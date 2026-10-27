@@ -192,11 +192,11 @@ const platePool: HotspotContent[] = [
   },
   {
     observation:
-      'The plate reads DEF 4471. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. Today is the 20th of May.',
+      'The plate reads DEF 4471. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. The OR in the glove box shows the last renewal was in January of last year. Today is the 20th of May.',
     question:
       'Work out this plate’s registration deadline. Today is 20 May. Is the registration still within schedule?',
     choices: [
-      { label: 'Go — last digit 1 means January, so this cycle already renewed', action: 'accelerate' },
+      { label: 'Go — last digit 1 means January, and January is already past, so nothing is due', action: 'accelerate' },
       { label: 'No-Go — last digit 1 means January, so this plate is already overdue', action: 'stop' },
       { label: 'Go — the RFID sticker being intact means the plate is current', action: 'honk' },
     ],
@@ -205,7 +205,7 @@ const platePool: HotspotContent[] = [
     penaltyMessage:
       'Misreading the staggered schedule leaves the vehicle unregistered on the road. Last digit sets the month, second-to-last sets the week.',
     rewardMessage:
-      'Correct. Last digit 1 is January, well before May — this plate is already overdue.',
+      'Correct. Last digit 1 is January, and the OR shows January this year was missed, so the plate is already overdue.',
     lawCitation:
       'The last digit of the plate sets the registration month and the second-to-last digit sets the weekly deadline; digits 1 to 3 fall on the 1st week.',
     competency: 'document_awareness',
@@ -379,6 +379,9 @@ const brakesPool: HotspotContent[] = [
 ];
 
 const lightsShell: HotspotShell = { id: 'lights', label: 'Headlights & Signals', area: 'BLOWBAGETS — L (Lights)', x: 0.5, y: 0.11, detail: 'lights' };
+// Light, trunk, tire, brake and engine checks are all vehicle readiness and
+// share one tag, hazard_awareness (catalogue review 2026-10-28): the trunk's
+// EWD, spare and tools are equipment, not documents.
 const lightsPool: HotspotContent[] = [
   {
     observation:
@@ -394,7 +397,7 @@ const lightsPool: HotspotContent[] = [
     penaltyMessage: 'Every lamp checked out and visibility was clear; this vehicle was ready on lights.',
     rewardMessage: 'Correct. Lights and visibility are ready for the trip.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
-    competency: 'general_rules',
+    competency: 'hazard_awareness',
     severity: 'minor',
   },
   {
@@ -412,7 +415,7 @@ const lightsPool: HotspotContent[] = [
       'A busted brake light and a damaged headlight reduce visibility and signal clearly to other drivers - this must be fixed first.',
     rewardMessage: 'Correct no-go. Busted bulbs and a damaged lens are fixed before the trip starts.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
-    competency: 'general_rules',
+    competency: 'hazard_awareness',
     severity: 'minor',
   },
   {
@@ -429,7 +432,7 @@ const lightsPool: HotspotContent[] = [
     penaltyMessage: 'Non-working turn signals leave other drivers with no warning of your intentions - this must be fixed first.',
     rewardMessage: 'Correct no-go. Non-working signal lights are fixed before the trip starts.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
-    competency: 'general_rules',
+    competency: 'hazard_awareness',
     severity: 'minor',
   },
   {
@@ -446,7 +449,7 @@ const lightsPool: HotspotContent[] = [
     penaltyMessage: 'Every lamp checked out and the lens was clear; this vehicle was ready on lights.',
     rewardMessage: 'Correct. Lights and visibility are ready for the trip.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
-    competency: 'general_rules',
+    competency: 'hazard_awareness',
     severity: 'minor',
   },
 ];
@@ -540,7 +543,7 @@ const trunkPool: HotspotContent[] = [
     rewardMessage: 'Correct. The EWD, spare tire, and tools are sorted before leaving.',
     lawCitation:
       'Vehicles must carry a reflectorized early warning device; the accessories and tools check also covers the spare tire, jack, and wrenches.',
-    competency: 'document_awareness',
+    competency: 'hazard_awareness',
     severity: 'major',
   },
   {
@@ -558,7 +561,7 @@ const trunkPool: HotspotContent[] = [
     rewardMessage: 'Correct. EWD, spare tire, and tools are all accounted for.',
     lawCitation:
       'Vehicles must carry a reflectorized early warning device; the accessories and tools check also covers the spare tire, jack, and wrenches.',
-    competency: 'document_awareness',
+    competency: 'hazard_awareness',
     severity: 'major',
   },
   {
@@ -576,7 +579,7 @@ const trunkPool: HotspotContent[] = [
     rewardMessage: 'Correct no-go. A usable spare is sorted before leaving.',
     lawCitation:
       'Vehicles must carry a reflectorized early warning device; the accessories and tools check also covers the spare tire, jack, and wrenches.',
-    competency: 'document_awareness',
+    competency: 'hazard_awareness',
     severity: 'major',
   },
   {
@@ -594,7 +597,7 @@ const trunkPool: HotspotContent[] = [
     rewardMessage: 'Correct. EWD, spare tire, and tools are all accounted for.',
     lawCitation:
       'Vehicles must carry a reflectorized early warning device; the accessories and tools check also covers the spare tire, jack, and wrenches.',
-    competency: 'document_awareness',
+    competency: 'hazard_awareness',
     severity: 'major',
   },
 ];
@@ -776,7 +779,7 @@ const mergeSlot: SlotVariant[] = [
       'Pushing into a moving traffic stream without signaling or yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded, and merged once a safe gap opened.',
     duration: 200,
-    lawCitation: 'Check surroundings and signal when entering traffic, then move smoothly and obey road rules.',
+    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -791,7 +794,7 @@ const mergeSlot: SlotVariant[] = [
       'Pulling out ahead of an approaching jeepney without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded to the jeepney, and merged once it had passed.',
     duration: 200,
-    lawCitation: 'Check surroundings and signal when entering traffic, then move smoothly and obey road rules.',
+    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -806,7 +809,7 @@ const mergeSlot: SlotVariant[] = [
       'Pulling out ahead of an approaching tricycle without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded to the tricycle, and merged once it had passed.',
     duration: 200,
-    lawCitation: 'Check surroundings and signal when entering traffic, then move smoothly and obey road rules.',
+    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -821,7 +824,7 @@ const mergeSlot: SlotVariant[] = [
       'Pushing out into a lane a weaving motorcycle is using without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded until the motorcycle cleared, and merged into a safe gap.',
     duration: 200,
-    lawCitation: 'Check surroundings and signal when entering traffic, then move smoothly and obey road rules.',
+    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },

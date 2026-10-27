@@ -143,7 +143,7 @@ const priorityStopSlot: SlotVariant[] = [
     penaltyMessage: 'A crossing with no barrier or light is not a clear crossing. Stop and check the track both ways first.',
     rewardMessage: 'Correct. You stopped and checked both directions before crossing the tracks.',
     duration: 200,
-    lawCitation: 'Where a railway crossing has no barrier or warning light, slow down, check both directions, then proceed only if it is clearly safe.',
+    lawCitation: 'RA 4136, as taught in Levels 2 and 5: a driver about to traverse a railroad crossing shall bring the vehicle to a full stop, unless no hazard is apparent, in which case it may be slowed instead to about 8 kph. A crossing with no barrier or warning light gives no sign the way is clear, so stop, check both directions, and proceed only when it is clearly safe.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -621,14 +621,16 @@ const speedSlot: SlotVariant[] = [
     // Posted below the speed the vehicle cruises at, so obeying it takes a
     // deliberate act rather than simply carrying on.
     postedSpeed: 60,
-    description: '60 km/h speed zone: a MAXIMUM SPEED RESTRICTION sign marks the crowded street ahead.',
+    description: '60 km/h speed zone: a MAXIMUM SPEED RESTRICTION sign marks the open road ahead.',
     correctAction: 'brake',
     points: 20,
-    penaltyMessage: 'A posted maximum speed is a limit, not a suggestion. Reduce speed before the crowded area.',
+    penaltyMessage: 'A posted maximum speed is a limit, not a suggestion. Reduce speed to the posted 60 km/h before the sign.',
     rewardMessage: 'Correct. You kept within the posted 60 km/h limit.',
     duration: 200,
     lawCitation: 'Vehicles must not exceed the speed posted by a Maximum Speed Restriction sign.',
-    competency: 'road_signs',
+    // Tagged speed_control with the other two posted restrictions in this slot
+    // (catalogue review 2026-10-28); the advisory signs stay road_signs.
+    competency: 'speed_control',
     severity: 'major',
     sign: {
       image: IMG + 'maximum-speed-restriction.png',
@@ -1110,7 +1112,9 @@ const signalSlot: SlotVariant[] = [
     type: 'red_light',
     scene: 'signal',
     description: 'Signalized intersection: a solid red signal, stop line, crosswalk, and cross street control the approach.',
-    correctAction: 'brake',
+    // A full stop, not merely slowing: 'brake' was satisfied by slowing
+    // (ruleEngine), which a solid red does not allow (catalogue review 2026-10-28).
+    correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A solid red signal requires a full stop before the stop line and crosswalk.',
     rewardMessage: 'Correct. You stopped before the line at the red signal.',

@@ -347,7 +347,7 @@ const tricycleInTheBoxSlot: SlotVariant[] = [
     duration: 220,
     lawCitation:
       "A yellow box marks the part of a junction no vehicle should stay inside, so that it does not obstruct other motorists. The tricycle is breaking its own rules twice: waiting within six meters of an intersection, and stopping on a yellow box, one of the violations of public utility drivers that cause heavy traffic. A tricycle is registered with the LTO and renewed every year like any other motor vehicle; its franchise comes from the local government unit, not the LTFRB; and it displays its authorized fare matrix and identification card.",
-    competency: 'general_rules',
+    competency: 'lane_discipline',
     severity: 'major',
   },
 ];

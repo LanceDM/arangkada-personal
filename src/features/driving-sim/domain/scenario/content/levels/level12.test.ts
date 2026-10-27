@@ -67,7 +67,7 @@ describe('the final exam, as it is made', () => {
     expect(ids(SLOTS[3])).toEqual(ids(portable('right_of_way')));
     expect(ids(SLOTS[5])).toEqual(ids(portable('hazard_awareness')));
     expect(ids(SLOTS[6])).toEqual(ids(portable('lane_discipline').filter(v => v.requiredLane?.strict === true)));
-    expect(BORROWED.map(slot => SLOTS[slot].length)).toEqual([38, 24, 12, 6]);
+    expect(BORROWED.map(slot => SLOTS[slot].length)).toEqual([37, 20, 12, 6]);
   });
 
   it("never rolls Level 3's prohibitions on a turn it does not offer, which nothing can fail", () => {

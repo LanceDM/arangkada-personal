@@ -116,7 +116,7 @@ describe('a prohibition on a turn the variant does not offer', () => {
       const offered = COMPETENCIES.flatMap(competency => remediationCandidates(competency, level)).map(c => c.variant.id);
       expect(offered.filter(id => UNFAILABLE.includes(id)), `Level ${level}`).toEqual([]);
     }
-    expect(remediationCandidates('road_signs', 11)).toHaveLength(38);
+    expect(remediationCandidates('road_signs', 11)).toHaveLength(37);
   });
 
   it("keeps all five in Level 3's own pool, where they stay open", () => {

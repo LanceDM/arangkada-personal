@@ -84,9 +84,12 @@ export const drawNoEntryRoadSign = (ctx: CanvasRenderingContext2D, x: number, y:
 };
 
 /**
- * Yellow warning diamond. `label` selects a pictogram where one exists and is
- * otherwise painted on the face as short text, so a new warning sign only needs
- * a pictogram when a word will not do.
+ * Warning sign: a white triangle, point up, with a red border, as the LTO
+ * manual draws Philippine warning signs (it was a yellow diamond until the
+ * catalogue review of 2026-10-28). The art name stays `diamond` so no content
+ * file changes. `label` selects a pictogram where one exists and is otherwise
+ * painted on the face as short text, so a new warning sign only needs a
+ * pictogram when a word will not do.
  */
 export const drawWarningRoadSign = (
   ctx: CanvasRenderingContext2D,
@@ -97,13 +100,17 @@ export const drawWarningRoadSign = (
   drawSignPost(ctx, x, y + 18, 29);
   ctx.save();
   ctx.translate(x, y);
-  ctx.rotate(Math.PI / 4);
-  ctx.fillStyle = '#facc15';
-  ctx.fillRect(-17, -17, 34, 34);
-  ctx.strokeStyle = '#1f2937';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(-17, -17, 34, 34);
-  ctx.rotate(-Math.PI / 4);
+  ctx.fillStyle = '#f8fafc';
+  ctx.beginPath();
+  ctx.moveTo(0, -27);
+  ctx.lineTo(-25, 17);
+  ctx.lineTo(25, 17);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#dc2626';
+  ctx.lineWidth = 3.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
   ctx.fillStyle = '#1f2937';
   ctx.strokeStyle = '#1f2937';
   ctx.lineCap = 'round';

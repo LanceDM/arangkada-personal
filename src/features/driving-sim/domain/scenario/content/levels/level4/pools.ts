@@ -1,6 +1,7 @@
 import type { SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { MarkingPlate } from '@/features/driving-sim/domain/scenario/scenarioScene';
+import type { DrivingCompetency } from '@/domain/learner/competency';
 
 /** Folder the level module already publishes its marking images from. */
 const IMG = 'arangkada_extracted_images/level4/';
@@ -27,6 +28,12 @@ interface MarkingSpec extends MarkingPlate {
   postedSpeed?: ScenarioEvent['postedSpeed'];
   neutral?: ScenarioEvent['neutral'];
   warningDistance?: ScenarioEvent['warningDistance'];
+  /**
+   * The competency the marking is graded under, where it is not lane
+   * discipline: a crossing is about pedestrians, a painted limit about speed
+   * (catalogue review 2026-10-28).
+   */
+  competency?: DrivingCompetency;
 }
 
 /**
@@ -48,7 +55,7 @@ const marking = (spec: MarkingSpec): SlotVariant => {
     penaltyMessage: `${spec.penalty}`,
     rewardMessage: `${spec.reward}`,
     lawCitation: spec.law,
-    competency: 'lane_discipline',
+    competency: spec.competency ?? 'lane_discipline',
     severity,
     ...(spec.scene ? { scene: spec.scene } : {}),
     ...(spec.requiredLane ? { requiredLane: spec.requiredLane } : {}),
@@ -407,6 +414,7 @@ const traverseSlot: SlotVariant[] = [
   }),
   marking({
     id: 'level4.traverse.pedestrian-signalized',
+    competency: 'pedestrians',
     name: 'Pedestrian Intersection (Signalized)',
     image: IMG + 'signalized-pedestrian-crossing-marking.jpg',
     category: 'B. Traverse Line',
@@ -428,6 +436,7 @@ const traverseSlot: SlotVariant[] = [
   }),
   marking({
     id: 'level4.traverse.pedestrian-non-signalized',
+    competency: 'pedestrians',
     name: 'Pedestrian Intersection (Non-Signalized)',
     image: IMG + 'non-signalized-pedestrian-crossing-marking.jpg',
     category: 'B. Traverse Line',
@@ -670,6 +679,7 @@ const speedMarkingSlot: SlotVariant[] = [
   }),
   marking({
     id: 'level4.traverse.painted-speed-limit',
+    competency: 'speed_control',
     name: 'Speed Limit On Pavement',
     image: IMG + 'speed-limit-painted-on-pavement.jpg',
     points: 25,

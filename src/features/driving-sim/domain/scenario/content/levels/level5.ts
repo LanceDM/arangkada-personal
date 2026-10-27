@@ -769,7 +769,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     avoid: ['brake'],
     lawCitation:
       'Yellow box junction rules: do not block the intersection even when turning, do not stop or make a U-turn inside the box, and yield to vehicles already within it.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',
@@ -795,7 +795,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Yellow box junction rules: do not enter the box unless your exit beyond it is clear, even on a green light.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',
@@ -818,7 +818,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Yellow box junction rules: yield the right-of-way to vehicles already within the box, which are committed to clearing the intersection.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',
@@ -859,7 +859,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Yellow box junction rules: do not block the intersection. A vehicle already within the box is committed to clearing it and must do so rather than coming to rest inside.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',

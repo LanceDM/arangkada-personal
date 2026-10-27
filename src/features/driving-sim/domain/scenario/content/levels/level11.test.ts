@@ -361,7 +361,7 @@ describe('the Level 11 curriculum', () => {
       'hazard_awareness',
       'general_rules',
       'general_rules',
-      'general_rules',
+      'lane_discipline',
       'pedestrians',
       'hazard_awareness',
       'hazard_awareness',

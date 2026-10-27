@@ -770,7 +770,7 @@ export const level3Module = {
         },
         {
           type: 'paragraph',
-          text: 'On this mission, the route passes an intersection with a Stop sign, a Give Way sign near a merging side road, a No Entry sign blocking a shortcut, a posted speed limit through a crowded street, warning signs for a curve and a pedestrian crossing, and a signalized intersection with a full red-yellow-green cycle. Reading and responding correctly to each one, in order, completes the mission.',
+          text: 'On this mission, the route passes an intersection with a Stop sign, a Give Way sign near a merging side road, a No Entry sign blocking a shortcut, a posted speed limit on an open stretch of road, warning signs for a curve and a pedestrian crossing, and a signalized intersection with a full red-yellow-green cycle. Reading and responding correctly to each one, in order, completes the mission.',
         },
         {
           type: 'heading',

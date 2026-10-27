@@ -17,7 +17,7 @@ const levelModule = getLevelModule(12);
  * | 1 | Roadside check     | this level's, 4 variants  | a full stop, then what the check comes to |
  * | 2 | Signs              | Level 3's, 44             | as graded there |
  * | 3 | Flagged down       | this level's, 3           | a full stop, then conduct and rights |
- * | 4 | Right-of-way       | Levels 2 and 5, 24        | as graded there |
+ * | 4 | Right-of-way       | Levels 2 and 5, 20        | as graded there |
  * | 5 | Ticket issued      | this level's, 3           | a full stop, then the TOP and the record |
  * | 6 | Hazard response    | Levels 7-11, 12           | as graded there |
  * | 7 | Violation risk     | Levels 4 and 6, 6         | as graded there: a line not crossed |

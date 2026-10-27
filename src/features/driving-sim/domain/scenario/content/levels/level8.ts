@@ -129,7 +129,9 @@ const holdYourLineSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Give courtesy and respect to active-transport and light-mobility users. Check your blind spots before any movement that could affect a rider beside you, and do not blow the horn annoyingly or excessively — it is listed among the habits of an aggressive driver.',
-    competency: 'pedestrians',
+    // Graded on holding the lane while a rider filters past, so lane discipline
+    // rather than pedestrians (catalogue review 2026-10-28).
+    competency: 'lane_discipline',
     severity: 'critical',
     // A third of the room between a centred car and the rider's line. Enough
     // that a driver easing off or correcting the wheel is never marked down,
@@ -331,7 +333,7 @@ const bothAtOnceSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stopped for the child and let the car behind wait.',
     duration: 200,
     lawCitation:
-      "Don't be a victim of road rage: avoid retaliation, since it takes at least two people to have a fight; keep your distance; put away your pride, because driving is not a contest; and call the traffic authorities, who are the proper party to deal with a dangerous driver. Give extra care and right-of-way to children.",
+      "A school service stopped with its hazard lights on means students may cross: slow down and prepare to stop, and give way to it (Level 2 module, right-of-way). Give extra care and right-of-way to children. The car closing up behind does not change that duty: don't be a victim of road rage; keep your distance and put away your pride, because driving is not a contest.",
     competency: 'pedestrians',
     severity: 'critical',
     // Sounding the horn fails this outright. It is the one place in the level
