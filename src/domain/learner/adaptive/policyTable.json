@@ -1,0 +1,20 @@
+{
+  "critical:struggling:steady": "weakest:cue:0",
+  "critical:struggling:slow": "weakest:full:0",
+  "critical:mixed:steady": "related:full:-1",
+  "critical:mixed:slow": "review:full:1",
+  "critical:improving:steady": "weakest:cue:1",
+  "critical:improving:slow": "related:cue:1",
+  "weak:struggling:steady": "weakest:full:1",
+  "weak:struggling:slow": "review:full:0",
+  "weak:mixed:steady": "related:cue:0",
+  "weak:mixed:slow": "review:cue:0",
+  "weak:improving:steady": "review:cue:1",
+  "weak:improving:slow": "related:full:0",
+  "ok:struggling:steady": "weakest:full:-1",
+  "ok:struggling:slow": "weakest:full:0",
+  "ok:mixed:steady": "weakest:full:-1",
+  "ok:mixed:slow": "weakest:full:-1",
+  "ok:improving:steady": "weakest:full:1",
+  "ok:improving:slow": "review:full:-1"
+}

@@ -1,0 +1,307 @@
+rules_version = '2';
+
+// Firestore security rules for Arangkada.
+//
+// Schema - the TypeScript types named are the authoritative shapes:
+//   users/{uid}                                    UserProfile (features/auth)
+//   users/{uid}/progress/summary                   UserProgressSummary
+//   users/{uid}/attempts/{id}                      LevelAttempt, append-only
+//   users/{uid}/attempts/{id}/telemetry/fsm        FsmTelemetryDoc
+//   users/{uid}/attempts/{id}/telemetry/decisions  DecisionTelemetryDoc
+//   users/{uid}/attempts/{id}/telemetry/routing    RoutingTelemetryDoc
+//   users/{uid}/routing/assignment                 the pilot group the developers assigned
+//   users/{uid}/routing/cursor                     StoredRoutingCursor
+//   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
+//   users/{uid}/dailyStreak/summary                DailyStreakSummary
+//   users/{uid}/dailyAttempts/{id}                 DailyAttempt, append-only
+//   exam_questions/{id}                            RemoteExamQuestion, shared content
+//
+// Who:
+//   - A player reads and writes only their own users/{uid} tree, and can delete
+//     nothing in it. Records are append-only. Their pilot group
+//     (routing/assignment) they read and never write: the developers assign it
+//     with the service account.
+//   - An admin is the custom claim `admin: true` on the sign-in token, set by
+//     the developers with the service account. It is never a document field:
+//     a `role` on a profile is a legacy label that no rule and no screen
+//     trusts, and no player write can change it.
+//   - An admin reads every player's data (the report's collection-group
+//     queries included) and writes only the exam question bank.
+//
+// What these rules cannot do: check that a number is true. Every score, streak
+// and attempt is computed in the browser, so the rules decide who may write
+// and the shape written, never whether a score was earned.
+//
+// Shape checks name the keys a record must carry and their types. Only the
+// profile also refuses keys it does not know, because its fields are the ones
+// the admin report lists for every player. Everything else accepts an added
+// key, so an additive payload change - how these shapes have always evolved -
+// never makes a save fail and lose the record.
+//
+// The developers test these rules on the Firestore emulator before a change
+// to a path or a payload ships.
+//
+// Legacy collections (fsm_sessions, exam_results, daily_results, and the
+// `progress`/`daily` fields still embedded in old users/{uid} docs) are
+// intentionally NOT deleted or migrated - they are frozen historical data.
+// Nothing in the app writes to them anymore; rules below make that
+// permanent (read-only) rather than leaving it as an unenforced convention.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.get('admin', false) == true;
+    }
+
+    function isCount(value) {
+      return value is number && value >= 0;
+    }
+
+    // ── Shapes ─────────────────────────────────────────────
+
+    function profileKeys() {
+      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore'];
+    }
+
+    // Checks only the keys a write sets, so a field an old profile already
+    // carries is left as it is rather than re-judged on every merge.
+    function profileFieldsValid(data, keys) {
+      return (!keys.hasAny(['email']) || data.email is string)
+        && (!keys.hasAny(['username']) || data.username is string)
+        && (!keys.hasAny(['createdAt']) || data.createdAt is number)
+        && (!keys.hasAny(['totalScore']) || isCount(data.totalScore))
+        && (!keys.hasAny(['longestStreak']) || isCount(data.longestStreak))
+        && (!keys.hasAny(['bestExamScore']) || isCount(data.bestExamScore));
+    }
+
+    function isProgressSummary(data) {
+      return data.keys().hasAll(['unlockedLevels', 'levelBest', 'updatedAt'])
+        && data.unlockedLevels is list
+        && data.levelBest is map
+        && data.updatedAt is number;
+    }
+
+    function isLevelAttempt(data) {
+      return data.keys().hasAll(['levelId', 'timestamp', 'finalScore', 'violations', 'correctDecisions', 'logs'])
+        && data.levelId is int && data.levelId >= 0
+        && data.timestamp is number
+        && data.finalScore is number
+        && isCount(data.violations)
+        && isCount(data.correctDecisions)
+        && data.logs is list
+        && (!data.keys().hasAny(['fsmMetrics']) || data.fsmMetrics is map)
+        && (!data.keys().hasAny(['reactionLatencies']) || data.reactionLatencies is list);
+    }
+
+    function isFsmTelemetry(data) {
+      return data.keys().hasAll(['transitions', 'truncated', 'totalCount'])
+        && data.transitions is list
+        && data.truncated is bool
+        && isCount(data.totalCount);
+    }
+
+    function isDecisionTelemetry(data) {
+      return data.keys().hasAll([
+          'schemaVersion', 'levelId', 'attemptSeed', 'route', 'bkt', 'policy',
+          'rerolls', 'decisions', 'truncated', 'totalCount'
+        ])
+        && data.schemaVersion == 1
+        && data.levelId is int
+        && data.attemptSeed is number
+        && data.route is list
+        && data.bkt is map
+        && data.policy is map
+        && data.rerolls is list
+        && data.decisions is list
+        && data.truncated is bool
+        && isCount(data.totalCount);
+    }
+
+    function isRoutingTelemetry(data) {
+      return data.keys().hasAll([
+          'schemaVersion', 'mode', 'assignedGroup', 'groupInEffect', 'override',
+          'options', 'driving', 'entry', 'log', 'truncated', 'totalCount'
+        ])
+        && data.schemaVersion == 1
+        && data.mode in ['legacy', 'new']
+        && (data.assignedGroup == null || data.assignedGroup in ['conventional', 'optimized'])
+        && data.groupInEffect in ['legacy', 'conventional', 'optimized']
+        && data.override is bool
+        && data.options is map
+        && data.driving is map
+        && (data.entry == null || data.entry is map)
+        && data.log is list
+        && data.truncated is bool
+        && isCount(data.totalCount);
+    }
+
+    // A cursor is never inside a review: a review's `return` is taken by the
+    // attempt that played it.
+    function isRoutingCursor(data) {
+      return data.keys().hasAll(['schemaVersion', 'state', 'outcome', 'seq', 'decisionsSpent', 'pending', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.state is map
+        && data.state.kind in ['DRIVE', 'FINAL', 'CERTIFIED']
+        && (data.outcome == null || data.outcome in ['passed', 'failed'])
+        && isCount(data.seq)
+        && isCount(data.decisionsSpent)
+        && (data.pending == null || data.pending is map)
+        && data.updatedAt is number;
+    }
+
+    function isExamAttempt(data) {
+      return data.keys().hasAll(['score', 'passed', 'wrongIds', 'questionIds', 'timestamp'])
+        && isCount(data.score)
+        && data.passed is bool
+        && data.wrongIds is list
+        && data.questionIds is list
+        && data.timestamp is number;
+    }
+
+    function isDailyStreak(data) {
+      return data.keys().hasAll(['currentStreak', 'longestStreak', 'lastCompletedDate', 'completedDates', 'updatedAt'])
+        && isCount(data.currentStreak)
+        && isCount(data.longestStreak)
+        && (data.lastCompletedDate == null || data.lastCompletedDate is string)
+        && data.completedDates is list
+        && data.updatedAt is number;
+    }
+
+    function isDailyAttempt(data) {
+      return data.keys().hasAll(['date', 'scenarioId', 'selectedIndex', 'correct', 'timestamp'])
+        && data.date is string
+        && data.scenarioId is string
+        && data.selectedIndex is int && data.selectedIndex >= 0
+        && data.correct is bool
+        && data.timestamp is number;
+    }
+
+    // ── users/{uid} ────────────────────────────────────────
+    match /users/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      // Only the admin report lists accounts: a profile carries an email.
+      allow list: if isAdmin();
+
+      // Created at sign-up - or first, as `{ totalScore }` alone, when
+      // ProgressSync's merge lands before sign-up's own write, which then
+      // arrives as an update. `role` may only ever read 'player'.
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(profileKeys())
+        && profileFieldsValid(request.resource.data, request.resource.data.keys())
+        && request.resource.data.get('role', 'player') == 'player';
+
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(profileKeys())
+        && profileFieldsValid(request.resource.data, request.resource.data.diff(resource.data).affectedKeys())
+        && request.resource.data.get('role', 'player') == resource.data.get('role', 'player');
+
+      allow delete: if false;
+
+      match /progress/summary {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid) && isProgressSummary(request.resource.data);
+        allow delete: if false;
+      }
+
+      match /attempts/{attemptId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data);
+        allow update, delete: if false; // append-only, never rewrite history
+
+        // The raw FSM transition log, the per-decision record and the routing
+        // record, apart from the attempt because they are large or read only
+        // by analysis. Each is written once, after the attempt it belongs to
+        // exists.
+        match /telemetry/{docId} {
+          allow read: if isOwner(uid) || isAdmin();
+          allow create: if isOwner(uid)
+            && exists(/databases/$(database)/documents/users/$(uid)/attempts/$(attemptId))
+            && ((docId == 'fsm' && isFsmTelemetry(request.resource.data))
+              || (docId == 'decisions' && isDecisionTelemetry(request.resource.data))
+              || (docId == 'routing' && isRoutingTelemetry(request.resource.data)));
+          allow update, delete: if false;
+        }
+      }
+
+      // The routing FSM in the game. The assignment is written by the
+      // developers alone, with the service account, which these rules do not
+      // govern: no
+      // client writes it, so no player can choose their own group, and an
+      // admin writes no player data. The cursor is the player's place in the
+      // course, rewritten as they play.
+      match /routing/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid) && docId == 'cursor' && isRoutingCursor(request.resource.data);
+        allow delete: if false;
+      }
+
+      match /examAttempts/{attemptId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isExamAttempt(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      match /dailyStreak/summary {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid) && isDailyStreak(request.resource.data);
+        allow delete: if false;
+      }
+
+      match /dailyAttempts/{attemptId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isDailyAttempt(request.resource.data);
+        allow update, delete: if false;
+      }
+    }
+
+    // ── The admin report's collection-group queries ────────
+    // A collection-group query is judged against a recursive match only, never
+    // against the per-user rules above.
+    match /{path=**}/attempts/{attemptId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/examAttempts/{attemptId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/dailyAttempts/{attemptId} {
+      allow read: if isAdmin();
+    }
+
+    // ── Shared content ─────────────────────────────────────
+    // Public: guests sit the mock exam too, and the bank also ships in the
+    // bundle as the local fallback.
+    match /exam_questions/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Legacy collections: frozen, read-only ──────────────
+    // Nothing writes here anymore; formally closing writes prevents this
+    // deploy from accidentally re-opening a path nothing should use.
+    match /fsm_sessions/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /exam_results/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /daily_results/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if false;
+    }
+  }
+}

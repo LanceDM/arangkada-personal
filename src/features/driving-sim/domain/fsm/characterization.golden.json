@@ -1,0 +1,3059 @@
+{
+  "core": [
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "accelerate",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "brake",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "briefing_dismissed",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "scenario_trigger",
+      "accepted": true,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "start",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "turn_left",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "turn_right",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "brake",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "crash",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "road_clear",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "scenario_trigger",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "start",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "stop",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "vehicle_stopped",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "answer_correct",
+      "accepted": true,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "answer_incorrect",
+      "accepted": true,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "brake",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "scenario_trigger",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "start",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "DECISION",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "DECISION"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "accelerate",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "brake",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "emergency_vehicle",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "level_end",
+      "accepted": true,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "obstacle_ahead",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "overtaking_zone",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "pedestrian_crossing",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "red_light",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "road_clear",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "road_marking",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "scenario_trigger",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "speed_limit",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "start",
+      "accepted": false,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "stop_sign",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "turn_left",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "turn_right",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "DRIVING",
+      "trigger": "yellow_light",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "brake",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "recovery_complete",
+      "accepted": true,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "scenario_trigger",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "start",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "brake",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "crash",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "road_clear",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "scenario_trigger",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "start",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "stop",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "vehicle_stopped",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "answer_correct",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "answer_incorrect",
+      "accepted": true,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "brake",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "feedback_displayed",
+      "accepted": true,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "scenario_trigger",
+      "accepted": true,
+      "to": "DECISION"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "start",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "HAZARD",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "HAZARD"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "accelerate",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "brake",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "emergency_vehicle",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "obstacle_ahead",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "overtaking_zone",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "pedestrian_crossing",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "red_light",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "road_clear",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "road_marking",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "scenario_trigger",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "speed_limit",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "start",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "stop",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "stop_sign",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "vehicle_stopped",
+      "accepted": false,
+      "to": "IDLE"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "yellow_light",
+      "accepted": true,
+      "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "answer_correct",
+      "accepted": true,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "answer_incorrect",
+      "accepted": true,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "brake",
+      "accepted": true,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "feedback_displayed",
+      "accepted": true,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "green_light",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "scenario_trigger",
+      "accepted": true,
+      "to": "DECISION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "start",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "INTERSECTION",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "answer_correct",
+      "accepted": true,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "answer_incorrect",
+      "accepted": true,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "brake",
+      "accepted": true,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "emergency_vehicle",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "obstacle_ahead",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "overtaking_zone",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "pedestrian_crossing",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "red_light",
+      "accepted": true,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "road_marking",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "scenario_trigger",
+      "accepted": true,
+      "to": "DECISION"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "speed_limit",
+      "accepted": true,
+      "to": "HAZARD"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "start",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "stop_sign",
+      "accepted": true,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "REACTION_WINDOW"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "trigger": "yellow_light",
+      "accepted": true,
+      "to": "INTERSECTION"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "accelerate",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "brake",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "feedback_displayed",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "DRIVING"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "scenario_trigger",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "start",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "RECOVERY",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "RECOVERY"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "accelerate",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "answer_correct",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "answer_incorrect",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "brake",
+      "accepted": true,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "briefing_dismissed",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "crash",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "emergency_vehicle",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "feedback_displayed",
+      "accepted": true,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "green_light",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "level_end",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "obstacle_ahead",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "overtaking_zone",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "pedestrian_crossing",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "recovery_complete",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "red_light",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "road_clear",
+      "accepted": true,
+      "to": "FEEDBACK_DISPLAYED"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "road_marking",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "scenario_trigger",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "speed_limit",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "start",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "stop",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "stop_sign",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "turn_left",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "turn_right",
+      "accepted": false,
+      "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "vehicle_stopped",
+      "accepted": true,
+      "to": "IDLE"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "yellow_light",
+      "accepted": false,
+      "to": "VIOLATION"
+    }
+  ],
+  "operations": [
+    {
+      "from": "APPROACHING_EVENT",
+      "operation": "markVehicleMoving",
+      "stateAfter": "APPROACHING_EVENT",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "APPROACHING_EVENT",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "APPROACHING_EVENT",
+          "to": "IDLE",
+          "message": "APPROACHING_EVENT -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "APPROACHING_EVENT",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "COMPLETED",
+      "operation": "markVehicleMoving",
+      "stateAfter": "COMPLETED",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "COMPLETED",
+      "operation": "markVehicleStopped",
+      "stateAfter": "COMPLETED",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "COMPLETED",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "DECISION",
+      "operation": "markVehicleMoving",
+      "stateAfter": "DECISION",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "DECISION",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "DECISION",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "DECISION",
+          "to": "IDLE",
+          "message": "DECISION -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "DECISION",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "DRIVING",
+      "operation": "markVehicleMoving",
+      "stateAfter": "DRIVING",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "DRIVING",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "DRIVING",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "DRIVING",
+          "to": "IDLE",
+          "message": "DRIVING -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "DRIVING",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "operation": "markVehicleMoving",
+      "stateAfter": "FEEDBACK_DISPLAYED",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "FEEDBACK_DISPLAYED",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "FEEDBACK_DISPLAYED",
+          "to": "IDLE",
+          "message": "FEEDBACK_DISPLAYED -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "GAME_OVER",
+      "operation": "markVehicleMoving",
+      "stateAfter": "GAME_OVER",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "GAME_OVER",
+      "operation": "markVehicleStopped",
+      "stateAfter": "GAME_OVER",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "GAME_OVER",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "HAZARD",
+      "operation": "markVehicleMoving",
+      "stateAfter": "HAZARD",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "HAZARD",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "HAZARD",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "HAZARD",
+          "to": "IDLE",
+          "message": "HAZARD -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "HAZARD",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "IDLE",
+      "operation": "markVehicleMoving",
+      "stateAfter": "DRIVING",
+      "logAppended": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "accelerate"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "DRIVING",
+          "message": "IDLE -> DRIVING"
+        }
+      ]
+    },
+    {
+      "from": "IDLE",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "IDLE",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "INTERSECTION",
+      "operation": "markVehicleMoving",
+      "stateAfter": "INTERSECTION",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "INTERSECTION",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "INTERSECTION",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "INTERSECTION",
+          "to": "IDLE",
+          "message": "INTERSECTION -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "INTERSECTION",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "operation": "markVehicleMoving",
+      "stateAfter": "REACTION_WINDOW",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "REACTION_WINDOW",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "REACTION_WINDOW",
+          "to": "IDLE",
+          "message": "REACTION_WINDOW -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "REACTION_WINDOW",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "RECOVERY",
+      "operation": "markVehicleMoving",
+      "stateAfter": "RECOVERY",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "RECOVERY",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "RECOVERY",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "RECOVERY",
+          "to": "IDLE",
+          "message": "RECOVERY -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "RECOVERY",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    },
+    {
+      "from": "VIOLATION",
+      "operation": "markVehicleMoving",
+      "stateAfter": "VIOLATION",
+      "logAppended": [],
+      "emitted": []
+    },
+    {
+      "from": "VIOLATION",
+      "operation": "markVehicleStopped",
+      "stateAfter": "IDLE",
+      "logAppended": [
+        {
+          "from": "VIOLATION",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        }
+      ],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "VIOLATION",
+          "to": "IDLE",
+          "message": "VIOLATION -> IDLE"
+        }
+      ]
+    },
+    {
+      "from": "VIOLATION",
+      "operation": "reset",
+      "stateAfter": "IDLE",
+      "logAppended": [],
+      "emitted": [
+        {
+          "type": "state_change",
+          "from": "IDLE",
+          "to": "IDLE",
+          "message": "FSM reset"
+        }
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "clean run: approach, react, correct answer, drive on",
+      "steps": [
+        "start",
+        "red_light",
+        "scenario_trigger",
+        "red_light",
+        "answer_correct",
+        "feedback_displayed",
+        "road_clear"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "APPROACHING_EVENT",
+        "REACTION_WINDOW",
+        "INTERSECTION",
+        "INTERSECTION",
+        "FEEDBACK_DISPLAYED",
+        "DRIVING"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "APPROACHING_EVENT",
+          "trigger": "red_light"
+        },
+        {
+          "from": "APPROACHING_EVENT",
+          "to": "REACTION_WINDOW",
+          "trigger": "scenario_trigger"
+        },
+        {
+          "from": "REACTION_WINDOW",
+          "to": "INTERSECTION",
+          "trigger": "red_light"
+        },
+        {
+          "from": "INTERSECTION",
+          "to": "INTERSECTION",
+          "trigger": "answer_correct"
+        },
+        {
+          "from": "INTERSECTION",
+          "to": "FEEDBACK_DISPLAYED",
+          "trigger": "feedback_displayed"
+        },
+        {
+          "from": "FEEDBACK_DISPLAYED",
+          "to": "DRIVING",
+          "trigger": "road_clear"
+        }
+      ]
+    },
+    {
+      "name": "violation and recovery after an incorrect answer",
+      "steps": [
+        "start",
+        "pedestrian_crossing",
+        "scenario_trigger",
+        "pedestrian_crossing",
+        "answer_incorrect",
+        "feedback_displayed",
+        "recovery_complete",
+        "road_clear"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "APPROACHING_EVENT",
+        "REACTION_WINDOW",
+        "HAZARD",
+        "VIOLATION",
+        "FEEDBACK_DISPLAYED",
+        "RECOVERY",
+        "DRIVING"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "APPROACHING_EVENT",
+          "trigger": "pedestrian_crossing"
+        },
+        {
+          "from": "APPROACHING_EVENT",
+          "to": "REACTION_WINDOW",
+          "trigger": "scenario_trigger"
+        },
+        {
+          "from": "REACTION_WINDOW",
+          "to": "HAZARD",
+          "trigger": "pedestrian_crossing"
+        },
+        {
+          "from": "HAZARD",
+          "to": "VIOLATION",
+          "trigger": "answer_incorrect"
+        },
+        {
+          "from": "VIOLATION",
+          "to": "FEEDBACK_DISPLAYED",
+          "trigger": "feedback_displayed"
+        },
+        {
+          "from": "FEEDBACK_DISPLAYED",
+          "to": "RECOVERY",
+          "trigger": "recovery_complete"
+        },
+        {
+          "from": "RECOVERY",
+          "to": "DRIVING",
+          "trigger": "road_clear"
+        }
+      ]
+    },
+    {
+      "name": "DECISION-state cutscene graded incorrectly",
+      "steps": [
+        "start",
+        "speed_limit",
+        "scenario_trigger",
+        "scenario_trigger",
+        "answer_incorrect",
+        "feedback_displayed",
+        "recovery_complete",
+        "road_clear"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "APPROACHING_EVENT",
+        "REACTION_WINDOW",
+        "DECISION",
+        "VIOLATION",
+        "FEEDBACK_DISPLAYED",
+        "RECOVERY",
+        "DRIVING"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "APPROACHING_EVENT",
+          "trigger": "speed_limit"
+        },
+        {
+          "from": "APPROACHING_EVENT",
+          "to": "REACTION_WINDOW",
+          "trigger": "scenario_trigger"
+        },
+        {
+          "from": "REACTION_WINDOW",
+          "to": "DECISION",
+          "trigger": "scenario_trigger"
+        },
+        {
+          "from": "DECISION",
+          "to": "VIOLATION",
+          "trigger": "answer_incorrect"
+        },
+        {
+          "from": "VIOLATION",
+          "to": "FEEDBACK_DISPLAYED",
+          "trigger": "feedback_displayed"
+        },
+        {
+          "from": "FEEDBACK_DISPLAYED",
+          "to": "RECOVERY",
+          "trigger": "recovery_complete"
+        },
+        {
+          "from": "RECOVERY",
+          "to": "DRIVING",
+          "trigger": "road_clear"
+        }
+      ]
+    },
+    {
+      "name": "crash ends the run from DRIVING",
+      "steps": [
+        "start",
+        "crash"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "GAME_OVER"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "GAME_OVER",
+          "trigger": "crash"
+        }
+      ]
+    },
+    {
+      "name": "level completed",
+      "steps": [
+        "start",
+        "level_end"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "COMPLETED"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "COMPLETED",
+          "trigger": "level_end"
+        }
+      ]
+    },
+    {
+      "name": "rejected triggers leave the machine untouched",
+      "steps": [
+        "green_light",
+        "answer_correct",
+        "feedback_displayed",
+        "start",
+        "recovery_complete",
+        "brake"
+      ],
+      "states": [
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "IDLE",
+        "DRIVING",
+        "DRIVING",
+        "DRIVING"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "DRIVING",
+          "trigger": "brake"
+        }
+      ]
+    }
+  ],
+  "annotations": {
+    "snapshotKeys": [
+      "competency",
+      "gameplay"
+    ],
+    "script": [
+      {
+        "step": "initial",
+        "stateAfter": "IDLE",
+        "snapshot": {
+          "competency": "unassigned",
+          "gameplay": "IDLE"
+        },
+        "emitted": [],
+        "logAppendedCount": 0
+      },
+      {
+        "step": "setCompetency('hazard_awareness')",
+        "stateAfter": "IDLE",
+        "snapshot": {
+          "competency": "hazard_awareness",
+          "gameplay": "IDLE"
+        },
+        "emitted": [
+          {
+            "type": "state_change",
+            "message": "Competency: hazard_awareness"
+          }
+        ],
+        "logAppendedCount": 0
+      },
+      {
+        "step": "setCompetency('hazard_awareness') again (no-op)",
+        "stateAfter": "IDLE",
+        "snapshot": {
+          "competency": "hazard_awareness",
+          "gameplay": "IDLE"
+        },
+        "emitted": [],
+        "logAppendedCount": 0
+      },
+      {
+        "step": "setCompetency('right_of_way')",
+        "stateAfter": "IDLE",
+        "snapshot": {
+          "competency": "right_of_way",
+          "gameplay": "IDLE"
+        },
+        "emitted": [
+          {
+            "type": "state_change",
+            "message": "Competency: right_of_way"
+          }
+        ],
+        "logAppendedCount": 0
+      },
+      {
+        "step": "transition('start')",
+        "stateAfter": "DRIVING",
+        "snapshot": {
+          "competency": "right_of_way",
+          "gameplay": "DRIVING"
+        },
+        "emitted": [
+          {
+            "type": "state_change",
+            "message": "IDLE -> DRIVING"
+          }
+        ],
+        "logAppendedCount": 1
+      },
+      {
+        "step": "transition('crash')",
+        "stateAfter": "GAME_OVER",
+        "snapshot": {
+          "competency": "right_of_way",
+          "gameplay": "GAME_OVER"
+        },
+        "emitted": [
+          {
+            "type": "state_change",
+            "message": "DRIVING -> GAME_OVER"
+          }
+        ],
+        "logAppendedCount": 1
+      },
+      {
+        "step": "reset()",
+        "stateAfter": "IDLE",
+        "snapshot": {
+          "competency": "unassigned",
+          "gameplay": "IDLE"
+        },
+        "emitted": [
+          {
+            "type": "state_change",
+            "message": "FSM reset"
+          }
+        ],
+        "logAppendedCount": 0
+      }
+    ]
+  },
+  "structure": {
+    "reachableStates": [
+      "APPROACHING_EVENT",
+      "COMPLETED",
+      "DECISION",
+      "DRIVING",
+      "FEEDBACK_DISPLAYED",
+      "GAME_OVER",
+      "HAZARD",
+      "IDLE",
+      "INTERSECTION",
+      "REACTION_WINDOW",
+      "RECOVERY",
+      "VIOLATION"
+    ],
+    "unreachableStates": [],
+    "shortestPaths": {
+      "APPROACHING_EVENT": [
+        "red_light"
+      ],
+      "COMPLETED": [
+        "accelerate",
+        "level_end"
+      ],
+      "DECISION": [
+        "red_light",
+        "scenario_trigger",
+        "scenario_trigger"
+      ],
+      "DRIVING": [
+        "accelerate"
+      ],
+      "FEEDBACK_DISPLAYED": [
+        "red_light",
+        "scenario_trigger",
+        "red_light",
+        "feedback_displayed"
+      ],
+      "GAME_OVER": [
+        "crash"
+      ],
+      "HAZARD": [
+        "red_light",
+        "scenario_trigger",
+        "pedestrian_crossing"
+      ],
+      "IDLE": [],
+      "INTERSECTION": [
+        "red_light",
+        "scenario_trigger",
+        "red_light"
+      ],
+      "REACTION_WINDOW": [
+        "red_light",
+        "scenario_trigger"
+      ],
+      "RECOVERY": [
+        "red_light",
+        "scenario_trigger",
+        "red_light",
+        "feedback_displayed",
+        "recovery_complete"
+      ],
+      "VIOLATION": [
+        "red_light",
+        "scenario_trigger",
+        "answer_incorrect"
+      ]
+    },
+    "transitionCount": 99,
+    "shadowedTransitions": [],
+    "unreachableTransitions": [],
+    "triggersWithNoTransitions": [],
+    "triggersNeverFireable": []
+  },
+  "guards": {
+    "guardedEdges": [
+      {
+        "from": "APPROACHING_EVENT",
+        "trigger": "scenario_trigger",
+        "to": "REACTION_WINDOW"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "emergency_vehicle",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "obstacle_ahead",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "overtaking_zone",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "pedestrian_crossing",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "red_light",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "road_marking",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "scenario_trigger",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "speed_limit",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "stop_sign",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "yellow_light",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "emergency_vehicle",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "obstacle_ahead",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "overtaking_zone",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "pedestrian_crossing",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "red_light",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "road_marking",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "scenario_trigger",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "speed_limit",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "stop_sign",
+        "to": "APPROACHING_EVENT"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "yellow_light",
+        "to": "APPROACHING_EVENT"
+      }
+    ],
+    "unguardedSafetyCriticalEdges": [
+      {
+        "from": "DRIVING",
+        "trigger": "crash",
+        "to": "GAME_OVER"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "level_end",
+        "to": "COMPLETED"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "vehicle_stopped",
+        "to": "IDLE"
+      },
+      {
+        "from": "REACTION_WINDOW",
+        "trigger": "answer_incorrect",
+        "to": "VIOLATION"
+      },
+      {
+        "from": "INTERSECTION",
+        "trigger": "answer_incorrect",
+        "to": "VIOLATION"
+      },
+      {
+        "from": "HAZARD",
+        "trigger": "answer_incorrect",
+        "to": "VIOLATION"
+      },
+      {
+        "from": "DECISION",
+        "trigger": "answer_incorrect",
+        "to": "VIOLATION"
+      }
+    ],
+    "firingDistances": [
+      {
+        "edge": "DRIVING --red_light--> APPROACHING_EVENT",
+        "approachScale": 0.5,
+        "reactionScale": 1,
+        "firstAcceptedAt": -50
+      },
+      {
+        "edge": "APPROACHING_EVENT --scenario_trigger--> REACTION_WINDOW",
+        "approachScale": 1,
+        "reactionScale": 0.5,
+        "firstAcceptedAt": -5
+      },
+      {
+        "edge": "DRIVING --red_light--> APPROACHING_EVENT",
+        "approachScale": 1,
+        "reactionScale": 1,
+        "firstAcceptedAt": -100
+      },
+      {
+        "edge": "APPROACHING_EVENT --scenario_trigger--> REACTION_WINDOW",
+        "approachScale": 1,
+        "reactionScale": 1,
+        "firstAcceptedAt": -10
+      },
+      {
+        "edge": "DRIVING --red_light--> APPROACHING_EVENT",
+        "approachScale": 2,
+        "reactionScale": 1,
+        "firstAcceptedAt": -200
+      },
+      {
+        "edge": "APPROACHING_EVENT --scenario_trigger--> REACTION_WINDOW",
+        "approachScale": 1,
+        "reactionScale": 2,
+        "firstAcceptedAt": -20
+      }
+    ],
+    "clamping": [
+      {
+        "requested": {
+          "approachScale": 1,
+          "reactionScale": 1
+        },
+        "applied": {
+          "approachScale": 1,
+          "reactionScale": 1
+        }
+      },
+      {
+        "requested": {
+          "approachScale": 0,
+          "reactionScale": 0
+        },
+        "applied": {
+          "approachScale": 0.5,
+          "reactionScale": 0.5
+        }
+      },
+      {
+        "requested": {
+          "approachScale": 99,
+          "reactionScale": 99
+        },
+        "applied": {
+          "approachScale": 2,
+          "reactionScale": 2
+        }
+      },
+      {
+        "requested": {
+          "approachScale": -5,
+          "reactionScale": null
+        },
+        "applied": {
+          "approachScale": 0.5,
+          "reactionScale": 1
+        }
+      }
+    ],
+    "boundedFiringDistances": [
+      {
+        "approachScale": 0.5,
+        "approachFloor": 80,
+        "approachRoom": 150,
+        "firstAcceptedAt": -80
+      },
+      {
+        "approachScale": 1,
+        "approachFloor": 80,
+        "approachRoom": 150,
+        "firstAcceptedAt": -100
+      },
+      {
+        "approachScale": 2,
+        "approachFloor": 80,
+        "approachRoom": 150,
+        "firstAcceptedAt": -150
+      },
+      {
+        "approachScale": 0.5,
+        "approachFloor": 120,
+        "approachRoom": 60,
+        "firstAcceptedAt": -100
+      },
+      {
+        "approachScale": 1,
+        "approachFloor": 120,
+        "approachRoom": 60,
+        "firstAcceptedAt": -100
+      },
+      {
+        "approachScale": 2,
+        "approachFloor": 120,
+        "approachRoom": 60,
+        "firstAcceptedAt": -100
+      }
+    ]
+  }
+}

@@ -1,0 +1,5303 @@
+{
+  "course": {
+    "courseLevels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "tutorial": 0,
+    "lastCourseLevel": 11,
+    "finalExam": 12,
+    "reviewLevels": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "competencies": [
+      "driver_legality",
+      "document_awareness",
+      "traffic_signals",
+      "road_signs",
+      "right_of_way",
+      "pedestrians",
+      "speed_control",
+      "lane_discipline",
+      "hazard_awareness",
+      "parking",
+      "general_rules"
+    ],
+    "terminalStates": [
+      "CERTIFIED"
+    ],
+    "controlStates": [
+      "DRIVE(0)",
+      "DRIVE(1)",
+      "DRIVE(2)",
+      "DRIVE(3)",
+      "DRIVE(4)",
+      "DRIVE(5)",
+      "DRIVE(6)",
+      "DRIVE(7)",
+      "DRIVE(8)",
+      "DRIVE(9)",
+      "DRIVE(10)",
+      "DRIVE(11)",
+      "REVIEW(1)",
+      "REVIEW(2)",
+      "REVIEW(3)",
+      "REVIEW(4)",
+      "REVIEW(5)",
+      "REVIEW(6)",
+      "REVIEW(7)",
+      "REVIEW(8)",
+      "REVIEW(9)",
+      "REVIEW(10)",
+      "REVIEW(11)",
+      "FINAL",
+      "CERTIFIED"
+    ],
+    "states": [
+      "DRIVE(0)",
+      "DRIVE(1)",
+      "DRIVE(2)",
+      "DRIVE(3)",
+      "DRIVE(4)",
+      "DRIVE(5)",
+      "DRIVE(6)",
+      "DRIVE(7)",
+      "DRIVE(8)",
+      "DRIVE(9)",
+      "DRIVE(10)",
+      "DRIVE(11)",
+      "REVIEW(1->DRIVE(2))",
+      "REVIEW(1->DRIVE(3))",
+      "REVIEW(2->DRIVE(3))",
+      "REVIEW(1->DRIVE(4))",
+      "REVIEW(2->DRIVE(4))",
+      "REVIEW(3->DRIVE(4))",
+      "REVIEW(1->DRIVE(5))",
+      "REVIEW(2->DRIVE(5))",
+      "REVIEW(3->DRIVE(5))",
+      "REVIEW(4->DRIVE(5))",
+      "REVIEW(1->DRIVE(6))",
+      "REVIEW(2->DRIVE(6))",
+      "REVIEW(3->DRIVE(6))",
+      "REVIEW(4->DRIVE(6))",
+      "REVIEW(5->DRIVE(6))",
+      "REVIEW(1->DRIVE(7))",
+      "REVIEW(2->DRIVE(7))",
+      "REVIEW(3->DRIVE(7))",
+      "REVIEW(4->DRIVE(7))",
+      "REVIEW(5->DRIVE(7))",
+      "REVIEW(6->DRIVE(7))",
+      "REVIEW(1->DRIVE(8))",
+      "REVIEW(2->DRIVE(8))",
+      "REVIEW(3->DRIVE(8))",
+      "REVIEW(4->DRIVE(8))",
+      "REVIEW(5->DRIVE(8))",
+      "REVIEW(6->DRIVE(8))",
+      "REVIEW(7->DRIVE(8))",
+      "REVIEW(1->DRIVE(9))",
+      "REVIEW(2->DRIVE(9))",
+      "REVIEW(3->DRIVE(9))",
+      "REVIEW(4->DRIVE(9))",
+      "REVIEW(5->DRIVE(9))",
+      "REVIEW(6->DRIVE(9))",
+      "REVIEW(7->DRIVE(9))",
+      "REVIEW(8->DRIVE(9))",
+      "REVIEW(1->DRIVE(10))",
+      "REVIEW(2->DRIVE(10))",
+      "REVIEW(3->DRIVE(10))",
+      "REVIEW(4->DRIVE(10))",
+      "REVIEW(5->DRIVE(10))",
+      "REVIEW(6->DRIVE(10))",
+      "REVIEW(7->DRIVE(10))",
+      "REVIEW(8->DRIVE(10))",
+      "REVIEW(9->DRIVE(10))",
+      "REVIEW(1->DRIVE(11))",
+      "REVIEW(2->DRIVE(11))",
+      "REVIEW(3->DRIVE(11))",
+      "REVIEW(4->DRIVE(11))",
+      "REVIEW(5->DRIVE(11))",
+      "REVIEW(6->DRIVE(11))",
+      "REVIEW(7->DRIVE(11))",
+      "REVIEW(8->DRIVE(11))",
+      "REVIEW(9->DRIVE(11))",
+      "REVIEW(10->DRIVE(11))",
+      "REVIEW(1->FINAL)",
+      "REVIEW(2->FINAL)",
+      "REVIEW(3->FINAL)",
+      "REVIEW(4->FINAL)",
+      "REVIEW(5->FINAL)",
+      "REVIEW(6->FINAL)",
+      "REVIEW(7->FINAL)",
+      "REVIEW(8->FINAL)",
+      "REVIEW(9->FINAL)",
+      "REVIEW(10->FINAL)",
+      "REVIEW(11->FINAL)",
+      "FINAL",
+      "CERTIFIED"
+    ],
+    "alphabet": [
+      "retry",
+      "retry+practice(driver_legality)",
+      "retry+practice(document_awareness)",
+      "retry+practice(traffic_signals)",
+      "retry+practice(road_signs)",
+      "retry+practice(right_of_way)",
+      "retry+practice(pedestrians)",
+      "retry+practice(speed_control)",
+      "retry+practice(lane_discipline)",
+      "retry+practice(hazard_awareness)",
+      "retry+practice(parking)",
+      "retry+practice(general_rules)",
+      "advance",
+      "advance+practice(driver_legality)",
+      "advance+practice(document_awareness)",
+      "advance+practice(traffic_signals)",
+      "advance+practice(road_signs)",
+      "advance+practice(right_of_way)",
+      "advance+practice(pedestrians)",
+      "advance+practice(speed_control)",
+      "advance+practice(lane_discipline)",
+      "advance+practice(hazard_awareness)",
+      "advance+practice(parking)",
+      "advance+practice(general_rules)",
+      "to_final",
+      "review(1,driver_legality)",
+      "review(1,document_awareness)",
+      "review(1,traffic_signals)",
+      "review(1,road_signs)",
+      "review(1,right_of_way)",
+      "review(1,pedestrians)",
+      "review(1,speed_control)",
+      "review(1,lane_discipline)",
+      "review(1,hazard_awareness)",
+      "review(1,parking)",
+      "review(1,general_rules)",
+      "review(2,driver_legality)",
+      "review(2,document_awareness)",
+      "review(2,traffic_signals)",
+      "review(2,road_signs)",
+      "review(2,right_of_way)",
+      "review(2,pedestrians)",
+      "review(2,speed_control)",
+      "review(2,lane_discipline)",
+      "review(2,hazard_awareness)",
+      "review(2,parking)",
+      "review(2,general_rules)",
+      "review(3,driver_legality)",
+      "review(3,document_awareness)",
+      "review(3,traffic_signals)",
+      "review(3,road_signs)",
+      "review(3,right_of_way)",
+      "review(3,pedestrians)",
+      "review(3,speed_control)",
+      "review(3,lane_discipline)",
+      "review(3,hazard_awareness)",
+      "review(3,parking)",
+      "review(3,general_rules)",
+      "review(4,driver_legality)",
+      "review(4,document_awareness)",
+      "review(4,traffic_signals)",
+      "review(4,road_signs)",
+      "review(4,right_of_way)",
+      "review(4,pedestrians)",
+      "review(4,speed_control)",
+      "review(4,lane_discipline)",
+      "review(4,hazard_awareness)",
+      "review(4,parking)",
+      "review(4,general_rules)",
+      "review(5,driver_legality)",
+      "review(5,document_awareness)",
+      "review(5,traffic_signals)",
+      "review(5,road_signs)",
+      "review(5,right_of_way)",
+      "review(5,pedestrians)",
+      "review(5,speed_control)",
+      "review(5,lane_discipline)",
+      "review(5,hazard_awareness)",
+      "review(5,parking)",
+      "review(5,general_rules)",
+      "review(6,driver_legality)",
+      "review(6,document_awareness)",
+      "review(6,traffic_signals)",
+      "review(6,road_signs)",
+      "review(6,right_of_way)",
+      "review(6,pedestrians)",
+      "review(6,speed_control)",
+      "review(6,lane_discipline)",
+      "review(6,hazard_awareness)",
+      "review(6,parking)",
+      "review(6,general_rules)",
+      "review(7,driver_legality)",
+      "review(7,document_awareness)",
+      "review(7,traffic_signals)",
+      "review(7,road_signs)",
+      "review(7,right_of_way)",
+      "review(7,pedestrians)",
+      "review(7,speed_control)",
+      "review(7,lane_discipline)",
+      "review(7,hazard_awareness)",
+      "review(7,parking)",
+      "review(7,general_rules)",
+      "review(8,driver_legality)",
+      "review(8,document_awareness)",
+      "review(8,traffic_signals)",
+      "review(8,road_signs)",
+      "review(8,right_of_way)",
+      "review(8,pedestrians)",
+      "review(8,speed_control)",
+      "review(8,lane_discipline)",
+      "review(8,hazard_awareness)",
+      "review(8,parking)",
+      "review(8,general_rules)",
+      "review(9,driver_legality)",
+      "review(9,document_awareness)",
+      "review(9,traffic_signals)",
+      "review(9,road_signs)",
+      "review(9,right_of_way)",
+      "review(9,pedestrians)",
+      "review(9,speed_control)",
+      "review(9,lane_discipline)",
+      "review(9,hazard_awareness)",
+      "review(9,parking)",
+      "review(9,general_rules)",
+      "review(10,driver_legality)",
+      "review(10,document_awareness)",
+      "review(10,traffic_signals)",
+      "review(10,road_signs)",
+      "review(10,right_of_way)",
+      "review(10,pedestrians)",
+      "review(10,speed_control)",
+      "review(10,lane_discipline)",
+      "review(10,hazard_awareness)",
+      "review(10,parking)",
+      "review(10,general_rules)",
+      "review(11,driver_legality)",
+      "review(11,document_awareness)",
+      "review(11,traffic_signals)",
+      "review(11,road_signs)",
+      "review(11,right_of_way)",
+      "review(11,pedestrians)",
+      "review(11,speed_control)",
+      "review(11,lane_discipline)",
+      "review(11,hazard_awareness)",
+      "review(11,parking)",
+      "review(11,general_rules)",
+      "return",
+      "certify"
+    ]
+  },
+  "table": [
+    {
+      "row": "retry",
+      "from": "DRIVE",
+      "on": "failed",
+      "move": "retry",
+      "where": "every course level",
+      "guard": "always; + practice(c) only if L is not the tutorial and c is placeable at L"
+    },
+    {
+      "row": "advance",
+      "from": "DRIVE",
+      "on": "passed",
+      "move": "advance",
+      "where": "L < 11",
+      "guard": "always; + practice(c) only if c is placeable at L + 1"
+    },
+    {
+      "row": "to final",
+      "from": "DRIVE",
+      "on": "passed",
+      "move": "to_final",
+      "where": "L = 11",
+      "guard": "always; nothing is added to the final exam"
+    },
+    {
+      "row": "review",
+      "from": "DRIVE",
+      "on": "passed",
+      "move": "review",
+      "where": "L >= 1",
+      "guard": "1 <= L' <= L (passed, never the tutorial), c has no portable practice item at the next level, and L' teaches c"
+    },
+    {
+      "row": "return",
+      "from": "REVIEW",
+      "on": "either",
+      "move": "return",
+      "where": "every review",
+      "guard": "always, whatever the review scored; nothing is added"
+    },
+    {
+      "row": "retry the final",
+      "from": "FINAL",
+      "on": "failed",
+      "move": "retry",
+      "where": "the final exam",
+      "guard": "always; never practice"
+    },
+    {
+      "row": "certify",
+      "from": "FINAL",
+      "on": "passed",
+      "move": "certify",
+      "where": "the final exam",
+      "guard": "always"
+    }
+  ],
+  "probes": {
+    "none": {
+      "description": "No competency has a portable item and no level teaches anything: only the plain moves are legal.",
+      "practice": {
+        "driver_legality": "none",
+        "document_awareness": "none",
+        "traffic_signals": "none",
+        "road_signs": "none",
+        "right_of_way": "none",
+        "pedestrians": "none",
+        "speed_control": "none",
+        "lane_discipline": "none",
+        "hazard_awareness": "none",
+        "parking": "none",
+        "general_rules": "none"
+      },
+      "teaches": {
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": [],
+        "5": [],
+        "6": [],
+        "7": [],
+        "8": [],
+        "9": [],
+        "10": [],
+        "11": []
+      }
+    },
+    "open": {
+      "description": "Every competency is placeable and every level teaches everything: every practice add-on is legal, and no review, because everything is portable.",
+      "practice": {
+        "driver_legality": "placeable",
+        "document_awareness": "placeable",
+        "traffic_signals": "placeable",
+        "road_signs": "placeable",
+        "right_of_way": "placeable",
+        "pedestrians": "placeable",
+        "speed_control": "placeable",
+        "lane_discipline": "placeable",
+        "hazard_awareness": "placeable",
+        "parking": "placeable",
+        "general_rules": "placeable"
+      },
+      "teaches": {
+        "1": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "2": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "3": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "4": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "5": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "6": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "7": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "8": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "9": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "10": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "11": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ]
+      }
+    },
+    "gap": {
+      "description": "No competency has a portable item and every level teaches everything: every review of a passed level is legal.",
+      "practice": {
+        "driver_legality": "none",
+        "document_awareness": "none",
+        "traffic_signals": "none",
+        "road_signs": "none",
+        "right_of_way": "none",
+        "pedestrians": "none",
+        "speed_control": "none",
+        "lane_discipline": "none",
+        "hazard_awareness": "none",
+        "parking": "none",
+        "general_rules": "none"
+      },
+      "teaches": {
+        "1": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "2": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "3": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "4": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "5": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "6": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "7": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "8": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "9": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "10": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ],
+        "11": [
+          "driver_legality",
+          "document_awareness",
+          "traffic_signals",
+          "road_signs",
+          "right_of_way",
+          "pedestrians",
+          "speed_control",
+          "lane_discipline",
+          "hazard_awareness",
+          "parking",
+          "general_rules"
+        ]
+      }
+    },
+    "mixed": {
+      "description": "Competencies cycle placeable / on-route / none in COMPETENCIES order; review level L' teaches COMPETENCIES[(L' - 1) mod 11] alone.",
+      "practice": {
+        "driver_legality": "placeable",
+        "document_awareness": "on-route",
+        "traffic_signals": "none",
+        "road_signs": "placeable",
+        "right_of_way": "on-route",
+        "pedestrians": "none",
+        "speed_control": "placeable",
+        "lane_discipline": "on-route",
+        "hazard_awareness": "none",
+        "parking": "placeable",
+        "general_rules": "on-route"
+      },
+      "teaches": {
+        "1": [
+          "driver_legality"
+        ],
+        "2": [
+          "document_awareness"
+        ],
+        "3": [
+          "traffic_signals"
+        ],
+        "4": [
+          "road_signs"
+        ],
+        "5": [
+          "right_of_way"
+        ],
+        "6": [
+          "pedestrians"
+        ],
+        "7": [
+          "speed_control"
+        ],
+        "8": [
+          "lane_discipline"
+        ],
+        "9": [
+          "hazard_awareness"
+        ],
+        "10": [
+          "parking"
+        ],
+        "11": [
+          "general_rules"
+        ]
+      }
+    }
+  },
+  "core": {
+    "DRIVE(0) | passed | none": [
+      "advance -> DRIVE(1)"
+    ],
+    "DRIVE(0) | passed | open": [
+      "advance -> DRIVE(1)",
+      "advance+practice(driver_legality) -> DRIVE(1)",
+      "advance+practice(document_awareness) -> DRIVE(1)",
+      "advance+practice(traffic_signals) -> DRIVE(1)",
+      "advance+practice(road_signs) -> DRIVE(1)",
+      "advance+practice(right_of_way) -> DRIVE(1)",
+      "advance+practice(pedestrians) -> DRIVE(1)",
+      "advance+practice(speed_control) -> DRIVE(1)",
+      "advance+practice(lane_discipline) -> DRIVE(1)",
+      "advance+practice(hazard_awareness) -> DRIVE(1)",
+      "advance+practice(parking) -> DRIVE(1)",
+      "advance+practice(general_rules) -> DRIVE(1)"
+    ],
+    "DRIVE(0) | passed | gap": [
+      "advance -> DRIVE(1)"
+    ],
+    "DRIVE(0) | passed | mixed": [
+      "advance -> DRIVE(1)",
+      "advance+practice(driver_legality) -> DRIVE(1)",
+      "advance+practice(road_signs) -> DRIVE(1)",
+      "advance+practice(speed_control) -> DRIVE(1)",
+      "advance+practice(parking) -> DRIVE(1)"
+    ],
+    "DRIVE(0) | failed | none": [
+      "retry -> DRIVE(0)"
+    ],
+    "DRIVE(0) | failed | open": [
+      "retry -> DRIVE(0)"
+    ],
+    "DRIVE(0) | failed | gap": [
+      "retry -> DRIVE(0)"
+    ],
+    "DRIVE(0) | failed | mixed": [
+      "retry -> DRIVE(0)"
+    ],
+    "DRIVE(1) | passed | none": [
+      "advance -> DRIVE(2)"
+    ],
+    "DRIVE(1) | passed | open": [
+      "advance -> DRIVE(2)",
+      "advance+practice(driver_legality) -> DRIVE(2)",
+      "advance+practice(document_awareness) -> DRIVE(2)",
+      "advance+practice(traffic_signals) -> DRIVE(2)",
+      "advance+practice(road_signs) -> DRIVE(2)",
+      "advance+practice(right_of_way) -> DRIVE(2)",
+      "advance+practice(pedestrians) -> DRIVE(2)",
+      "advance+practice(speed_control) -> DRIVE(2)",
+      "advance+practice(lane_discipline) -> DRIVE(2)",
+      "advance+practice(hazard_awareness) -> DRIVE(2)",
+      "advance+practice(parking) -> DRIVE(2)",
+      "advance+practice(general_rules) -> DRIVE(2)"
+    ],
+    "DRIVE(1) | passed | gap": [
+      "advance -> DRIVE(2)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(2))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(2))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(2))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(2))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(2))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(2))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(2))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(2))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(2))",
+      "review(1,parking) -> REVIEW(1->DRIVE(2))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(2))"
+    ],
+    "DRIVE(1) | passed | mixed": [
+      "advance -> DRIVE(2)",
+      "advance+practice(driver_legality) -> DRIVE(2)",
+      "advance+practice(road_signs) -> DRIVE(2)",
+      "advance+practice(speed_control) -> DRIVE(2)",
+      "advance+practice(parking) -> DRIVE(2)"
+    ],
+    "DRIVE(1) | failed | none": [
+      "retry -> DRIVE(1)"
+    ],
+    "DRIVE(1) | failed | open": [
+      "retry -> DRIVE(1)",
+      "retry+practice(driver_legality) -> DRIVE(1)",
+      "retry+practice(document_awareness) -> DRIVE(1)",
+      "retry+practice(traffic_signals) -> DRIVE(1)",
+      "retry+practice(road_signs) -> DRIVE(1)",
+      "retry+practice(right_of_way) -> DRIVE(1)",
+      "retry+practice(pedestrians) -> DRIVE(1)",
+      "retry+practice(speed_control) -> DRIVE(1)",
+      "retry+practice(lane_discipline) -> DRIVE(1)",
+      "retry+practice(hazard_awareness) -> DRIVE(1)",
+      "retry+practice(parking) -> DRIVE(1)",
+      "retry+practice(general_rules) -> DRIVE(1)"
+    ],
+    "DRIVE(1) | failed | gap": [
+      "retry -> DRIVE(1)"
+    ],
+    "DRIVE(1) | failed | mixed": [
+      "retry -> DRIVE(1)",
+      "retry+practice(driver_legality) -> DRIVE(1)",
+      "retry+practice(road_signs) -> DRIVE(1)",
+      "retry+practice(speed_control) -> DRIVE(1)",
+      "retry+practice(parking) -> DRIVE(1)"
+    ],
+    "DRIVE(2) | passed | none": [
+      "advance -> DRIVE(3)"
+    ],
+    "DRIVE(2) | passed | open": [
+      "advance -> DRIVE(3)",
+      "advance+practice(driver_legality) -> DRIVE(3)",
+      "advance+practice(document_awareness) -> DRIVE(3)",
+      "advance+practice(traffic_signals) -> DRIVE(3)",
+      "advance+practice(road_signs) -> DRIVE(3)",
+      "advance+practice(right_of_way) -> DRIVE(3)",
+      "advance+practice(pedestrians) -> DRIVE(3)",
+      "advance+practice(speed_control) -> DRIVE(3)",
+      "advance+practice(lane_discipline) -> DRIVE(3)",
+      "advance+practice(hazard_awareness) -> DRIVE(3)",
+      "advance+practice(parking) -> DRIVE(3)",
+      "advance+practice(general_rules) -> DRIVE(3)"
+    ],
+    "DRIVE(2) | passed | gap": [
+      "advance -> DRIVE(3)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(3))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(3))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(3))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(3))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(3))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(3))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(3))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(3))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(3))",
+      "review(1,parking) -> REVIEW(1->DRIVE(3))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(3))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(3))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(3))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(3))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(3))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(3))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(3))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(3))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(3))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(3))",
+      "review(2,parking) -> REVIEW(2->DRIVE(3))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(3))"
+    ],
+    "DRIVE(2) | passed | mixed": [
+      "advance -> DRIVE(3)",
+      "advance+practice(driver_legality) -> DRIVE(3)",
+      "advance+practice(road_signs) -> DRIVE(3)",
+      "advance+practice(speed_control) -> DRIVE(3)",
+      "advance+practice(parking) -> DRIVE(3)"
+    ],
+    "DRIVE(2) | failed | none": [
+      "retry -> DRIVE(2)"
+    ],
+    "DRIVE(2) | failed | open": [
+      "retry -> DRIVE(2)",
+      "retry+practice(driver_legality) -> DRIVE(2)",
+      "retry+practice(document_awareness) -> DRIVE(2)",
+      "retry+practice(traffic_signals) -> DRIVE(2)",
+      "retry+practice(road_signs) -> DRIVE(2)",
+      "retry+practice(right_of_way) -> DRIVE(2)",
+      "retry+practice(pedestrians) -> DRIVE(2)",
+      "retry+practice(speed_control) -> DRIVE(2)",
+      "retry+practice(lane_discipline) -> DRIVE(2)",
+      "retry+practice(hazard_awareness) -> DRIVE(2)",
+      "retry+practice(parking) -> DRIVE(2)",
+      "retry+practice(general_rules) -> DRIVE(2)"
+    ],
+    "DRIVE(2) | failed | gap": [
+      "retry -> DRIVE(2)"
+    ],
+    "DRIVE(2) | failed | mixed": [
+      "retry -> DRIVE(2)",
+      "retry+practice(driver_legality) -> DRIVE(2)",
+      "retry+practice(road_signs) -> DRIVE(2)",
+      "retry+practice(speed_control) -> DRIVE(2)",
+      "retry+practice(parking) -> DRIVE(2)"
+    ],
+    "DRIVE(3) | passed | none": [
+      "advance -> DRIVE(4)"
+    ],
+    "DRIVE(3) | passed | open": [
+      "advance -> DRIVE(4)",
+      "advance+practice(driver_legality) -> DRIVE(4)",
+      "advance+practice(document_awareness) -> DRIVE(4)",
+      "advance+practice(traffic_signals) -> DRIVE(4)",
+      "advance+practice(road_signs) -> DRIVE(4)",
+      "advance+practice(right_of_way) -> DRIVE(4)",
+      "advance+practice(pedestrians) -> DRIVE(4)",
+      "advance+practice(speed_control) -> DRIVE(4)",
+      "advance+practice(lane_discipline) -> DRIVE(4)",
+      "advance+practice(hazard_awareness) -> DRIVE(4)",
+      "advance+practice(parking) -> DRIVE(4)",
+      "advance+practice(general_rules) -> DRIVE(4)"
+    ],
+    "DRIVE(3) | passed | gap": [
+      "advance -> DRIVE(4)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(4))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(4))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(4))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(4))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(4))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(4))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(4))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(4))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(4))",
+      "review(1,parking) -> REVIEW(1->DRIVE(4))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(4))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(4))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(4))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(4))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(4))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(4))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(4))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(4))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(4))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(4))",
+      "review(2,parking) -> REVIEW(2->DRIVE(4))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(4))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(4))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(4))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(4))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(4))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(4))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(4))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(4))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(4))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(4))",
+      "review(3,parking) -> REVIEW(3->DRIVE(4))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(4))"
+    ],
+    "DRIVE(3) | passed | mixed": [
+      "advance -> DRIVE(4)",
+      "advance+practice(driver_legality) -> DRIVE(4)",
+      "advance+practice(road_signs) -> DRIVE(4)",
+      "advance+practice(speed_control) -> DRIVE(4)",
+      "advance+practice(parking) -> DRIVE(4)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(4))"
+    ],
+    "DRIVE(3) | failed | none": [
+      "retry -> DRIVE(3)"
+    ],
+    "DRIVE(3) | failed | open": [
+      "retry -> DRIVE(3)",
+      "retry+practice(driver_legality) -> DRIVE(3)",
+      "retry+practice(document_awareness) -> DRIVE(3)",
+      "retry+practice(traffic_signals) -> DRIVE(3)",
+      "retry+practice(road_signs) -> DRIVE(3)",
+      "retry+practice(right_of_way) -> DRIVE(3)",
+      "retry+practice(pedestrians) -> DRIVE(3)",
+      "retry+practice(speed_control) -> DRIVE(3)",
+      "retry+practice(lane_discipline) -> DRIVE(3)",
+      "retry+practice(hazard_awareness) -> DRIVE(3)",
+      "retry+practice(parking) -> DRIVE(3)",
+      "retry+practice(general_rules) -> DRIVE(3)"
+    ],
+    "DRIVE(3) | failed | gap": [
+      "retry -> DRIVE(3)"
+    ],
+    "DRIVE(3) | failed | mixed": [
+      "retry -> DRIVE(3)",
+      "retry+practice(driver_legality) -> DRIVE(3)",
+      "retry+practice(road_signs) -> DRIVE(3)",
+      "retry+practice(speed_control) -> DRIVE(3)",
+      "retry+practice(parking) -> DRIVE(3)"
+    ],
+    "DRIVE(4) | passed | none": [
+      "advance -> DRIVE(5)"
+    ],
+    "DRIVE(4) | passed | open": [
+      "advance -> DRIVE(5)",
+      "advance+practice(driver_legality) -> DRIVE(5)",
+      "advance+practice(document_awareness) -> DRIVE(5)",
+      "advance+practice(traffic_signals) -> DRIVE(5)",
+      "advance+practice(road_signs) -> DRIVE(5)",
+      "advance+practice(right_of_way) -> DRIVE(5)",
+      "advance+practice(pedestrians) -> DRIVE(5)",
+      "advance+practice(speed_control) -> DRIVE(5)",
+      "advance+practice(lane_discipline) -> DRIVE(5)",
+      "advance+practice(hazard_awareness) -> DRIVE(5)",
+      "advance+practice(parking) -> DRIVE(5)",
+      "advance+practice(general_rules) -> DRIVE(5)"
+    ],
+    "DRIVE(4) | passed | gap": [
+      "advance -> DRIVE(5)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(5))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(5))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(5))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(5))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(5))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(5))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(5))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(5))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(5))",
+      "review(1,parking) -> REVIEW(1->DRIVE(5))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(5))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(5))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(5))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(5))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(5))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(5))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(5))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(5))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(5))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(5))",
+      "review(2,parking) -> REVIEW(2->DRIVE(5))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(5))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(5))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(5))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(5))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(5))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(5))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(5))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(5))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(5))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(5))",
+      "review(3,parking) -> REVIEW(3->DRIVE(5))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(5))",
+      "review(4,driver_legality) -> REVIEW(4->DRIVE(5))",
+      "review(4,document_awareness) -> REVIEW(4->DRIVE(5))",
+      "review(4,traffic_signals) -> REVIEW(4->DRIVE(5))",
+      "review(4,road_signs) -> REVIEW(4->DRIVE(5))",
+      "review(4,right_of_way) -> REVIEW(4->DRIVE(5))",
+      "review(4,pedestrians) -> REVIEW(4->DRIVE(5))",
+      "review(4,speed_control) -> REVIEW(4->DRIVE(5))",
+      "review(4,lane_discipline) -> REVIEW(4->DRIVE(5))",
+      "review(4,hazard_awareness) -> REVIEW(4->DRIVE(5))",
+      "review(4,parking) -> REVIEW(4->DRIVE(5))",
+      "review(4,general_rules) -> REVIEW(4->DRIVE(5))"
+    ],
+    "DRIVE(4) | passed | mixed": [
+      "advance -> DRIVE(5)",
+      "advance+practice(driver_legality) -> DRIVE(5)",
+      "advance+practice(road_signs) -> DRIVE(5)",
+      "advance+practice(speed_control) -> DRIVE(5)",
+      "advance+practice(parking) -> DRIVE(5)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(5))"
+    ],
+    "DRIVE(4) | failed | none": [
+      "retry -> DRIVE(4)"
+    ],
+    "DRIVE(4) | failed | open": [
+      "retry -> DRIVE(4)",
+      "retry+practice(driver_legality) -> DRIVE(4)",
+      "retry+practice(document_awareness) -> DRIVE(4)",
+      "retry+practice(traffic_signals) -> DRIVE(4)",
+      "retry+practice(road_signs) -> DRIVE(4)",
+      "retry+practice(right_of_way) -> DRIVE(4)",
+      "retry+practice(pedestrians) -> DRIVE(4)",
+      "retry+practice(speed_control) -> DRIVE(4)",
+      "retry+practice(lane_discipline) -> DRIVE(4)",
+      "retry+practice(hazard_awareness) -> DRIVE(4)",
+      "retry+practice(parking) -> DRIVE(4)",
+      "retry+practice(general_rules) -> DRIVE(4)"
+    ],
+    "DRIVE(4) | failed | gap": [
+      "retry -> DRIVE(4)"
+    ],
+    "DRIVE(4) | failed | mixed": [
+      "retry -> DRIVE(4)",
+      "retry+practice(driver_legality) -> DRIVE(4)",
+      "retry+practice(road_signs) -> DRIVE(4)",
+      "retry+practice(speed_control) -> DRIVE(4)",
+      "retry+practice(parking) -> DRIVE(4)"
+    ],
+    "DRIVE(5) | passed | none": [
+      "advance -> DRIVE(6)"
+    ],
+    "DRIVE(5) | passed | open": [
+      "advance -> DRIVE(6)",
+      "advance+practice(driver_legality) -> DRIVE(6)",
+      "advance+practice(document_awareness) -> DRIVE(6)",
+      "advance+practice(traffic_signals) -> DRIVE(6)",
+      "advance+practice(road_signs) -> DRIVE(6)",
+      "advance+practice(right_of_way) -> DRIVE(6)",
+      "advance+practice(pedestrians) -> DRIVE(6)",
+      "advance+practice(speed_control) -> DRIVE(6)",
+      "advance+practice(lane_discipline) -> DRIVE(6)",
+      "advance+practice(hazard_awareness) -> DRIVE(6)",
+      "advance+practice(parking) -> DRIVE(6)",
+      "advance+practice(general_rules) -> DRIVE(6)"
+    ],
+    "DRIVE(5) | passed | gap": [
+      "advance -> DRIVE(6)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(6))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(6))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(6))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(6))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(6))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(6))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(6))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(6))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(6))",
+      "review(1,parking) -> REVIEW(1->DRIVE(6))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(6))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(6))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(6))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(6))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(6))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(6))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(6))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(6))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(6))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(6))",
+      "review(2,parking) -> REVIEW(2->DRIVE(6))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(6))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(6))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(6))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(6))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(6))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(6))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(6))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(6))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(6))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(6))",
+      "review(3,parking) -> REVIEW(3->DRIVE(6))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(6))",
+      "review(4,driver_legality) -> REVIEW(4->DRIVE(6))",
+      "review(4,document_awareness) -> REVIEW(4->DRIVE(6))",
+      "review(4,traffic_signals) -> REVIEW(4->DRIVE(6))",
+      "review(4,road_signs) -> REVIEW(4->DRIVE(6))",
+      "review(4,right_of_way) -> REVIEW(4->DRIVE(6))",
+      "review(4,pedestrians) -> REVIEW(4->DRIVE(6))",
+      "review(4,speed_control) -> REVIEW(4->DRIVE(6))",
+      "review(4,lane_discipline) -> REVIEW(4->DRIVE(6))",
+      "review(4,hazard_awareness) -> REVIEW(4->DRIVE(6))",
+      "review(4,parking) -> REVIEW(4->DRIVE(6))",
+      "review(4,general_rules) -> REVIEW(4->DRIVE(6))",
+      "review(5,driver_legality) -> REVIEW(5->DRIVE(6))",
+      "review(5,document_awareness) -> REVIEW(5->DRIVE(6))",
+      "review(5,traffic_signals) -> REVIEW(5->DRIVE(6))",
+      "review(5,road_signs) -> REVIEW(5->DRIVE(6))",
+      "review(5,right_of_way) -> REVIEW(5->DRIVE(6))",
+      "review(5,pedestrians) -> REVIEW(5->DRIVE(6))",
+      "review(5,speed_control) -> REVIEW(5->DRIVE(6))",
+      "review(5,lane_discipline) -> REVIEW(5->DRIVE(6))",
+      "review(5,hazard_awareness) -> REVIEW(5->DRIVE(6))",
+      "review(5,parking) -> REVIEW(5->DRIVE(6))",
+      "review(5,general_rules) -> REVIEW(5->DRIVE(6))"
+    ],
+    "DRIVE(5) | passed | mixed": [
+      "advance -> DRIVE(6)",
+      "advance+practice(driver_legality) -> DRIVE(6)",
+      "advance+practice(road_signs) -> DRIVE(6)",
+      "advance+practice(speed_control) -> DRIVE(6)",
+      "advance+practice(parking) -> DRIVE(6)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(6))"
+    ],
+    "DRIVE(5) | failed | none": [
+      "retry -> DRIVE(5)"
+    ],
+    "DRIVE(5) | failed | open": [
+      "retry -> DRIVE(5)",
+      "retry+practice(driver_legality) -> DRIVE(5)",
+      "retry+practice(document_awareness) -> DRIVE(5)",
+      "retry+practice(traffic_signals) -> DRIVE(5)",
+      "retry+practice(road_signs) -> DRIVE(5)",
+      "retry+practice(right_of_way) -> DRIVE(5)",
+      "retry+practice(pedestrians) -> DRIVE(5)",
+      "retry+practice(speed_control) -> DRIVE(5)",
+      "retry+practice(lane_discipline) -> DRIVE(5)",
+      "retry+practice(hazard_awareness) -> DRIVE(5)",
+      "retry+practice(parking) -> DRIVE(5)",
+      "retry+practice(general_rules) -> DRIVE(5)"
+    ],
+    "DRIVE(5) | failed | gap": [
+      "retry -> DRIVE(5)"
+    ],
+    "DRIVE(5) | failed | mixed": [
+      "retry -> DRIVE(5)",
+      "retry+practice(driver_legality) -> DRIVE(5)",
+      "retry+practice(road_signs) -> DRIVE(5)",
+      "retry+practice(speed_control) -> DRIVE(5)",
+      "retry+practice(parking) -> DRIVE(5)"
+    ],
+    "DRIVE(6) | passed | none": [
+      "advance -> DRIVE(7)"
+    ],
+    "DRIVE(6) | passed | open": [
+      "advance -> DRIVE(7)",
+      "advance+practice(driver_legality) -> DRIVE(7)",
+      "advance+practice(document_awareness) -> DRIVE(7)",
+      "advance+practice(traffic_signals) -> DRIVE(7)",
+      "advance+practice(road_signs) -> DRIVE(7)",
+      "advance+practice(right_of_way) -> DRIVE(7)",
+      "advance+practice(pedestrians) -> DRIVE(7)",
+      "advance+practice(speed_control) -> DRIVE(7)",
+      "advance+practice(lane_discipline) -> DRIVE(7)",
+      "advance+practice(hazard_awareness) -> DRIVE(7)",
+      "advance+practice(parking) -> DRIVE(7)",
+      "advance+practice(general_rules) -> DRIVE(7)"
+    ],
+    "DRIVE(6) | passed | gap": [
+      "advance -> DRIVE(7)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(7))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(7))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(7))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(7))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(7))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(7))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(7))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(7))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(7))",
+      "review(1,parking) -> REVIEW(1->DRIVE(7))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(7))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(7))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(7))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(7))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(7))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(7))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(7))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(7))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(7))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(7))",
+      "review(2,parking) -> REVIEW(2->DRIVE(7))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(7))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(7))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(7))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(7))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(7))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(7))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(7))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(7))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(7))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(7))",
+      "review(3,parking) -> REVIEW(3->DRIVE(7))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(7))",
+      "review(4,driver_legality) -> REVIEW(4->DRIVE(7))",
+      "review(4,document_awareness) -> REVIEW(4->DRIVE(7))",
+      "review(4,traffic_signals) -> REVIEW(4->DRIVE(7))",
+      "review(4,road_signs) -> REVIEW(4->DRIVE(7))",
+      "review(4,right_of_way) -> REVIEW(4->DRIVE(7))",
+      "review(4,pedestrians) -> REVIEW(4->DRIVE(7))",
+      "review(4,speed_control) -> REVIEW(4->DRIVE(7))",
+      "review(4,lane_discipline) -> REVIEW(4->DRIVE(7))",
+      "review(4,hazard_awareness) -> REVIEW(4->DRIVE(7))",
+      "review(4,parking) -> REVIEW(4->DRIVE(7))",
+      "review(4,general_rules) -> REVIEW(4->DRIVE(7))",
+      "review(5,driver_legality) -> REVIEW(5->DRIVE(7))",
+      "review(5,document_awareness) -> REVIEW(5->DRIVE(7))",
+      "review(5,traffic_signals) -> REVIEW(5->DRIVE(7))",
+      "review(5,road_signs) -> REVIEW(5->DRIVE(7))",
+      "review(5,right_of_way) -> REVIEW(5->DRIVE(7))",
+      "review(5,pedestrians) -> REVIEW(5->DRIVE(7))",
+      "review(5,speed_control) -> REVIEW(5->DRIVE(7))",
+      "review(5,lane_discipline) -> REVIEW(5->DRIVE(7))",
+      "review(5,hazard_awareness) -> REVIEW(5->DRIVE(7))",
+      "review(5,parking) -> REVIEW(5->DRIVE(7))",
+      "review(5,general_rules) -> REVIEW(5->DRIVE(7))",
+      "review(6,driver_legality) -> REVIEW(6->DRIVE(7))",
+      "review(6,document_awareness) -> REVIEW(6->DRIVE(7))",
+      "review(6,traffic_signals) -> REVIEW(6->DRIVE(7))",
+      "review(6,road_signs) -> REVIEW(6->DRIVE(7))",
+      "review(6,right_of_way) -> REVIEW(6->DRIVE(7))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(7))",
+      "review(6,speed_control) -> REVIEW(6->DRIVE(7))",
+      "review(6,lane_discipline) -> REVIEW(6->DRIVE(7))",
+      "review(6,hazard_awareness) -> REVIEW(6->DRIVE(7))",
+      "review(6,parking) -> REVIEW(6->DRIVE(7))",
+      "review(6,general_rules) -> REVIEW(6->DRIVE(7))"
+    ],
+    "DRIVE(6) | passed | mixed": [
+      "advance -> DRIVE(7)",
+      "advance+practice(driver_legality) -> DRIVE(7)",
+      "advance+practice(road_signs) -> DRIVE(7)",
+      "advance+practice(speed_control) -> DRIVE(7)",
+      "advance+practice(parking) -> DRIVE(7)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(7))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(7))"
+    ],
+    "DRIVE(6) | failed | none": [
+      "retry -> DRIVE(6)"
+    ],
+    "DRIVE(6) | failed | open": [
+      "retry -> DRIVE(6)",
+      "retry+practice(driver_legality) -> DRIVE(6)",
+      "retry+practice(document_awareness) -> DRIVE(6)",
+      "retry+practice(traffic_signals) -> DRIVE(6)",
+      "retry+practice(road_signs) -> DRIVE(6)",
+      "retry+practice(right_of_way) -> DRIVE(6)",
+      "retry+practice(pedestrians) -> DRIVE(6)",
+      "retry+practice(speed_control) -> DRIVE(6)",
+      "retry+practice(lane_discipline) -> DRIVE(6)",
+      "retry+practice(hazard_awareness) -> DRIVE(6)",
+      "retry+practice(parking) -> DRIVE(6)",
+      "retry+practice(general_rules) -> DRIVE(6)"
+    ],
+    "DRIVE(6) | failed | gap": [
+      "retry -> DRIVE(6)"
+    ],
+    "DRIVE(6) | failed | mixed": [
+      "retry -> DRIVE(6)",
+      "retry+practice(driver_legality) -> DRIVE(6)",
+      "retry+practice(road_signs) -> DRIVE(6)",
+      "retry+practice(speed_control) -> DRIVE(6)",
+      "retry+practice(parking) -> DRIVE(6)"
+    ],
+    "DRIVE(7) | passed | none": [
+      "advance -> DRIVE(8)"
+    ],
+    "DRIVE(7) | passed | open": [
+      "advance -> DRIVE(8)",
+      "advance+practice(driver_legality) -> DRIVE(8)",
+      "advance+practice(document_awareness) -> DRIVE(8)",
+      "advance+practice(traffic_signals) -> DRIVE(8)",
+      "advance+practice(road_signs) -> DRIVE(8)",
+      "advance+practice(right_of_way) -> DRIVE(8)",
+      "advance+practice(pedestrians) -> DRIVE(8)",
+      "advance+practice(speed_control) -> DRIVE(8)",
+      "advance+practice(lane_discipline) -> DRIVE(8)",
+      "advance+practice(hazard_awareness) -> DRIVE(8)",
+      "advance+practice(parking) -> DRIVE(8)",
+      "advance+practice(general_rules) -> DRIVE(8)"
+    ],
+    "DRIVE(7) | passed | gap": [
+      "advance -> DRIVE(8)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(8))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(8))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(8))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(8))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(8))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(8))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(8))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(8))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(8))",
+      "review(1,parking) -> REVIEW(1->DRIVE(8))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(8))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(8))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(8))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(8))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(8))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(8))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(8))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(8))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(8))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(8))",
+      "review(2,parking) -> REVIEW(2->DRIVE(8))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(8))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(8))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(8))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(8))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(8))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(8))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(8))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(8))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(8))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(8))",
+      "review(3,parking) -> REVIEW(3->DRIVE(8))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(8))",
+      "review(4,driver_legality) -> REVIEW(4->DRIVE(8))",
+      "review(4,document_awareness) -> REVIEW(4->DRIVE(8))",
+      "review(4,traffic_signals) -> REVIEW(4->DRIVE(8))",
+      "review(4,road_signs) -> REVIEW(4->DRIVE(8))",
+      "review(4,right_of_way) -> REVIEW(4->DRIVE(8))",
+      "review(4,pedestrians) -> REVIEW(4->DRIVE(8))",
+      "review(4,speed_control) -> REVIEW(4->DRIVE(8))",
+      "review(4,lane_discipline) -> REVIEW(4->DRIVE(8))",
+      "review(4,hazard_awareness) -> REVIEW(4->DRIVE(8))",
+      "review(4,parking) -> REVIEW(4->DRIVE(8))",
+      "review(4,general_rules) -> REVIEW(4->DRIVE(8))",
+      "review(5,driver_legality) -> REVIEW(5->DRIVE(8))",
+      "review(5,document_awareness) -> REVIEW(5->DRIVE(8))",
+      "review(5,traffic_signals) -> REVIEW(5->DRIVE(8))",
+      "review(5,road_signs) -> REVIEW(5->DRIVE(8))",
+      "review(5,right_of_way) -> REVIEW(5->DRIVE(8))",
+      "review(5,pedestrians) -> REVIEW(5->DRIVE(8))",
+      "review(5,speed_control) -> REVIEW(5->DRIVE(8))",
+      "review(5,lane_discipline) -> REVIEW(5->DRIVE(8))",
+      "review(5,hazard_awareness) -> REVIEW(5->DRIVE(8))",
+      "review(5,parking) -> REVIEW(5->DRIVE(8))",
+      "review(5,general_rules) -> REVIEW(5->DRIVE(8))",
+      "review(6,driver_legality) -> REVIEW(6->DRIVE(8))",
+      "review(6,document_awareness) -> REVIEW(6->DRIVE(8))",
+      "review(6,traffic_signals) -> REVIEW(6->DRIVE(8))",
+      "review(6,road_signs) -> REVIEW(6->DRIVE(8))",
+      "review(6,right_of_way) -> REVIEW(6->DRIVE(8))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(8))",
+      "review(6,speed_control) -> REVIEW(6->DRIVE(8))",
+      "review(6,lane_discipline) -> REVIEW(6->DRIVE(8))",
+      "review(6,hazard_awareness) -> REVIEW(6->DRIVE(8))",
+      "review(6,parking) -> REVIEW(6->DRIVE(8))",
+      "review(6,general_rules) -> REVIEW(6->DRIVE(8))",
+      "review(7,driver_legality) -> REVIEW(7->DRIVE(8))",
+      "review(7,document_awareness) -> REVIEW(7->DRIVE(8))",
+      "review(7,traffic_signals) -> REVIEW(7->DRIVE(8))",
+      "review(7,road_signs) -> REVIEW(7->DRIVE(8))",
+      "review(7,right_of_way) -> REVIEW(7->DRIVE(8))",
+      "review(7,pedestrians) -> REVIEW(7->DRIVE(8))",
+      "review(7,speed_control) -> REVIEW(7->DRIVE(8))",
+      "review(7,lane_discipline) -> REVIEW(7->DRIVE(8))",
+      "review(7,hazard_awareness) -> REVIEW(7->DRIVE(8))",
+      "review(7,parking) -> REVIEW(7->DRIVE(8))",
+      "review(7,general_rules) -> REVIEW(7->DRIVE(8))"
+    ],
+    "DRIVE(7) | passed | mixed": [
+      "advance -> DRIVE(8)",
+      "advance+practice(driver_legality) -> DRIVE(8)",
+      "advance+practice(road_signs) -> DRIVE(8)",
+      "advance+practice(speed_control) -> DRIVE(8)",
+      "advance+practice(parking) -> DRIVE(8)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(8))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(8))"
+    ],
+    "DRIVE(7) | failed | none": [
+      "retry -> DRIVE(7)"
+    ],
+    "DRIVE(7) | failed | open": [
+      "retry -> DRIVE(7)",
+      "retry+practice(driver_legality) -> DRIVE(7)",
+      "retry+practice(document_awareness) -> DRIVE(7)",
+      "retry+practice(traffic_signals) -> DRIVE(7)",
+      "retry+practice(road_signs) -> DRIVE(7)",
+      "retry+practice(right_of_way) -> DRIVE(7)",
+      "retry+practice(pedestrians) -> DRIVE(7)",
+      "retry+practice(speed_control) -> DRIVE(7)",
+      "retry+practice(lane_discipline) -> DRIVE(7)",
+      "retry+practice(hazard_awareness) -> DRIVE(7)",
+      "retry+practice(parking) -> DRIVE(7)",
+      "retry+practice(general_rules) -> DRIVE(7)"
+    ],
+    "DRIVE(7) | failed | gap": [
+      "retry -> DRIVE(7)"
+    ],
+    "DRIVE(7) | failed | mixed": [
+      "retry -> DRIVE(7)",
+      "retry+practice(driver_legality) -> DRIVE(7)",
+      "retry+practice(road_signs) -> DRIVE(7)",
+      "retry+practice(speed_control) -> DRIVE(7)",
+      "retry+practice(parking) -> DRIVE(7)"
+    ],
+    "DRIVE(8) | passed | none": [
+      "advance -> DRIVE(9)"
+    ],
+    "DRIVE(8) | passed | open": [
+      "advance -> DRIVE(9)",
+      "advance+practice(driver_legality) -> DRIVE(9)",
+      "advance+practice(document_awareness) -> DRIVE(9)",
+      "advance+practice(traffic_signals) -> DRIVE(9)",
+      "advance+practice(road_signs) -> DRIVE(9)",
+      "advance+practice(right_of_way) -> DRIVE(9)",
+      "advance+practice(pedestrians) -> DRIVE(9)",
+      "advance+practice(speed_control) -> DRIVE(9)",
+      "advance+practice(lane_discipline) -> DRIVE(9)",
+      "advance+practice(hazard_awareness) -> DRIVE(9)",
+      "advance+practice(parking) -> DRIVE(9)",
+      "advance+practice(general_rules) -> DRIVE(9)"
+    ],
+    "DRIVE(8) | passed | gap": [
+      "advance -> DRIVE(9)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(9))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(9))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(9))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(9))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(9))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(9))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(9))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(9))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(9))",
+      "review(1,parking) -> REVIEW(1->DRIVE(9))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(9))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(9))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(9))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(9))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(9))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(9))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(9))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(9))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(9))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(9))",
+      "review(2,parking) -> REVIEW(2->DRIVE(9))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(9))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(9))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(9))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(9))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(9))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(9))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(9))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(9))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(9))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(9))",
+      "review(3,parking) -> REVIEW(3->DRIVE(9))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(9))",
+      "review(4,driver_legality) -> REVIEW(4->DRIVE(9))",
+      "review(4,document_awareness) -> REVIEW(4->DRIVE(9))",
+      "review(4,traffic_signals) -> REVIEW(4->DRIVE(9))",
+      "review(4,road_signs) -> REVIEW(4->DRIVE(9))",
+      "review(4,right_of_way) -> REVIEW(4->DRIVE(9))",
+      "review(4,pedestrians) -> REVIEW(4->DRIVE(9))",
+      "review(4,speed_control) -> REVIEW(4->DRIVE(9))",
+      "review(4,lane_discipline) -> REVIEW(4->DRIVE(9))",
+      "review(4,hazard_awareness) -> REVIEW(4->DRIVE(9))",
+      "review(4,parking) -> REVIEW(4->DRIVE(9))",
+      "review(4,general_rules) -> REVIEW(4->DRIVE(9))",
+      "review(5,driver_legality) -> REVIEW(5->DRIVE(9))",
+      "review(5,document_awareness) -> REVIEW(5->DRIVE(9))",
+      "review(5,traffic_signals) -> REVIEW(5->DRIVE(9))",
+      "review(5,road_signs) -> REVIEW(5->DRIVE(9))",
+      "review(5,right_of_way) -> REVIEW(5->DRIVE(9))",
+      "review(5,pedestrians) -> REVIEW(5->DRIVE(9))",
+      "review(5,speed_control) -> REVIEW(5->DRIVE(9))",
+      "review(5,lane_discipline) -> REVIEW(5->DRIVE(9))",
+      "review(5,hazard_awareness) -> REVIEW(5->DRIVE(9))",
+      "review(5,parking) -> REVIEW(5->DRIVE(9))",
+      "review(5,general_rules) -> REVIEW(5->DRIVE(9))",
+      "review(6,driver_legality) -> REVIEW(6->DRIVE(9))",
+      "review(6,document_awareness) -> REVIEW(6->DRIVE(9))",
+      "review(6,traffic_signals) -> REVIEW(6->DRIVE(9))",
+      "review(6,road_signs) -> REVIEW(6->DRIVE(9))",
+      "review(6,right_of_way) -> REVIEW(6->DRIVE(9))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(9))",
+      "review(6,speed_control) -> REVIEW(6->DRIVE(9))",
+      "review(6,lane_discipline) -> REVIEW(6->DRIVE(9))",
+      "review(6,hazard_awareness) -> REVIEW(6->DRIVE(9))",
+      "review(6,parking) -> REVIEW(6->DRIVE(9))",
+      "review(6,general_rules) -> REVIEW(6->DRIVE(9))",
+      "review(7,driver_legality) -> REVIEW(7->DRIVE(9))",
+      "review(7,document_awareness) -> REVIEW(7->DRIVE(9))",
+      "review(7,traffic_signals) -> REVIEW(7->DRIVE(9))",
+      "review(7,road_signs) -> REVIEW(7->DRIVE(9))",
+      "review(7,right_of_way) -> REVIEW(7->DRIVE(9))",
+      "review(7,pedestrians) -> REVIEW(7->DRIVE(9))",
+      "review(7,speed_control) -> REVIEW(7->DRIVE(9))",
+      "review(7,lane_discipline) -> REVIEW(7->DRIVE(9))",
+      "review(7,hazard_awareness) -> REVIEW(7->DRIVE(9))",
+      "review(7,parking) -> REVIEW(7->DRIVE(9))",
+      "review(7,general_rules) -> REVIEW(7->DRIVE(9))",
+      "review(8,driver_legality) -> REVIEW(8->DRIVE(9))",
+      "review(8,document_awareness) -> REVIEW(8->DRIVE(9))",
+      "review(8,traffic_signals) -> REVIEW(8->DRIVE(9))",
+      "review(8,road_signs) -> REVIEW(8->DRIVE(9))",
+      "review(8,right_of_way) -> REVIEW(8->DRIVE(9))",
+      "review(8,pedestrians) -> REVIEW(8->DRIVE(9))",
+      "review(8,speed_control) -> REVIEW(8->DRIVE(9))",
+      "review(8,lane_discipline) -> REVIEW(8->DRIVE(9))",
+      "review(8,hazard_awareness) -> REVIEW(8->DRIVE(9))",
+      "review(8,parking) -> REVIEW(8->DRIVE(9))",
+      "review(8,general_rules) -> REVIEW(8->DRIVE(9))"
+    ],
+    "DRIVE(8) | passed | mixed": [
+      "advance -> DRIVE(9)",
+      "advance+practice(driver_legality) -> DRIVE(9)",
+      "advance+practice(road_signs) -> DRIVE(9)",
+      "advance+practice(speed_control) -> DRIVE(9)",
+      "advance+practice(parking) -> DRIVE(9)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(9))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(9))"
+    ],
+    "DRIVE(8) | failed | none": [
+      "retry -> DRIVE(8)"
+    ],
+    "DRIVE(8) | failed | open": [
+      "retry -> DRIVE(8)",
+      "retry+practice(driver_legality) -> DRIVE(8)",
+      "retry+practice(document_awareness) -> DRIVE(8)",
+      "retry+practice(traffic_signals) -> DRIVE(8)",
+      "retry+practice(road_signs) -> DRIVE(8)",
+      "retry+practice(right_of_way) -> DRIVE(8)",
+      "retry+practice(pedestrians) -> DRIVE(8)",
+      "retry+practice(speed_control) -> DRIVE(8)",
+      "retry+practice(lane_discipline) -> DRIVE(8)",
+      "retry+practice(hazard_awareness) -> DRIVE(8)",
+      "retry+practice(parking) -> DRIVE(8)",
+      "retry+practice(general_rules) -> DRIVE(8)"
+    ],
+    "DRIVE(8) | failed | gap": [
+      "retry -> DRIVE(8)"
+    ],
+    "DRIVE(8) | failed | mixed": [
+      "retry -> DRIVE(8)",
+      "retry+practice(driver_legality) -> DRIVE(8)",
+      "retry+practice(road_signs) -> DRIVE(8)",
+      "retry+practice(speed_control) -> DRIVE(8)",
+      "retry+practice(parking) -> DRIVE(8)"
+    ],
+    "DRIVE(9) | passed | none": [
+      "advance -> DRIVE(10)"
+    ],
+    "DRIVE(9) | passed | open": [
+      "advance -> DRIVE(10)",
+      "advance+practice(driver_legality) -> DRIVE(10)",
+      "advance+practice(document_awareness) -> DRIVE(10)",
+      "advance+practice(traffic_signals) -> DRIVE(10)",
+      "advance+practice(road_signs) -> DRIVE(10)",
+      "advance+practice(right_of_way) -> DRIVE(10)",
+      "advance+practice(pedestrians) -> DRIVE(10)",
+      "advance+practice(speed_control) -> DRIVE(10)",
+      "advance+practice(lane_discipline) -> DRIVE(10)",
+      "advance+practice(hazard_awareness) -> DRIVE(10)",
+      "advance+practice(parking) -> DRIVE(10)",
+      "advance+practice(general_rules) -> DRIVE(10)"
+    ],
+    "DRIVE(9) | passed | gap": [
+      "advance -> DRIVE(10)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(10))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(10))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(10))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(10))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(10))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(10))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(10))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(10))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(10))",
+      "review(1,parking) -> REVIEW(1->DRIVE(10))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(10))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(10))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(10))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(10))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(10))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(10))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(10))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(10))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(10))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(10))",
+      "review(2,parking) -> REVIEW(2->DRIVE(10))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(10))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(10))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(10))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(10))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(10))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(10))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(10))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(10))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(10))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(10))",
+      "review(3,parking) -> REVIEW(3->DRIVE(10))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(10))",
+      "review(4,driver_legality) -> REVIEW(4->DRIVE(10))",
+      "review(4,document_awareness) -> REVIEW(4->DRIVE(10))",
+      "review(4,traffic_signals) -> REVIEW(4->DRIVE(10))",
+      "review(4,road_signs) -> REVIEW(4->DRIVE(10))",
+      "review(4,right_of_way) -> REVIEW(4->DRIVE(10))",
+      "review(4,pedestrians) -> REVIEW(4->DRIVE(10))",
+      "review(4,speed_control) -> REVIEW(4->DRIVE(10))",
+      "review(4,lane_discipline) -> REVIEW(4->DRIVE(10))",
+      "review(4,hazard_awareness) -> REVIEW(4->DRIVE(10))",
+      "review(4,parking) -> REVIEW(4->DRIVE(10))",
+      "review(4,general_rules) -> REVIEW(4->DRIVE(10))",
+      "review(5,driver_legality) -> REVIEW(5->DRIVE(10))",
+      "review(5,document_awareness) -> REVIEW(5->DRIVE(10))",
+      "review(5,traffic_signals) -> REVIEW(5->DRIVE(10))",
+      "review(5,road_signs) -> REVIEW(5->DRIVE(10))",
+      "review(5,right_of_way) -> REVIEW(5->DRIVE(10))",
+      "review(5,pedestrians) -> REVIEW(5->DRIVE(10))",
+      "review(5,speed_control) -> REVIEW(5->DRIVE(10))",
+      "review(5,lane_discipline) -> REVIEW(5->DRIVE(10))",
+      "review(5,hazard_awareness) -> REVIEW(5->DRIVE(10))",
+      "review(5,parking) -> REVIEW(5->DRIVE(10))",
+      "review(5,general_rules) -> REVIEW(5->DRIVE(10))",
+      "review(6,driver_legality) -> REVIEW(6->DRIVE(10))",
+      "review(6,document_awareness) -> REVIEW(6->DRIVE(10))",
+      "review(6,traffic_signals) -> REVIEW(6->DRIVE(10))",
+      "review(6,road_signs) -> REVIEW(6->DRIVE(10))",
+      "review(6,right_of_way) -> REVIEW(6->DRIVE(10))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(10))",
+      "review(6,speed_control) -> REVIEW(6->DRIVE(10))",
+      "review(6,lane_discipline) -> REVIEW(6->DRIVE(10))",
+      "review(6,hazard_awareness) -> REVIEW(6->DRIVE(10))",
+      "review(6,parking) -> REVIEW(6->DRIVE(10))",
+      "review(6,general_rules) -> REVIEW(6->DRIVE(10))",
+      "review(7,driver_legality) -> REVIEW(7->DRIVE(10))",
+      "review(7,document_awareness) -> REVIEW(7->DRIVE(10))",
+      "review(7,traffic_signals) -> REVIEW(7->DRIVE(10))",
+      "review(7,road_signs) -> REVIEW(7->DRIVE(10))",
+      "review(7,right_of_way) -> REVIEW(7->DRIVE(10))",
+      "review(7,pedestrians) -> REVIEW(7->DRIVE(10))",
+      "review(7,speed_control) -> REVIEW(7->DRIVE(10))",
+      "review(7,lane_discipline) -> REVIEW(7->DRIVE(10))",
+      "review(7,hazard_awareness) -> REVIEW(7->DRIVE(10))",
+      "review(7,parking) -> REVIEW(7->DRIVE(10))",
+      "review(7,general_rules) -> REVIEW(7->DRIVE(10))",
+      "review(8,driver_legality) -> REVIEW(8->DRIVE(10))",
+      "review(8,document_awareness) -> REVIEW(8->DRIVE(10))",
+      "review(8,traffic_signals) -> REVIEW(8->DRIVE(10))",
+      "review(8,road_signs) -> REVIEW(8->DRIVE(10))",
+      "review(8,right_of_way) -> REVIEW(8->DRIVE(10))",
+      "review(8,pedestrians) -> REVIEW(8->DRIVE(10))",
+      "review(8,speed_control) -> REVIEW(8->DRIVE(10))",
+      "review(8,lane_discipline) -> REVIEW(8->DRIVE(10))",
+      "review(8,hazard_awareness) -> REVIEW(8->DRIVE(10))",
+      "review(8,parking) -> REVIEW(8->DRIVE(10))",
+      "review(8,general_rules) -> REVIEW(8->DRIVE(10))",
+      "review(9,driver_legality) -> REVIEW(9->DRIVE(10))",
+      "review(9,document_awareness) -> REVIEW(9->DRIVE(10))",
+      "review(9,traffic_signals) -> REVIEW(9->DRIVE(10))",
+      "review(9,road_signs) -> REVIEW(9->DRIVE(10))",
+      "review(9,right_of_way) -> REVIEW(9->DRIVE(10))",
+      "review(9,pedestrians) -> REVIEW(9->DRIVE(10))",
+      "review(9,speed_control) -> REVIEW(9->DRIVE(10))",
+      "review(9,lane_discipline) -> REVIEW(9->DRIVE(10))",
+      "review(9,hazard_awareness) -> REVIEW(9->DRIVE(10))",
+      "review(9,parking) -> REVIEW(9->DRIVE(10))",
+      "review(9,general_rules) -> REVIEW(9->DRIVE(10))"
+    ],
+    "DRIVE(9) | passed | mixed": [
+      "advance -> DRIVE(10)",
+      "advance+practice(driver_legality) -> DRIVE(10)",
+      "advance+practice(road_signs) -> DRIVE(10)",
+      "advance+practice(speed_control) -> DRIVE(10)",
+      "advance+practice(parking) -> DRIVE(10)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(10))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(10))",
+      "review(9,hazard_awareness) -> REVIEW(9->DRIVE(10))"
+    ],
+    "DRIVE(9) | failed | none": [
+      "retry -> DRIVE(9)"
+    ],
+    "DRIVE(9) | failed | open": [
+      "retry -> DRIVE(9)",
+      "retry+practice(driver_legality) -> DRIVE(9)",
+      "retry+practice(document_awareness) -> DRIVE(9)",
+      "retry+practice(traffic_signals) -> DRIVE(9)",
+      "retry+practice(road_signs) -> DRIVE(9)",
+      "retry+practice(right_of_way) -> DRIVE(9)",
+      "retry+practice(pedestrians) -> DRIVE(9)",
+      "retry+practice(speed_control) -> DRIVE(9)",
+      "retry+practice(lane_discipline) -> DRIVE(9)",
+      "retry+practice(hazard_awareness) -> DRIVE(9)",
+      "retry+practice(parking) -> DRIVE(9)",
+      "retry+practice(general_rules) -> DRIVE(9)"
+    ],
+    "DRIVE(9) | failed | gap": [
+      "retry -> DRIVE(9)"
+    ],
+    "DRIVE(9) | failed | mixed": [
+      "retry -> DRIVE(9)",
+      "retry+practice(driver_legality) -> DRIVE(9)",
+      "retry+practice(road_signs) -> DRIVE(9)",
+      "retry+practice(speed_control) -> DRIVE(9)",
+      "retry+practice(parking) -> DRIVE(9)"
+    ],
+    "DRIVE(10) | passed | none": [
+      "advance -> DRIVE(11)"
+    ],
+    "DRIVE(10) | passed | open": [
+      "advance -> DRIVE(11)",
+      "advance+practice(driver_legality) -> DRIVE(11)",
+      "advance+practice(document_awareness) -> DRIVE(11)",
+      "advance+practice(traffic_signals) -> DRIVE(11)",
+      "advance+practice(road_signs) -> DRIVE(11)",
+      "advance+practice(right_of_way) -> DRIVE(11)",
+      "advance+practice(pedestrians) -> DRIVE(11)",
+      "advance+practice(speed_control) -> DRIVE(11)",
+      "advance+practice(lane_discipline) -> DRIVE(11)",
+      "advance+practice(hazard_awareness) -> DRIVE(11)",
+      "advance+practice(parking) -> DRIVE(11)",
+      "advance+practice(general_rules) -> DRIVE(11)"
+    ],
+    "DRIVE(10) | passed | gap": [
+      "advance -> DRIVE(11)",
+      "review(1,driver_legality) -> REVIEW(1->DRIVE(11))",
+      "review(1,document_awareness) -> REVIEW(1->DRIVE(11))",
+      "review(1,traffic_signals) -> REVIEW(1->DRIVE(11))",
+      "review(1,road_signs) -> REVIEW(1->DRIVE(11))",
+      "review(1,right_of_way) -> REVIEW(1->DRIVE(11))",
+      "review(1,pedestrians) -> REVIEW(1->DRIVE(11))",
+      "review(1,speed_control) -> REVIEW(1->DRIVE(11))",
+      "review(1,lane_discipline) -> REVIEW(1->DRIVE(11))",
+      "review(1,hazard_awareness) -> REVIEW(1->DRIVE(11))",
+      "review(1,parking) -> REVIEW(1->DRIVE(11))",
+      "review(1,general_rules) -> REVIEW(1->DRIVE(11))",
+      "review(2,driver_legality) -> REVIEW(2->DRIVE(11))",
+      "review(2,document_awareness) -> REVIEW(2->DRIVE(11))",
+      "review(2,traffic_signals) -> REVIEW(2->DRIVE(11))",
+      "review(2,road_signs) -> REVIEW(2->DRIVE(11))",
+      "review(2,right_of_way) -> REVIEW(2->DRIVE(11))",
+      "review(2,pedestrians) -> REVIEW(2->DRIVE(11))",
+      "review(2,speed_control) -> REVIEW(2->DRIVE(11))",
+      "review(2,lane_discipline) -> REVIEW(2->DRIVE(11))",
+      "review(2,hazard_awareness) -> REVIEW(2->DRIVE(11))",
+      "review(2,parking) -> REVIEW(2->DRIVE(11))",
+      "review(2,general_rules) -> REVIEW(2->DRIVE(11))",
+      "review(3,driver_legality) -> REVIEW(3->DRIVE(11))",
+      "review(3,document_awareness) -> REVIEW(3->DRIVE(11))",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(11))",
+      "review(3,road_signs) -> REVIEW(3->DRIVE(11))",
+      "review(3,right_of_way) -> REVIEW(3->DRIVE(11))",
+      "review(3,pedestrians) -> REVIEW(3->DRIVE(11))",
+      "review(3,speed_control) -> REVIEW(3->DRIVE(11))",
+      "review(3,lane_discipline) -> REVIEW(3->DRIVE(11))",
+      "review(3,hazard_awareness) -> REVIEW(3->DRIVE(11))",
+      "review(3,parking) -> REVIEW(3->DRIVE(11))",
+      "review(3,general_rules) -> REVIEW(3->DRIVE(11))",
+      "review(4,driver_legality) -> REVIEW(4->DRIVE(11))",
+      "review(4,document_awareness) -> REVIEW(4->DRIVE(11))",
+      "review(4,traffic_signals) -> REVIEW(4->DRIVE(11))",
+      "review(4,road_signs) -> REVIEW(4->DRIVE(11))",
+      "review(4,right_of_way) -> REVIEW(4->DRIVE(11))",
+      "review(4,pedestrians) -> REVIEW(4->DRIVE(11))",
+      "review(4,speed_control) -> REVIEW(4->DRIVE(11))",
+      "review(4,lane_discipline) -> REVIEW(4->DRIVE(11))",
+      "review(4,hazard_awareness) -> REVIEW(4->DRIVE(11))",
+      "review(4,parking) -> REVIEW(4->DRIVE(11))",
+      "review(4,general_rules) -> REVIEW(4->DRIVE(11))",
+      "review(5,driver_legality) -> REVIEW(5->DRIVE(11))",
+      "review(5,document_awareness) -> REVIEW(5->DRIVE(11))",
+      "review(5,traffic_signals) -> REVIEW(5->DRIVE(11))",
+      "review(5,road_signs) -> REVIEW(5->DRIVE(11))",
+      "review(5,right_of_way) -> REVIEW(5->DRIVE(11))",
+      "review(5,pedestrians) -> REVIEW(5->DRIVE(11))",
+      "review(5,speed_control) -> REVIEW(5->DRIVE(11))",
+      "review(5,lane_discipline) -> REVIEW(5->DRIVE(11))",
+      "review(5,hazard_awareness) -> REVIEW(5->DRIVE(11))",
+      "review(5,parking) -> REVIEW(5->DRIVE(11))",
+      "review(5,general_rules) -> REVIEW(5->DRIVE(11))",
+      "review(6,driver_legality) -> REVIEW(6->DRIVE(11))",
+      "review(6,document_awareness) -> REVIEW(6->DRIVE(11))",
+      "review(6,traffic_signals) -> REVIEW(6->DRIVE(11))",
+      "review(6,road_signs) -> REVIEW(6->DRIVE(11))",
+      "review(6,right_of_way) -> REVIEW(6->DRIVE(11))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(11))",
+      "review(6,speed_control) -> REVIEW(6->DRIVE(11))",
+      "review(6,lane_discipline) -> REVIEW(6->DRIVE(11))",
+      "review(6,hazard_awareness) -> REVIEW(6->DRIVE(11))",
+      "review(6,parking) -> REVIEW(6->DRIVE(11))",
+      "review(6,general_rules) -> REVIEW(6->DRIVE(11))",
+      "review(7,driver_legality) -> REVIEW(7->DRIVE(11))",
+      "review(7,document_awareness) -> REVIEW(7->DRIVE(11))",
+      "review(7,traffic_signals) -> REVIEW(7->DRIVE(11))",
+      "review(7,road_signs) -> REVIEW(7->DRIVE(11))",
+      "review(7,right_of_way) -> REVIEW(7->DRIVE(11))",
+      "review(7,pedestrians) -> REVIEW(7->DRIVE(11))",
+      "review(7,speed_control) -> REVIEW(7->DRIVE(11))",
+      "review(7,lane_discipline) -> REVIEW(7->DRIVE(11))",
+      "review(7,hazard_awareness) -> REVIEW(7->DRIVE(11))",
+      "review(7,parking) -> REVIEW(7->DRIVE(11))",
+      "review(7,general_rules) -> REVIEW(7->DRIVE(11))",
+      "review(8,driver_legality) -> REVIEW(8->DRIVE(11))",
+      "review(8,document_awareness) -> REVIEW(8->DRIVE(11))",
+      "review(8,traffic_signals) -> REVIEW(8->DRIVE(11))",
+      "review(8,road_signs) -> REVIEW(8->DRIVE(11))",
+      "review(8,right_of_way) -> REVIEW(8->DRIVE(11))",
+      "review(8,pedestrians) -> REVIEW(8->DRIVE(11))",
+      "review(8,speed_control) -> REVIEW(8->DRIVE(11))",
+      "review(8,lane_discipline) -> REVIEW(8->DRIVE(11))",
+      "review(8,hazard_awareness) -> REVIEW(8->DRIVE(11))",
+      "review(8,parking) -> REVIEW(8->DRIVE(11))",
+      "review(8,general_rules) -> REVIEW(8->DRIVE(11))",
+      "review(9,driver_legality) -> REVIEW(9->DRIVE(11))",
+      "review(9,document_awareness) -> REVIEW(9->DRIVE(11))",
+      "review(9,traffic_signals) -> REVIEW(9->DRIVE(11))",
+      "review(9,road_signs) -> REVIEW(9->DRIVE(11))",
+      "review(9,right_of_way) -> REVIEW(9->DRIVE(11))",
+      "review(9,pedestrians) -> REVIEW(9->DRIVE(11))",
+      "review(9,speed_control) -> REVIEW(9->DRIVE(11))",
+      "review(9,lane_discipline) -> REVIEW(9->DRIVE(11))",
+      "review(9,hazard_awareness) -> REVIEW(9->DRIVE(11))",
+      "review(9,parking) -> REVIEW(9->DRIVE(11))",
+      "review(9,general_rules) -> REVIEW(9->DRIVE(11))",
+      "review(10,driver_legality) -> REVIEW(10->DRIVE(11))",
+      "review(10,document_awareness) -> REVIEW(10->DRIVE(11))",
+      "review(10,traffic_signals) -> REVIEW(10->DRIVE(11))",
+      "review(10,road_signs) -> REVIEW(10->DRIVE(11))",
+      "review(10,right_of_way) -> REVIEW(10->DRIVE(11))",
+      "review(10,pedestrians) -> REVIEW(10->DRIVE(11))",
+      "review(10,speed_control) -> REVIEW(10->DRIVE(11))",
+      "review(10,lane_discipline) -> REVIEW(10->DRIVE(11))",
+      "review(10,hazard_awareness) -> REVIEW(10->DRIVE(11))",
+      "review(10,parking) -> REVIEW(10->DRIVE(11))",
+      "review(10,general_rules) -> REVIEW(10->DRIVE(11))"
+    ],
+    "DRIVE(10) | passed | mixed": [
+      "advance -> DRIVE(11)",
+      "advance+practice(driver_legality) -> DRIVE(11)",
+      "advance+practice(road_signs) -> DRIVE(11)",
+      "advance+practice(speed_control) -> DRIVE(11)",
+      "advance+practice(parking) -> DRIVE(11)",
+      "review(3,traffic_signals) -> REVIEW(3->DRIVE(11))",
+      "review(6,pedestrians) -> REVIEW(6->DRIVE(11))",
+      "review(9,hazard_awareness) -> REVIEW(9->DRIVE(11))"
+    ],
+    "DRIVE(10) | failed | none": [
+      "retry -> DRIVE(10)"
+    ],
+    "DRIVE(10) | failed | open": [
+      "retry -> DRIVE(10)",
+      "retry+practice(driver_legality) -> DRIVE(10)",
+      "retry+practice(document_awareness) -> DRIVE(10)",
+      "retry+practice(traffic_signals) -> DRIVE(10)",
+      "retry+practice(road_signs) -> DRIVE(10)",
+      "retry+practice(right_of_way) -> DRIVE(10)",
+      "retry+practice(pedestrians) -> DRIVE(10)",
+      "retry+practice(speed_control) -> DRIVE(10)",
+      "retry+practice(lane_discipline) -> DRIVE(10)",
+      "retry+practice(hazard_awareness) -> DRIVE(10)",
+      "retry+practice(parking) -> DRIVE(10)",
+      "retry+practice(general_rules) -> DRIVE(10)"
+    ],
+    "DRIVE(10) | failed | gap": [
+      "retry -> DRIVE(10)"
+    ],
+    "DRIVE(10) | failed | mixed": [
+      "retry -> DRIVE(10)",
+      "retry+practice(driver_legality) -> DRIVE(10)",
+      "retry+practice(road_signs) -> DRIVE(10)",
+      "retry+practice(speed_control) -> DRIVE(10)",
+      "retry+practice(parking) -> DRIVE(10)"
+    ],
+    "DRIVE(11) | passed | none": [
+      "to_final -> FINAL"
+    ],
+    "DRIVE(11) | passed | open": [
+      "to_final -> FINAL"
+    ],
+    "DRIVE(11) | passed | gap": [
+      "to_final -> FINAL",
+      "review(1,driver_legality) -> REVIEW(1->FINAL)",
+      "review(1,document_awareness) -> REVIEW(1->FINAL)",
+      "review(1,traffic_signals) -> REVIEW(1->FINAL)",
+      "review(1,road_signs) -> REVIEW(1->FINAL)",
+      "review(1,right_of_way) -> REVIEW(1->FINAL)",
+      "review(1,pedestrians) -> REVIEW(1->FINAL)",
+      "review(1,speed_control) -> REVIEW(1->FINAL)",
+      "review(1,lane_discipline) -> REVIEW(1->FINAL)",
+      "review(1,hazard_awareness) -> REVIEW(1->FINAL)",
+      "review(1,parking) -> REVIEW(1->FINAL)",
+      "review(1,general_rules) -> REVIEW(1->FINAL)",
+      "review(2,driver_legality) -> REVIEW(2->FINAL)",
+      "review(2,document_awareness) -> REVIEW(2->FINAL)",
+      "review(2,traffic_signals) -> REVIEW(2->FINAL)",
+      "review(2,road_signs) -> REVIEW(2->FINAL)",
+      "review(2,right_of_way) -> REVIEW(2->FINAL)",
+      "review(2,pedestrians) -> REVIEW(2->FINAL)",
+      "review(2,speed_control) -> REVIEW(2->FINAL)",
+      "review(2,lane_discipline) -> REVIEW(2->FINAL)",
+      "review(2,hazard_awareness) -> REVIEW(2->FINAL)",
+      "review(2,parking) -> REVIEW(2->FINAL)",
+      "review(2,general_rules) -> REVIEW(2->FINAL)",
+      "review(3,driver_legality) -> REVIEW(3->FINAL)",
+      "review(3,document_awareness) -> REVIEW(3->FINAL)",
+      "review(3,traffic_signals) -> REVIEW(3->FINAL)",
+      "review(3,road_signs) -> REVIEW(3->FINAL)",
+      "review(3,right_of_way) -> REVIEW(3->FINAL)",
+      "review(3,pedestrians) -> REVIEW(3->FINAL)",
+      "review(3,speed_control) -> REVIEW(3->FINAL)",
+      "review(3,lane_discipline) -> REVIEW(3->FINAL)",
+      "review(3,hazard_awareness) -> REVIEW(3->FINAL)",
+      "review(3,parking) -> REVIEW(3->FINAL)",
+      "review(3,general_rules) -> REVIEW(3->FINAL)",
+      "review(4,driver_legality) -> REVIEW(4->FINAL)",
+      "review(4,document_awareness) -> REVIEW(4->FINAL)",
+      "review(4,traffic_signals) -> REVIEW(4->FINAL)",
+      "review(4,road_signs) -> REVIEW(4->FINAL)",
+      "review(4,right_of_way) -> REVIEW(4->FINAL)",
+      "review(4,pedestrians) -> REVIEW(4->FINAL)",
+      "review(4,speed_control) -> REVIEW(4->FINAL)",
+      "review(4,lane_discipline) -> REVIEW(4->FINAL)",
+      "review(4,hazard_awareness) -> REVIEW(4->FINAL)",
+      "review(4,parking) -> REVIEW(4->FINAL)",
+      "review(4,general_rules) -> REVIEW(4->FINAL)",
+      "review(5,driver_legality) -> REVIEW(5->FINAL)",
+      "review(5,document_awareness) -> REVIEW(5->FINAL)",
+      "review(5,traffic_signals) -> REVIEW(5->FINAL)",
+      "review(5,road_signs) -> REVIEW(5->FINAL)",
+      "review(5,right_of_way) -> REVIEW(5->FINAL)",
+      "review(5,pedestrians) -> REVIEW(5->FINAL)",
+      "review(5,speed_control) -> REVIEW(5->FINAL)",
+      "review(5,lane_discipline) -> REVIEW(5->FINAL)",
+      "review(5,hazard_awareness) -> REVIEW(5->FINAL)",
+      "review(5,parking) -> REVIEW(5->FINAL)",
+      "review(5,general_rules) -> REVIEW(5->FINAL)",
+      "review(6,driver_legality) -> REVIEW(6->FINAL)",
+      "review(6,document_awareness) -> REVIEW(6->FINAL)",
+      "review(6,traffic_signals) -> REVIEW(6->FINAL)",
+      "review(6,road_signs) -> REVIEW(6->FINAL)",
+      "review(6,right_of_way) -> REVIEW(6->FINAL)",
+      "review(6,pedestrians) -> REVIEW(6->FINAL)",
+      "review(6,speed_control) -> REVIEW(6->FINAL)",
+      "review(6,lane_discipline) -> REVIEW(6->FINAL)",
+      "review(6,hazard_awareness) -> REVIEW(6->FINAL)",
+      "review(6,parking) -> REVIEW(6->FINAL)",
+      "review(6,general_rules) -> REVIEW(6->FINAL)",
+      "review(7,driver_legality) -> REVIEW(7->FINAL)",
+      "review(7,document_awareness) -> REVIEW(7->FINAL)",
+      "review(7,traffic_signals) -> REVIEW(7->FINAL)",
+      "review(7,road_signs) -> REVIEW(7->FINAL)",
+      "review(7,right_of_way) -> REVIEW(7->FINAL)",
+      "review(7,pedestrians) -> REVIEW(7->FINAL)",
+      "review(7,speed_control) -> REVIEW(7->FINAL)",
+      "review(7,lane_discipline) -> REVIEW(7->FINAL)",
+      "review(7,hazard_awareness) -> REVIEW(7->FINAL)",
+      "review(7,parking) -> REVIEW(7->FINAL)",
+      "review(7,general_rules) -> REVIEW(7->FINAL)",
+      "review(8,driver_legality) -> REVIEW(8->FINAL)",
+      "review(8,document_awareness) -> REVIEW(8->FINAL)",
+      "review(8,traffic_signals) -> REVIEW(8->FINAL)",
+      "review(8,road_signs) -> REVIEW(8->FINAL)",
+      "review(8,right_of_way) -> REVIEW(8->FINAL)",
+      "review(8,pedestrians) -> REVIEW(8->FINAL)",
+      "review(8,speed_control) -> REVIEW(8->FINAL)",
+      "review(8,lane_discipline) -> REVIEW(8->FINAL)",
+      "review(8,hazard_awareness) -> REVIEW(8->FINAL)",
+      "review(8,parking) -> REVIEW(8->FINAL)",
+      "review(8,general_rules) -> REVIEW(8->FINAL)",
+      "review(9,driver_legality) -> REVIEW(9->FINAL)",
+      "review(9,document_awareness) -> REVIEW(9->FINAL)",
+      "review(9,traffic_signals) -> REVIEW(9->FINAL)",
+      "review(9,road_signs) -> REVIEW(9->FINAL)",
+      "review(9,right_of_way) -> REVIEW(9->FINAL)",
+      "review(9,pedestrians) -> REVIEW(9->FINAL)",
+      "review(9,speed_control) -> REVIEW(9->FINAL)",
+      "review(9,lane_discipline) -> REVIEW(9->FINAL)",
+      "review(9,hazard_awareness) -> REVIEW(9->FINAL)",
+      "review(9,parking) -> REVIEW(9->FINAL)",
+      "review(9,general_rules) -> REVIEW(9->FINAL)",
+      "review(10,driver_legality) -> REVIEW(10->FINAL)",
+      "review(10,document_awareness) -> REVIEW(10->FINAL)",
+      "review(10,traffic_signals) -> REVIEW(10->FINAL)",
+      "review(10,road_signs) -> REVIEW(10->FINAL)",
+      "review(10,right_of_way) -> REVIEW(10->FINAL)",
+      "review(10,pedestrians) -> REVIEW(10->FINAL)",
+      "review(10,speed_control) -> REVIEW(10->FINAL)",
+      "review(10,lane_discipline) -> REVIEW(10->FINAL)",
+      "review(10,hazard_awareness) -> REVIEW(10->FINAL)",
+      "review(10,parking) -> REVIEW(10->FINAL)",
+      "review(10,general_rules) -> REVIEW(10->FINAL)",
+      "review(11,driver_legality) -> REVIEW(11->FINAL)",
+      "review(11,document_awareness) -> REVIEW(11->FINAL)",
+      "review(11,traffic_signals) -> REVIEW(11->FINAL)",
+      "review(11,road_signs) -> REVIEW(11->FINAL)",
+      "review(11,right_of_way) -> REVIEW(11->FINAL)",
+      "review(11,pedestrians) -> REVIEW(11->FINAL)",
+      "review(11,speed_control) -> REVIEW(11->FINAL)",
+      "review(11,lane_discipline) -> REVIEW(11->FINAL)",
+      "review(11,hazard_awareness) -> REVIEW(11->FINAL)",
+      "review(11,parking) -> REVIEW(11->FINAL)",
+      "review(11,general_rules) -> REVIEW(11->FINAL)"
+    ],
+    "DRIVE(11) | passed | mixed": [
+      "to_final -> FINAL",
+      "review(3,traffic_signals) -> REVIEW(3->FINAL)",
+      "review(6,pedestrians) -> REVIEW(6->FINAL)",
+      "review(9,hazard_awareness) -> REVIEW(9->FINAL)"
+    ],
+    "DRIVE(11) | failed | none": [
+      "retry -> DRIVE(11)"
+    ],
+    "DRIVE(11) | failed | open": [
+      "retry -> DRIVE(11)",
+      "retry+practice(driver_legality) -> DRIVE(11)",
+      "retry+practice(document_awareness) -> DRIVE(11)",
+      "retry+practice(traffic_signals) -> DRIVE(11)",
+      "retry+practice(road_signs) -> DRIVE(11)",
+      "retry+practice(right_of_way) -> DRIVE(11)",
+      "retry+practice(pedestrians) -> DRIVE(11)",
+      "retry+practice(speed_control) -> DRIVE(11)",
+      "retry+practice(lane_discipline) -> DRIVE(11)",
+      "retry+practice(hazard_awareness) -> DRIVE(11)",
+      "retry+practice(parking) -> DRIVE(11)",
+      "retry+practice(general_rules) -> DRIVE(11)"
+    ],
+    "DRIVE(11) | failed | gap": [
+      "retry -> DRIVE(11)"
+    ],
+    "DRIVE(11) | failed | mixed": [
+      "retry -> DRIVE(11)",
+      "retry+practice(driver_legality) -> DRIVE(11)",
+      "retry+practice(road_signs) -> DRIVE(11)",
+      "retry+practice(speed_control) -> DRIVE(11)",
+      "retry+practice(parking) -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(2)) | passed | none": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(2)) | passed | open": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(2)) | passed | gap": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(2)) | passed | mixed": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(2)) | failed | none": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(2)) | failed | open": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(2)) | failed | gap": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(2)) | failed | mixed": [
+      "return -> DRIVE(2)"
+    ],
+    "REVIEW(1->DRIVE(3)) | passed | none": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(3)) | passed | open": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(3)) | passed | gap": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(3)) | passed | mixed": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(3)) | failed | none": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(3)) | failed | open": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(3)) | failed | gap": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(3)) | failed | mixed": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | passed | none": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | passed | open": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | passed | gap": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | passed | mixed": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | failed | none": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | failed | open": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | failed | gap": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(2->DRIVE(3)) | failed | mixed": [
+      "return -> DRIVE(3)"
+    ],
+    "REVIEW(1->DRIVE(4)) | passed | none": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(4)) | passed | open": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(4)) | passed | gap": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(4)) | passed | mixed": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(4)) | failed | none": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(4)) | failed | open": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(4)) | failed | gap": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(4)) | failed | mixed": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | passed | none": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | passed | open": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | passed | gap": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | passed | mixed": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | failed | none": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | failed | open": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | failed | gap": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(2->DRIVE(4)) | failed | mixed": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | passed | none": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | passed | open": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | passed | gap": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | passed | mixed": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | failed | none": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | failed | open": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | failed | gap": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(3->DRIVE(4)) | failed | mixed": [
+      "return -> DRIVE(4)"
+    ],
+    "REVIEW(1->DRIVE(5)) | passed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(5)) | passed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(5)) | passed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(5)) | passed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(5)) | failed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(5)) | failed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(5)) | failed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(5)) | failed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | passed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | passed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | passed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | passed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | failed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | failed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | failed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(2->DRIVE(5)) | failed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | passed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | passed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | passed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | passed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | failed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | failed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | failed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(3->DRIVE(5)) | failed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | passed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | passed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | passed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | passed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | failed | none": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | failed | open": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | failed | gap": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(4->DRIVE(5)) | failed | mixed": [
+      "return -> DRIVE(5)"
+    ],
+    "REVIEW(1->DRIVE(6)) | passed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(6)) | passed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(6)) | passed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(6)) | passed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(6)) | failed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(6)) | failed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(6)) | failed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(6)) | failed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | passed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | passed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | passed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | passed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | failed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | failed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | failed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(2->DRIVE(6)) | failed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | passed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | passed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | passed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | passed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | failed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | failed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | failed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(3->DRIVE(6)) | failed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | passed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | passed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | passed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | passed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | failed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | failed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | failed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(4->DRIVE(6)) | failed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | passed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | passed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | passed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | passed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | failed | none": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | failed | open": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | failed | gap": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(5->DRIVE(6)) | failed | mixed": [
+      "return -> DRIVE(6)"
+    ],
+    "REVIEW(1->DRIVE(7)) | passed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(7)) | passed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(7)) | passed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(7)) | passed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(7)) | failed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(7)) | failed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(7)) | failed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(7)) | failed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | passed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | passed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | passed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | passed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | failed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | failed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | failed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(2->DRIVE(7)) | failed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | passed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | passed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | passed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | passed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | failed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | failed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | failed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(3->DRIVE(7)) | failed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | passed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | passed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | passed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | passed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | failed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | failed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | failed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(4->DRIVE(7)) | failed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | passed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | passed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | passed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | passed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | failed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | failed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | failed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(5->DRIVE(7)) | failed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | passed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | passed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | passed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | passed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | failed | none": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | failed | open": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | failed | gap": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(6->DRIVE(7)) | failed | mixed": [
+      "return -> DRIVE(7)"
+    ],
+    "REVIEW(1->DRIVE(8)) | passed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(8)) | passed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(8)) | passed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(8)) | passed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(8)) | failed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(8)) | failed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(8)) | failed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(8)) | failed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | passed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | passed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | passed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | passed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | failed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | failed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | failed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(2->DRIVE(8)) | failed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | passed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | passed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | passed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | passed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | failed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | failed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | failed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(3->DRIVE(8)) | failed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | passed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | passed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | passed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | passed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | failed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | failed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | failed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(4->DRIVE(8)) | failed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | passed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | passed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | passed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | passed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | failed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | failed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | failed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(5->DRIVE(8)) | failed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | passed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | passed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | passed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | passed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | failed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | failed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | failed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(6->DRIVE(8)) | failed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | passed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | passed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | passed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | passed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | failed | none": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | failed | open": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | failed | gap": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(7->DRIVE(8)) | failed | mixed": [
+      "return -> DRIVE(8)"
+    ],
+    "REVIEW(1->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(2->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(3->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(4->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(5->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(6->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(7->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | passed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | passed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | passed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | passed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | failed | none": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | failed | open": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | failed | gap": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(8->DRIVE(9)) | failed | mixed": [
+      "return -> DRIVE(9)"
+    ],
+    "REVIEW(1->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(2->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(3->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(4->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(5->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(6->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(7->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(8->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | passed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | passed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | passed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | passed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | failed | none": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | failed | open": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | failed | gap": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(9->DRIVE(10)) | failed | mixed": [
+      "return -> DRIVE(10)"
+    ],
+    "REVIEW(1->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(2->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(3->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(4->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(5->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(6->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(7->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(8->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(9->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | passed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | passed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | passed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | passed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | failed | none": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | failed | open": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | failed | gap": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(10->DRIVE(11)) | failed | mixed": [
+      "return -> DRIVE(11)"
+    ],
+    "REVIEW(1->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(1->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(1->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(1->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(1->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(1->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(1->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(1->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(2->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(3->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(4->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(5->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(6->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(7->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(8->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(9->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(10->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | passed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | passed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | passed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | passed | mixed": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | failed | none": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | failed | open": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | failed | gap": [
+      "return -> FINAL"
+    ],
+    "REVIEW(11->FINAL) | failed | mixed": [
+      "return -> FINAL"
+    ],
+    "FINAL | passed | none": [
+      "certify -> CERTIFIED"
+    ],
+    "FINAL | passed | open": [
+      "certify -> CERTIFIED"
+    ],
+    "FINAL | passed | gap": [
+      "certify -> CERTIFIED"
+    ],
+    "FINAL | passed | mixed": [
+      "certify -> CERTIFIED"
+    ],
+    "FINAL | failed | none": [
+      "retry -> FINAL"
+    ],
+    "FINAL | failed | open": [
+      "retry -> FINAL"
+    ],
+    "FINAL | failed | gap": [
+      "retry -> FINAL"
+    ],
+    "FINAL | failed | mixed": [
+      "retry -> FINAL"
+    ],
+    "CERTIFIED | passed | none": [],
+    "CERTIFIED | passed | open": [],
+    "CERTIFIED | passed | gap": [],
+    "CERTIFIED | passed | mixed": [],
+    "CERTIFIED | failed | none": [],
+    "CERTIFIED | failed | open": [],
+    "CERTIFIED | failed | gap": [],
+    "CERTIFIED | failed | mixed": []
+  },
+  "scenarios": [
+    {
+      "name": "the conventional route: every level passed first time, nothing added",
+      "start": "DRIVE(0)",
+      "steps": [
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(1)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(2)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(3)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(4)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(5)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(6)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(7)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(8)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(9)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(10)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(11)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "to_final",
+          "accepted": true,
+          "state": "FINAL"
+        },
+        {
+          "outcome": "passed",
+          "probe": "none",
+          "request": "certify",
+          "accepted": true,
+          "state": "CERTIFIED"
+        }
+      ],
+      "log": [
+        {
+          "seq": 0,
+          "from": "DRIVE(0)",
+          "to": "DRIVE(1)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 1,
+          "from": "DRIVE(1)",
+          "to": "DRIVE(2)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 2,
+          "from": "DRIVE(2)",
+          "to": "DRIVE(3)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 3,
+          "from": "DRIVE(3)",
+          "to": "DRIVE(4)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 4,
+          "from": "DRIVE(4)",
+          "to": "DRIVE(5)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 5,
+          "from": "DRIVE(5)",
+          "to": "DRIVE(6)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 6,
+          "from": "DRIVE(6)",
+          "to": "DRIVE(7)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 7,
+          "from": "DRIVE(7)",
+          "to": "DRIVE(8)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 8,
+          "from": "DRIVE(8)",
+          "to": "DRIVE(9)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 9,
+          "from": "DRIVE(9)",
+          "to": "DRIVE(10)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 10,
+          "from": "DRIVE(10)",
+          "to": "DRIVE(11)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance"
+          ]
+        },
+        {
+          "seq": 11,
+          "from": "DRIVE(11)",
+          "to": "FINAL",
+          "transition": "to_final",
+          "outcome": "passed",
+          "legal": [
+            "to_final"
+          ]
+        },
+        {
+          "seq": 12,
+          "from": "FINAL",
+          "to": "CERTIFIED",
+          "transition": "certify",
+          "outcome": "passed",
+          "legal": [
+            "certify"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a failed level retried with practice, then passed and advanced with practice",
+      "start": "DRIVE(4)",
+      "steps": [
+        {
+          "outcome": "failed",
+          "probe": "mixed",
+          "request": "retry+practice(road_signs)",
+          "accepted": true,
+          "state": "DRIVE(4)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "advance+practice(driver_legality)",
+          "accepted": true,
+          "state": "DRIVE(5)"
+        }
+      ],
+      "log": [
+        {
+          "seq": 0,
+          "from": "DRIVE(4)",
+          "to": "DRIVE(4)",
+          "transition": "retry+practice(road_signs)",
+          "outcome": "failed",
+          "legal": [
+            "retry",
+            "retry+practice(driver_legality)",
+            "retry+practice(road_signs)",
+            "retry+practice(speed_control)",
+            "retry+practice(parking)"
+          ]
+        },
+        {
+          "seq": 1,
+          "from": "DRIVE(4)",
+          "to": "DRIVE(5)",
+          "transition": "advance+practice(driver_legality)",
+          "outcome": "passed",
+          "legal": [
+            "advance",
+            "advance+practice(driver_legality)",
+            "advance+practice(road_signs)",
+            "advance+practice(speed_control)",
+            "advance+practice(parking)",
+            "review(3,traffic_signals)"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a review after a pass, and the return to the frontier whatever the review scored",
+      "start": "DRIVE(6)",
+      "steps": [
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "review(3,traffic_signals)",
+          "accepted": true,
+          "state": "REVIEW(3->DRIVE(7))"
+        },
+        {
+          "outcome": "failed",
+          "probe": "mixed",
+          "request": "return",
+          "accepted": true,
+          "state": "DRIVE(7)"
+        }
+      ],
+      "log": [
+        {
+          "seq": 0,
+          "from": "DRIVE(6)",
+          "to": "REVIEW(3->DRIVE(7))",
+          "transition": "review(3,traffic_signals)",
+          "outcome": "passed",
+          "legal": [
+            "advance",
+            "advance+practice(driver_legality)",
+            "advance+practice(road_signs)",
+            "advance+practice(speed_control)",
+            "advance+practice(parking)",
+            "review(3,traffic_signals)",
+            "review(6,pedestrians)"
+          ]
+        },
+        {
+          "seq": 1,
+          "from": "REVIEW(3->DRIVE(7))",
+          "to": "DRIVE(7)",
+          "transition": "return",
+          "outcome": "failed",
+          "legal": [
+            "return"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a review before the final exam",
+      "start": "DRIVE(11)",
+      "steps": [
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "review(9,hazard_awareness)",
+          "accepted": true,
+          "state": "REVIEW(9->FINAL)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "return",
+          "accepted": true,
+          "state": "FINAL"
+        }
+      ],
+      "log": [
+        {
+          "seq": 0,
+          "from": "DRIVE(11)",
+          "to": "REVIEW(9->FINAL)",
+          "transition": "review(9,hazard_awareness)",
+          "outcome": "passed",
+          "legal": [
+            "to_final",
+            "review(3,traffic_signals)",
+            "review(6,pedestrians)",
+            "review(9,hazard_awareness)"
+          ]
+        },
+        {
+          "seq": 1,
+          "from": "REVIEW(9->FINAL)",
+          "to": "FINAL",
+          "transition": "return",
+          "outcome": "passed",
+          "legal": [
+            "return"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "the final exam failed, retried, then passed",
+      "start": "FINAL",
+      "steps": [
+        {
+          "outcome": "failed",
+          "probe": "mixed",
+          "request": "retry",
+          "accepted": true,
+          "state": "FINAL"
+        },
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "certify",
+          "accepted": true,
+          "state": "CERTIFIED"
+        }
+      ],
+      "log": [
+        {
+          "seq": 0,
+          "from": "FINAL",
+          "to": "FINAL",
+          "transition": "retry",
+          "outcome": "failed",
+          "legal": [
+            "retry"
+          ]
+        },
+        {
+          "seq": 1,
+          "from": "FINAL",
+          "to": "CERTIFIED",
+          "transition": "certify",
+          "outcome": "passed",
+          "legal": [
+            "certify"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "illegal requests are refused and leave the state and the log untouched",
+      "start": "DRIVE(0)",
+      "steps": [
+        {
+          "outcome": "failed",
+          "probe": "open",
+          "request": "retry+practice(pedestrians)",
+          "accepted": false,
+          "state": "DRIVE(0)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "gap",
+          "request": "review(1,parking)",
+          "accepted": false,
+          "state": "DRIVE(0)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "open",
+          "request": "advance",
+          "accepted": true,
+          "state": "DRIVE(1)"
+        },
+        {
+          "outcome": "failed",
+          "probe": "mixed",
+          "request": "advance",
+          "accepted": false,
+          "state": "DRIVE(1)"
+        },
+        {
+          "outcome": "failed",
+          "probe": "gap",
+          "request": "review(1,parking)",
+          "accepted": false,
+          "state": "DRIVE(1)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "advance+practice(document_awareness)",
+          "accepted": false,
+          "state": "DRIVE(1)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "review(1,driver_legality)",
+          "accepted": false,
+          "state": "DRIVE(1)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "review(2,traffic_signals)",
+          "accepted": false,
+          "state": "DRIVE(1)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "mixed",
+          "request": "advance+practice(driver_legality)",
+          "accepted": true,
+          "state": "DRIVE(2)"
+        }
+      ],
+      "log": [
+        {
+          "seq": 0,
+          "from": "DRIVE(0)",
+          "to": "DRIVE(1)",
+          "transition": "advance",
+          "outcome": "passed",
+          "legal": [
+            "advance",
+            "advance+practice(driver_legality)",
+            "advance+practice(document_awareness)",
+            "advance+practice(traffic_signals)",
+            "advance+practice(road_signs)",
+            "advance+practice(right_of_way)",
+            "advance+practice(pedestrians)",
+            "advance+practice(speed_control)",
+            "advance+practice(lane_discipline)",
+            "advance+practice(hazard_awareness)",
+            "advance+practice(parking)",
+            "advance+practice(general_rules)"
+          ]
+        },
+        {
+          "seq": 1,
+          "from": "DRIVE(1)",
+          "to": "DRIVE(2)",
+          "transition": "advance+practice(driver_legality)",
+          "outcome": "passed",
+          "legal": [
+            "advance",
+            "advance+practice(driver_legality)",
+            "advance+practice(road_signs)",
+            "advance+practice(speed_control)",
+            "advance+practice(parking)"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nothing is added to the final exam, and nothing leaves CERTIFIED",
+      "start": "DRIVE(11)",
+      "steps": [
+        {
+          "outcome": "passed",
+          "probe": "open",
+          "request": "advance",
+          "accepted": false,
+          "state": "DRIVE(11)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "open",
+          "request": "advance+practice(pedestrians)",
+          "accepted": false,
+          "state": "DRIVE(11)"
+        },
+        {
+          "outcome": "passed",
+          "probe": "open",
+          "request": "to_final",
+          "accepted": true,
+          "state": "FINAL"
+        },
+        {
+          "outcome": "failed",
+          "probe": "open",
+          "request": "retry+practice(pedestrians)",
+          "accepted": false,
+          "state": "FINAL"
+        },
+        {
+          "outcome": "failed",
+          "probe": "open",
+          "request": "retry",
+          "accepted": true,
+          "state": "FINAL"
+        },
+        {
+          "outcome": "passed",
+          "probe": "open",
+          "request": "certify",
+          "accepted": true,
+          "state": "CERTIFIED"
+        },
+        {
+          "outcome": "failed",
+          "probe": "open",
+          "request": "retry",
+          "accepted": false,
+          "state": "CERTIFIED"
+        },
+        {
+          "outcome": "passed",
+          "probe": "open",
+          "request": "certify",
+          "accepted": false,
+          "state": "CERTIFIED"
+        }
+      ],
+      "log": [
+        {
+          "seq": 0,
+          "from": "DRIVE(11)",
+          "to": "FINAL",
+          "transition": "to_final",
+          "outcome": "passed",
+          "legal": [
+            "to_final"
+          ]
+        },
+        {
+          "seq": 1,
+          "from": "FINAL",
+          "to": "FINAL",
+          "transition": "retry",
+          "outcome": "failed",
+          "legal": [
+            "retry"
+          ]
+        },
+        {
+          "seq": 2,
+          "from": "FINAL",
+          "to": "CERTIFIED",
+          "transition": "certify",
+          "outcome": "passed",
+          "legal": [
+            "certify"
+          ]
+        }
+      ]
+    }
+  ],
+  "structure": {
+    "stateCount": 80,
+    "controlStateCount": 25,
+    "alphabetSize": 148,
+    "tableRows": 7,
+    "cellsProbed": 640,
+    "initial": "DRIVE(0)",
+    "reachableStates": [
+      "DRIVE(0)",
+      "DRIVE(1)",
+      "DRIVE(2)",
+      "DRIVE(3)",
+      "DRIVE(4)",
+      "DRIVE(5)",
+      "DRIVE(6)",
+      "DRIVE(7)",
+      "DRIVE(8)",
+      "DRIVE(9)",
+      "DRIVE(10)",
+      "DRIVE(11)",
+      "REVIEW(1->DRIVE(2))",
+      "REVIEW(1->DRIVE(3))",
+      "REVIEW(2->DRIVE(3))",
+      "REVIEW(1->DRIVE(4))",
+      "REVIEW(2->DRIVE(4))",
+      "REVIEW(3->DRIVE(4))",
+      "REVIEW(1->DRIVE(5))",
+      "REVIEW(2->DRIVE(5))",
+      "REVIEW(3->DRIVE(5))",
+      "REVIEW(4->DRIVE(5))",
+      "REVIEW(1->DRIVE(6))",
+      "REVIEW(2->DRIVE(6))",
+      "REVIEW(3->DRIVE(6))",
+      "REVIEW(4->DRIVE(6))",
+      "REVIEW(5->DRIVE(6))",
+      "REVIEW(1->DRIVE(7))",
+      "REVIEW(2->DRIVE(7))",
+      "REVIEW(3->DRIVE(7))",
+      "REVIEW(4->DRIVE(7))",
+      "REVIEW(5->DRIVE(7))",
+      "REVIEW(6->DRIVE(7))",
+      "REVIEW(1->DRIVE(8))",
+      "REVIEW(2->DRIVE(8))",
+      "REVIEW(3->DRIVE(8))",
+      "REVIEW(4->DRIVE(8))",
+      "REVIEW(5->DRIVE(8))",
+      "REVIEW(6->DRIVE(8))",
+      "REVIEW(7->DRIVE(8))",
+      "REVIEW(1->DRIVE(9))",
+      "REVIEW(2->DRIVE(9))",
+      "REVIEW(3->DRIVE(9))",
+      "REVIEW(4->DRIVE(9))",
+      "REVIEW(5->DRIVE(9))",
+      "REVIEW(6->DRIVE(9))",
+      "REVIEW(7->DRIVE(9))",
+      "REVIEW(8->DRIVE(9))",
+      "REVIEW(1->DRIVE(10))",
+      "REVIEW(2->DRIVE(10))",
+      "REVIEW(3->DRIVE(10))",
+      "REVIEW(4->DRIVE(10))",
+      "REVIEW(5->DRIVE(10))",
+      "REVIEW(6->DRIVE(10))",
+      "REVIEW(7->DRIVE(10))",
+      "REVIEW(8->DRIVE(10))",
+      "REVIEW(9->DRIVE(10))",
+      "REVIEW(1->DRIVE(11))",
+      "REVIEW(2->DRIVE(11))",
+      "REVIEW(3->DRIVE(11))",
+      "REVIEW(4->DRIVE(11))",
+      "REVIEW(5->DRIVE(11))",
+      "REVIEW(6->DRIVE(11))",
+      "REVIEW(7->DRIVE(11))",
+      "REVIEW(8->DRIVE(11))",
+      "REVIEW(9->DRIVE(11))",
+      "REVIEW(10->DRIVE(11))",
+      "REVIEW(1->FINAL)",
+      "REVIEW(2->FINAL)",
+      "REVIEW(3->FINAL)",
+      "REVIEW(4->FINAL)",
+      "REVIEW(5->FINAL)",
+      "REVIEW(6->FINAL)",
+      "REVIEW(7->FINAL)",
+      "REVIEW(8->FINAL)",
+      "REVIEW(9->FINAL)",
+      "REVIEW(10->FINAL)",
+      "REVIEW(11->FINAL)",
+      "FINAL",
+      "CERTIFIED"
+    ],
+    "unreachableStates": [],
+    "unreachableControlStates": [],
+    "shortestPaths": {
+      "DRIVE(0)": [],
+      "DRIVE(1)": [
+        "passed | none | advance"
+      ],
+      "DRIVE(2)": [
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(3)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(4)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(5)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(6)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(7)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(8)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(9)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(10)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "DRIVE(11)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance"
+      ],
+      "REVIEW(1->DRIVE(2))": [
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(3))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(3))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(4))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(4))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(4))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(5))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(5))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(5))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->DRIVE(5))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(6))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(6))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(6))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->DRIVE(6))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(5->DRIVE(6))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(5,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(7))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(7))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(7))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->DRIVE(7))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(5->DRIVE(7))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(5,driver_legality)"
+      ],
+      "REVIEW(6->DRIVE(7))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(6,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(8))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(8))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(8))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->DRIVE(8))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(5->DRIVE(8))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(5,driver_legality)"
+      ],
+      "REVIEW(6->DRIVE(8))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(6,driver_legality)"
+      ],
+      "REVIEW(7->DRIVE(8))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(7,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(5->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(5,driver_legality)"
+      ],
+      "REVIEW(6->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(6,driver_legality)"
+      ],
+      "REVIEW(7->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(7,driver_legality)"
+      ],
+      "REVIEW(8->DRIVE(9))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(8,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(5->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(5,driver_legality)"
+      ],
+      "REVIEW(6->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(6,driver_legality)"
+      ],
+      "REVIEW(7->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(7,driver_legality)"
+      ],
+      "REVIEW(8->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(8,driver_legality)"
+      ],
+      "REVIEW(9->DRIVE(10))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(9,driver_legality)"
+      ],
+      "REVIEW(1->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(5->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(5,driver_legality)"
+      ],
+      "REVIEW(6->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(6,driver_legality)"
+      ],
+      "REVIEW(7->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(7,driver_legality)"
+      ],
+      "REVIEW(8->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(8,driver_legality)"
+      ],
+      "REVIEW(9->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(9,driver_legality)"
+      ],
+      "REVIEW(10->DRIVE(11))": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(10,driver_legality)"
+      ],
+      "REVIEW(1->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(1,driver_legality)"
+      ],
+      "REVIEW(2->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(2,driver_legality)"
+      ],
+      "REVIEW(3->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(3,driver_legality)"
+      ],
+      "REVIEW(4->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(4,driver_legality)"
+      ],
+      "REVIEW(5->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(5,driver_legality)"
+      ],
+      "REVIEW(6->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(6,driver_legality)"
+      ],
+      "REVIEW(7->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(7,driver_legality)"
+      ],
+      "REVIEW(8->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(8,driver_legality)"
+      ],
+      "REVIEW(9->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(9,driver_legality)"
+      ],
+      "REVIEW(10->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(10,driver_legality)"
+      ],
+      "REVIEW(11->FINAL)": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | gap | review(11,driver_legality)"
+      ],
+      "FINAL": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | to_final"
+      ],
+      "CERTIFIED": [
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | advance",
+        "passed | none | to_final",
+        "passed | none | certify"
+      ]
+    },
+    "terminalStates": [
+      "CERTIFIED"
+    ],
+    "deadCells": [],
+    "exitsFromTerminal": [],
+    "trapStates": [],
+    "nondeterministic": [],
+    "stepDisagreements": [],
+    "rowsNeverOffered": [],
+    "labelsNeverLegal": [],
+    "legalMovesPerRow": {
+      "retry": 213,
+      "advance": 209,
+      "to final": 4,
+      "review": 744,
+      "return": 528,
+      "retry the final": 4,
+      "certify": 4
+    }
+  }
+}

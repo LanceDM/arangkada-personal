@@ -1,0 +1,53 @@
+# Logs and diagnostics
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+storage-debug.log*
+
+# Dependencies
+node_modules
+
+# Build output and caches
+dist
+dist-ssr
+.vite-cache
+.vite
+coverage
+.nyc_output
+*.tsbuildinfo
+*.local
+
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+*.runtimeconfig.json
+*serviceAccount*.json
+*service-account*.json
+firebase-adminsdk*.json
+
+# Firebase local state
+.firebase/
+
+# Editor directories and OS files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Pilot exports: participant data and emails
+pilot-export/
