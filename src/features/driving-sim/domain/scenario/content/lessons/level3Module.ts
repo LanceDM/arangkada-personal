@@ -50,7 +50,7 @@ export const level3Module = {
         },
         {
           type: 'paragraph',
-          text: 'Three broad visual habits apply across most categories: a red or black shape on white, often circular or octagonal, states a law. A yellow or orange diamond warns of a hazard. A green, blue, or white rectangle gives direction or information. Traffic lights and signals sit outside this lettered system entirely, since they control movement in real time rather than through a fixed sign.',
+          text: 'Three broad visual habits apply across most categories: a red or black shape on white, often circular or octagonal, states a law. A white triangle with a red border warns of a hazard (crossing warnings for pedestrians, children and PWDs use a yellow-green background, and orange marks roadwork). A green, blue, or white rectangle gives direction or information. Traffic lights and signals sit outside this lettered system entirely, since they control movement in real time rather than through a fixed sign.',
         },
         {
           type: 'table',
@@ -157,7 +157,8 @@ export const level3Module = {
             [`![No pedestrian crossing sign](${IMG}no-pedestrian-crossing.png)`, 'No Pedestrian Crossing', 'Pedestrians may not cross at this point; use the overpass or a marked pedestrian crossing instead.'],
             [`![No left turn sign](${IMG}no-left-turn.png)`, 'No Left Turn', 'A left turn is not allowed at this point.'],
             [`![No right turn sign](${IMG}no-right-turn.png)`, 'No Right Turn', 'A right turn is not allowed at this point.'],
-            [`![No U-turn sign](${IMG}no-u-turn.png)`, 'No U-Turn', 'A U-turn is not allowed at this point.'],
+            // FDM Vol. 1 p. 63
+            [`![No U-turn sign](${IMG}no-u-turn.png)`, 'No U-Turn', 'A red-bordered circle with a crossed-out U-turn arrow: a U-turn is not allowed at this point.'],
             [`![No overtaking zone sign](${IMG}no-overtaking-zone.png)`, 'No Overtaking Zone', 'Passing another vehicle is not allowed in this zone.'],
           ],
         },
@@ -253,6 +254,11 @@ export const level3Module = {
         {
           type: 'paragraph',
           text: 'Unlike a regulatory sign, a warning sign does not forbid anything by itself. It tells you what condition is coming so you can decide the safe way to handle it: slow down, cover the brake, or simply pay closer attention.',
+        },
+        // FDM Vol. 1 pp. 67-72: warning signs are shown as white triangles with a red border.
+        {
+          type: 'paragraph',
+          text: 'Most warning signs in the FDM share one shape: a white triangle, point up, with a red border and a black symbol. If you see that shape, expect a hazard ahead even before you read the symbol. Crossing warnings for pedestrians, children and PWDs use a bright yellow-green background so they stand out.',
         },
         {
           type: 'heading',
@@ -356,6 +362,11 @@ export const level3Module = {
             [`![Advice to cross at designated areas sign](${IMG}advice-to-cross-at-designated-areas.png)`, 'Advice To Cross At Designated Areas', 'Reminds pedestrians to use the marked crossing, not to cross anywhere.'],
             [`![Be aware and slow down bike lane ahead sign](${IMG}be-aware-and-slow-down-bike-lane-ahead.png)`, 'Be Aware And Slow Down: Bike Lane Ahead', 'A bicycle lane crosses or runs alongside the road ahead.'],
           ],
+        },
+        // FDM Vol. 1 pp. 124, 156, 167, 180
+        {
+          type: 'paragraph',
+          text: 'When a pedestrian sign leads you to a crosswalk, slow down and stop to yield to pedestrians. Never park on a pedestrian lane, under any circumstances. Stopping a jeepney or bus on the crosswalk to wait for passengers is one of the common violations by PUV drivers.',
         },
         {
           type: 'heading',
@@ -704,6 +715,9 @@ export const level3Module = {
             ['Flashing yellow', 'Slow down and proceed with caution.'],
             ['Green (solid)', 'Proceed, provided you yield to pedestrians and traffic lawfully using the intersection.'],
             ['Flashing green', 'Proceed with caution; commonly seen where a pedestrian crossing button is available.'],
+            // FDM Vol. 1 pp. 170, 181
+            ['Green arrow', 'Vehicles turning in the direction of the arrow may proceed.'],
+            ['Steady yellow arrow', 'Turning vehicles facing the arrow must slow down and prepare to stop.'],
           ],
         },
         {
@@ -722,7 +736,8 @@ export const level3Module = {
           type: 'list',
           ordered: false,
           items: [
-            'Treating yellow as a signal to speed up and beat the red light.',
+            // FDM Vol. 1 p. 178
+            'Treating yellow as a signal to speed up and beat the red light. Disregarding the yellow light to rush through is beating the red light, which amounts to reckless driving.',
             'Rolling through a flashing red without coming to a full stop first.',
             'Assuming flashing green means the same thing as solid green.',
           ],

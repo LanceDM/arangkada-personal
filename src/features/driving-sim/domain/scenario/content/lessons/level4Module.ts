@@ -179,7 +179,8 @@ export const level4Module = {
           rows: [
             [`![Motorcycle lane](${IMG}motorcycle-lane.jpg)`, 'Motorcycle Lane', 'Allotted for motorcycle riders and may be shared with other vehicles, but riders are not allowed to leave it for other lanes unless instructed by enforcers or turning into an intersection, and must signal that intention within 100 meters.'],
             [`![Bicycle lane](${IMG}bicycle-lane.jpg)`, 'Bicycle Lane', 'Painted on the pavement with a solid line along the side of the road, for bicycle use.'],
-            [`![Bus lane](${IMG}bus-lane.jpg)`, 'Bus Lane', 'A designated lane for buses; bus drivers are not allowed to use other lanes except when instructed by enforcers or turning into an intersection.'],
+            // FDM Vol. 1 pp. 97, 180
+            [`![Bus lane](${IMG}bus-lane.jpg)`, 'Bus Lane', 'A designated lane for buses; bus drivers are not allowed to use other lanes except when instructed by enforcers or turning into an intersection. Private vehicles may not drive in it, except to turn or to enter a garage within 100 meters.'],
           ],
         },
         {
@@ -232,8 +233,10 @@ export const level4Module = {
           type: 'table',
           headers: ['Marking Image', 'Painted Curb', 'Meaning'],
           rows: [
-            [`![Red-painted curb no parking](${IMG}red-painted-curb-no-parking.jpg)`, 'Red-Painted Curb', 'No parking.'],
-            [`![Yellow-painted curb no loading unloading](${IMG}yellow-painted-curb-no-loading-unloading.jpg)`, 'Yellow-Painted Curb', 'No loading or unloading.'],
+            // FDM Vol. 1 p. 96: red = No Loading and Unloading, yellow = No Parking.
+            // TODO(assets): the image file names below have the two meanings swapped; rename them when convenient.
+            [`![Red-painted curb: no loading and unloading](${IMG}red-painted-curb-no-parking.jpg)`, 'Red-Painted Curb', 'No loading and unloading.'],
+            [`![Yellow-painted curb: no parking](${IMG}yellow-painted-curb-no-loading-unloading.jpg)`, 'Yellow-Painted Curb', 'No parking.'],
           ],
         },
         {

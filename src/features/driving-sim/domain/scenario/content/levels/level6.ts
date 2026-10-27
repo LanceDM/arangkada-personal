@@ -136,15 +136,15 @@ const laneChangeSlowBusSlot: SlotVariant[] = [
     type: 'obstacle_ahead',
     // Where the bus is, and nothing about the lane the scenario grades: whether
     // the lane beside it is clear is for the driver to look at.
-    description: 'A provincial bus has slowed almost to a stop in your lane, the one beside the center line.',
+    description: 'On a business-district street with two lanes running your way, a provincial bus has slowed almost to a stop in your lane, the one beside the center line.',
     correctAction: 'accelerate',
     points: 20,
     warningDistance: 340,
-    penaltyMessage: `With two or more lanes running your way, changing lanes to the right to pass a slower vehicle is allowed — and it is the only safe option here. Crossing the center line into oncoming traffic is not a lane change, and sitting behind the bus blocks everyone behind you.`,
+    penaltyMessage: `In a business or residential district with two or more lanes running your way, changing lanes to the right to pass a slower vehicle is allowed — and it is the only safe option here. Crossing the center line into oncoming traffic is not a lane change, and sitting behind the bus blocks everyone behind you.`,
     rewardMessage: 'Correct. Mirrors, blind spot, signal, and across into the clear curb lane.',
     duration: 200,
     lawCitation:
-      'Changing lanes: check ahead, behind and to the sides, check your mirrors, glance at the blind spot, signal, then steer across and cancel the signal. Overtaking or changing lanes on the right is allowed where two or more lanes run in the same direction.',
+      'Changing lanes: check ahead, behind and to the sides, check your mirrors, glance at the blind spot, signal, then steer across and cancel the signal. RA 4136 Sec. 41 (FDM Vol. 1 p. 121): overtaking on the right is allowed on a road in a business or residential district with two or more lanes running in the same direction.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -216,17 +216,17 @@ const redCurbNoParkingSlot: SlotVariant[] = [
     correctAction: 'accelerate',
     points: 20,
     warningDistance: 340,
-    penaltyMessage: `A red-painted curb prohibits stopping, standing and parking outright — there is no brief-stop exception and staying with the vehicle changes nothing. Coming to rest here is a parking violation.`,
+    penaltyMessage: `A red-painted curb means No Loading and Unloading, so you may not stop here to pick up, drop off or wait, and staying with the vehicle changes nothing. Coming to rest here is a violation.`,
     rewardMessage: 'Correct. You recognized the red curb and carried on to find a legal space.',
     duration: 200,
     lawCitation:
-      'Painted curb markings: a red curb prohibits stopping, standing or parking at any time. A yellow curb permits loading and unloading only.',
+      'FDM Vol. 1 p. 96, painted curbs: a red-painted curb means No Loading and Unloading; a yellow-painted curb means No Parking.',
     competency: 'parking',
     severity: 'major',
     marking: {
       name: 'Red Painted Curb',
       category: 'E. Painted Curb',
-      meaning: 'No stopping, standing or parking at any time.',
+      meaning: 'No loading and unloading.',
       art: 'red_curb',
       side: 'right',
     },

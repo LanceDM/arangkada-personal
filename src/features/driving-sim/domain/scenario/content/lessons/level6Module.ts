@@ -74,7 +74,8 @@ export const level6Module = {
         },
         {
           type: 'paragraph',
-          text: 'U-turns are risky and prohibited in some areas. Start turning from the right side of the innermost lane, check for traffic in both directions and signal, and when the way is clear, turn the wheel sharply to the left while moving forward. Do not change lanes again until you have reached the correct traffic speed. A U-turn is never allowed on a double solid yellow line or where a No U-Turn sign is posted, and it is never allowed inside a yellow box.',
+          // FDM Vol. 1 p. 164: no U-turn on a double solid yellow line or where a No U-Turn sign is posted.
+          text: 'U-turns are risky and prohibited in some areas: never on a double solid yellow line or where a No U-Turn sign is posted. Start turning from the right side of the innermost lane, check for traffic in both directions and signal, and when the way is clear, turn the wheel sharply to the left while moving forward. Do not change lanes again until you have reached the correct traffic speed. A U-turn is never allowed on a double solid yellow line or where a No U-Turn sign is posted, and it is never allowed inside a yellow box.',
         },
       ],
     },
@@ -144,7 +145,8 @@ export const level6Module = {
           headers: ['Situation', 'Rule'],
           rows: [
             ['Changing lanes when it is not safe to do so', 'Not allowed, regardless of the lane marking.'],
-            ['Overtaking or changing lanes on the right, with two or more lanes going the same direction', 'Allowed, since multiple lanes moving the same way create a safe passing option on the right.'],
+            // RA 4136 Sec. 41, FDM Vol. 1 p. 121
+            ['Overtaking on the right, on a road in a business or residential district with two or more lanes going the same direction', 'Allowed if it is safe. Outside those districts, overtake on the left.'],
             ['Overtaking or changing lanes on the right when the vehicle in front is visibly turning left', 'Allowed, since the vehicle ahead has committed to leaving your lane.'],
           ],
         },
@@ -235,6 +237,8 @@ export const level6Module = {
           type: 'table',
           headers: ['Visual', 'Situation', 'Wheel Position'],
           rows: [
+            // TODO(LTO review): FDM Vol. 1 p. 123 says wheels into the curb uphill and downhill, but the
+            // FDM reviewer (pp. 168, 182) says away from the curb uphill. Kept as-is until the LTO reviewers decide.
             [`[large]![Vehicle parked on a slope with wheels turned into the curb](${IMG}slope-parking-with-curb.png)`, 'Parking Uphill Or Downhill, With A Curb', 'Turn the front wheels into the curb or toward the sidewalk. Always engage the parking brake, and leave the vehicle in gear if possible.'],
             [`[large]![Vehicle parked on a slope without a curb, wheels turned toward the edge of the road](${IMG}slope-parking-without-curb.png)`, 'Parking Uphill Or Downhill, Without A Curb', 'Turn the wheels so that if the parking brake is inadvertently released, the vehicle rolls off the road rather than into it.'],
           ],
@@ -251,6 +255,27 @@ export const level6Module = {
             'Use the center stand when parking for longer periods.',
             'Always lock the handlebar before leaving the motorcycle.',
             'If parking in a mall or bay, leave enough maneuvering space for others and for yourself.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Before You Choose The Space',
+        },
+        // FDM Vol. 1 pp. 64, 96, 124 (RA 4136 Sec. 46), 172, 180
+        {
+          type: 'paragraph',
+          text: 'Level 4 covered where parking is prohibited. Check these before you start the maneuver:',
+        },
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Not within 4 meters of a fire hydrant.',
+            'Not within 6 meters of the intersection of curb lines.',
+            'Never double park: parking on the roadway side of a vehicle already parked at the curb is prohibited.',
+            'Never on a pedestrian lane.',
+            'In a No Loading/Unloading zone, do not stop even briefly; find a proper loading zone, even if it is farther.',
+            'A PWD parking space is only for a PWD or someone driving with one.',
           ],
         },
       ],
@@ -331,14 +356,14 @@ export const level6Module = {
       question:
         'You are in the lane beside the center line, behind a slow jeepney, with a second lane running your way to your right and it is clear. Is changing lanes to the right allowed?',
       options: [
-        'Yes — with two or more lanes going the same direction, passing on the right is allowed if it is safe',
+        'Yes, if this is a business or residential district and the change is safe, since there are two or more lanes going your way',
         'No — overtaking on the right is never allowed under any circumstances',
         'Only if you sound the horn first',
         'Only if the jeepney is signaling to turn left',
       ],
       correct: 0,
       explanation:
-        'Where two or more lanes run in the same direction, changing lanes or overtaking to the right is allowed, as it is when the vehicle ahead is visibly turning left. Legality is only half of it though: the change must also be safe, which means mirrors, blind spot, signal, then steer.',
+        'RA 4136 allows overtaking on the right on a road in a business or residential district with two or more lanes going the same direction, and when the vehicle ahead is visibly turning left. Outside those districts, overtake on the left. Legality is only half of it though: the change must also be safe, which means mirrors, blind spot, signal, then steer.',
     },
     {
       question: 'Where is overtaking prohibited, regardless of how clear the road looks to you?',

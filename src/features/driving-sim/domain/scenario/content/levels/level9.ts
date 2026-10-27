@@ -294,7 +294,7 @@ const tireBlowoutSlot: SlotVariant[] = [
       'Correct. Straight and gradual, then a soft brake and off the road into the bay.',
     duration: 200,
     lawCitation:
-      'Tire blowout: take your foot off the accelerator pedal, do not slam on the brakes, hold on to your steering wheel firmly, slow down gradually, apply the brake softly once the vehicle is under control, and pull the vehicle to the safe side of the road. Then switch on hazard lights and place your Early Warning Device about four meters behind the vehicle on a one-way road, or on both sides on a two-way road. Always carry an emergency kit: a first aid kit, a flashlight and an Early Warning Device.',
+      'Tire blowout: take your foot off the accelerator pedal, do not slam on the brakes, hold on to your steering wheel firmly, slow down gradually, apply the brake softly once the vehicle is under control, and pull the vehicle to the safe side of the road. Then switch on hazard lights and place your Early Warning Devices 4 meters in front of and 4 meters behind the vehicle (FDM Vol. 1 p. 160). Always carry an emergency kit: a first aid kit, a flashlight and an Early Warning Device.',
     competency: 'hazard_awareness',
     severity: 'critical',
     // 36 is 60% of this level's limit, the share the rest of the game already

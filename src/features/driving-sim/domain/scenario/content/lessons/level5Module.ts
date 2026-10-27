@@ -156,7 +156,8 @@ export const level5Module = {
           headers: ['Step', 'Action'],
           rows: [
             ['1. Notice', 'Check mirrors and surroundings before reacting; do not brake hard without warning the traffic behind you.'],
-            ['2. Move Over', 'Signal your intention, then move toward the nearest safe edge of the road and slow down or stop.'],
+            // FDM Vol. 1 p. 141
+            ['2. Move Over', 'Signal your intention, then pull over as near as possible to the right-hand edge of the road, clear of any intersection, and stop until the emergency vehicle has passed.'],
             ['3. Hold Position', 'Never stop inside an intersection or on top of a pedestrian crossing while yielding.'],
             ['4. Do Not Follow', 'Do not follow closely behind an emergency vehicle to take advantage of the cleared path.'],
           ],
@@ -231,9 +232,56 @@ export const level5Module = {
         },
       ],
     },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    // TODO(LTO review): the FDM implies, but does not state outright, that an enforcer overrides the light (pp. 114, 141).
+    {
+      id: 'level-5-signals-at-intersections',
+      title: '7. Signals, Turns, And Pedestrians At The Intersection',
+      text: 'A signalized intersection still asks for judgment: where to stop, when a turn is allowed, and who is still in the crossing.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'A signalized intersection still asks for judgment: where to stop, when a turn is allowed, and who is still in the crossing.',
+        },
+        {
+          type: 'heading',
+          text: 'Stopping And Turning On Signals',
+        },
+        // FDM Vol. 1 pp. 69, 83, 114, 118, 141, 147, 156, 182
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'On a red light, all vehicles facing it stop at the STOP line.',
+            'Turn right on red only where a sign allows it, and only after stopping and yielding. Where no sign allows it, stop and wait for the green light.',
+            'Where a turn on red from one one-way street into another one-way street is allowed, position your vehicle nearest the curb of the intersection.',
+            'A "Turn Right On Green Light Only" sign means you may turn right only when the signal is green.',
+            'Do not park or stop within 6 meters of a "Traffic Lights Ahead" sign.',
+            'Where a traffic enforcer is directing traffic, follow the enforcer, even if the light shows otherwise.',
+            'Delaying on a green light to wait for passengers is a common violation by PUV drivers.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Pedestrians At The Intersection',
+        },
+        // FDM Vol. 1 pp. 109, 117, 137, 139, 172
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Give way to pedestrians at crossings, pavements and intersections.',
+            'Before turning, give way to pedestrians and to vehicles with priority right of way.',
+            'When turning right, check for pedestrians and other obstructions, not only for traffic from the left.',
+            'A flashing green signal at a crossing with a pedestrian push button means proceed with caution and be ready for pedestrians who might cross.',
+            'Persons with disabilities, including blind pedestrians, may need extra time. Stop completely and let them cross.',
+          ],
+        },
+      ],
+    },
     {
       id: 'level-5-method-and-recap',
-      title: '7. Right-Of-Way Method And Mission Recap',
+      title: '8. Right-Of-Way Method And Mission Recap',
       text: 'Use one repeatable method at every intersection: identify the control type, identify who else is present, apply the matching right-of-way rule, then move only when it is confirmed safe.',
       blocks: [
         {
@@ -333,13 +381,13 @@ export const level5Module = {
         'An ambulance on official business is closing behind you with its siren sounding. What is the correct response?',
       options: [
         'Brake hard immediately so it can pass',
-        'Signal, move to the nearest safe edge of the road, and slow or stop until it passes',
+        'Signal, pull over to the right-hand edge clear of any intersection, and stop until it passes',
         'Hold your lane and speed so your movements stay predictable',
         'Move over, then follow closely behind it through the cleared traffic',
       ],
       correct: 1,
       explanation:
-        'Yield by signaling and moving to the nearest safe edge, then slowing or stopping. Braking hard without warning endangers the traffic behind you, never stop inside an intersection or crossing to do it, and never tailgate the emergency vehicle through the gap it has made.',
+        'Yield by signaling, pulling over as near as possible to the right-hand edge clear of any intersection, and stopping until it passes. Braking hard without warning endangers the traffic behind you, never stop inside an intersection or crossing to do it, and never tailgate the emergency vehicle through the gap it has made.',
     },
     {
       question:

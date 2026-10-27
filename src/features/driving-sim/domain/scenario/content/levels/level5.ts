@@ -730,7 +730,7 @@ const emergencyYieldSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You cleared the junction before pulling over, leaving its path open.',
     duration: 200,
     lawCitation:
-      'When yielding to an emergency vehicle, move to the nearest safe edge of the road and slow or stop — but never stop within an intersection or on a pedestrian crossing.',
+      'FDM Vol. 1 p. 141: when an emergency vehicle approaches, pull over as near as possible to the right-hand edge of the road, clear of any intersection, and stop until it has passed. Never stop within an intersection or on a pedestrian crossing.',
     competency: 'right_of_way',
     severity: 'critical',
     npc: {

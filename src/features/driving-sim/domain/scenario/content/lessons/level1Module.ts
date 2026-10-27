@@ -308,9 +308,58 @@ export const level1Module = {
         },
       ],
     },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-1-eligibility-renewal-carry',
+      title: '7. Who May Apply, Renewing On Time, And What To Carry',
+      text: 'A license is only as good as the rules behind it: who may hold one, when it must be renewed, and what the driver has to carry while driving.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'A license is only as good as the rules behind it: who may hold one, when it must be renewed, and what the driver has to carry while driving.',
+        },
+        {
+          type: 'heading',
+          text: 'Who May Apply',
+        },
+        // FDM Vol. 1 pp. 5, 9, 13, 24
+        {
+          type: 'table',
+          headers: ['Rule', 'What The FDM Says'],
+          rows: [
+            ['Minimum age for a Student-Driver\'s Permit', 'At least 16 years old. Applicants below 18 need parental or guardian consent.'],
+            ['Minimum age for a driver\'s license', 'At least 17 years old.'],
+            ['First license for a new applicant', 'A first-time applicant may only be issued a non-professional license for DL Codes A, A1, B, B1 or B2.'],
+            ['Tourist with a valid foreign license', 'May drive in the Philippines for no more than 90 days of their stay.'],
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Renewing On Time',
+        },
+        // FDM Vol. 1 p. 27; FDM Vol. 2 p. 72 (JAO 2014-01)
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'A license may be renewed on or before its expiry date, but not earlier than 60 days before it. (It may be renewed up to a year early only with a ticket showing imminent travel.)',
+            'An expired license is not a valid license. Driving on one is treated as driving without a valid driver\'s license.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'What To Carry While Driving',
+        },
+        // FDM Vol. 1 pp. 105, 162; FDM Vol. 2 p. 75
+        {
+          type: 'paragraph',
+          text: 'The driver of a private car must carry three documents: the driver\'s license, the Certificate of Registration (CR), and the current Official Receipt (OR). Level 2 covers the vehicle documents in detail.',
+        },
+      ],
+    },
     {
       id: 'level-1-go-no-go',
-      title: '7. Checkpoint Go / No-Go Method',
+      title: '8. Checkpoint Go / No-Go Method',
       text: 'Use one decision method every time you reach the checkpoint: stop, inspect, match, then decide.',
       blocks: [
         {
