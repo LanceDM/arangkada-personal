@@ -5,7 +5,7 @@
  * The exam is deliberately not adaptive — items are shuffled uniformly and the
  * IRT ability estimate is computed once, after submission, for display only.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthSession } from '@/features/auth';
 import { EXAM_QUESTIONS, type ExamQuestion } from '../domain/questionBank';
 import {
@@ -17,8 +17,7 @@ import {
   type WeakArea,
 } from '../domain/grading';
 import { fisherYatesShuffle } from '../domain/shuffle';
-import { estimateAbilityEAP } from '../domain/assessment/irt';
-import { EXAM_ITEM_PARAMS } from '../domain/assessment/examItemParams';
+import { raschEAP } from '@/domain/assessment/rasch';
 import { mockExamDeps } from './dependencies';
 
 export type ExamPhase = 'intro' | 'exam' | 'results';
@@ -38,10 +37,8 @@ export interface MockExamState {
   requiredScore: number;
   weakAreas: WeakArea[];
   /**
-   * Provisional 2PL ability estimate, or null when it cannot be trusted.
-   * `EXAM_ITEM_PARAMS` is calibrated against the local bank only, so a
-   * Firebase-sourced bank of different content gets no estimate rather than a
-   * meaningless number.
+   * Rasch ability estimate (EAP, N(0,1) prior), every item at b = 0 until
+   * difficulties are estimated from real pilot responses.
    */
   estimatedAbility: number | null;
   goTo: (index: number) => void;
@@ -114,26 +111,17 @@ export const useMockExam = (): MockExamState => {
   const requiredScore = passingScoreFor(questions.length);
   const passed = score >= requiredScore;
 
-  const paramsById = useMemo(
-    () => new Map(EXAM_QUESTIONS.map((q, i) => [q.id, EXAM_ITEM_PARAMS[i]])),
-    []
-  );
-  const estimatedAbility =
-    bankStatus === 'fallback'
-      ? estimateAbilityEAP(
-          questions.reduce<{ params: (typeof EXAM_ITEM_PARAMS)[number]; correct: boolean }[]>(
-            (acc, q, i) => {
-              const params = paramsById.get(q.id);
-              if (params) acc.push({ params, correct: answers[i] === q.correctIndex });
-              return acc;
-            },
-            []
-          )
-        )
-      : null;
+  // Rasch (1PL) ability with every item at the rubric's medium difficulty
+  // (b = 0) until difficulties are estimated on the pilot group's real
+  // responses. The simulated 2PL item parameters were removed (no simulated
+  // data, 2026-10-28). With equal difficulties this orders players exactly as
+  // their number correct does.
+  const estimatedAbility = raschEAP(
+    questions.map((q, i) => ({ b: 0, correct: answers[i] === q.correctIndex }))
+  ).theta;
 
   // Persisted once per sitting, signed-in players only — the foundation for
-  // eventually recalibrating IRT on real responses instead of simulated ones.
+  // estimating item difficulties on real responses.
   const savedRef = useRef(false);
   useEffect(() => {
     if (phase !== 'results') {

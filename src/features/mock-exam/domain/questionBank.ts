@@ -2,8 +2,7 @@
  * The local exam bank: 40 LTO-style items with their law citations.
  *
  * This is also the fallback when the `exam_questions` Firestore collection is
- * empty or unreadable, and the only bank the IRT item parameters are
- * calibrated against - see `assessment/examItemParams.ts`.
+ * empty or unreadable. Its ability estimate is Rasch (`@/domain/assessment/rasch`).
  */
 export interface ExamQuestion {
   id: number;
