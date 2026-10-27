@@ -28,6 +28,7 @@ import {
   roadHeadingAt,
   CAR_WIDTH,
   speedStepFor,
+  SCREEN_PX_PER_UNIT,
   type CurveSpan,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { drivableBounds } from '@/features/driving-sim/domain/world/routeGeometry';
@@ -314,7 +315,12 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
   // still pointing dead ahead, which reads as sliding sideways.
   car.heading = roadHeadingAt(car.distance, curves);
   car.distance += car.speed * pace.distancePerSpeed;
-  world.roadOffset += car.speed * 0.3;
+  // The lane paint scrolls on the same scale as everything else drawn on the
+  // road: one route unit is SCREEN_PX_PER_UNIT pixels. It used to advance by
+  // speed * 0.3, which ran the paint about 12x faster than the roadside (20x
+  // on Level 7's pace). Change the shared scale or the pace to change the
+  // feel, never the paint alone.
+  world.roadOffset = car.distance * SCREEN_PX_PER_UNIT;
 
   // Standing penalties: things the driver keeps doing, rather than a
   // decision at an event. Both run the same grace/interval/cap machinery

@@ -1,5 +1,13 @@
 import type { SupportLevel } from './competency';
 
+/**
+ * Where a graded answer came from. BKT reads `drive`, `quiz` and `diagnostic`
+ * with separate guess and slip per class (`mastery/buildBKTProfile.ts`);
+ * `post_exam` answers are logged but never enter BKT, because the
+ * post-evaluation exam is the outcome independent of the models.
+ */
+export type EvidenceSource = 'drive' | 'quiz' | 'diagnostic' | 'post_exam';
+
 export interface ActionLog {
   timestamp: number;
   action: string;
@@ -56,6 +64,16 @@ export interface ActionLog {
    * support levels existed.
    */
   support?: SupportLevel;
+  /**
+   * Where this answer came from. Absent on every driving decision, including
+   * all attempts saved before quiz and diagnostic answers were logged: absent
+   * means `drive`.
+   */
+  source?: EvidenceSource;
+  /** Quiz, diagnostic and post-exam answers: the bank item answered. */
+  itemId?: string;
+  /** Short-quiz answers: which attempt of the stage's quiz (1-3). */
+  quizAttempt?: number;
 }
 
 /**

@@ -39,7 +39,7 @@ import { advanceToVerdict } from '@/features/driving-sim/domain/systems/fsmBridg
 import { isTutorial } from '@/features/driving-sim/domain/systems/tutorial';
 import { scanEvents } from './scanEvents';
 import { CANVAS_HEIGHT, ROAD_EFFECT_SPAN, ROAD_WIDTH, ROUNDABOUT_PATH_RADIUS, distanceToScreenY, laneCentreX, resolveLaneRole, roadXAt, 
-  speedProfileFor, laneOf, BAY_WIDTH, type CurveSpan, } from '@/features/driving-sim/domain/world/vehiclePhysics';
+  speedProfileFor, laneOf, BAY_WIDTH, SCREEN_PX_PER_UNIT, type CurveSpan, } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { roadAtFor } from '@/features/driving-sim/domain/world/eventPlacement';
 import { curvesForLevel } from '@/features/driving-sim/domain/world/roadCurves';
 import { generateEnvObjects } from '@/features/driving-sim/domain/world/roadsideScenery';
@@ -698,7 +698,8 @@ export class DrivingSession {
         impact = pose.impact;
         const travelled = car.distance;
         car.distance = yielding.fromDistance + pose.playerAdvance;
-        world.roadOffset += Math.max(0, car.distance - travelled) * 6;
+        // Same scale as driveVehicle: the paint moves with the distance.
+        if (car.distance > travelled) world.roadOffset = car.distance * SCREEN_PX_PER_UNIT;
         if (pose.done) {
           world.rightOfWay = null;
           world.rightOfWayPlayed = true;

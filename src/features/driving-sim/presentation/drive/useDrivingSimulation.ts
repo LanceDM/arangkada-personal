@@ -41,6 +41,11 @@ import {
 import type { useFSM } from '@/features/driving-sim/application/useFSM';
 import type { useScenarioEvaluation } from '@/features/driving-sim/application/useScenarioEvaluation';
 
+/** One simulation step: the drive is tuned for 60 steps a second. */
+const SIM_STEP_MS = 1000 / 60;
+/** The most steps one animation frame may catch up on. */
+const MAX_STEPS_PER_FRAME = 4;
+
 /** How long the stage shakes after rough ground throws the car about. */
 const JOLT_MS = 450;
 
@@ -239,10 +244,29 @@ export const useDrivingSimulation = ({
     let animationFrame = 0;
     let running = true;
     let previous = session.getSnapshot();
+    // Fixed timestep: the simulation advances in 1/60 s steps whatever the
+    // screen's refresh rate, so a 120 Hz display no longer runs the drive (and
+    // every reaction window in it) twice as fast as a 60 Hz one. Rendering
+    // still happens once per animation frame.
+    let lastTime: number | null = null;
+    let carried = 0;
 
-    const tick = () => {
+    const tick = (now: number) => {
       if (!running) return;
-      handle(session.update(readInput(keysRef.current)));
+      if (lastTime === null) {
+        // The first frame runs one step, as the loop always did.
+        lastTime = now;
+        carried = SIM_STEP_MS;
+      } else {
+        // A long pause (a hidden tab, a debugger) is not caught up on: at most
+        // MAX_STEPS_PER_FRAME steps run, so the drive resumes where it was.
+        carried = Math.min(carried + (now - lastTime), SIM_STEP_MS * MAX_STEPS_PER_FRAME);
+        lastTime = now;
+      }
+      while (carried >= SIM_STEP_MS) {
+        handle(session.update(readInput(keysRef.current)));
+        carried -= SIM_STEP_MS;
+      }
 
       const frame = session.getFrame();
       if (frame) {

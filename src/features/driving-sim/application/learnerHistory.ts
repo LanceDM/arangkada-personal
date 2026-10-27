@@ -26,6 +26,16 @@ export const loadLearnerHistory = (uid: string | null): Promise<LearnerHistory> 
  * level id - so a naive flatMap would replay a signed-in player's most recent
  * evidence as their earliest. Sorting by each log's own `timestamp` fixes that
  * without caring which attempt a log came from. Route every consumer here.
+ *
+ * The tutorial (Level 0) is left out: its steps teach the controls, and the
+ * rule engine's competency tags on them are not evidence of a driving
+ * competency (catalogue review 2026-10-28). Quiz and diagnostic answers, which
+ * are not level attempts, are passed in as `extra` and merged by timestamp.
  */
-export const historyLogs = (history: LearnerHistory): ActionLog[] =>
-  history.attempts.flatMap(attempt => attempt.logs).sort((a, b) => a.timestamp - b.timestamp);
+export const TUTORIAL_LEVEL_ID = 0;
+
+export const historyLogs = (history: LearnerHistory, extra: readonly ActionLog[] = []): ActionLog[] =>
+  [
+    ...history.attempts.filter(attempt => attempt.levelId !== TUTORIAL_LEVEL_ID).flatMap(attempt => attempt.logs),
+    ...extra,
+  ].sort((a, b) => a.timestamp - b.timestamp);
