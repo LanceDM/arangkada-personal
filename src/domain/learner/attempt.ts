@@ -70,6 +70,8 @@ export interface ActionLog {
    * means `drive`.
    */
   source?: EvidenceSource;
+  /** The scenario (drive) this decision was graded on. */
+  scenarioId?: string;
   /** Quiz, diagnostic and post-exam answers: the bank item answered. */
   itemId?: string;
   /** Short-quiz answers: which attempt of the stage's quiz (1-3). */

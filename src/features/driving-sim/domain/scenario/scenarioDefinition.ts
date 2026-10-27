@@ -764,6 +764,13 @@ export type GarageDetailArt =
  */
 export interface GarageHotspot {
   id: string;
+  /**
+   * The catalogue id of the content standing at this point, where it differs
+   * from the point's own `id` (a pooled Level 2 check is `level2.garage.<point>.<n>`).
+   * What a decision log records as its scenario, so a repeat drive can draw
+   * content the learner has not seen. Absent: the point's `id`.
+   */
+  scenarioId?: string;
   label: string;
   /**
    * What this point is about, for the marker that stands on it.

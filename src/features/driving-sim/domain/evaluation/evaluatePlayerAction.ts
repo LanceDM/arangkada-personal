@@ -10,7 +10,7 @@ import { NO_REACTION, type ReactionObservation } from './reactionTiming';
  * are adapted into the shape the evaluator already understands.
  */
 export const garageHotspotToEvent = (hotspot: GarageHotspot): ScenarioEvent => ({
-  id: hotspot.id,
+  id: hotspot.scenarioId ?? hotspot.id,
   triggerAtDistance: 0,
   type: 'scenario_trigger',
   description: hotspot.label,
@@ -125,6 +125,9 @@ export const evaluatePlayerAction = (
       result: result.isCorrect ? 'correct' : 'violation',
       points: result.points,
       ruleId: result.trace.ruleId,
+      // The scenario answered, so a repeat drive can draw ones not yet seen
+      // and a competency's drive result can be read per scenario.
+      scenarioId: event.id,
       competency: result.trace.competency,
       severity: result.trace.severity,
       weight: result.trace.weight,

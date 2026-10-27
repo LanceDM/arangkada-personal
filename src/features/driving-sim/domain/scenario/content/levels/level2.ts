@@ -683,6 +683,81 @@ const cockpitPool: HotspotContent[] = [
 // Exported (rather than kept module-private) so the dev scenario harness can
 // index into each hotspot's exact pool the same way it already does for
 // SLOTS/SLOT_DISTANCES above.
+// Two general-rules points added 2026-10-28 (DRAFT, for review), so a drive
+// can give general_rules its 3 scenarios: the module's Before Starting The
+// Engine table, split across the passenger side and the controls.
+const beltsShell: HotspotShell = { id: 'belts', label: 'Seatbelts & Doors', area: 'Before Starting — Occupants', x: 0.62, y: 0.5, detail: 'belt' };
+const beltsPool: HotspotContent[] = [
+  {
+    observation: 'You are belted in. Your passenger in the front seat has not fastened theirs and says the trip is only five minutes.',
+    question: 'You are about to move off. What is the correct decision?',
+    choices: [
+      { label: 'Go — a five-minute trip does not need belts', action: 'accelerate' },
+      { label: 'No-Go — advise the passenger to belt up and lock the doors first', action: 'stop' },
+      { label: 'Go — only the driver has to wear a belt', action: 'brake' },
+    ],
+    correctAction: 'stop',
+    points: 20,
+    penaltyMessage: 'Belts are worn on every trip, however short, and the driver advises the passengers to wear theirs.',
+    rewardMessage: 'Correct. Everyone belted and the doors locked, then you move off.',
+    lawCitation: 'Level 2 module, Before Starting The Engine: "Wear the seatbelt, advise passengers to wear seatbelts, and lock all doors."',
+    competency: 'general_rules',
+    severity: 'major',
+  },
+  {
+    observation: 'You and your front passenger are both belted in, and all four doors are locked.',
+    question: 'You are about to move off. What is the correct decision?',
+    choices: [
+      { label: 'Go — belts on and doors locked', action: 'accelerate' },
+      { label: 'No-Go — doors must stay unlocked while driving', action: 'stop' },
+      { label: 'No-Go — passengers may not wear belts in the front', action: 'brake' },
+    ],
+    correctAction: 'accelerate',
+    points: 20,
+    penaltyMessage: 'Belts on and doors locked: this was ready to go. Delaying it is also a wrong call.',
+    rewardMessage: 'Correct. Belted and locked, ready for the trip.',
+    lawCitation: 'Level 2 module, Before Starting The Engine: "Wear the seatbelt, advise passengers to wear seatbelts, and lock all doors."',
+    competency: 'general_rules',
+    severity: 'major',
+  },
+];
+
+const controlsShell: HotspotShell = { id: 'controls', label: 'Gear Lever & Seat Position', area: 'Before Starting — Controls', x: 0.38, y: 0.62, detail: 'cockpit' };
+const controlsPool: HotspotContent[] = [
+  {
+    observation: 'The car is an automatic. The shifting lever is in Drive, and the seat is so far back you have to stretch to reach the pedals.',
+    question: 'You are about to start the engine. What is the correct decision?',
+    choices: [
+      { label: 'Go — start it in Drive and adjust the seat at the first stop', action: 'accelerate' },
+      { label: 'No-Go — lever to Park and the seat adjusted before starting', action: 'stop' },
+      { label: 'Go — stretching for the pedals is fine on a short trip', action: 'brake' },
+    ],
+    correctAction: 'stop',
+    points: 20,
+    penaltyMessage: 'An automatic is started in Park, and the seat is set so the pedals and wheel can be used without leaning.',
+    rewardMessage: 'Correct. Park before starting, and a seat that lets you reach everything.',
+    lawCitation: 'Level 2 module, Before Starting The Engine: "Automatic transmission — make sure the shifting lever is in Park before starting." "Sit comfortably and adjust the seat so pedals and steering can be used without leaning forward or backward."',
+    competency: 'general_rules',
+    severity: 'major',
+  },
+  {
+    observation: 'The car is an automatic with the lever in Park. The seat lets you reach the pedals comfortably, and you hold the wheel at 9 and 3.',
+    question: 'You are about to start the engine. What is the correct decision?',
+    choices: [
+      { label: 'Go — Park, seat set, hands at 9 and 3', action: 'accelerate' },
+      { label: 'No-Go — an automatic must be started in Neutral only', action: 'stop' },
+      { label: 'No-Go — hands belong at 12 o\'clock', action: 'brake' },
+    ],
+    correctAction: 'accelerate',
+    points: 20,
+    penaltyMessage: 'Park, the seat set and a proper grip: this was ready to go. Delaying it is also a wrong call.',
+    rewardMessage: 'Correct. Ready to start.',
+    lawCitation: 'Level 2 module, Before Starting The Engine: lever in Park for an automatic; seat adjusted; "Grip the steering wheel at 9-and-3 or 10-and-2."',
+    competency: 'general_rules',
+    severity: 'major',
+  },
+];
+
 export const HOTSPOTS: { shell: HotspotShell; pool: HotspotContent[] }[] = [
   { shell: documentsShell, pool: documentsPool },
   { shell: plateShell, pool: platePool },
@@ -692,6 +767,8 @@ export const HOTSPOTS: { shell: HotspotShell; pool: HotspotContent[] }[] = [
   { shell: engineBayShell, pool: engineBayPool },
   { shell: trunkShell, pool: trunkPool },
   { shell: cockpitShell, pool: cockpitPool },
+  { shell: beltsShell, pool: beltsPool },
+  { shell: controlsShell, pool: controlsPool },
 ];
 
 export const buildHotspots = (pick: (pool: HotspotContent[]) => HotspotContent): GarageHotspot[] =>
