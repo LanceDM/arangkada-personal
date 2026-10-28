@@ -131,6 +131,8 @@ const Admin = () => {
       topWeakCompetencies={dashboard.topWeakCompetencies}
       onExportJSON={dashboard.exportJSON}
       onExportAttemptsCSV={dashboard.exportAttemptsCSV}
+      onExportStudy={dashboard.exportStudy}
+      studyParticipants={dashboard.studyParticipants}
     />
   );
 };

@@ -5,6 +5,7 @@ import {
   DEFAULT_BKT_MODEL,
   buildBKTEvidence,
   buildBKTProfile,
+  bktTrajectory,
   updateMastery,
 } from './buildBKTProfile';
 
@@ -81,5 +82,20 @@ describe('BKT with separate guess and slip per item class', () => {
       log('parking', true, { source: 'post_exam' }),
     ]);
     expect(evidence.parking).toEqual({ total: 4, drive: 1, quiz: 1, diagnostic: 1, post_exam: 1 });
+  });
+
+  it('replays step by step to the same final mastery, with each prediction made before the answer', () => {
+    const logs = [
+      log('parking', true, { source: 'diagnostic' }),
+      log('parking', false),
+      log('road_signs', true, { source: 'quiz', itemId: 'q1' }),
+      log('parking', true, { source: 'post_exam' }),
+    ];
+    const steps = bktTrajectory(logs);
+    expect(steps).toHaveLength(4);
+    expect(steps[0].predictedCorrect).toBeCloseTo(0.3 * 0.9 + 0.7 * 0.25, 10);
+    expect(steps[1].pBefore).toBe(steps[0].pAfter);
+    expect(steps[2]).toMatchObject({ competency: 'road_signs', source: 'quiz', itemId: 'q1', pBefore: 0.3 });
+    expect(steps[3].pAfter).toBeCloseTo(buildBKTProfile(logs).parking, 12);
   });
 });

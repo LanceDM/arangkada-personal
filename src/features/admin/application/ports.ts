@@ -7,8 +7,12 @@
  */
 import type {
   AttemptRow,
+  BackgroundRow,
+  CourseLogRow,
   DailyRow,
   ExamRow,
+  SharedQTableRow,
+  SittingRow,
   UserRow,
 } from '@/features/admin/domain/adminReport';
 
@@ -17,4 +21,9 @@ export interface AdminReportRepository {
   attempts(): Promise<AttemptRow[]>;
   examResults(): Promise<ExamRow[]>;
   dailyResults(): Promise<DailyRow[]>;
+  /** The per-competency course: every participant's log, sittings and background form, and the shared table. */
+  courseLogs(): Promise<CourseLogRow[]>;
+  sittings(): Promise<SittingRow[]>;
+  backgrounds(): Promise<BackgroundRow[]>;
+  sharedQTable(): Promise<SharedQTableRow | null>;
 }

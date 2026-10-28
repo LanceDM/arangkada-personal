@@ -154,6 +154,61 @@ export const buildBKTProfile = (
   return mastery;
 };
 
+/** One graded answer as BKT read it: the mastery before and after, and the prediction it made. */
+export interface BKTStep {
+  timestamp: number;
+  competency: DrivingCompetency;
+  source: EvidenceSource;
+  correct: boolean;
+  /** P(L) before this answer. */
+  pBefore: number;
+  /**
+   * P(correct) BKT predicted for this answer before seeing it,
+   * P(L)(1 - S) + (1 - P(L)) G with this answer's item class: the input to
+   * next-answer AUC and RMSE.
+   */
+  predictedCorrect: number;
+  /** P(L) after this answer (posterior plus the learning step). */
+  pAfter: number;
+  itemId?: string;
+  scenarioId?: string;
+}
+
+/**
+ * The same replay as `buildBKTProfile`, step by step: every graded answer
+ * with its mastery before and after and the prediction made for it. One
+ * learner's logs in, one learner's trajectory out (BKT is per learner).
+ */
+export const bktTrajectory = (logs: ActionLog[], params: BKTModel | BKTParams = DEFAULT_BKT_MODEL): BKTStep[] => {
+  const model = asModel(params);
+  const mastery = COMPETENCIES.reduce((acc, competency) => {
+    acc[competency] = model.pInit;
+    return acc;
+  }, {} as Record<DrivingCompetency, number>);
+  const steps: BKTStep[] = [];
+  for (const log of logs) {
+    if (!isBKTEvidence(log)) continue;
+    const source = evidenceSourceOf(log);
+    const evidence = paramsForSource(model, source);
+    const pBefore = mastery[log.competency];
+    const correct = log.result === 'correct';
+    const pAfter = updateMastery(pBefore, correct, evidence);
+    mastery[log.competency] = pAfter;
+    steps.push({
+      timestamp: log.timestamp,
+      competency: log.competency,
+      source,
+      correct,
+      pBefore,
+      predictedCorrect: pBefore * (1 - evidence.pSlip) + (1 - pBefore) * evidence.pGuess,
+      pAfter,
+      ...(log.itemId ? { itemId: log.itemId } : {}),
+      ...(log.scenarioId ? { scenarioId: log.scenarioId } : {}),
+    });
+  }
+  return steps;
+};
+
 /** How much evidence BKT has seen per competency, by source. */
 export interface CompetencyEvidence {
   total: number;

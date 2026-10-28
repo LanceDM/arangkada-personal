@@ -12,6 +12,7 @@ import type {
   AttemptRow,
   DailyRow,
   ExamRow,
+  StudyData,
   UserRow,
 } from '@/features/admin/domain/adminReport';
 import { adminDeps } from './dependencies';
@@ -21,6 +22,7 @@ interface AdminData {
   attempts: AttemptRow[];
   examResults: ExamRow[];
   dailyResults: DailyRow[];
+  study: StudyData;
   collectionErrors: AdminCollectionErrors;
 }
 
@@ -29,6 +31,7 @@ const EMPTY: AdminData = {
   attempts: [],
   examResults: [],
   dailyResults: [],
+  study: { courseLogs: [], sittings: [], backgrounds: [], sharedQTable: null },
   collectionErrors: {},
 };
 
@@ -50,14 +53,18 @@ const loadAdminData = async (): Promise<AdminData> => {
   const { report } = adminDeps();
   const collectionErrors: AdminCollectionErrors = {};
 
-  const [users, attempts, examResults, dailyResults] = await Promise.all([
+  const [users, attempts, examResults, dailyResults, courseLogs, sittings, backgrounds, sharedQTable] = await Promise.all([
     attempt('users', report.users, collectionErrors),
     attempt('attempts', report.attempts, collectionErrors),
     attempt('examAttempts', report.examResults, collectionErrors),
     attempt('dailyAttempts', report.dailyResults, collectionErrors),
+    attempt('courseLog', report.courseLogs, collectionErrors),
+    attempt('assessmentSittings', report.sittings, collectionErrors),
+    attempt('study', report.backgrounds, collectionErrors),
+    attempt('policy/competencyQ', async () => [await report.sharedQTable()], collectionErrors).then(rows => rows[0] ?? null),
   ]);
 
-  return { users, attempts, examResults, dailyResults, collectionErrors };
+  return { users, attempts, examResults, dailyResults, study: { courseLogs, sittings, backgrounds, sharedQTable }, collectionErrors };
 };
 
 export const useAdminData = (enabled: boolean) => {
@@ -79,6 +86,7 @@ export const useAdminData = (enabled: boolean) => {
     attempts: data.attempts,
     examResults: data.examResults,
     dailyResults: data.dailyResults,
+    study: data.study,
     isLoading: isFetching,
     loadError: failed
       ? 'Some Firebase collections could not be loaded. Check the collection messages below.'

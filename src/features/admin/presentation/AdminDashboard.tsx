@@ -59,6 +59,9 @@ interface AdminDashboardProps {
   topWeakCompetencies: [string, number][];
   onExportJSON: () => void;
   onExportAttemptsCSV: () => void;
+  /** Study data of the per-competency course (no IRT). */
+  onExportStudy: (kind: 'json' | 'bkt' | 'decisions' | 'rewards' | 'background') => void;
+  studyParticipants: number;
 }
 
 export const AdminDashboard = ({
@@ -90,6 +93,8 @@ export const AdminDashboard = ({
   topWeakCompetencies,
   onExportJSON,
   onExportAttemptsCSV,
+  onExportStudy,
+  studyParticipants,
 }: AdminDashboardProps) => (
   <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
@@ -359,6 +364,37 @@ export const AdminDashboard = ({
               <Button variant="outline" onClick={onExportJSON}>
                 <Download className="h-4 w-4" />
                 Full JSON
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle className="text-sm">Study data: per-competency course</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                {studyParticipants} participant(s). BKT is replayed per participant; the Q-table is shared. Participants are
+                identified by user id only. IRT (ability, item difficulty) is not included.
+              </p>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2">
+              <Button onClick={() => onExportStudy('json')}>
+                <Download className="h-4 w-4" />
+                Study JSON
+              </Button>
+              <Button variant="outline" onClick={() => onExportStudy('bkt')}>
+                <Download className="h-4 w-4" />
+                BKT trajectory CSV
+              </Button>
+              <Button variant="outline" onClick={() => onExportStudy('decisions')}>
+                <Download className="h-4 w-4" />
+                Decisions CSV
+              </Button>
+              <Button variant="outline" onClick={() => onExportStudy('rewards')}>
+                <Download className="h-4 w-4" />
+                Rewards CSV
+              </Button>
+              <Button variant="outline" onClick={() => onExportStudy('background')}>
+                <Download className="h-4 w-4" />
+                Background CSV
               </Button>
             </CardContent>
           </Card>

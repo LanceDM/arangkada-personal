@@ -7,6 +7,8 @@
  * borrowed from the writing feature's persistence types.
  */
 import type { ActionLog } from '@/domain/learner/attempt';
+import type { DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
+import type { QTable } from '@/domain/competencyRouting/qLearning';
 import type { ScenarioEvent } from '@/features/driving-sim';
 
 /**
@@ -71,6 +73,16 @@ export interface AttemptRow {
   violations: number;
   correctDecisions: number;
   logs: ActionLog[];
+  /** Timing of a course drive (start, end, pauses, route length); absent on older attempts. */
+  session?: {
+    startedAt: number;
+    endedAt: number;
+    durationMs: number;
+    pausedMs: number;
+    routeLength: number;
+    crashed: boolean;
+    phase: string;
+  };
 }
 
 /** One sitting, flattened out of `users/{uid}/examAttempts` across every user. */
@@ -114,3 +126,56 @@ export interface AdminData {
 }
 
 export type AdminCollectionErrors = Record<string, string>;
+
+/** One entry of `users/{uid}/courseLog`: a drive's, quiz's, final's or post-exam's decisions and rewards. */
+export interface CourseLogRow {
+  userId: string;
+  kind: 'drive' | 'quiz' | 'post_exam' | 'final';
+  levelId: number;
+  phase: string;
+  attemptId: string | null;
+  verdicts: { competency: string; total: number; correct: number; passed: boolean; masteryP: number; driveEvidence: number }[];
+  decisions: DecisionRecord[];
+  rewards: RewardRecord[];
+  /** The shared Q-table right after this entry. */
+  tableAfter: QTable;
+  endReason?: 'certified' | 'cap_reached';
+  timestamp: number;
+}
+
+/**
+ * One sitting of `users/{uid}/assessmentSittings`: quiz, diagnostic or
+ * post-exam answers. The stored Rasch ability is deliberately not read: IRT is
+ * excluded from the study export until the group decides what it uses.
+ */
+export interface SittingRow {
+  userId: string;
+  kind: 'quiz' | 'diagnostic' | 'post_exam';
+  levelId: number | null;
+  attempt: number | null;
+  answers: ActionLog[];
+  timestamp: number;
+}
+
+/** `users/{uid}/study/background`. */
+export interface BackgroundRow {
+  userId: string;
+  formVersion: number;
+  answers: Record<string, string>;
+  timestamp: number;
+}
+
+/** `policy/competencyQ`: the one Q-table every participant's decisions update. */
+export interface SharedQTableRow {
+  table: QTable;
+  updates: number;
+  updatedAt: number;
+}
+
+/** What the study export reads, beyond the report's four collections. */
+export interface StudyData {
+  courseLogs: CourseLogRow[];
+  sittings: SittingRow[];
+  backgrounds: BackgroundRow[];
+  sharedQTable: SharedQTableRow | null;
+}
