@@ -12,7 +12,7 @@
  */
 import { guestAttempts } from '@/features/progression';
 import { composeAuth } from '@/features/auth/composition';
-import { composeAdmin, loadDesignatedRoutingPolicy } from '@/features/admin/composition';
+import { composeAdmin } from '@/features/admin/composition';
 import { composeDailyChallenge } from '@/features/daily-challenge/composition';
 import { composeMockExam } from '@/features/mock-exam/composition';
 import { composeProgression } from '@/features/progression/composition';
@@ -47,7 +47,14 @@ composeDailyChallenge();
 composeMockExam();
 composeDrivingSim({
   learnerHistory: guestAwareLearnerHistory,
-  // The Optimized group's table is the designated trained one, read from
-  // admin's table file on first use.
-  routing: { mode: routingMode, optimized: loadDesignatedRoutingPolicy },
+  // The old two-group run's Optimized table (seed 11, trained in simulation)
+  // was removed on 2026-10-28: the study uses no simulated data, and the New
+  // switch now plays the per-competency course, whose Q-table is learned
+  // online from participants. Nothing in the game asks for this loader.
+  routing: {
+    mode: routingMode,
+    optimized: async () => {
+      throw new Error('The simulation-trained routing table was removed (no simulated data).');
+    },
+  },
 });

@@ -54,8 +54,8 @@ export const ExamResults = ({
               <span className="font-display">{estimatedAbility.toFixed(2)}</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              Provisional — calibrated on simulated data, weighs harder questions more than easy
-              ones. Pass/fail above is unaffected.
+              Provisional Rasch estimate: every item counts the same until difficulties are
+              estimated from real responses. Pass/fail above is unaffected.
             </p>
           </div>
         </div>
