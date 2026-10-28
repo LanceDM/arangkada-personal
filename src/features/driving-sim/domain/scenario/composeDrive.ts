@@ -296,3 +296,35 @@ export const itemsByCompetency = (drive: Pick<ComposedDrive, 'items'>): Map<Driv
   for (const item of drive.items) out.set(item.competency, [...(out.get(item.competency) ?? []), item.scenarioId]);
   return out;
 };
+
+/** One scenario a stage can draw for a competency, as the pool report lists it. */
+export interface PoolEntry {
+  scenarioId: string;
+  /** Own slot k, garage or crash-scene point, written for the stage, or borrowed from an earlier stage. */
+  source: 'slot' | 'garage' | 'aftermath' | 'stage_extra' | 'borrowed';
+  slot: number | null;
+  sourceLevelId: number;
+  /** Can be appended after the authored road. */
+  portable: boolean;
+  scenario: SlotVariant | GarageHotspot;
+}
+
+/** Every scenario a stage's drive can draw for a competency, own content first. For reports. */
+export const poolFor = (levelId: number, competency: DrivingCompetency): PoolEntry[] => {
+  const content = stageContent(levelId);
+  if (!content) return [];
+  const seen = new Set<string>();
+  return candidatesFor(content, competency)
+    .map((candidate): PoolEntry => ({
+      scenarioId: candidateId(candidate),
+      source:
+        candidate.kind === 'slot' ? 'slot'
+        : candidate.kind === 'point' ? candidate.scene
+        : candidate.own ? 'stage_extra' : 'borrowed',
+      slot: candidate.kind === 'slot' ? candidate.slot : candidate.kind === 'point' ? candidate.point : null,
+      sourceLevelId: candidate.kind === 'append' ? candidate.sourceLevelId : levelId,
+      portable: candidate.kind !== 'point' && isPortableRemediation(candidate.variant),
+      scenario: candidate.kind === 'point' ? candidate.hotspot : candidate.variant,
+    }))
+    .filter(entry => (seen.has(entry.scenarioId) ? false : (seen.add(entry.scenarioId), true)));
+};
