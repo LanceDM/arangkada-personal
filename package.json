@@ -15,7 +15,14 @@
     "fsm:update-golden": "tsx scripts/characterizeFsm.ts --write",
     "routing:check": "tsx scripts/characterizeRoutingFsm.ts",
     "routing:update-golden": "tsx scripts/characterizeRoutingFsm.ts --write",
-    "emulators": "firebase emulators:start --only auth,firestore"
+    "emulators": "firebase emulators:start --only auth,firestore",
+    "db:init": "tsx scripts/db/init.ts",
+    "db:validate": "tsx scripts/db/validate.ts",
+    "db:role": "tsx scripts/db/role.ts",
+    "db:participant": "tsx scripts/db/participant.ts",
+    "db:deploy": "firebase deploy --only firestore:rules,firestore:indexes",
+    "db:deploy:sql": "firebase deploy --config firebase.sql.json --only dataconnect",
+    "emulators:sql": "firebase emulators:start --config firebase.sql.json --only dataconnect"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

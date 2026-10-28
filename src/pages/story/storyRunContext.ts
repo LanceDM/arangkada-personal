@@ -69,8 +69,8 @@ export interface StoryAssessments {
   postExamDone: boolean;
   diagnosticItems: readonly BankItem[];
   postExamItems: readonly BankItem[];
-  submitDiagnostic: (choices: (number | null)[]) => Promise<void>;
-  submitPostExam: (choices: (number | null)[]) => Promise<void>;
+  submitDiagnostic: (choices: (number | null)[], responseMs?: (number | null)[]) => Promise<void>;
+  submitPostExam: (choices: (number | null)[], responseMs?: (number | null)[]) => Promise<void>;
 }
 
 export interface StoryRunContext {

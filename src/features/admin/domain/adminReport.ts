@@ -179,3 +179,73 @@ export interface StudyData {
   backgrounds: BackgroundRow[];
   sharedQTable: SharedQTableRow | null;
 }
+
+/** `participants/{code}` (A) or the `Participant` table (B): who is enrolled under which code. */
+export interface ParticipantRow {
+  code: string;
+  uid: string;
+  email: string | null;
+  consentVersion: string;
+  consentedAt: number;
+  enrolledAt: number;
+  finishedAt: number | null;
+  withdrawnAt: number | null;
+  note: string | null;
+}
+
+/** `roleGrants/{id}` (A) or the `RoleGrant` table (B): who was given admin, by whom, and when. */
+export interface RoleGrantRow {
+  id: string;
+  uid: string;
+  email: string | null;
+  role: 'admin';
+  action: 'grant' | 'revoke';
+  by: string;
+  at: number;
+  reason: string | null;
+}
+
+/** `configVersions/{tag}` (A) or the `ConfigVersion` table (B): every settings version the study ran. */
+export interface ConfigVersionRow {
+  tag: string;
+  fingerprint: string;
+  config: Record<string, unknown>;
+  activeFrom: number;
+  activeTo: number | null;
+  note: string | null;
+}
+
+/** The people, roles and settings records, from whichever implementation is bound. */
+export interface StudyRecords {
+  participants: ParticipantRow[];
+  roleGrants: RoleGrantRow[];
+  configVersions: ConfigVersionRow[];
+}
+
+/** The live Q-table document, `policy/competencyQ`. */
+export interface LiveQTable {
+  table: Record<string, Partial<Record<'none' | 'practice' | 'review', { q: number; n: number; visits: number }>>>;
+  updates: number;
+  updatedAt: number;
+  states: Record<string, { phase: string; tag: 'exploring' | 'exploiting' | 'no_choice'; leader: string | null }>;
+  lastUpdate: { updateId: string; globalSeq: number; kind: 'visit' | 'learn'; uid: string; participantCode: string | null; at: number } | null;
+}
+
+/** One entry of `policy/competencyQ/updates`, as the dashboard reads it. */
+export interface QUpdateRow {
+  updateId: string;
+  globalSeq: number;
+  kind: 'visit' | 'learn';
+  uid: string;
+  participantCode: string | null;
+  at: number;
+  levelId: number | null;
+  phase: string | null;
+  competency: string;
+  decisionId: string;
+  stateKey: string;
+  action: string;
+  decision: Record<string, unknown> | null;
+  learning: Record<string, unknown> | null;
+  configVersion: string;
+}

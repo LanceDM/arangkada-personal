@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { execSync } from 'child_process'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -35,8 +36,20 @@ const stripDevPages = (): Plugin => ({
   },
 })
 
+/** The commit the app is built from, stamped on every logged study record. */
+const appBuild = (() => {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+  } catch {
+    return 'unknown'
+  }
+})()
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_APP_BUILD': JSON.stringify(process.env.VITE_APP_BUILD ?? appBuild),
+  },
   plugins: [react(), tailwindcss(), stripDevPages()],
   cacheDir: '.vite-cache',
     resolve: {

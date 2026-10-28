@@ -35,7 +35,8 @@ const logEntry = (userId: string): CourseLogRow => ({
   verdicts: [],
   decisions: [{
     seq: 0, levelId: 6, phase: 'DRIVE:6', competency: 'parking', state: { mastery: 2, result: 'passed' }, masteryP: 0.6,
-    legal: ['none', 'practice', 'review'], action: 'practice', source: 'explore_1', probability: 0.8, probabilities: { practice: 0.8 }, leader: null, timestamp: 5,
+    legal: ['none', 'practice', 'review'], action: 'practice', source: 'explore_1', probability: 0.8, probabilities: { practice: 0.8 }, leader: null,
+    selection: 'explore', draw: 0.42, snapshot: { practice: { q: 0, visits: 0 } }, timestamp: 5,
   }],
   rewards: [{
     decisionId: '5:parking:0', competency: 'parking', state: { mastery: 1, result: 'failed' }, action: 'none', reward: 1.1,

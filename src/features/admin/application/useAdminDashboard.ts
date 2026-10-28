@@ -4,13 +4,18 @@ import { buildAdminJSONExport, buildAttemptsCSV, downloadFile, } from '@/feature
 import { calculateAverageScore, countCompletedLevels, countTotalCorrectDecisions, countTotalViolations, getTopWeakCompetencies, } from '@/features/admin/domain/adminMetrics';
 import { buildRuleSummaries } from '@/features/admin/domain/adminRules';
 import type { AttemptRow, DailyRow, ExamRow, StudyData, UserRow } from '@/features/admin/domain/adminReport';
+import { adminDeps } from './dependencies';
 import {
   buildBKTTrajectoryCSV,
   buildBackgroundCSV,
+  buildLoggedBKTCSV,
+  buildQUpdatesCSV,
   buildDecisionsCSV,
   buildRewardsCSV,
   buildStudyExport,
 } from '@/features/admin/domain/studyExport';
+
+export type StudyExportKind = 'json' | 'bkt' | 'decisions' | 'rewards' | 'background' | 'qupdates' | 'bktlog';
 
 interface UseAdminDashboardOptions {
   users: UserRow[];
@@ -86,15 +91,31 @@ export const useAdminDashboard = ({
   };
 
   /** The per-competency course's study data: per-user BKT, the shared Q-table, decisions, rewards; no IRT. */
-  const exportStudy = (kind: 'json' | 'bkt' | 'decisions' | 'rewards' | 'background') => {
+  const exportStudy = async (kind: StudyExportKind) => {
     const now = Date.now();
-    const data = buildStudyExport({ ...study, attempts }, now);
+    // The logs and the people/settings records are read only when exporting:
+    // they are the largest reads in the report.
+    const { logs, records } = adminDeps();
+    const [bktUpdates, qUpdates, events, participants, roleGrants, configVersions] = await Promise.all([
+      logs.bktUpdates().catch(() => []),
+      logs.qUpdates().catch(() => []),
+      logs.events().catch(() => []),
+      records.participants().catch(() => []),
+      records.roleGrants().catch(() => []),
+      records.configVersions().catch(() => []),
+    ]);
+    const data = buildStudyExport(
+      { ...study, attempts, logged: { bktUpdates, qUpdates, events }, records: { participants, roleGrants, configVersions } },
+      now
+    );
     const files = {
       json: () => downloadFile(`arangkada_study_${now}.json`, JSON.stringify(data, null, 2), 'application/json'),
       bkt: () => downloadFile(`arangkada_bkt_trajectory_${now}.csv`, buildBKTTrajectoryCSV(data), 'text/csv'),
       decisions: () => downloadFile(`arangkada_decisions_${now}.csv`, buildDecisionsCSV(data), 'text/csv'),
       rewards: () => downloadFile(`arangkada_rewards_${now}.csv`, buildRewardsCSV(data), 'text/csv'),
       background: () => downloadFile(`arangkada_background_${now}.csv`, buildBackgroundCSV(data), 'text/csv'),
+      qupdates: () => downloadFile(`arangkada_q_updates_${now}.csv`, buildQUpdatesCSV(data), 'text/csv'),
+      bktlog: () => downloadFile(`arangkada_bkt_log_${now}.csv`, buildLoggedBKTCSV(data), 'text/csv'),
     };
     files[kind]();
   };

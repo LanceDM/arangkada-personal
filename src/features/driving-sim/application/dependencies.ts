@@ -11,6 +11,9 @@ import type { RoutingMode } from '@/features/driving-sim/domain/telemetry/routin
 import type {
   AssessmentRepository,
   BackgroundFormRepository,
+  BKTLogRepository,
+  StudyEventRepository,
+  SurveyRepository,
   BriefingProgressRepository,
   CompetencyCourseRepository,
   LearnerHistoryRepository,
@@ -42,6 +45,14 @@ export interface DrivingSimDependencies {
   background: BackgroundFormRepository;
   /** Overrides BACKGROUND_FORM_ENABLED (muted by default). */
   backgroundFormEnabled?: boolean;
+  /** The participant's event stream. */
+  studyEvents: StudyEventRepository;
+  /** The participant's own BKT profile and its update log. */
+  bktLog: BKTLogRepository;
+  /** Questionnaire answers (ISO/IEC 25010, TAM). */
+  surveys: SurveyRepository;
+  /** The commit the app was built from, stamped on every logged record. */
+  appBuild?: string;
 }
 
 let bound: DrivingSimDependencies | null = null;

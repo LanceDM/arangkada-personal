@@ -14,9 +14,14 @@ import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCo
 import type { DecisionTelemetryDoc } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import type { RoutingTelemetryDoc } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type { GroupInEffect, RoutingCursor, RoutingGroup } from '@/features/driving-sim/domain/adaptive/courseRouting';
-import type { CourseCursor, DecisionRecord, QOperation, RewardRecord } from '@/domain/competencyRouting/course';
+import type { CourseCursor, DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
 import type { QTable } from '@/domain/competencyRouting/qLearning';
 import type { EvidenceSource } from '@/domain/learner/attempt';
+import type { StudyEvent } from '@/domain/study/studyEvent';
+import type { BKTProfileDoc, BKTUpdateRecord } from '@/domain/study/bktLog';
+import type { QLogContext, QLogEntry, QLogItem } from '@/domain/study/qLog';
+import type { StudyEnvelope } from '@/domain/study/studyEvent';
+import type { SurveyResponse } from '@/domain/study/survey';
 
 /** One recorded run, whichever source it came from. */
 export interface LearnerAttempt {
@@ -134,8 +139,13 @@ export interface CompetencyCourseRepository {
   saveCursor(uid: string, cursor: CourseCursor): Promise<void>;
   /** The shared Q-table; empty until the first participant's first decision. */
   loadQTable(): Promise<QTable>;
-  /** Applies operations to the newest shared table, atomically, and returns it. */
-  applyQOperations(operations: readonly QOperation[]): Promise<QTable>;
+  /**
+   * Applies the operations to the newest shared table, atomically, and writes
+   * one log entry per operation (`policy/competencyQ/updates`) in the same
+   * transaction, numbered by the table's own counter. Returns the table after
+   * and the entries written.
+   */
+  applyQLog(input: { items: readonly QLogItem[]; context: QLogContext; envelope: (index: number) => StudyEnvelope }): Promise<{ table: QTable; entries: QLogEntry[] }>;
   appendLog(uid: string, entry: CourseLogEntry): Promise<void>;
 }
 
@@ -161,4 +171,25 @@ export interface AssessmentRepository {
   /** Every sitting, oldest first. */
   load(uid: string): Promise<AssessmentSitting[]>;
   save(uid: string, sitting: AssessmentSitting): Promise<void>;
+}
+
+/**
+ * `users/{uid}/events`: the participant's append-only event stream. The store
+ * numbers each event (`seq`) from the participant's counter
+ * (`users/{uid}/state/events`), in one transaction with the writes.
+ */
+export interface StudyEventRepository {
+  append(uid: string, events: readonly Omit<StudyEvent, 'seq'>[]): Promise<void>;
+}
+
+/** `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates`: the participant's own BKT, written together. */
+export interface BKTLogRepository {
+  loadProfile(uid: string): Promise<BKTProfileDoc | null>;
+  record(uid: string, profile: BKTProfileDoc, entries: readonly BKTUpdateRecord[]): Promise<void>;
+}
+
+/** ISO/IEC 25010 and TAM answers: one record per participant per instrument. */
+export interface SurveyRepository {
+  load(uid: string, instrument: SurveyResponse['instrument']): Promise<SurveyResponse | null>;
+  save(uid: string, response: SurveyResponse): Promise<void>;
 }

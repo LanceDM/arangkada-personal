@@ -1,6 +1,7 @@
-import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, runTransaction, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, runTransaction, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
-import { COURSE_SCHEMA_VERSION, applyQOperations, type CourseCursor } from '@/domain/competencyRouting/course';
+import { COURSE_SCHEMA_VERSION, type CourseCursor } from '@/domain/competencyRouting/course';
+import { applyQLog, statesOf } from '@/domain/study/qLog';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
 import type {
   AssessmentRepository,
@@ -42,14 +43,30 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
     return snap.exists() ? ((snap.data().table as QTable) ?? emptyQTable()) : emptyQTable();
   },
 
-  async applyQOperations(operations) {
+  async applyQLog({ items, context, envelope }) {
     return runTransaction(db, async transaction => {
       const snap = await transaction.get(tableDoc());
       const current: QTable = snap.exists() ? (snap.data().table as QTable) : emptyQTable();
       const updates = snap.exists() ? Number(snap.data().updates ?? 0) : 0;
-      const next = applyQOperations(current, operations);
-      transaction.set(tableDoc(), plain({ schemaVersion: 1, table: next, updates: updates + operations.length, updatedAt: Date.now() }));
-      return next;
+      const applied = applyQLog({ table: current, items, firstGlobalSeq: updates + 1, context, envelope });
+      const last = applied.entries.at(-1);
+      // The live document the dashboard listens to: the table, each state's
+      // warm-up phase and exploring/exploiting tag, and the last change.
+      transaction.set(
+        tableDoc(),
+        plain({
+          schemaVersion: 1,
+          table: applied.table,
+          updates: updates + items.length,
+          updatedAt: Date.now(),
+          states: statesOf(applied.table),
+          lastUpdate: last ? { updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid, participantCode: last.participantCode, at: last.at } : null,
+        })
+      );
+      for (const entry of applied.entries) {
+        transaction.set(doc(collection(db, 'policy', 'competencyQ', 'updates'), entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
+      }
+      return applied;
     });
   },
 

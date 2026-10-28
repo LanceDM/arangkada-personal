@@ -15,7 +15,22 @@ rules_version = '2';
 //   users/{uid}/courseLog/{id}                     CourseLogEntry: decisions, rewards, table snapshot
 //   users/{uid}/assessmentSittings/{id}            AssessmentSitting: quiz, diagnostic, post-exam answers
 //   users/{uid}/study/background                   BackgroundResponse: the background form (muted by default)
+//   users/{uid}/events/{eventId}                   StudyEvent: the participant's event stream, append-only
+//   users/{uid}/state/events                       { nextSeq }: the event stream's counter
+//   users/{uid}/bkt/profile                        BKTProfileDoc: the participant's own BKT now
+//   users/{uid}/bktUpdates/{updateId}              BKTUpdateRecord: one per graded answer, append-only
+//   users/{uid}/surveys/{instrument}               SurveyResponse: ISO/IEC 25010 or TAM, written once
 //   policy/competencyQ                             the shared Q-table, learned online by every participant
+//   policy/competencyQ/updates/{updateId}          QLogEntry: every table change, append-only
+//   policy/config                                  the settings version in force (written by db:init)
+//   configVersions/{tag}                           every settings version (written by db:init)
+//   participants/{code}                            study enrolment (written by db:participant)
+//   roleGrants/{id}                                admin grants and revokes (written by db:role)
+//   meta/schema                                    which schema version the database was set up with
+//
+// Implementation B (VITE_DATABASE_MODE=firestore+sql) keeps participants,
+// role grants, settings versions and form answers in SQL Connect instead
+// (dataconnect/); the paths above for them are then unused. See DATABASE.md.
 //   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
 //   users/{uid}/dailyStreak/summary                DailyStreakSummary
 //   users/{uid}/dailyAttempts/{id}                 DailyAttempt, append-only
@@ -204,6 +219,72 @@ service cloud.firestore {
 
     // The shared table holds 8 states; every update is the whole table,
     // written in a transaction on the newest version.
+    // A logged record's own id is its eventId, made on the device; it never
+    // changes once written. A retried write may only touch the server time.
+    function isEnvelope(data, uid, id) {
+      return data.keys().hasAll(['schemaVersion', 'eventId', 'uid', 'at', 'sessionId', 'appBuild', 'configVersion'])
+        && data.schemaVersion == 1
+        && data.eventId == id
+        && data.uid == uid
+        && data.at is number
+        && data.sessionId is string
+        && data.appBuild is string
+        && data.configVersion is string;
+    }
+
+    function onlyServerTimeChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['serverAt']);
+    }
+
+    function isStudyEvent(data, uid, id) {
+      return isEnvelope(data, uid, id)
+        && data.keys().hasAll(['type', 'seq', 'payload'])
+        && data.type in [
+          'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered',
+          'background_submitted', 'survey_submitted', 'drive_planned', 'decision_made', 'drive_ended',
+          'verdict_computed', 'policy_decision', 'reward_computed', 'app_error'
+        ]
+        && (data.seq == null || data.seq is int)
+        && data.payload is map;
+    }
+
+    function isBKTUpdate(data, uid, id) {
+      return isEnvelope(data, uid, id)
+        && data.keys().hasAll(['userSeq', 'competency', 'source', 'correct', 'params', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter'])
+        && data.userSeq is int
+        && data.source in ['drive', 'quiz', 'diagnostic', 'post_exam']
+        && data.correct is bool
+        && data.params is map
+        && data.pBefore is number && data.pAfter is number;
+    }
+
+    function isBKTProfile(data, uid) {
+      return data.keys().hasAll(['schemaVersion', 'uid', 'configVersion', 'updates', 'competencies', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.uid == uid
+        && data.updates is int
+        && data.competencies is map
+        && data.competencies.size() == 11;
+    }
+
+    function isSurvey(data, instrument) {
+      return data.keys().hasOnly(['schemaVersion', 'instrument', 'formVersion', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.instrument == instrument
+        && instrument in ['iso25010', 'tam']
+        && data.formVersion is int
+        && data.answers is map
+        && data.timestamp is number;
+    }
+
+    function isQLogEntry(data, id) {
+      return isEnvelope(data, request.auth.uid, id)
+        && data.keys().hasAll(['globalSeq', 'kind', 'stateKey', 'action', 'tableAfter', 'statesAfter'])
+        && data.globalSeq is int
+        && data.kind in ['visit', 'learn']
+        && data.tableAfter is map;
+    }
+
     function isQTableDoc(data) {
       return data.keys().hasAll(['schemaVersion', 'table', 'updates', 'updatedAt'])
         && data.schemaVersion == 1
@@ -315,6 +396,43 @@ service cloud.firestore {
         allow update, delete: if false;
       }
 
+      // The event stream: append-only; its counter only moves forward.
+      match /events/{eventId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isStudyEvent(request.resource.data, uid, eventId);
+        allow update: if isOwner(uid) && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+
+      match /state/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && docId == 'events'
+          && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1;
+        allow update: if isOwner(uid) && docId == 'events'
+          && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq;
+        allow delete: if false;
+      }
+
+      // The participant's own BKT: the profile now, and one log entry per answer.
+      match /bkt/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid) && docId == 'profile' && isBKTProfile(request.resource.data, uid);
+        allow delete: if false;
+      }
+
+      match /bktUpdates/{updateId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId);
+        allow update: if isOwner(uid) && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+
+      match /surveys/{instrument} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isSurvey(request.resource.data, instrument);
+        allow update, delete: if false;
+      }
+
       // Quiz, diagnostic and post-exam answers, append-only; BKT reads all of them.
       match /assessmentSittings/{sittingId} {
         allow read: if isOwner(uid) || isAdmin();
@@ -368,6 +486,18 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    match /{path=**}/events/{eventId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/bktUpdates/{updateId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/surveys/{instrument} {
+      allow read: if isAdmin();
+    }
+
     // ── The shared Q-table ─────────────────────────────────
     // Learned online from the participants themselves: any signed-in player's
     // drive updates it, in a transaction. The rules check its shape only; a
@@ -376,6 +506,43 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create, update: if isSignedIn() && isQTableDoc(request.resource.data);
       allow delete: if false;
+
+      // Every change to the table, written in the same transaction by the
+      // participant whose decision or reward caused it.
+      match /updates/{updateId} {
+        allow read: if isAdmin();
+        allow create: if isSignedIn() && isQLogEntry(request.resource.data, updateId);
+        allow update: if isSignedIn() && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+    }
+
+    // ── Settings, enrolment and roles ───────────────────────
+    // Written only by the scripts in scripts/db with the service account,
+    // which these rules do not govern. The app reads the settings in force.
+    match /policy/config {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /configVersions/{tag} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /participants/{code} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /roleGrants/{grantId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /meta/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // ── Shared content ─────────────────────────────────────

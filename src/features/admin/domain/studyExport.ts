@@ -26,13 +26,22 @@ import {
   type CompetencyEvidence,
 } from '@/domain/learner/mastery/buildBKTProfile';
 import { masteryLevel, MIN_DRIVE_EVIDENCE_FOR_BENCHMARKING } from '@/domain/competencyRouting/mastery';
-import type { AttemptRow, BackgroundRow, CourseLogRow, SharedQTableRow, SittingRow, StudyData } from './adminReport';
+import type { AttemptRow, BackgroundRow, ConfigVersionRow, CourseLogRow, RoleGrantRow, SharedQTableRow, SittingRow, StudyData, StudyRecords } from './adminReport';
 
 /** The tutorial's steps teach the controls; they are not evidence of a competency. */
 const TUTORIAL_LEVEL_ID = 0;
 
+/** What the app logged as it ran (Firestore in both implementations). */
+export interface LoggedData {
+  bktUpdates: Record<string, unknown>[];
+  qUpdates: Record<string, unknown>[];
+  events: Record<string, unknown>[];
+}
+
 export interface ParticipantExport {
   userId: string;
+  /** The study code (P01...), when the participant is enrolled. */
+  participantCode: string | null;
   background: Omit<BackgroundRow, 'userId'> | null;
   bkt: {
     /** Every graded answer BKT read, in order, with P(L) before and after and the predicted P(correct). */
@@ -49,6 +58,10 @@ export interface ParticipantExport {
   courseLog: Omit<CourseLogRow, 'userId'>[];
   /** Quiz, diagnostic and post-exam answers (no IRT scoring). */
   sittings: Omit<SittingRow, 'userId'>[];
+  /** The BKT update log as the app wrote it at the time (`users/{uid}/bktUpdates`), in order. */
+  loggedBKT: Record<string, unknown>[];
+  /** The participant's event stream, in order. */
+  events: Record<string, unknown>[];
 }
 
 export interface StudyExport {
@@ -62,6 +75,12 @@ export interface StudyExport {
   /** The BKT model every trajectory was replayed with (Tentative literature defaults). */
   bktModel: typeof DEFAULT_BKT_MODEL;
   sharedQTable: SharedQTableRow | null;
+  /** The shared Q-table's whole update log, in `globalSeq` order. */
+  qUpdateLog: Record<string, unknown>[];
+  /** Every settings version the study ran under. */
+  configVersions: ConfigVersionRow[];
+  /** Admin grants and revocations. */
+  roleGrants: RoleGrantRow[];
   participants: ParticipantExport[];
 }
 
@@ -78,15 +97,23 @@ export const participantEvidence = (attempts: readonly AttemptRow[], sittings: r
     ...sittings.flatMap(sitting => sitting.answers),
   ].sort((a, b) => a.timestamp - b.timestamp);
 
+const num = (value: unknown) => (typeof value === 'number' ? value : Number.POSITIVE_INFINITY);
+
 export const buildStudyExport = (
-  data: StudyData & { attempts: readonly AttemptRow[] },
+  data: StudyData & { attempts: readonly AttemptRow[]; logged?: LoggedData; records?: StudyRecords },
   exportedAt: number
 ): StudyExport => {
+  const logged = data.logged ?? { bktUpdates: [], qUpdates: [], events: [] };
+  const records = data.records ?? { participants: [], roleGrants: [], configVersions: [] };
+  const codeOf = new Map(records.participants.map(p => [p.uid, p.code]));
   const userIds = [
     ...new Set([
       ...data.courseLogs.map(row => row.userId),
       ...data.sittings.map(row => row.userId),
       ...data.backgrounds.map(row => row.userId),
+      ...logged.events.map(row => String(row.uid)),
+      ...logged.bktUpdates.map(row => String(row.uid)),
+      ...records.participants.map(p => p.uid),
     ]),
   ].sort();
 
@@ -105,6 +132,7 @@ export const buildStudyExport = (
 
     return {
       userId,
+      participantCode: codeOf.get(userId) ?? null,
       background: background ? withoutUser(background) : null,
       bkt: { trajectory, finalMastery, finalLevel, evidence: counts },
       drives: attempts.map(attempt => {
@@ -115,6 +143,10 @@ export const buildStudyExport = (
       }),
       courseLog: data.courseLogs.filter(row => row.userId === userId).map(withoutUser),
       sittings: sittings.map(withoutUser),
+      loggedBKT: logged.bktUpdates.filter(row => row.uid === userId).sort((a, b) => num(a.userSeq) - num(b.userSeq)),
+      events: logged.events
+        .filter(row => row.uid === userId)
+        .sort((a, b) => num(a.seq) - num(b.seq) || num(a.at) - num(b.at)),
     };
   });
 
@@ -128,6 +160,9 @@ export const buildStudyExport = (
     },
     bktModel: DEFAULT_BKT_MODEL,
     sharedQTable: data.sharedQTable,
+    qUpdateLog: [...logged.qUpdates].sort((a, b) => num(a.globalSeq) - num(b.globalSeq)),
+    configVersions: records.configVersions,
+    roleGrants: records.roleGrants,
     participants,
   };
 };
@@ -150,11 +185,12 @@ export const buildBKTTrajectoryCSV = (study: StudyExport) =>
 /** One row per routing decision. */
 export const buildDecisionsCSV = (study: StudyExport) =>
   csv(
-    ['userId', 'seq', 'levelId', 'phase', 'competency', 'state', 'masteryP', 'legal', 'action', 'source', 'probability', 'leader', 'timestamp'],
+    ['userId', 'participantCode', 'seq', 'levelId', 'phase', 'competency', 'state', 'masteryP', 'legal', 'action', 'source', 'selection', 'probability', 'draw', 'leader', 'timestamp'],
     study.participants.flatMap(p =>
       p.courseLog.flatMap(entry =>
         entry.decisions.map(d => [
-          p.userId, d.seq, d.levelId, d.phase, d.competency, stateKey(d.state), d.masteryP, d.legal.join('|'), d.action, d.source, d.probability, d.leader ?? '', d.timestamp,
+          p.userId, p.participantCode ?? '', d.seq, d.levelId, d.phase, d.competency, stateKey(d.state), d.masteryP, d.legal.join('|'), d.action, d.source,
+          d.selection ?? '', d.probability, d.draw ?? '', d.leader ?? '', d.timestamp,
         ])
       )
     )
@@ -181,5 +217,31 @@ export const buildBackgroundCSV = (study: StudyExport) => {
     study.participants
       .filter(p => p.background)
       .map(p => [p.userId, p.background!.formVersion, p.background!.timestamp, ...questionIds.map(id => p.background!.answers[id] ?? '')])
+  );
+};
+
+const get = (row: Record<string, unknown>, path: string): unknown =>
+  path.split('.').reduce<unknown>((value, key) => (value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined), row);
+
+/** One row per Q-table log entry, in the order the updates landed. */
+export const buildQUpdatesCSV = (study: StudyExport) => {
+  const columns = [
+    'globalSeq', 'kind', 'uid', 'participantCode', 'at', 'configVersion', 'levelId', 'phase', 'competency', 'decisionId', 'stateKey', 'action',
+    'decision.selection', 'decision.warmUpPhase', 'decision.probability', 'decision.draw', 'decision.leader', 'decision.masteryP', 'decision.visitsBefore', 'decision.visitsAfter',
+    'learning.accuracy', 'learning.passed', 'learning.addedDecisions', 'learning.reward', 'learning.measuredBy', 'learning.nextStateKey', 'learning.maxNextQ',
+    'learning.gamma', 'learning.alpha', 'learning.target', 'learning.qBefore', 'learning.qAfter', 'learning.nBefore', 'learning.nAfter',
+  ];
+  return csv(columns, study.qUpdateLog.map(row => columns.map(column => get(row, column))));
+};
+
+/** One row per logged BKT update, as the app computed it at the time. */
+export const buildLoggedBKTCSV = (study: StudyExport) => {
+  const columns = [
+    'userSeq', 'at', 'configVersion', 'competency', 'source', 'origin.kind', 'origin.levelId', 'scenarioId', 'itemId', 'ruleId', 'correct', 'action', 'expectedAction',
+    'responseMs', 'timedOut', 'params.pTransit', 'params.pSlip', 'params.pGuess', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter', 'levelBefore', 'levelAfter', 'capApplied',
+  ];
+  return csv(
+    ['userId', 'participantCode', ...columns],
+    study.participants.flatMap(p => p.loggedBKT.map(row => [p.userId, p.participantCode ?? '', ...columns.map(column => get(row, column))]))
   );
 };

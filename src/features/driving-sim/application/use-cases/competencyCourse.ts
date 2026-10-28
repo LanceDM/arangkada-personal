@@ -13,7 +13,7 @@ import type { ActionLog } from '@/domain/learner/attempt';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import { buildBKTEvidence, buildBKTProfile } from '@/domain/learner/mastery/buildBKTProfile';
 import { COMPETENCIES } from '@/domain/learner/profile';
-import { QUIZ_PASS_CORRECT, STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
+import { DRIVE_PASS_CORRECT, QUIZ_PASS_CORRECT, STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
 import {
   driveCompetencies,
   driveCompleted,
@@ -45,6 +45,12 @@ import { pausedMsOf } from '@/features/driving-sim/domain/scoring/levelAttempt';
 import { buildDecisionTelemetry, recordRoutedDecision } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import { getCompetencyLabel } from '@/domain/learner/profile';
 import { drivingSimDeps } from '../dependencies';
+import { envelopeFor, recordBKT, recordEvents } from '../studyRecorder';
+import { pairQOperations, type QLogContext, type QLogEntry } from '@/domain/study/qLog';
+import type { StudyEventDraft } from '@/domain/study/studyEvent';
+import { isLikert, type SurveyResponse } from '@/domain/study/survey';
+import type { DecisionRecord, QOperation, RewardRecord } from '@/domain/competencyRouting/course';
+import type { QTable } from '@/domain/competencyRouting/qLearning';
 import { historyLogs, loadLearnerHistory } from '../learnerHistory';
 import type { AssessmentSitting } from '../ports';
 import type { AdaptivePlan } from './buildAdaptivePlan';
@@ -88,6 +94,7 @@ export const saveBackground = async (uid: string, answers: Record<string, string
     answers,
     timestamp: Date.now(),
   });
+  await recordEvents(uid, [{ type: 'background_submitted', payload: { formVersion: BACKGROUND_FORM_VERSION, answers } }]);
 };
 
 /** Every graded answer BKT reads, oldest first: drives (tutorial left out), quiz, diagnostic and post-exam answers. */
@@ -97,7 +104,159 @@ export const loadEvidence = async (uid: string): Promise<ActionLog[]> => {
   return historyLogs(history, answers);
 };
 
-const saveCursor = (uid: string, cursor: CourseCursor) => drivingSimDeps().competencyCourse.saveCursor(uid, cursor);
+/** Saves the cursor and logs the transition: from, to, and what triggered it. */
+const moveCursor = async (uid: string, from: CourseCursor, to: CourseCursor, trigger: string) => {
+  await drivingSimDeps().competencyCourse.saveCursor(uid, to);
+  await recordEvents(uid, [
+    {
+      type: 'course_transition',
+      levelId: phaseLevel(to.phase),
+      phase: phaseId(to.phase),
+      payload: {
+        from: phaseId(from.phase),
+        to: phaseId(to.phase),
+        trigger,
+        quiz: to.quiz,
+        pendingDecisions: to.pending.length,
+        seq: to.seq,
+        flagged: to.flagged.length,
+      },
+    },
+  ]);
+};
+
+/**
+ * Applies a drive's, quiz's or post-exam's Q operations to the shared table,
+ * writes the table's update log in the same transaction, and mirrors each
+ * decision and reward into the participant's event stream.
+ */
+const applyAndLogQ = async (
+  uid: string,
+  input: { operations: readonly QOperation[]; decisions: readonly DecisionRecord[]; rewards: readonly RewardRecord[]; context: Omit<QLogContext, 'participantCode'> }
+): Promise<{ tableAfter: QTable; entries: QLogEntry[] }> => {
+  const deps = drivingSimDeps();
+  const now = Date.now();
+  let entries: QLogEntry[] = [];
+  let tableAfter = await deps.competencyCourse.loadQTable();
+  if (input.operations.length > 0) {
+    const applied = await deps.competencyCourse.applyQLog({
+      items: pairQOperations(input.operations, input.decisions, input.rewards),
+      context: { ...input.context, participantCode: null },
+      envelope: i => envelopeFor(uid, now + i),
+    });
+    tableAfter = applied.table;
+    entries = applied.entries;
+  }
+  const byDecision = new Map(entries.map(e => [`${e.kind}:${e.decisionId}`, e]));
+  const drafts: StudyEventDraft[] = [
+    ...input.rewards.map(reward => {
+      const entry = byDecision.get(`learn:${reward.decisionId}`);
+      return {
+        type: 'reward_computed' as const,
+        levelId: input.context.levelId,
+        phase: input.context.phase,
+        attemptId: input.context.attemptId,
+        payload: { ...reward, qUpdateId: entry?.eventId ?? null, globalSeq: entry?.globalSeq ?? null, learning: entry?.learning ?? null },
+      };
+    }),
+    ...input.decisions.map(decision => {
+      const decisionId = `${decision.levelId}:${decision.competency}:${decision.seq}`;
+      const entry = byDecision.get(`visit:${decisionId}`);
+      return {
+        type: 'policy_decision' as const,
+        levelId: input.context.levelId,
+        phase: input.context.phase,
+        attemptId: input.context.attemptId,
+        payload: { ...decision, decisionId, qUpdateId: entry?.eventId ?? null, globalSeq: entry?.globalSeq ?? null, stateAfter: entry?.statesAfter[entry.stateKey] ?? null },
+      };
+    }),
+  ];
+  await recordEvents(uid, drafts);
+  return { tableAfter, entries };
+};
+
+/** One event per answered item, then one for the sitting. */
+const sittingEvents = (
+  kind: 'quiz' | 'diagnostic' | 'post_exam',
+  items: readonly BankItem[],
+  answers: readonly ActionLog[],
+  context: { levelId: number | null; phase: string | null; attempt: number | null }
+): StudyEventDraft[] => [
+  ...answers.map((answer, i) => ({
+    type: 'item_answered' as const,
+    at: answer.timestamp,
+    levelId: context.levelId,
+    phase: context.phase,
+    payload: {
+      sitting: kind,
+      quizAttempt: context.attempt,
+      position: i + 1,
+      itemId: items[i].id,
+      competency: items[i].competency,
+      choice: answer.action,
+      expected: answer.expectedAction ?? null,
+      correct: answer.result === 'correct',
+      responseMs: answer.reactionTime ?? null,
+    },
+  })),
+  {
+    type: 'sitting_submitted' as const,
+    levelId: context.levelId,
+    phase: context.phase,
+    payload: {
+      sitting: kind,
+      quizAttempt: context.attempt,
+      items: answers.length,
+      correct: answers.filter(a => a.result === 'correct').length,
+      itemIds: items.map(item => item.id),
+    },
+  },
+];
+
+/** One event per graded decision a drive logged, then the drive's end. */
+const driveEvents = (
+  result: LevelResult,
+  context: { levelId: number; phase: string | null; attemptId: string | null },
+  ended: Record<string, unknown>
+): StudyEventDraft[] => [
+  ...result.logs.map(log => ({
+    type: 'decision_made' as const,
+    at: log.timestamp,
+    levelId: context.levelId,
+    phase: context.phase,
+    attemptId: context.attemptId,
+    payload: {
+      scenarioId: log.scenarioId ?? null,
+      ruleId: log.ruleId ?? null,
+      competency: log.competency ?? null,
+      action: log.action,
+      expectedAction: log.expectedAction ?? null,
+      result: log.result,
+      points: log.points,
+      reactionMs: log.reactionTime ?? null,
+      timedOut: log.reactionCensored === true,
+      severity: log.severity ?? null,
+      weight: log.weight ?? null,
+      support: log.support ?? null,
+    },
+  })),
+  {
+    type: 'drive_ended' as const,
+    levelId: context.levelId,
+    phase: context.phase,
+    attemptId: context.attemptId,
+    payload: {
+      completed: result.completed,
+      score: result.score,
+      stars: result.stars,
+      violations: result.violations,
+      correctActions: result.correctActions,
+      crashReason: result.crashReason ?? null,
+      endReason: result.crashReason ? 'crashed' : result.completed ? 'finished' : 'not_completed',
+      ...ended,
+    },
+  },
+];
 
 // --- answering bank items -------------------------------------------------------
 
@@ -107,7 +266,8 @@ export const answerLog = (
   choice: number | null,
   source: 'quiz' | 'diagnostic' | 'post_exam',
   at: number,
-  quizAttempt?: number
+  quizAttempt?: number,
+  responseMs?: number | null
 ): ActionLog => ({
   timestamp: at,
   action: choice === null ? 'unanswered' : `choice_${'ABCD'[choice]}`,
@@ -118,13 +278,15 @@ export const answerLog = (
   source,
   itemId: item.id,
   ...(quizAttempt !== undefined ? { quizAttempt } : {}),
+  // How long the item was on screen before it was answered; BKT does not read it.
+  ...(typeof responseMs === 'number' ? { reactionTime: responseMs } : {}),
 });
 
 // --- module and quiz ----------------------------------------------------------------
 
 export const markCourseLessonsRead = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
   const next = lessonsRead(cursor);
-  await saveCursor(uid, next);
+  await moveCursor(uid, cursor, next, 'lessons_read');
   return next;
 };
 
@@ -146,11 +308,12 @@ export const submitCourseQuiz = async (
   uid: string,
   cursor: CourseCursor,
   items: readonly BankItem[],
-  choices: readonly (number | null)[]
+  choices: readonly (number | null)[],
+  responseMs: readonly (number | null)[] = []
 ): Promise<{ cursor: CourseCursor; results: QuizCompetencyResult[] }> => {
   const at = Date.now();
   const attempt = cursor.quiz?.attempt ?? 1;
-  const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'quiz', at + i, attempt));
+  const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'quiz', at + i, attempt, responseMs[i]));
   await drivingSimDeps().assessments.save(uid, {
     schemaVersion: 1,
     kind: 'quiz',
@@ -159,6 +322,8 @@ export const submitCourseQuiz = async (
     answers,
     timestamp: at,
   });
+  await recordEvents(uid, sittingEvents('quiz', items, answers, { levelId: phaseLevel(cursor.phase), phase: phaseId(cursor.phase), attempt }));
+  await recordBKT(uid);
   const graded: QuizAnswer[] = items.map((item, i) => ({ itemId: item.id, competency: item.competency, correct: choices[i] === item.answer }));
   const competencies = [...new Set(items.map(item => item.competency))];
   const results = competencies.map(competency => {
@@ -187,7 +352,12 @@ export const submitCourseQuiz = async (
     const outcome = quizMeasured(next, measurements, table, at);
     next = outcome.cursor;
     if (outcome.operations.length > 0) {
-      const tableAfter = await deps.competencyCourse.applyQOperations(outcome.operations);
+      const { tableAfter } = await applyAndLogQ(uid, {
+        operations: outcome.operations,
+        decisions: [],
+        rewards: outcome.rewards,
+        context: { levelId: level, phase: phaseId(cursor.phase), attemptId: null },
+      });
       await deps.competencyCourse.appendLog(uid, {
         schemaVersion: 1,
         kind: 'quiz',
@@ -204,19 +374,19 @@ export const submitCourseQuiz = async (
       });
     }
   }
-  await saveCursor(uid, next);
+  await moveCursor(uid, cursor, next, 'quiz_submitted');
   return { cursor: next, results };
 };
 
 export const finishCourseQuizReview = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
   const next = quizReviewDone(cursor);
-  await saveCursor(uid, next);
+  await moveCursor(uid, cursor, next, 'quiz_review_done');
   return next;
 };
 
 export const markCourseReviewShown = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
   const next = reviewShown(cursor);
-  await saveCursor(uid, next);
+  await moveCursor(uid, cursor, next, 'review_shown');
   return next;
 };
 
@@ -264,6 +434,22 @@ export const planCourseDrive = async (uid: string, cursor: CourseCursor, attempt
   } else {
     throw new Error(`no drive in ${phaseId(phase)}`);
   }
+
+  await recordEvents(uid, [
+    {
+      type: 'drive_planned',
+      levelId,
+      phase: phaseId(phase),
+      payload: {
+        attemptSeed,
+        counted: composed?.items.map(item => ({ ...item })) ?? [],
+        structural: composed?.structural ?? [],
+        shortfall: composed?.shortfall ?? {},
+        route: level.events.map(event => event.id),
+        support: 'full',
+      },
+    },
+  ]);
 
   return {
     levelId,
@@ -363,11 +549,22 @@ export const completeCourseDrive = async ({
   // The tutorial: no verdicts, no decisions.
   if (!run.composed) {
     const outcome = driveCompleted(cursor, { measurements: [], scenarioIds, table: {}, rng: Math.random, now });
-    await saveCursor(uid, outcome.cursor);
+    await recordEvents(uid, driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now }));
+    await moveCursor(uid, cursor, outcome.cursor, 'drive_completed');
     return { cursor: outcome.cursor, verdicts: [], lines: [], note: 'Tutorial done. Continue to Level 1.' };
   }
 
   const verdicts = competencyVerdicts(run.composed.items, result.logs);
+  const where = { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId };
+  await recordEvents(uid, [
+    ...driveEvents(result, where, { startedAt: startedAt ?? null, endedAt: now, routeLength: level.roadLength }),
+    ...verdicts.map(v => ({
+      type: 'verdict_computed' as const,
+      ...where,
+      payload: { ...v, rule: cursor.phase.kind === 'FINAL' ? 'final exam: 1 item, 25-point scale' : `${DRIVE_PASS_CORRECT} of ${v.total}`, scenarios: run.composed!.items.filter(item => item.competency === v.competency).map(item => item.scenarioId) },
+    })),
+  ]);
+  await recordBKT(uid);
 
   if (cursor.phase.kind === 'FINAL') {
     const passed = result.completed;
@@ -385,7 +582,7 @@ export const completeCourseDrive = async ({
       decisions: [], rewards: [], tableAfter: await deps.competencyCourse.loadQTable(), timestamp: now,
       ...(passed ? { endReason: 'certified' as const } : {}),
     });
-    await saveCursor(uid, next);
+    await moveCursor(uid, cursor, next, passed ? 'final_passed' : 'final_failed');
     return {
       cursor: next,
       verdicts,
@@ -408,7 +605,12 @@ export const completeCourseDrive = async ({
 
   const table = await deps.competencyCourse.loadQTable();
   const outcome = driveCompleted(cursor, { measurements, scenarioIds, table, rng: Math.random, now });
-  const tableAfter = outcome.operations.length > 0 ? await deps.competencyCourse.applyQOperations(outcome.operations) : table;
+  const { tableAfter } = await applyAndLogQ(uid, {
+    operations: outcome.operations,
+    decisions: outcome.decisions,
+    rewards: outcome.rewards,
+    context: { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId },
+  });
   await deps.competencyCourse.appendLog(uid, {
     schemaVersion: 1,
     kind: 'drive',
@@ -424,7 +626,7 @@ export const completeCourseDrive = async ({
     timestamp: now,
     ...(outcome.decisions.some(d => d.source === 'cap') ? { endReason: 'cap_reached' as const } : {}),
   });
-  await saveCursor(uid, outcome.cursor);
+  await moveCursor(uid, cursor, outcome.cursor, 'drive_completed');
 
   const lines = verdicts.map(v => {
     const decision = outcome.decisions.find(d => d.competency === v.competency);
@@ -450,16 +652,24 @@ export const diagnosticItems = (): BankItem[] => COMPETENCIES.flatMap(c => items
 export const postExamItems = (): BankItem[] => COMPETENCIES.flatMap(c => itemsFor(POST_EXAM_ITEMS[c]));
 
 /** No feedback, one competency per item; the answers set each competency's starting mastery (T = 0). */
-export const saveDiagnostic = async (uid: string, items: readonly BankItem[], choices: readonly (number | null)[]) => {
+export const saveDiagnostic = async (
+  uid: string,
+  items: readonly BankItem[],
+  choices: readonly (number | null)[],
+  responseMs: readonly (number | null)[] = []
+) => {
   const at = Date.now();
+  const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'diagnostic', at + i, undefined, responseMs[i]));
   await drivingSimDeps().assessments.save(uid, {
     schemaVersion: 1,
     kind: 'diagnostic',
     levelId: null,
     attempt: null,
-    answers: items.map((item, i) => answerLog(item, choices[i] ?? null, 'diagnostic', at + i)),
+    answers,
     timestamp: at,
   });
+  await recordEvents(uid, sittingEvents('diagnostic', items, answers, { levelId: null, phase: null, attempt: null }));
+  await recordBKT(uid);
 };
 
 /**
@@ -471,13 +681,16 @@ export const completePostExam = async (
   uid: string,
   cursor: CourseCursor,
   items: readonly BankItem[],
-  choices: readonly (number | null)[]
+  choices: readonly (number | null)[],
+  responseMs: readonly (number | null)[] = []
 ): Promise<{ cursor: CourseCursor; theta: number; se: number; correct: number }> => {
   const deps = drivingSimDeps();
   const at = Date.now();
-  const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'post_exam', at + i));
+  const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'post_exam', at + i, undefined, responseMs[i]));
   const ability = raschEAP(items.map((item, i) => ({ b: 0, correct: choices[i] === item.answer })));
   await deps.assessments.save(uid, { schemaVersion: 1, kind: 'post_exam', levelId: null, attempt: null, answers, ability, timestamp: at });
+  await recordEvents(uid, sittingEvents('post_exam', items, answers, { levelId: null, phase: phaseId(cursor.phase), attempt: null }));
+  await recordBKT(uid);
 
   const byCompetency: Partial<Record<DrivingCompetency, { accuracy: number; passed: boolean }>> = {};
   for (const competency of COMPETENCIES) {
@@ -488,12 +701,17 @@ export const completePostExam = async (
   }
   const table = await deps.competencyCourse.loadQTable();
   const settled = postExamCompleted(cursor, byCompetency, table, at);
-  const tableAfter = settled.operations.length > 0 ? await deps.competencyCourse.applyQOperations(settled.operations) : table;
+  const { tableAfter } = await applyAndLogQ(uid, {
+    operations: settled.operations,
+    decisions: [],
+    rewards: settled.rewards,
+    context: { levelId: null, phase: phaseId(cursor.phase), attemptId: null },
+  });
   await deps.competencyCourse.appendLog(uid, {
     schemaVersion: 1, kind: 'post_exam', levelId: 0, phase: phaseId(cursor.phase), attemptId: null,
     verdicts: [], decisions: [], rewards: settled.rewards, tableAfter, timestamp: at,
   });
-  await saveCursor(uid, settled.cursor);
+  await moveCursor(uid, cursor, settled.cursor, 'post_exam_completed');
   return { cursor: settled.cursor, theta: ability.theta, se: ability.se, correct: answers.filter(a => a.result === 'correct').length };
 };
 
@@ -543,4 +761,21 @@ export const completeFreeReplayDrive = async (uid: string, result: LevelResult, 
     ...(telemetry ? { fsmMetrics: telemetry.metrics, reactionLatencies: telemetry.reactionLatencies } : {}),
   });
   if (telemetry) await storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions);
+  await recordEvents(uid, driveEvents(result, { levelId: result.levelId, phase: 'FREE_REPLAY', attemptId }, { freeReplay: true }));
+  await recordBKT(uid);
 };
+
+// --- questionnaires ----------------------------------------------------------------------
+
+/**
+ * Saves one questionnaire (ISO/IEC 25010 or TAM): every value 1-5. The items
+ * are not in the app yet; this is the save path they will use.
+ */
+export const saveSurvey = async (uid: string, response: SurveyResponse): Promise<void> => {
+  if (!Object.values(response.answers).every(isLikert)) throw new Error('Every answer must be a whole number from 1 to 5.');
+  await drivingSimDeps().surveys.save(uid, response);
+  await recordEvents(uid, [{ type: 'survey_submitted', payload: { instrument: response.instrument, formVersion: response.formVersion, answers: response.answers } }]);
+};
+
+/** Logs something that happened outside the course's own steps (a session start, a page view). */
+export const logStudyEvent = (uid: string, draft: StudyEventDraft): Promise<void> => recordEvents(uid, [draft]);

@@ -1,0 +1,44 @@
+# Participant writes: each row is keyed by the caller's own uid.
+
+mutation UpsertMe @auth(level: USER) {
+  user_upsert(data: { uid_expr: "auth.uid", email_expr: "auth.token.email" })
+}
+
+mutation SaveBackgroundAnswer(
+  $questionId: String!
+  $formVersion: Int!
+  $answer: String!
+  $answeredAt: Timestamp!
+) @auth(level: USER) {
+  backgroundResponse_upsert(
+    data: {
+      userUid_expr: "auth.uid"
+      questionId: $questionId
+      formVersion: $formVersion
+      answer: $answer
+      answeredAt: $answeredAt
+    }
+  )
+}
+
+mutation SaveSurveyAnswer(
+  $instrument: String!
+  $itemId: String!
+  $formVersion: Int!
+  $value: Int!
+  $answeredAt: Timestamp!
+) @auth(level: USER) {
+  surveyResponse_upsert(
+    data: {
+      userUid_expr: "auth.uid"
+      instrument: $instrument
+      itemId: $itemId
+      formVersion: $formVersion
+      value: $value
+      answeredAt: $answeredAt
+    }
+  )
+}
+
+# Participants, roles and settings versions are written by the scripts in
+# scripts/db with the service account (admin privileges), not by the app.

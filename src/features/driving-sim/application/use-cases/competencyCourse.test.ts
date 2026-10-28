@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
 import { provideDrivingSimDependencies } from '../dependencies';
-import { memoryAssessments, memoryBackground, memoryCompetencyCourse, memoryCourseStore, type MemoryCourseStore } from '../testDependencies';
+import { memoryAssessments, memoryBackground, memoryStudyLogs, memoryCompetencyCourse, memoryCourseStore, type MemoryCourseStore } from '../testDependencies';
 import {
   completeCourseDrive,
   completePostExam,
@@ -47,6 +47,7 @@ beforeEach(() => {
     competencyCourse: memoryCompetencyCourse(store),
     assessments: memoryAssessments(store),
     background: memoryBackground(store),
+    ...memoryStudyLogs(store),
   });
 });
 
@@ -137,5 +138,48 @@ describe('the per-competency course, end to end', () => {
     const run = await planCourseDrive(UID, cursor, 5);
     expect(run.composed!.items).toHaveLength(11);
     expect(run.plan.level!.events.every(event => event.points === 25)).toBe(true);
+  });
+
+  it('logs every step: events in order, a BKT entry per answer, and the Q-table log', async () => {
+    let cursor: CourseCursor = (await loadCompetencyCourse(UID)).cursor;
+    const diagnostic = diagnosticItems();
+    await saveDiagnostic(UID, diagnostic, answerAll(diagnostic, true), diagnostic.map(() => 1500));
+    cursor = await markCourseLessonsRead(UID, cursor);
+    let run = await planCourseDrive(UID, cursor, 1);
+    cursor = (await completeCourseDrive({ uid: UID, cursor, run, result: resultFor(run) })).cursor;
+    cursor = await markCourseLessonsRead(UID, cursor);
+    const quiz = drawCourseQuiz(cursor, 7);
+    cursor = (await submitCourseQuiz(UID, cursor, quiz.items, answerAll(quiz.items, true))).cursor;
+    run = await planCourseDrive(UID, cursor, 2);
+    await completeCourseDrive({ uid: UID, cursor, run, result: resultFor(run, ['document_awareness']) });
+
+    // The event stream: numbered 1, 2, 3... and stamped with the envelope.
+    const events = store.events.get(UID)!;
+    expect(events.map(e => e.seq)).toEqual(events.map((_, i) => i + 1));
+    expect(events.every(e => e.configVersion && e.sessionId && e.eventId && e.uid === UID)).toBe(true);
+    const types = new Set(events.map(e => e.type));
+    for (const type of ['item_answered', 'sitting_submitted', 'course_transition', 'drive_planned', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision']) {
+      expect(types.has(type as never), type).toBe(true);
+    }
+    const answered = events.find(e => e.type === 'item_answered' && e.payload.sitting === 'diagnostic')!;
+    expect(answered.payload.responseMs).toBe(1500);
+
+    // BKT: one logged update per graded answer, numbered, and the profile matches.
+    const updates = store.bktUpdates.get(UID)!;
+    const graded = 55 + quiz.items.length + run.composed!.items.length;
+    expect(updates).toHaveLength(graded);
+    expect(updates.map(u => u.userSeq)).toEqual(updates.map((_, i) => i + 1));
+    const profile = store.bktProfiles.get(UID)!;
+    expect(profile.updates).toBe(graded);
+    const last = updates.at(-1)!;
+    expect(profile.competencies[last.competency].p).toBe(last.pAfter);
+    expect(updates.filter(u => u.source === 'diagnostic').every(u => u.params.pTransit === 0)).toBe(true);
+
+    // The Q-table log: one visit per decision, numbered by the table's own counter, tagged.
+    expect(store.qUpdates.map(u => u.globalSeq)).toEqual(store.qUpdates.map((_, i) => i + 1));
+    const visits = store.qUpdates.filter(u => u.kind === 'visit');
+    expect(visits).toHaveLength(store.logs.at(-1)!.decisions.filter(d => d.source !== 'cap').length);
+    expect(visits.every(v => ['explore', 'exploit', 'forced'].includes(v.decision!.selection))).toBe(true);
+    expect(store.qUpdates.at(-1)!.tableAfter).toEqual(store.table);
   });
 });

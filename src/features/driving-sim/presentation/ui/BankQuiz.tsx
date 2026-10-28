@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { AlertCircle, BrainCircuit, CheckCircle2, ClipboardList } from 'lucide-react';
 import type { BankItem } from '@/domain/assessment/questionBank';
 import { getCompetencyLabel } from '@/domain/learner/profile';
@@ -23,7 +23,7 @@ interface BankQuizProps {
    * Called once, when the last item is answered. A short quiz returns its
    * per-competency results to show; an exam returns nothing (no feedback).
    */
-  onSubmit: (choices: (number | null)[]) => Promise<BankQuizResult[] | null>;
+  onSubmit: (choices: (number | null)[], responseMs: (number | null)[]) => Promise<BankQuizResult[] | null>;
   /** After the results: continue (passed, or retake drawn), or close. */
   onDone: () => void;
   onClose?: () => void;
@@ -43,12 +43,15 @@ const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onDone, onClose }: B
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // How long each item was on screen before it was answered, for the logs.
+  const shownAt = useRef<number>(Date.now());
+  const timings = useRef<(number | null)[]>(items.map(() => null));
 
   const submit = async (final: (number | null)[]) => {
     setSaving(true);
     setError(null);
     try {
-      setResults(await onSubmit(final));
+      setResults(await onSubmit(final, [...timings.current]));
       setSubmitted(true);
     } catch (failure) {
       console.error('Failed to save the answers:', failure);
@@ -59,6 +62,9 @@ const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onDone, onClose }: B
   };
 
   const answer = (choice: number) => {
+    const now = Date.now();
+    timings.current[step] = now - shownAt.current;
+    shownAt.current = now;
     const next = choices.map((c, i) => (i === step ? choice : c));
     setChoices(next);
     if (step < items.length - 1) setStep(step + 1);

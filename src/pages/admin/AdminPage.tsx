@@ -131,7 +131,7 @@ const Admin = () => {
       topWeakCompetencies={dashboard.topWeakCompetencies}
       onExportJSON={dashboard.exportJSON}
       onExportAttemptsCSV={dashboard.exportAttemptsCSV}
-      onExportStudy={dashboard.exportStudy}
+      onExportStudy={kind => void dashboard.exportStudy(kind)}
       studyParticipants={dashboard.studyParticipants}
     />
   );

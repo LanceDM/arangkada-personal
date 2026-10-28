@@ -49,6 +49,8 @@ import {
   GAMMA,
   type CompetencyAction,
   type DecisionPhase,
+  type DecisionSelection,
+  type PolicyDecision,
   type QState,
   type QTable,
   type RewardWeights,
@@ -281,6 +283,12 @@ export interface DecisionRecord {
   probability: number;
   probabilities: Partial<Record<CompetencyAction, number>>;
   leader: CompetencyAction | null;
+  /** Explored, exploited or forced (only one legal action, or the cap). */
+  selection: DecisionSelection;
+  /** The random number the action was drawn with; null when nothing was drawn. */
+  draw: number | null;
+  /** Every legal action's Q and visits when the decision was made. */
+  snapshot: PolicyDecision['snapshot'];
   timestamp: number;
 }
 
@@ -462,7 +470,8 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
       if (progress.flagged) flagged.push({ levelId: level, competency: m.competency });
       decisions.push({
         seq: seq++, levelId: level, phase: phaseId(cursor.phase), competency: m.competency, state, masteryP: m.masteryP,
-        legal, action: 'none', source: 'cap', probability: 1, probabilities: { none: 1 }, leader: null, timestamp: input.now,
+        legal, action: 'none', source: 'cap', probability: 1, probabilities: { none: 1 }, leader: null,
+        selection: 'forced', draw: null, snapshot: {}, timestamp: input.now,
       });
       stage[m.competency] = progress;
       continue;
@@ -480,7 +489,8 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
     const record: DecisionRecord = {
       seq: seq++, levelId: level, phase: phaseId(cursor.phase), competency: m.competency, state, masteryP: m.masteryP,
       legal: decision.legal, action: decision.action, source: decision.phase, probability: decision.probability,
-      probabilities: decision.probabilities, leader: decision.leader, timestamp: input.now,
+      probabilities: decision.probabilities, leader: decision.leader,
+      selection: decision.selection, draw: decision.draw, snapshot: decision.snapshot, timestamp: input.now,
     };
     decisions.push(record);
     newPending.push({

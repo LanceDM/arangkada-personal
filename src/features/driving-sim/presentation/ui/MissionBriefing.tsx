@@ -39,7 +39,7 @@ export interface BriefingGate {
     items: readonly BankItem[];
     attempt: number;
     cap: number;
-    onSubmit: (choices: (number | null)[]) => Promise<BankQuizResult[]>;
+    onSubmit: (choices: (number | null)[], responseMs: (number | null)[]) => Promise<BankQuizResult[]>;
     onDone: () => void;
   } | null;
   /** Whether the stage has a quiz at all (the tutorial has none). */

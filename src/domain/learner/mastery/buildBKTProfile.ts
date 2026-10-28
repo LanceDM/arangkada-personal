@@ -168,8 +168,14 @@ export interface BKTStep {
    * next-answer AUC and RMSE.
    */
   predictedCorrect: number;
+  /** P(L) given this answer, before the learning step. */
+  posterior: number;
   /** P(L) after this answer (posterior plus the learning step). */
   pAfter: number;
+  /** The T, S and G this answer was updated with. */
+  params: BKTEvidenceParams;
+  /** Position of the answer in the logs passed in, so a caller can find where it came from. */
+  logIndex: number;
   itemId?: string;
   scenarioId?: string;
 }
@@ -186,13 +192,14 @@ export const bktTrajectory = (logs: ActionLog[], params: BKTModel | BKTParams = 
     return acc;
   }, {} as Record<DrivingCompetency, number>);
   const steps: BKTStep[] = [];
-  for (const log of logs) {
-    if (!isBKTEvidence(log)) continue;
+  logs.forEach((log, logIndex) => {
+    if (!isBKTEvidence(log)) return;
     const source = evidenceSourceOf(log);
     const evidence = paramsForSource(model, source);
     const pBefore = mastery[log.competency];
     const correct = log.result === 'correct';
     const pAfter = updateMastery(pBefore, correct, evidence);
+    const posterior = updateMastery(pBefore, correct, { ...evidence, pTransit: 0 });
     mastery[log.competency] = pAfter;
     steps.push({
       timestamp: log.timestamp,
@@ -201,11 +208,14 @@ export const bktTrajectory = (logs: ActionLog[], params: BKTModel | BKTParams = 
       correct,
       pBefore,
       predictedCorrect: pBefore * (1 - evidence.pSlip) + (1 - pBefore) * evidence.pGuess,
+      posterior,
       pAfter,
+      params: evidence,
+      logIndex,
       ...(log.itemId ? { itemId: log.itemId } : {}),
       ...(log.scenarioId ? { scenarioId: log.scenarioId } : {}),
     });
-  }
+  });
   return steps;
 };
 

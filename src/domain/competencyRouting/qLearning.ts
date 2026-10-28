@@ -106,7 +106,29 @@ export interface PolicyDecision {
   legal: CompetencyAction[];
   /** The leader the commit phases were built around; null while exploring. */
   leader: CompetencyAction | null;
+  /**
+   * Whether this choice explored or exploited: `exploit` when it took the
+   * leader, `explore` when it took another action (or no leader exists yet),
+   * `forced` when only one action was legal.
+   */
+  selection: DecisionSelection;
+  /** The uniform random number the choice was drawn with; null when nothing was drawn. */
+  draw: number | null;
+  /** Every legal action's Q and visits at the moment of the decision. */
+  snapshot: Partial<Record<CompetencyAction, { q: number; visits: number }>>;
 }
+
+/** Exploration or exploitation, per decision. */
+export type DecisionSelection = 'explore' | 'exploit' | 'forced';
+
+/** Exploration or exploitation, per state: the warm-up phase it is in. */
+export type StateTag = 'exploring' | 'exploiting' | 'no_choice';
+
+export const selectionOf = (phase: DecisionPhase | 'cap', action: CompetencyAction, leader: CompetencyAction | null): DecisionSelection =>
+  phase === 'only_legal' || phase === 'cap' ? 'forced' : leader !== null && action === leader ? 'exploit' : 'explore';
+
+export const tagOfPhase = (phase: DecisionPhase): StateTag =>
+  phase === 'only_legal' ? 'no_choice' : phase === 'explore_1' || phase === 'explore_2' ? 'exploring' : 'exploiting';
 
 /** What the fallback rule needs to break a tie: the state and whether this competency failed before. */
 export interface FallbackContext {
@@ -141,14 +163,16 @@ export const leaderOf = (
 const uniform = (actions: CompetencyAction[]) =>
   Object.fromEntries(actions.map(action => [action, 1 / actions.length])) as Partial<Record<CompetencyAction, number>>;
 
-const draw = (probabilities: Partial<Record<CompetencyAction, number>>, rng: () => number): CompetencyAction => {
+/** Draws an action; returns it with the random number used, which is logged. */
+const draw = (probabilities: Partial<Record<CompetencyAction, number>>, rng: () => number): [CompetencyAction, number] => {
   const entries = Object.entries(probabilities) as [CompetencyAction, number][];
-  let roll = rng();
+  const value = rng();
+  let roll = value;
   for (const [action, p] of entries) {
-    if (roll < p) return action;
+    if (roll < p) return [action, value];
     roll -= p;
   }
-  return entries[entries.length - 1][0];
+  return [entries[entries.length - 1][0], value];
 };
 
 /**
@@ -173,16 +197,27 @@ export const chooseAction = (
   warmUp: WarmUp = DEFAULT_WARM_UP
 ): PolicyDecision => {
   const legal = legalActions(state);
-  if (legal.length === 1) {
-    return { action: legal[0], phase: 'only_legal', probability: 1, probabilities: { [legal[0]]: 1 }, legal, leader: null };
-  }
+  const snapshot = Object.fromEntries(
+    legal.map(action => [action, { q: cell(table, state, action).q, visits: cell(table, state, action).visits }])
+  ) as PolicyDecision['snapshot'];
+  const decided = (
+    action: CompetencyAction,
+    phase: DecisionPhase,
+    probabilities: Partial<Record<CompetencyAction, number>>,
+    leader: CompetencyAction | null,
+    value: number | null
+  ): PolicyDecision => ({
+    action, phase, probability: probabilities[action]!, probabilities, legal, leader,
+    selection: selectionOf(phase, action, leader), draw: value, snapshot,
+  });
+  if (legal.length === 1) return decided(legal[0], 'only_legal', { [legal[0]]: 1 }, null, null);
   const visits = (action: CompetencyAction) => cell(table, state, action).visits;
 
   const needFirst = legal.filter(action => visits(action) < warmUp.exploreFirst);
   if (needFirst.length > 0) {
     const probabilities = uniform(needFirst);
-    const action = draw(probabilities, rng);
-    return { action, phase: 'explore_1', probability: probabilities[action]!, probabilities, legal, leader: null };
+    const [action, value] = draw(probabilities, rng);
+    return decided(action, 'explore_1', probabilities, null, value);
   }
 
   const leader = leaderOf(table, state, legal, fallbackAction(fallback));
@@ -194,8 +229,8 @@ export const chooseAction = (
 
   if (visits(leader) < warmUp.commitLeader) {
     const probabilities = floored();
-    const action = draw(probabilities, rng);
-    return { action, phase: 'commit_1', probability: probabilities[action]!, probabilities, legal, leader };
+    const [action, value] = draw(probabilities, rng);
+    return decided(action, 'commit_1', probabilities, leader, value);
   }
 
   const needSecond = legal.filter(
@@ -203,13 +238,34 @@ export const chooseAction = (
   );
   if (needSecond.length > 0) {
     const probabilities = uniform(needSecond);
-    const action = draw(probabilities, rng);
-    return { action, phase: 'explore_2', probability: probabilities[action]!, probabilities, legal, leader };
+    const [action, value] = draw(probabilities, rng);
+    return decided(action, 'explore_2', probabilities, leader, value);
   }
 
   const probabilities = floored();
-  const action = draw(probabilities, rng);
-  return { action, phase: 'final_commit', probability: probabilities[action]!, probabilities, legal, leader };
+  const [action, value] = draw(probabilities, rng);
+  return decided(action, 'final_commit', probabilities, leader, value);
+};
+
+/**
+ * The warm-up phase a state is in, for display: which phase its next decision
+ * would come from. Ties for the leader are broken by fewer visits, then list
+ * order, because the fallback rule needs a learner's context; the decision log
+ * carries the exact phase of every real decision.
+ */
+export const statePhase = (table: QTable, state: QState, warmUp: WarmUp = DEFAULT_WARM_UP): { phase: DecisionPhase; tag: StateTag; leader: CompetencyAction | null } => {
+  const legal = legalActions(state);
+  if (legal.length === 1) return { phase: 'only_legal', tag: 'no_choice', leader: null };
+  const visits = (action: CompetencyAction) => cell(table, state, action).visits;
+  if (legal.some(action => visits(action) < warmUp.exploreFirst)) return { phase: 'explore_1', tag: 'exploring', leader: null };
+  const leader = leaderOf(table, state, legal, legal[legal.length - 1]);
+  const phase: DecisionPhase =
+    visits(leader) < warmUp.commitLeader
+      ? 'commit_1'
+      : legal.some(action => action !== leader && visits(action) < warmUp.exploreFirst + warmUp.exploreSecond)
+        ? 'explore_2'
+        : 'final_commit';
+  return { phase, tag: tagOfPhase(phase), leader };
 };
 
 /** Records that an action was chosen in a state: the warm-up counts visits, whichever phase chose. */

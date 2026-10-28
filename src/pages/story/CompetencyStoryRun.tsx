@@ -11,7 +11,7 @@
  * API; the routing FSM, the simulation and persistence live there.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useProgressStore } from '@/features/progression';
 import {
   LEVELS,
@@ -22,6 +22,7 @@ import {
   drawCourseQuiz,
   finishCourseQuizReview,
   loadCompetencyCourse,
+  logStudyEvent,
   markCourseLessonsRead,
   markCourseReviewShown,
   nextAttemptSeed,
@@ -74,6 +75,24 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   const activeLevel = isValidLevel ? requestedLevelId : null;
 
   const { saveLevelResult, totalScore, levelResults } = useProgressStore();
+
+  // The study log: one session_started per sign-in in this app load, and a
+  // page_viewed for every Story Mode screen.
+  const { pathname } = useLocation();
+  useEffect(() => {
+    void logStudyEvent(uid, {
+      type: 'session_started',
+      payload: {
+        userAgent: typeof navigator === 'undefined' ? null : navigator.userAgent,
+        language: typeof navigator === 'undefined' ? null : navigator.language,
+        screen: typeof window === 'undefined' ? null : { width: window.screen?.width ?? null, height: window.screen?.height ?? null, dpr: window.devicePixelRatio ?? null },
+        viewport: typeof window === 'undefined' ? null : { width: window.innerWidth, height: window.innerHeight },
+      },
+    });
+  }, [uid]);
+  useEffect(() => {
+    void logStudyEvent(uid, { type: 'page_viewed', payload: { path: pathname } });
+  }, [uid, pathname]);
 
   const [state, setState] = useState<CourseState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -282,8 +301,8 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
               items: quizDraw.items,
               attempt: cursor.quiz.attempt,
               cap: QUIZ_ATTEMPT_CAP,
-              onSubmit: async choices => {
-                const submitted = await submitCourseQuiz(uid, cursor, quizDraw.items, choices);
+              onSubmit: async (choices, responseMs) => {
+                const submitted = await submitCourseQuiz(uid, cursor, quizDraw.items, choices, responseMs);
                 setCursor(submitted.cursor);
                 if (submitted.cursor.phase.kind === 'DRIVE') await planDrive(submitted.cursor);
                 return submitted.results;
@@ -369,12 +388,12 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
         postExamDone: state.postExamDone,
         diagnosticItems: diagnosticItems(),
         postExamItems: postExamItems(),
-        submitDiagnostic: async choices => {
-          await saveDiagnostic(uid, diagnosticItems(), choices);
+        submitDiagnostic: async (choices, responseMs) => {
+          await saveDiagnostic(uid, diagnosticItems(), choices, responseMs);
           setState(current => (current ? { ...current, diagnosticDone: true } : current));
         },
-        submitPostExam: async choices => {
-          const done = await completePostExam(uid, state.cursor, postExamItems(), choices);
+        submitPostExam: async (choices, responseMs) => {
+          const done = await completePostExam(uid, state.cursor, postExamItems(), choices, responseMs);
           setState(current => (current ? { ...current, cursor: done.cursor, postExamDone: true } : current));
         },
       },

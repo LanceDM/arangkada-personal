@@ -22,10 +22,27 @@ import {
   firebaseBackgroundFormRepository,
   firebaseCompetencyCourseRepository,
 } from './infrastructure/FirebaseCompetencyCourseRepository';
+import {
+  firebaseBKTLogRepository,
+  firebaseStudyEventRepository,
+  firebaseSurveyRepository,
+} from './infrastructure/FirebaseStudyLogRepositories';
+import { sqlBackgroundFormRepository, sqlSurveyRepository } from './infrastructure/SqlConnectStudyRecords';
+import type { DatabaseMode } from '@/shared/infrastructure/firebase/dataConnect';
 
 export type { LearnerHistoryRepository, OptimizedRouting, RoutingMode };
 
+export type { DatabaseMode };
+
 interface DrivingSimComposition {
+  /**
+   * Implementation A (`firestore`): every record in Firestore. Implementation
+   * B (`firestore+sql`): the form records (background, questionnaires) in SQL
+   * Connect; the logs, the Q-table and BKT stay in Firestore either way.
+   */
+  databaseMode?: DatabaseMode;
+  /** The commit the build came from, stamped on every logged record. */
+  appBuild?: string;
   learnerHistory?: (signedIn: LearnerHistoryRepository) => LearnerHistoryRepository;
   routing: {
     mode: RoutingMode;
@@ -33,7 +50,7 @@ interface DrivingSimComposition {
   };
 }
 
-export const composeDrivingSim = ({ learnerHistory, routing }: DrivingSimComposition) =>
+export const composeDrivingSim = ({ learnerHistory, routing, databaseMode = 'firestore', appBuild }: DrivingSimComposition) =>
   provideDrivingSimDependencies({
     learnerHistory: learnerHistory
       ? learnerHistory(firebaseLearnerHistoryRepository)
@@ -47,5 +64,9 @@ export const composeDrivingSim = ({ learnerHistory, routing }: DrivingSimComposi
     optimizedRouting: routing.optimized,
     competencyCourse: firebaseCompetencyCourseRepository,
     assessments: firebaseAssessmentRepository,
-    background: firebaseBackgroundFormRepository,
+    background: databaseMode === 'firestore+sql' ? sqlBackgroundFormRepository : firebaseBackgroundFormRepository,
+    surveys: databaseMode === 'firestore+sql' ? sqlSurveyRepository : firebaseSurveyRepository,
+    studyEvents: firebaseStudyEventRepository,
+    bktLog: firebaseBKTLogRepository,
+    appBuild,
   });

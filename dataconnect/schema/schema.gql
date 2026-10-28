@@ -1,0 +1,60 @@
+# Implementation B: people, roles, settings versions and form answers in
+# PostgreSQL. Every table keys people by the Firebase Auth uid, so a row joins
+# to that participant's Firestore logs (users/{uid}/...) with no mapping table.
+# The logs, the Q-table, BKT and IRT stay in Firestore in both implementations.
+
+type User @table(key: "uid") {
+  uid: String!
+  email: String
+  displayName: String
+  status: String! @default(value: "active")   # active | withdrawn
+  createdAt: Timestamp! @default(expr: "request.time")
+  lastSeenAt: Timestamp
+}
+
+type Participant @table(key: "code") {
+  code: String!                     # P01, P02 ...
+  user: User! @unique
+  consentVersion: String!
+  consentedAt: Timestamp!
+  enrolledAt: Timestamp!
+  finishedAt: Timestamp
+  withdrawnAt: Timestamp
+  note: String
+}
+
+# Append-only: a grant and a later revoke are two rows.
+type RoleGrant @table {
+  user: User!
+  role: String!                     # admin (a user with no grant is a plain user)
+  action: String!                   # grant | revoke
+  by: String!                       # who ran the role script
+  at: Timestamp!
+  reason: String
+}
+
+type ConfigVersion @table(key: "tag") {
+  tag: String!                      # RUN_CONFIG_VERSION, e.g. 2026-10-28a
+  fingerprint: String!
+  config: Any!                      # the whole RUN_CONFIG record
+  activeFrom: Timestamp!
+  activeTo: Timestamp
+  note: String
+}
+
+type BackgroundResponse @table(key: ["user", "questionId"]) {
+  user: User!
+  questionId: String!
+  formVersion: Int!
+  answer: String!
+  answeredAt: Timestamp!
+}
+
+type SurveyResponse @table(key: ["user", "instrument", "itemId"]) {
+  user: User!
+  instrument: String!               # iso25010 | tam
+  itemId: String!
+  formVersion: Int!
+  value: Int!                       # Likert 1-5
+  answeredAt: Timestamp!
+}

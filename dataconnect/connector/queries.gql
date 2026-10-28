@@ -1,0 +1,78 @@
+# A participant reads only their own form answers.
+
+query MyBackground @auth(level: USER) {
+  backgroundResponses(where: { userUid: { eq_expr: "auth.uid" } }) {
+    questionId
+    formVersion
+    answer
+    answeredAt
+  }
+}
+
+query MySurvey($instrument: String!) @auth(level: USER) {
+  surveyResponses(where: { userUid: { eq_expr: "auth.uid" }, instrument: { eq: $instrument } }) {
+    itemId
+    formVersion
+    value
+    answeredAt
+  }
+}
+
+# Admin reads: only a token with the admin claim.
+
+query ListParticipants @auth(expr: "auth.token.admin == true") {
+  participants(orderBy: { code: ASC }) {
+    code
+    user { uid email }
+    consentVersion
+    consentedAt
+    enrolledAt
+    finishedAt
+    withdrawnAt
+    note
+  }
+}
+
+query ListRoleGrants @auth(expr: "auth.token.admin == true") {
+  roleGrants(orderBy: { at: ASC }) {
+    id
+    user { uid email }
+    role
+    action
+    by
+    at
+    reason
+  }
+}
+
+query ListConfigVersions @auth(expr: "auth.token.admin == true") {
+  configVersions(orderBy: { activeFrom: ASC }) {
+    tag
+    fingerprint
+    config
+    activeFrom
+    activeTo
+    note
+  }
+}
+
+query ListBackgroundResponses @auth(expr: "auth.token.admin == true") {
+  backgroundResponses {
+    user { uid }
+    questionId
+    formVersion
+    answer
+    answeredAt
+  }
+}
+
+query ListSurveyResponses @auth(expr: "auth.token.admin == true") {
+  surveyResponses {
+    user { uid }
+    instrument
+    itemId
+    formVersion
+    value
+    answeredAt
+  }
+}

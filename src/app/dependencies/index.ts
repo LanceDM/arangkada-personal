@@ -19,6 +19,7 @@ import { composeProgression } from '@/features/progression/composition';
 import {
   composeDrivingSim,
   type LearnerHistoryRepository,
+  type DatabaseMode,
   type RoutingMode,
 } from '@/features/driving-sim/composition';
 
@@ -40,13 +41,26 @@ const guestAwareLearnerHistory = (
  */
 const routingMode: RoutingMode = import.meta.env.VITE_ROUTING_SWITCH === 'legacy' ? 'legacy' : 'new';
 
+/**
+ * Which database implementation stands behind the people, roles, settings and
+ * form records: A, Firestore only (the default), or B, Firestore plus SQL
+ * Connect (`VITE_DATABASE_MODE=firestore+sql`, needs the Blaze plan). The logs,
+ * the Q-table and BKT are in Firestore either way. See DATABASE.md.
+ */
+const databaseMode: DatabaseMode = import.meta.env.VITE_DATABASE_MODE === 'firestore+sql' ? 'firestore+sql' : 'firestore';
+
+/** The commit the build came from (vite.config.ts), stamped on every logged record. */
+const appBuild: string = import.meta.env.VITE_APP_BUILD ?? 'unknown';
+
 composeAuth();
 composeProgression();
-composeAdmin();
+composeAdmin({ databaseMode });
 composeDailyChallenge();
 composeMockExam();
 composeDrivingSim({
   learnerHistory: guestAwareLearnerHistory,
+  databaseMode,
+  appBuild,
   // The old two-group run's Optimized table (seed 11, trained in simulation)
   // was removed on 2026-10-28: the study uses no simulated data, and the New
   // switch now plays the per-competency course, whose Q-table is learned

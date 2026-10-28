@@ -1,8 +1,11 @@
 /** The bound implementation of Admin's port. Provided by `app/dependencies`. */
-import type { AdminReportRepository } from './ports';
+import type { AdminReportRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository } from './ports';
 
 export interface AdminDependencies {
   report: AdminReportRepository;
+  records: StudyRecordsRepository;
+  live: LiveQTableRepository;
+  logs: StudyLogRepository;
 }
 
 let bound: AdminDependencies | null = null;

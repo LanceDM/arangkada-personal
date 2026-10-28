@@ -28,8 +28,8 @@ const AssessmentPage = ({ kind }: { kind: 'diagnostic' | 'post_exam' }) => {
         items={items}
         kind={kind}
         title={title}
-        onSubmit={async choices => {
-          await (kind === 'diagnostic' ? assessments.submitDiagnostic(choices) : assessments.submitPostExam(choices));
+        onSubmit={async (choices, responseMs) => {
+          await (kind === 'diagnostic' ? assessments.submitDiagnostic(choices, responseMs) : assessments.submitPostExam(choices, responseMs));
           return null;
         }}
         onDone={() => navigate('/play/story')}

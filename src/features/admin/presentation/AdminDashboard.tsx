@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { LEVELS } from '@/features/driving-sim';
 
 import { toDateTime } from './formatDate';
+import { QTablePanel } from './QTablePanel';
 import type {
   AttemptRow,
   DailyRow,
@@ -60,7 +61,7 @@ interface AdminDashboardProps {
   onExportJSON: () => void;
   onExportAttemptsCSV: () => void;
   /** Study data of the per-competency course (no IRT). */
-  onExportStudy: (kind: 'json' | 'bkt' | 'decisions' | 'rewards' | 'background') => void;
+  onExportStudy: (kind: 'json' | 'bkt' | 'decisions' | 'rewards' | 'background' | 'qupdates' | 'bktlog') => void;
   studyParticipants: number;
 }
 
@@ -143,6 +144,10 @@ export const AdminDashboard = ({
           <TabsTrigger value="attempts">
             <Layers className="mr-1 h-4 w-4" />
             Attempts
+          </TabsTrigger>
+          <TabsTrigger value="qtable">
+            <Cpu className="mr-1 h-4 w-4" />
+            Q-table (live)
           </TabsTrigger>
           <TabsTrigger value="rules">
             <Cpu className="mr-1 h-4 w-4" />
@@ -348,6 +353,10 @@ export const AdminDashboard = ({
           </Card>
         </TabsContent>
 
+        <TabsContent value="qtable">
+          <QTablePanel />
+        </TabsContent>
+
         <TabsContent value="export">
           <Card>
             <CardHeader>
@@ -371,8 +380,9 @@ export const AdminDashboard = ({
             <CardHeader>
               <CardTitle className="text-sm">Study data: per-competency course</CardTitle>
               <p className="text-xs text-muted-foreground">
-                {studyParticipants} participant(s). BKT is replayed per participant; the Q-table is shared. Participants are
-                identified by user id only. IRT (ability, item difficulty) is not included.
+                {studyParticipants} participant(s). BKT is replayed per participant and also exported as logged; the Q-table is
+                shared, with its full update log. Participants appear by user id and study code. IRT (ability, item difficulty) is not
+                included.
               </p>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
@@ -395,6 +405,14 @@ export const AdminDashboard = ({
               <Button variant="outline" onClick={() => onExportStudy('background')}>
                 <Download className="h-4 w-4" />
                 Background CSV
+              </Button>
+              <Button variant="outline" onClick={() => onExportStudy('qupdates')}>
+                <Download className="h-4 w-4" />
+                Q-table log CSV
+              </Button>
+              <Button variant="outline" onClick={() => onExportStudy('bktlog')}>
+                <Download className="h-4 w-4" />
+                BKT log CSV (as logged)
               </Button>
             </CardContent>
           </Card>
