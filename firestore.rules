@@ -285,6 +285,18 @@ service cloud.firestore {
         && data.tableAfter is map;
     }
 
+    function isLoggedTableChange(previousUpdates) {
+      let next = request.resource.data;
+      let entryPath = /databases/$(database)/documents/policy/competencyQ/updates/$(next.lastUpdate.updateId);
+      return next.updates > previousUpdates
+        && next.lastUpdate is map
+        && next.lastUpdate.uid == request.auth.uid
+        && next.lastUpdate.globalSeq == next.updates
+        && existsAfter(entryPath)
+        && getAfter(entryPath).data.globalSeq == next.updates
+        && getAfter(entryPath).data.uid == request.auth.uid;
+    }
+
     function isQTableDoc(data) {
       return data.keys().hasAll(['schemaVersion', 'table', 'updates', 'updatedAt'])
         && data.schemaVersion == 1
@@ -504,14 +516,23 @@ service cloud.firestore {
     // value cannot be checked here, as with every score.
     match /policy/competencyQ {
       allow read: if isSignedIn();
-      allow create, update: if isSignedIn() && isQTableDoc(request.resource.data);
+      // A participant's change must come with its log: the counter only moves
+      // forward, the last change names this participant, and the log entry it
+      // names exists in the same transaction under the new counter. Every
+      // change to the table is therefore attributed and on the record. (The
+      // values themselves cannot be checked here; see DATABASE.md.)
+      allow create: if isSignedIn() && isQTableDoc(request.resource.data) && isLoggedTableChange(0);
+      allow update: if isSignedIn() && isQTableDoc(request.resource.data) && isLoggedTableChange(resource.data.updates);
       allow delete: if false;
 
       // Every change to the table, written in the same transaction by the
       // participant whose decision or reward caused it.
       match /updates/{updateId} {
         allow read: if isAdmin();
-        allow create: if isSignedIn() && isQLogEntry(request.resource.data, updateId);
+        // Written only together with the table: the table after the
+        // transaction must already count this entry.
+        allow create: if isSignedIn() && isQLogEntry(request.resource.data, updateId)
+          && getAfter(/databases/$(database)/documents/policy/competencyQ).data.updates >= request.resource.data.globalSeq;
         allow update: if isSignedIn() && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
         allow delete: if false;
       }

@@ -304,7 +304,7 @@ export interface RewardRecord {
   addedDecisions: number;
   next: QState | null;
   /** Where the next measurement came from. */
-  measuredBy: 'drive' | 'quiz' | 'post_exam';
+  measuredBy: 'drive' | 'quiz' | 'final' | 'post_exam';
   timestamp: number;
 }
 
@@ -403,6 +403,24 @@ export const quizMeasured = (
 ): { cursor: CourseCursor; rewards: RewardRecord[]; operations: QOperation[]; table: QTable } => {
   const willDecide = new Set(measurements.map(m => m.competency));
   const rewarded = rewardPending(cursor.pending, measurements, willDecide, table, 'quiz', now, weights);
+  return { cursor: { ...cursor, pending: rewarded.stillPending }, rewards: rewarded.rewards, operations: rewarded.operations, table: rewarded.table };
+};
+
+/**
+ * The final exam measured its competencies (one scenario each): pending
+ * decisions on them are rewarded now, and terminally, because no routing
+ * decision follows the final exam (Tentative, part of "next measurement
+ * anywhere"). A retaken final settles nothing more: the first sitting
+ * already settled what it measured.
+ */
+export const finalMeasured = (
+  cursor: CourseCursor,
+  measurements: readonly CompetencyMeasurement[],
+  table: QTable,
+  now: number,
+  weights: RewardWeights = DEFAULT_REWARD
+): { cursor: CourseCursor; rewards: RewardRecord[]; operations: QOperation[]; table: QTable } => {
+  const rewarded = rewardPending(cursor.pending, measurements, new Set(), table, 'final', now, weights);
   return { cursor: { ...cursor, pending: rewarded.stillPending }, rewards: rewarded.rewards, operations: rewarded.operations, table: rewarded.table };
 };
 

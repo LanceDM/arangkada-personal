@@ -19,6 +19,10 @@ const BriefingPage = () => {
 
   // `buildLevelConfig` returns null for a level id with no content behind it.
   if (activeLevel === null || !levelConfig) return <Navigate to="/play/story" replace />;
+  // In the course, a briefing exists only where the course is (or for a free
+  // replay of a finished stage). Any other level is not open: back to the map,
+  // so nobody plays a stage outside the course from a typed URL.
+  if (course && !course.loading && course.gate === null) return <Navigate to="/play/story" replace />;
 
   return (
     <AppLayout showFooter={false}>

@@ -9,6 +9,7 @@ import {
   lessonsRead,
   postExamCompleted,
   quizMeasured,
+  finalMeasured,
   quizReviewDone,
   quizSubmitted,
   reviewShown,
@@ -176,6 +177,20 @@ describe('the per-competency routing FSM', () => {
     // Driver legality is not in Level 2's quiz: it keeps waiting.
     expect(out.cursor.pending.map(p => p.competency)).toEqual(['driver_legality']);
     expect(applyQOperations(emptyQTable(), out.operations)).toEqual(out.table);
+  });
+
+  it('rewards pending decisions at the final exam, terminally', () => {
+    const cursor: CourseCursor = {
+      ...startingCourse(),
+      phase: { kind: 'FINAL' },
+      pending: [
+        { id: '11:parking:9', competency: 'parking', levelId: 11, state: { mastery: 2, result: 'passed' }, action: 'none', addedDecisions: 0, decidedAt: 0 },
+      ],
+    };
+    const out = finalMeasured(cursor, [{ competency: 'parking', accuracy: 1, passed: true, masteryP: 0.9, driveEvidence: 9 }], emptyQTable(), 3);
+    expect(out.rewards).toHaveLength(1);
+    expect(out.rewards[0]).toMatchObject({ measuredBy: 'final', next: null, reward: 1.5 });
+    expect(out.cursor.pending).toEqual([]);
   });
 
   it('applies the same operations to the stored table as it applied locally', () => {

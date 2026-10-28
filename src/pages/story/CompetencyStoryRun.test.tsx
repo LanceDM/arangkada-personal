@@ -238,4 +238,53 @@ describe('the course in Story Mode', () => {
     expect(host.textContent).toContain('Diagnostic Test');
     await act(async () => root.unmount());
   });
+
+  it('sends a typed briefing URL for a stage the course is not at back to the map', async () => {
+    diagnosticDone();
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/play/story/5/briefing']}>
+          <Routes>
+            <Route path="/play/story" element={<CompetencyStoryRun routing={routing} uid="participant" />}>
+              <Route index element={<LevelMapPage />} />
+              <Route path=":levelId/briefing" element={<BriefingPage />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      );
+    });
+    await settle();
+    expect(host.textContent).toContain('CONTINUE COURSE');
+    expect(host.textContent).not.toContain('Mission Briefing');
+    await act(async () => root.unmount());
+  });
+
+  it('plans the drive on a reloaded drive-phase briefing', async () => {
+    store.cursors.set('participant', { ...startingCourse(), phase: { kind: 'DRIVE', level: 0 } });
+    diagnosticDone();
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/play/story/0/briefing']}>
+          <Routes>
+            <Route path="/play/story" element={<CompetencyStoryRun routing={routing} uid="participant" />}>
+              <Route index element={<LevelMapPage />} />
+              <Route path=":levelId/briefing" element={<BriefingPage />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      );
+    });
+    await settle();
+    await settle();
+    expect(host.textContent).toContain('road events');
+    const drive = [...host.querySelectorAll('button')].find(b => b.textContent?.includes('Drive'));
+    expect(drive?.disabled).toBe(false);
+    await act(async () => root.unmount());
+  });
 });

@@ -44,6 +44,7 @@ import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import { getCompetencyLabel } from '@/domain/learner/profile';
 import {
   COMPETENCY_ATTEMPT_CAP,
+  phaseId,
   phaseLevel,
   reviewsDue,
   type CourseCursor,
@@ -58,7 +59,12 @@ interface PlannedRun {
   run: CourseDriveRun;
   /** Played from the map outside the course: nothing moves on the cursor. */
   free: boolean;
+  /** The cursor position the drive was composed for; a plan for any other position is stale. */
+  forCursor: string | null;
 }
+
+/** Where the course is: the phase and the decision count, which every drive moves. */
+const cursorKey = (cursor: CourseCursor) => `${phaseId(cursor.phase)}#${cursor.seq}#${Object.keys(cursor.seen).length}`;
 
 interface CompetencyStoryRunProps {
   routing: StoryRouting;
@@ -143,7 +149,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   const planDrive = useCallback(
     async (at: CourseCursor) => {
       const run = await planCourseDrive(uid, at, nextAttemptSeed());
-      setPlanned({ attempt: ++attempts.current, run, free: false });
+      setPlanned({ attempt: ++attempts.current, run, free: false, forCursor: cursorKey(at) });
       setStartedRun(null);
       return run;
     },
@@ -169,8 +175,8 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       setLevelResult(null);
       setResultNote(null);
       if (at.phase.kind === 'DRIVE' || at.phase.kind === 'REPEAT' || at.phase.kind === 'FINAL') {
-        const run = await planDrive(at);
-        navigate(`/play/story/${run.levelId}/briefing`);
+        const fresh = planned && !planned.free && planned.forCursor === cursorKey(at) ? planned.run : await planDrive(at);
+        navigate(`/play/story/${fresh.levelId}/briefing`);
         return;
       }
       setPlanned(null);
@@ -180,7 +186,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   const playFreeReplay = (levelId: number) =>
     void step('prepare that level', async () => {
       const run = await planFreeReplay(uid, levelId, nextAttemptSeed());
-      setPlanned({ attempt: ++attempts.current, run, free: true });
+      setPlanned({ attempt: ++attempts.current, run, free: true, forCursor: null });
       setStartedRun(null);
       setLevelResult(null);
       setResultNote(null);
@@ -315,7 +321,13 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
             }
           : null,
       review,
-      canDrive: drivePhase && planned !== null && planned.run.levelId === activeLevel && review === null,
+      canDrive:
+        drivePhase &&
+        planned !== null &&
+        !planned.free &&
+        planned.forCursor === cursorKey(cursor) &&
+        planned.run.levelId === activeLevel &&
+        review === null,
       preview:
         planned && planned.run.levelId === activeLevel && planned.run.plan.level
           ? drivePreview(
@@ -329,6 +341,25 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       notes,
     };
   }, [cursor, activeLevel, planned, quizDraw, uid, step, planDrive]);
+
+  // A drive phase's briefing always has a plan for where the course is now:
+  // after a reload, or once a drive has moved the cursor to a repeat drive,
+  // the old plan is stale and a new drive is composed (never a stale one).
+  const planning = useRef<string | null>(null);
+  useEffect(() => {
+    // Only on the briefing: the results screen keeps showing the drive it scored.
+    if (!cursor || activeLevel === null || planned?.free || !pathname.endsWith('/briefing')) return;
+    const drivePhase = cursor.phase.kind === 'DRIVE' || cursor.phase.kind === 'REPEAT' || cursor.phase.kind === 'FINAL';
+    if (!drivePhase || phaseLevel(cursor.phase) !== activeLevel) return;
+    const key = cursorKey(cursor);
+    if (planned?.forCursor === key || planning.current === key) return;
+    planning.current = key;
+    void step('prepare your drive', async () => {
+      await planDrive(cursor);
+    }).finally(() => {
+      planning.current = null;
+    });
+  }, [cursor, activeLevel, planned, planDrive, step, pathname]);
 
   // Landing on the map ends whatever was being briefed or shown.
   const [routedFrom, setRoutedFrom] = useState(activeLevel);

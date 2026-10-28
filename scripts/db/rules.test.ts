@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 
 const host = process.env.FIRESTORE_EMULATOR_HOST;
 
@@ -48,11 +48,27 @@ describe.skipIf(!host)('security rules for the study logs', () => {
     await assertFails(setDoc(doc(db, 'users/alice/state/events'), { nextSeq: 3 }));
   });
 
-  it('lets only the participant write their Q-table log entries, and only admins read them', async () => {
+  it('accepts a table change only together with its log entry, and only admins read the log', async () => {
     const alice = env.authenticatedContext('alice').firestore();
     const entry = { ...envelope('alice', 'q1'), globalSeq: 1, kind: 'visit', stateKey: 'M1-failed', action: 'practice', tableAfter: {}, statesAfter: {} };
-    await assertSucceeds(setDoc(doc(alice, 'policy/competencyQ/updates/q1'), entry));
-    await assertFails(setDoc(doc(alice, 'policy/competencyQ/updates/q2'), { ...entry, ...envelope('bob', 'q2') }));
+    const table = (updates: number, updateId: string, uid = 'alice') => ({
+      schemaVersion: 1, table: {}, updates, updatedAt: 1, states: {},
+      lastUpdate: { updateId, globalSeq: updates, kind: 'visit', uid, participantCode: null, at: 1 },
+    });
+    // Alone, neither is accepted.
+    await assertFails(setDoc(doc(alice, 'policy/competencyQ/updates/q1'), entry));
+    await assertFails(setDoc(doc(alice, 'policy/competencyQ'), table(1, 'q1')));
+    // Together, they are.
+    const batch = writeBatch(alice);
+    batch.set(doc(alice, 'policy/competencyQ/updates/q1'), entry);
+    batch.set(doc(alice, 'policy/competencyQ'), table(1, 'q1'));
+    await assertSucceeds(batch.commit());
+    // The counter never goes back, and a change cannot be attributed to someone else.
+    await assertFails(setDoc(doc(alice, 'policy/competencyQ'), table(1, 'q1')));
+    const forged = writeBatch(alice);
+    forged.set(doc(alice, 'policy/competencyQ/updates/q2'), { ...entry, ...envelope('alice', 'q2'), globalSeq: 2 });
+    forged.set(doc(alice, 'policy/competencyQ'), table(2, 'q2', 'bob'));
+    await assertFails(forged.commit());
     await assertFails(getDoc(doc(alice, 'policy/competencyQ/updates/q1')));
     await assertSucceeds(getDoc(doc(env.authenticatedContext('lance', { admin: true }).firestore(), 'policy/competencyQ/updates/q1')));
   });

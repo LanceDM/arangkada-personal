@@ -42,6 +42,8 @@ export interface ParticipantExport {
   userId: string;
   /** The study code (P01...), when the participant is enrolled. */
   participantCode: string | null;
+  /** Enrolment status: a withdrawn participant's data is kept and marked, never mixed in silently. */
+  status: 'active' | 'finished' | 'withdrawn' | 'not_enrolled';
   background: Omit<BackgroundRow, 'userId'> | null;
   bkt: {
     /** Every graded answer BKT read, in order, with P(L) before and after and the predicted P(correct). */
@@ -106,6 +108,9 @@ export const buildStudyExport = (
   const logged = data.logged ?? { bktUpdates: [], qUpdates: [], events: [] };
   const records = data.records ?? { participants: [], roleGrants: [], configVersions: [] };
   const codeOf = new Map(records.participants.map(p => [p.uid, p.code]));
+  const statusOf = new Map(
+    records.participants.map(p => [p.uid, p.withdrawnAt ? ('withdrawn' as const) : p.finishedAt ? ('finished' as const) : ('active' as const)])
+  );
   const userIds = [
     ...new Set([
       ...data.courseLogs.map(row => row.userId),
@@ -133,6 +138,7 @@ export const buildStudyExport = (
     return {
       userId,
       participantCode: codeOf.get(userId) ?? null,
+      status: statusOf.get(userId) ?? 'not_enrolled',
       background: background ? withoutUser(background) : null,
       bkt: { trajectory, finalMastery, finalLevel, evidence: counts },
       drives: attempts.map(attempt => {

@@ -45,6 +45,9 @@ const LevelMapPage = () => {
                   Your course starts with a short diagnostic test: Continue opens it.
                 </p>
               )}
+              {course?.assessments?.postExamDone && (
+                <p className="text-sm text-accent">Course complete. Thank you for taking part.</p>
+              )}
               {course?.assessments?.postExamOpen && !course.assessments.postExamDone && (
                 <button
                   onClick={() => navigate('/play/story/post-exam')}

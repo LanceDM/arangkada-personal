@@ -25,6 +25,7 @@ import {
   quizReviewDone,
   quizSubmitted,
   quizMeasured,
+  finalMeasured,
   reviewShown,
   startingCourse,
   type CourseCursor,
@@ -305,7 +306,13 @@ export const markCourseLessonsRead = async (uid: string, cursor: CourseCursor): 
 /** This attempt's quiz: 3 items per competency still to pass, unseen first. */
 export const drawCourseQuiz = (cursor: CourseCursor, seed: number): QuizDraw => {
   if (cursor.phase.kind !== 'QUIZ' || !cursor.quiz) throw new Error(`no quiz in ${phaseId(cursor.phase)}`);
-  const seen = new Map(cursor.quiz.seenItems.map((id, index) => [id, index]));
+  // The diagnostic's items count as already seen (earliest), so a quiz draws
+  // items the participant has not met before and reuses a pre-test item only
+  // when a thin pool runs out.
+  const seen = new Map<string, number>([
+    ...Object.values(DIAGNOSTIC_ITEMS).flat().map(id => [id, -1] as [string, number]),
+    ...cursor.quiz.seenItems.map((id, index) => [id, index] as [string, number]),
+  ]);
   return drawQuiz(cursor.phase.level, cursor.quiz.remaining, seen, createRng(seed));
 };
 
@@ -580,18 +587,34 @@ export const completeCourseDrive = async ({
 
   if (cursor.phase.kind === 'FINAL') {
     const passed = result.completed;
-    const next = finalCompleted(cursor, passed, scenarioIds);
-    // The final exam's decisions update BKT like any drive; it makes no routing decision.
+    // The final exam's decisions update BKT like any drive (recordBKT above);
+    // it makes no routing decision, but it is a measurement: pending decisions
+    // on the competencies it measured are rewarded now, terminally.
     const finalEvidence = await loadEvidence(uid);
     const finalMastery = buildBKTProfile(finalEvidence);
     const finalCounts = buildBKTEvidence(finalEvidence);
+    const finalMeasurements = verdicts.map(v => ({
+      competency: v.competency,
+      accuracy: v.accuracy,
+      passed: v.passed,
+      masteryP: finalMastery[v.competency],
+      driveEvidence: finalCounts[v.competency].drive,
+    }));
+    const settled = finalMeasured(cursor, finalMeasurements, await deps.competencyCourse.loadQTable(), now);
+    const { tableAfter } = await applyAndLogQ(uid, {
+      operations: settled.operations,
+      decisions: [],
+      rewards: settled.rewards,
+      context: { levelId: 12, phase: phaseId(cursor.phase), attemptId },
+    });
+    const next = finalCompleted(settled.cursor, passed, scenarioIds);
     await deps.competencyCourse.appendLog(uid, {
       schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId,
-      verdicts: verdicts.map(v => ({
-        competency: v.competency, total: v.total, correct: v.correct, passed: v.passed,
-        masteryP: finalMastery[v.competency], driveEvidence: finalCounts[v.competency].drive,
+      verdicts: finalMeasurements.map((m, i) => ({
+        competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed,
+        masteryP: m.masteryP, driveEvidence: m.driveEvidence,
       })),
-      decisions: [], rewards: [], tableAfter: await deps.competencyCourse.loadQTable(), timestamp: now,
+      decisions: [], rewards: settled.rewards, tableAfter, timestamp: now,
       ...(passed ? { endReason: 'certified' as const } : {}),
     });
     await moveCursor(uid, cursor, next, passed ? 'final_passed' : 'final_failed');

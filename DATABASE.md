@@ -61,7 +61,7 @@ The table document holds Q, n and visits per state and action, each state's warm
 Every change writes a log entry in the same transaction, numbered by the table's own counter (`globalSeq`):
 
 - `visit` (a decision was made): the decision with its probabilities, random draw, tag (`explore`, `exploit`, `forced`), warm-up phase, and visits before and after;
-- `learn` (a reward arrived): A_next, Pass, H, weights, r, what measured it, next state, max Q of the next state, γ, α, target, Q and n before and after.
+- `learn` (a reward arrived): A_next, Pass, H, weights, r, what measured it (a quiz, a drive, the final exam or the post-exam), next state, max Q of the next state, γ, α, target, Q and n before and after.
 
 Each entry also holds the whole table and every state's tag after it.
 
@@ -94,6 +94,16 @@ Admin → Export → **Study data**: the study JSON, and CSVs of the replayed BK
 | `npm run emulators` / `npm run emulators:sql` | Local Firestore and Auth / local SQL Connect |
 
 Run the scripts against the emulators with `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099`.
+
+## What the rules can and cannot protect
+
+Every record is written from the participant's browser, so the rules decide who may write and in what shape, never whether a value is true. In particular:
+
+- **The shared Q-table** can only change together with its log entry: the counter only moves forward, the last change must name the participant writing it, and the named log entry must exist under the new counter in the same transaction. Every change is therefore attributed and on the record, but the numbers themselves are not checked.
+- **A participant's own records** (course cursor, events, BKT profile and log) can only be written by that participant, append-only where they are logs.
+- **Admin** is a custom claim only the role script can set; settings versions, enrolment and role grants are written only by the scripts.
+
+Checking the values themselves needs server code (Cloud Functions, which need the Blaze plan) that recomputes each update from the logged inputs. Until then, `npm run db:validate` and the replay from the logs are how tampering would be found.
 
 ## Not yet verified
 
