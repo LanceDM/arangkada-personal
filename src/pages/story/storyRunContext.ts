@@ -59,6 +59,10 @@ export interface StoryCourse {
 
 /** The two exams around the course (2026-10-28). */
 export interface StoryAssessments {
+  /** The background form: asked only when it is not muted. */
+  backgroundRequired: boolean;
+  backgroundDone: boolean;
+  submitBackground: (answers: Record<string, string>) => Promise<void>;
   diagnosticDone: boolean;
   /** The post-exam opens once the final exam is passed. */
   postExamOpen: boolean;

@@ -10,6 +10,7 @@ import type { OptimizedRouting } from '@/features/driving-sim/domain/adaptive/co
 import type { RoutingMode } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type {
   AssessmentRepository,
+  BackgroundFormRepository,
   BriefingProgressRepository,
   CompetencyCourseRepository,
   LearnerHistoryRepository,
@@ -37,6 +38,10 @@ export interface DrivingSimDependencies {
   competencyCourse: CompetencyCourseRepository;
   /** Quiz, diagnostic and post-exam answers. */
   assessments: AssessmentRepository;
+  /** The background form's answers. */
+  background: BackgroundFormRepository;
+  /** Overrides BACKGROUND_FORM_ENABLED (muted by default). */
+  backgroundFormEnabled?: boolean;
 }
 
 let bound: DrivingSimDependencies | null = null;

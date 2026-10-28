@@ -1,3 +1,4 @@
+import type { BackgroundResponse } from '@/domain/study/backgroundForm';
 /**
  * What Driving Sim needs from the outside world, stated as interfaces.
  *
@@ -148,6 +149,12 @@ export interface AssessmentSitting {
   /** The post-exam's Rasch ability and its standard error. */
   ability?: { theta: number; se: number };
   timestamp: number;
+}
+
+/** `users/{uid}/study/background`: the background form, written once. */
+export interface BackgroundFormRepository {
+  load(uid: string): Promise<BackgroundResponse | null>;
+  save(uid: string, response: BackgroundResponse): Promise<void>;
 }
 
 export interface AssessmentRepository {

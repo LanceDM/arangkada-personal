@@ -34,6 +34,7 @@ import { drawQuiz, type QuizDraw } from '@/domain/assessment/drawQuiz';
 import { DIAGNOSTIC_ITEMS, POST_EXAM_ITEMS, itemsFor, type BankItem } from '@/domain/assessment/questionBank';
 import { raschEAP } from '@/domain/assessment/rasch';
 import { createRng } from '@/shared/lib/rng';
+import { BACKGROUND_FORM_ENABLED, BACKGROUND_FORM_VERSION, isCompleteBackground } from '@/domain/study/backgroundForm';
 import type { LevelResult } from '@/domain/learner/attempt';
 import type { LevelFsmTelemetry } from '@/features/driving-sim/domain/fsm/fsmMetrics';
 import { composeDrive, type ComposedDrive } from '@/features/driving-sim/domain/scenario/composeDrive';
@@ -54,18 +55,39 @@ export interface CourseState {
   cursor: CourseCursor;
   diagnosticDone: boolean;
   postExamDone: boolean;
+  /** Whether the background form is asked at all (muted by default). */
+  backgroundRequired: boolean;
+  backgroundDone: boolean;
   sittings: AssessmentSitting[];
 }
 
 export const loadCompetencyCourse = async (uid: string): Promise<CourseState> => {
-  const { competencyCourse, assessments } = drivingSimDeps();
-  const [cursor, sittings] = await Promise.all([competencyCourse.loadCursor(uid), assessments.load(uid)]);
+  const { competencyCourse, assessments, background, backgroundFormEnabled } = drivingSimDeps();
+  const backgroundRequired = backgroundFormEnabled ?? BACKGROUND_FORM_ENABLED;
+  const [cursor, sittings, form] = await Promise.all([
+    competencyCourse.loadCursor(uid),
+    assessments.load(uid),
+    backgroundRequired ? background.load(uid) : Promise.resolve(null),
+  ]);
   return {
     cursor: cursor ?? startingCourse(),
     diagnosticDone: sittings.some(sitting => sitting.kind === 'diagnostic'),
     postExamDone: sittings.some(sitting => sitting.kind === 'post_exam'),
+    backgroundRequired,
+    backgroundDone: form !== null,
     sittings,
   };
+};
+
+/** Saves the background form (study procedure step 2). */
+export const saveBackground = async (uid: string, answers: Record<string, string>): Promise<void> => {
+  if (!isCompleteBackground(answers)) throw new Error('Every background question needs an answer.');
+  await drivingSimDeps().background.save(uid, {
+    schemaVersion: 1,
+    formVersion: BACKGROUND_FORM_VERSION,
+    answers,
+    timestamp: Date.now(),
+  });
 };
 
 /** Every graded answer BKT reads, oldest first: drives (tutorial left out), quiz, diagnostic and post-exam answers. */

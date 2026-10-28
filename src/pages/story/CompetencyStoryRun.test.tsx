@@ -13,6 +13,8 @@ import CompetencyStoryRun from './CompetencyStoryRun';
 import LevelMapPage from './LevelMapPage';
 import BriefingPage from './BriefingPage';
 import { DiagnosticPage } from './AssessmentPage';
+import BackgroundFormPage from './BackgroundFormPage';
+import { BACKGROUND_QUESTIONS } from '@/features/driving-sim';
 import type { StoryRouting } from './storyRunContext';
 import { lessonsRead, startingCourse } from '@/domain/competencyRouting/course';
 import { QUESTION_BANK } from '@/domain/assessment/questionBank';
@@ -140,6 +142,7 @@ describe('the course in Story Mode', () => {
             <Route path="/play/story" element={<CompetencyStoryRun routing={routing} uid="participant" />}>
               <Route index element={<LevelMapPage />} />
               <Route path=":levelId/briefing" element={<BriefingPage />} />
+              <Route path="diagnostic" element={<DiagnosticPage />} />
             </Route>
           </Routes>
         </MemoryRouter>
@@ -188,6 +191,51 @@ describe('the course in Story Mode', () => {
     const retake = QUESTION_BANK.find(item => host.textContent?.includes(item.question))!;
     expect(retake.competency).toBe('document_awareness');
     expect(shown).not.toContain(retake.id);
+    await act(async () => root.unmount());
+  });
+
+  it('skips the background form while it is muted (the default)', async () => {
+    const { host, root } = await mount();
+    await clickText(host, 'CONTINUE COURSE');
+    expect(host.textContent).toContain('Diagnostic Test');
+    expect(store.backgrounds.size).toBe(0);
+    await act(async () => root.unmount());
+  });
+
+  it('asks the background form before the diagnostic when it is turned on', async () => {
+    provideInMemoryDrivingSim(store, { backgroundFormEnabled: true });
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    await act(async () => {
+      root.render(
+        <MemoryRouter initialEntries={['/play/story']}>
+          <Routes>
+            <Route path="/play/story" element={<CompetencyStoryRun routing={routing} uid="participant" />}>
+              <Route index element={<LevelMapPage />} />
+              <Route path="background" element={<BackgroundFormPage />} />
+              <Route path="diagnostic" element={<DiagnosticPage />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      );
+    });
+    await settle();
+
+    await clickText(host, 'CONTINUE COURSE');
+    expect(host.textContent).toContain('About You');
+    const submit = [...host.querySelectorAll('button')].find(b => b.textContent?.includes('SUBMIT'))!;
+    expect(submit.disabled).toBe(true);
+    for (const question of BACKGROUND_QUESTIONS) {
+      const radio = host.querySelector<HTMLInputElement>(`input[name="${question.id}"]`)!;
+      await act(async () => {
+        radio.click();
+      });
+    }
+    await clickText(host, 'SUBMIT');
+    expect(store.backgrounds.get('participant')?.answers.gaming_frequency).toBe('Never');
+    await clickText(host, 'CONTINUE COURSE');
+    expect(host.textContent).toContain('Diagnostic Test');
     await act(async () => root.unmount());
   });
 });

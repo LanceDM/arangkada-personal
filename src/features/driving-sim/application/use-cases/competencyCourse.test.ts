@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
 import { provideDrivingSimDependencies } from '../dependencies';
-import { memoryAssessments, memoryCompetencyCourse, memoryCourseStore, type MemoryCourseStore } from '../testDependencies';
+import { memoryAssessments, memoryBackground, memoryCompetencyCourse, memoryCourseStore, type MemoryCourseStore } from '../testDependencies';
 import {
   completeCourseDrive,
   completePostExam,
@@ -46,6 +46,7 @@ beforeEach(() => {
     },
     competencyCourse: memoryCompetencyCourse(store),
     assessments: memoryAssessments(store),
+    background: memoryBackground(store),
   });
 });
 

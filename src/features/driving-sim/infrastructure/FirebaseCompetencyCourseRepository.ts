@@ -5,8 +5,10 @@ import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
 import type {
   AssessmentRepository,
   AssessmentSitting,
+  BackgroundFormRepository,
   CompetencyCourseRepository,
 } from '@/features/driving-sim/application/ports';
+import type { BackgroundResponse } from '@/domain/study/backgroundForm';
 
 /** Firestore rejects `undefined`; every payload here is plain data, so a JSON round trip drops it. */
 const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -64,5 +66,18 @@ export const firebaseAssessmentRepository: AssessmentRepository = {
   },
   async save(uid, sitting) {
     await addDoc(collection(db, 'users', uid, 'assessmentSittings'), plain(sitting));
+  },
+};
+
+const backgroundDoc = (uid: string) => doc(db, 'users', uid, 'study', 'background');
+
+/** `users/{uid}/study/background`, written once. */
+export const firebaseBackgroundFormRepository: BackgroundFormRepository = {
+  async load(uid) {
+    const snap = await getDoc(backgroundDoc(uid));
+    return snap.exists() ? (snap.data() as BackgroundResponse) : null;
+  },
+  async save(uid, response) {
+    await setDoc(backgroundDoc(uid), plain(response));
   },
 };

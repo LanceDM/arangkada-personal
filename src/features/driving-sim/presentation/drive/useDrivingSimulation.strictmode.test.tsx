@@ -26,7 +26,7 @@ import { recordingCanvasContext } from '@/features/driving-sim/presentation/canv
 import { provideDrivingSimDependencies } from '@/features/driving-sim/application/dependencies';
 import { useScenarioEvaluation } from '@/features/driving-sim/application/useScenarioEvaluation';
 import { useDrivingSimulation } from './useDrivingSimulation';
-import { memoryAssessments, memoryCompetencyCourse, memoryCourseStore } from '@/features/driving-sim/application/testDependencies';
+import { memoryAssessments, memoryBackground, memoryCompetencyCourse, memoryCourseStore } from '@/features/driving-sim/application/testDependencies';
 
 /** Stands in for `app/dependencies`, which a mounted drive expects to have run. */
 provideDrivingSimDependencies({
@@ -44,6 +44,7 @@ provideDrivingSimDependencies({
   routingOverride: { load: () => 'assigned', save: () => {} },
   competencyCourse: memoryCompetencyCourse(memoryCourseStore()),
   assessments: memoryAssessments(memoryCourseStore()),
+  background: memoryBackground(memoryCourseStore()),
   optimizedRouting: async () => {
     throw new Error('no drive here reads the routing table');
   },

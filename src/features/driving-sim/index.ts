@@ -63,6 +63,7 @@ export {
   planFreeReplay,
   postExamItems,
   saveDiagnostic,
+  saveBackground,
   submitCourseQuiz,
 } from './application/use-cases/competencyCourse';
 export type { CourseDriveRun, CourseState } from './application/use-cases/competencyCourse';
@@ -76,3 +77,5 @@ export type { LevelFsmTelemetry } from './domain/fsm/fsmMetrics';
 export type { AdaptivePlan } from './application/use-cases/buildAdaptivePlan';
 export type { AttemptStart } from './application/use-cases/completeMission';
 export type { LevelRecommendation, PracticeChoice } from './domain/adaptive/practiceSelection';
+export { BACKGROUND_QUESTIONS, isCompleteBackground } from '@/domain/study/backgroundForm';
+export type { BackgroundQuestion } from '@/domain/study/backgroundForm';

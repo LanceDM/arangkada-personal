@@ -14,6 +14,7 @@ rules_version = '2';
 //   users/{uid}/routing/competencyCourse           CourseCursor (per-competency routing FSM)
 //   users/{uid}/courseLog/{id}                     CourseLogEntry: decisions, rewards, table snapshot
 //   users/{uid}/assessmentSittings/{id}            AssessmentSitting: quiz, diagnostic, post-exam answers
+//   users/{uid}/study/background                   BackgroundResponse: the background form (muted by default)
 //   policy/competencyQ                             the shared Q-table, learned online by every participant
 //   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
 //   users/{uid}/dailyStreak/summary                DailyStreakSummary
@@ -178,9 +179,18 @@ service cloud.firestore {
     function isCourseLogEntry(data) {
       return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'decisions', 'rewards', 'timestamp'])
         && data.schemaVersion == 1
-        && data.kind in ['drive', 'post_exam', 'final']
+        && data.kind in ['drive', 'quiz', 'post_exam', 'final']
         && data.decisions is list
         && data.rewards is list
+        && data.timestamp is number;
+    }
+
+    function isBackgroundResponse(data) {
+      return data.keys().hasOnly(['schemaVersion', 'formVersion', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.formVersion is int
+        && data.answers is map
+        && data.answers.size() <= 20
         && data.timestamp is number;
     }
 
@@ -298,7 +308,14 @@ service cloud.firestore {
         allow update, delete: if false;
       }
 
-      // Quiz, diagnostic and post-exam answers, append-only; BKT reads quiz and diagnostic.
+      // The background form, written once and never changed.
+      match /study/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && docId == 'background' && isBackgroundResponse(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      // Quiz, diagnostic and post-exam answers, append-only; BKT reads all of them.
       match /assessmentSittings/{sittingId} {
         allow read: if isOwner(uid) || isAdmin();
         allow create: if isOwner(uid) && isAssessmentSitting(request.resource.data);
@@ -344,6 +361,10 @@ service cloud.firestore {
     }
 
     match /{path=**}/assessmentSittings/{sittingId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/study/{docId} {
       allow read: if isAdmin();
     }
 

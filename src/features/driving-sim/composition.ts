@@ -19,6 +19,7 @@ import { localSignCoverageRepository } from './infrastructure/LocalSignCoverageR
 import { localBriefingProgressRepository } from './infrastructure/LocalBriefingProgressRepository';
 import {
   firebaseAssessmentRepository,
+  firebaseBackgroundFormRepository,
   firebaseCompetencyCourseRepository,
 } from './infrastructure/FirebaseCompetencyCourseRepository';
 
@@ -46,4 +47,5 @@ export const composeDrivingSim = ({ learnerHistory, routing }: DrivingSimComposi
     optimizedRouting: routing.optimized,
     competencyCourse: firebaseCompetencyCourseRepository,
     assessments: firebaseAssessmentRepository,
+    background: firebaseBackgroundFormRepository,
   });

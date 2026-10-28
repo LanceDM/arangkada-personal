@@ -30,6 +30,7 @@ import {
   postExamItems,
   reviewLessons,
   saveDiagnostic,
+  saveBackground,
   submitCourseQuiz,
   type BriefingGate,
   type CourseDriveRun,
@@ -133,6 +134,10 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
     void step('continue your course', async () => {
       if (!state) return;
       const { cursor: at } = state;
+      if (state.backgroundRequired && !state.backgroundDone) {
+        navigate('/play/story/background');
+        return;
+      }
       if (!state.diagnosticDone) {
         navigate('/play/story/diagnostic');
         return;
@@ -353,6 +358,12 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       playPostTest: null,
       gate,
       assessments: state && {
+        backgroundRequired: state.backgroundRequired,
+        backgroundDone: state.backgroundDone,
+        submitBackground: async answers => {
+          await saveBackground(uid, answers);
+          setState(current => (current ? { ...current, backgroundDone: true } : current));
+        },
         diagnosticDone: state.diagnosticDone,
         postExamOpen: state.cursor.phase.kind === 'CERTIFIED',
         postExamDone: state.postExamDone,
