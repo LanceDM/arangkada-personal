@@ -26,6 +26,7 @@ const BriefingPage = () => {
         level={levelConfig}
         weakArea={weakArea}
         courseNote={course?.note ?? null}
+        gate={course?.gate ?? null}
         onBack={() => navigate('/play/story')}
         onStartGame={() => {
           beginDrive(activeLevel);

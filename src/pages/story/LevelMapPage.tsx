@@ -37,9 +37,22 @@ const LevelMapPage = () => {
           }
         }
         aside={
-          (routing.canOverride || course?.error) && (
+          (routing.canOverride || course?.error || course?.assessments) && (
             <div className="flex w-full max-w-md flex-col items-center gap-3">
               {course?.error && <p className="text-sm text-destructive">{course.error}</p>}
+              {course?.assessments && !course.assessments.diagnosticDone && (
+                <p className="text-sm text-muted-foreground">
+                  Your course starts with a short diagnostic test: Continue opens it.
+                </p>
+              )}
+              {course?.assessments?.postExamOpen && !course.assessments.postExamDone && (
+                <button
+                  onClick={() => navigate('/play/story/post-exam')}
+                  className="rounded-xl bg-primary px-8 py-3 font-display text-sm tracking-wider text-primary-foreground"
+                >
+                  POST-EVALUATION EXAM →
+                </button>
+              )}
               {routing.canOverride && (
                 <RoutingGroupOverride
                   resolution={routing.resolution}

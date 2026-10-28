@@ -21,6 +21,7 @@ import BriefingPage from '@/pages/story/BriefingPage';
 import DrivePage from '@/pages/story/DrivePage';
 import CompletePage from '@/pages/story/CompletePage';
 import PostTestPage from '@/pages/story/PostTestPage';
+import { DiagnosticPage, PostExamPage } from '@/pages/story/AssessmentPage';
 import NotFound from '@/pages/NotFoundPage';
 import ResetPassword from '@/pages/auth/ResetPasswordPage';
 import VerifyEmail from '@/pages/auth/VerifyEmailPage';
@@ -69,6 +70,9 @@ export const AppRouter = () => (
       <Route path=":levelId/complete" element={<CompletePage />} />
       {/* The pilot's post-test, opened by the facilitator by URL. */}
       <Route path="post-test" element={<PostTestPage />} />
+      {/* The per-competency course's two exams (2026-10-28). */}
+      <Route path="diagnostic" element={<DiagnosticPage />} />
+      <Route path="post-exam" element={<PostExamPage />} />
     </Route>
     {lazyRoute('/learn/:levelId', <Learn />)}
     {lazyRoute('/play/eksamen', <EksamenMode />)}

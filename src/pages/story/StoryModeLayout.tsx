@@ -1,5 +1,7 @@
 /**
- * Story Mode's layout route, and the Legacy / New switch.
+ * Story Mode's layout route, and the Legacy / New switch. Under New every
+ * signed-in participant plays the per-competency course (`CompetencyStoryRun`);
+ * the old two-group run (`RoutedStoryRun`) is no longer mounted.
  *
  * It decides which game this player's Story Mode runs as, then hands the run
  * to it: `LegacyStoryRun`, today's game, or `RoutedStoryRun`, the routing FSM
@@ -12,7 +14,7 @@
  * one attempt span four URLs.
  */
 import { useEffect, useState } from 'react';
-import { useAuthSession } from '@/features/auth';
+import { useAuthModal, useAuthSession } from '@/features/auth';
 import {
   loadRoutingOverride,
   resolveRoutingGroup,
@@ -22,7 +24,7 @@ import {
   type RoutingOverride,
 } from '@/features/driving-sim';
 import LegacyStoryRun from './LegacyStoryRun';
-import RoutedStoryRun from './RoutedStoryRun';
+import CompetencyStoryRun from './CompetencyStoryRun';
 import type { StoryRouting } from './storyRunContext';
 
 const StoryModeLayout = () => {
@@ -83,15 +85,29 @@ const StoryModeLayout = () => {
     },
   };
 
-  return resolution.groupInEffect === 'legacy' ? (
-    <LegacyStoryRun routing={routing} />
-  ) : (
-    <RoutedStoryRun
-      key={`${uid ?? 'guest'}:${resolution.groupInEffect}`}
-      routing={routing}
-      uid={uid}
-      group={resolution.groupInEffect}
-    />
+  if (resolution.groupInEffect === 'legacy') return <LegacyStoryRun routing={routing} />;
+
+  // The New switch is the per-competency course, for every participant (no
+  // comparison group). It is part of the study, so it is played signed in:
+  // a guest's play would not be saved.
+  if (!uid) return <SignInFirst />;
+  return <CompetencyStoryRun key={uid} routing={routing} uid={uid} />;
+};
+
+const SignInFirst = () => {
+  const openAuth = useAuthModal(state => state.open);
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
+      <p className="font-display text-sm uppercase tracking-widest text-muted-foreground">
+        Sign in to start your course: your answers and drives are saved to your account.
+      </p>
+      <button
+        onClick={() => openAuth({ reason: 'Sign in to start your course.' })}
+        className="rounded-xl bg-primary px-8 py-3 font-display text-sm tracking-wider text-primary-foreground"
+      >
+        SIGN IN →
+      </button>
+    </div>
   );
 };
 

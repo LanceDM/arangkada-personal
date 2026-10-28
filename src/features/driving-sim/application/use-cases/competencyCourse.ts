@@ -420,3 +420,47 @@ export const completePostExam = async (
 /** The competencies the quiz of a stage asks. */
 export const stageQuizCompetencies = (level: number): readonly DrivingCompetency[] =>
   isCompetencyStage(level) ? STAGE_COMPETENCIES[level] : [];
+
+// --- free replay ----------------------------------------------------------------------
+
+/**
+ * A stage already finished, played again from the map, outside the routing
+ * FSM: every competency the stage teaches, 3 scenarios each, and nothing moves
+ * on the cursor or the table. The attempt is saved, so BKT reads it as
+ * evidence like any other drive.
+ */
+export const planFreeReplay = async (uid: string, levelId: number, attemptSeed: number): Promise<CourseDriveRun> => {
+  const history = await loadEvidence(uid);
+  const composed = isCompetencyStage(levelId)
+    ? composeDrive({ levelId, competencies: STAGE_COMPETENCIES[levelId], rng: createRng(attemptSeed) })
+    : null;
+  const level = composed?.level ?? buildLevelConfig(levelId, undefined, null, createRng(attemptSeed))!;
+  return {
+    levelId,
+    composed,
+    attemptSeed,
+    plan: {
+      weakArea: null,
+      practice: null,
+      level,
+      support: 'full',
+      record: recordRoutedDecision({ history, item: null, support: 'full' }),
+      priorLogs: history,
+      explanation: `free replay of level ${levelId}, outside the routing FSM`,
+    },
+  };
+};
+
+export const completeFreeReplayDrive = async (uid: string, result: LevelResult, telemetry?: LevelFsmTelemetry) => {
+  const { storyAttempts } = drivingSimDeps();
+  const attemptId = await storyAttempts.save(uid, {
+    levelId: result.levelId,
+    timestamp: Date.now(),
+    finalScore: result.score,
+    violations: result.violations,
+    correctDecisions: result.correctActions,
+    logs: result.logs,
+    ...(telemetry ? { fsmMetrics: telemetry.metrics, reactionLatencies: telemetry.reactionLatencies } : {}),
+  });
+  if (telemetry) await storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions);
+};

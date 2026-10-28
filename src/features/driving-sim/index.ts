@@ -45,6 +45,29 @@ export type { RoutingOverride } from './application/ports';
 export type { RoutingCursor, GroupInEffect } from './domain/adaptive/courseRouting';
 export type { CourseNote } from './domain/adaptive/routingBriefing';
 
+// The per-competency course (2026-10-28): everyone plays it, signed in.
+export { default as BankQuiz } from './presentation/ui/BankQuiz';
+export type { BankQuizResult } from './presentation/ui/BankQuiz';
+export type { BriefingGate } from './presentation/ui/MissionBriefing';
+export {
+  completeCourseDrive,
+  completeFreeReplayDrive,
+  completePostExam,
+  diagnosticItems,
+  drawCourseQuiz,
+  finishCourseQuizReview,
+  loadCompetencyCourse,
+  markCourseLessonsRead,
+  markCourseReviewShown,
+  planCourseDrive,
+  planFreeReplay,
+  postExamItems,
+  saveDiagnostic,
+  submitCourseQuiz,
+} from './application/use-cases/competencyCourse';
+export type { CourseDriveRun, CourseState } from './application/use-cases/competencyCourse';
+export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';
+
 export type { LevelConfig, ScenarioEvent } from './domain/scenario/scenarioDefinition';
 export type { LevelFsmTelemetry } from './domain/fsm/fsmMetrics';
 export type { AdaptivePlan } from './application/use-cases/buildAdaptivePlan';

@@ -8,7 +8,9 @@
 import { useOutletContext } from 'react-router-dom';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import type { SupportLevel, WeakArea } from '@/domain/learner/competency';
+import type { BankItem } from '@/domain/assessment/questionBank';
 import type {
+  BriefingGate,
   CourseNote,
   LevelConfig,
   LevelFsmTelemetry,
@@ -49,6 +51,22 @@ export interface StoryCourse {
   playFreeReplay: (levelId: number) => void;
   /** Starts the pilot's post-test; null for a guest, whose attempt would not be saved. */
   playPostTest: (() => void) | null;
+  /** The per-competency course's briefing gate (module, quiz, review, drive); absent in the old groups. */
+  gate?: BriefingGate | null;
+  /** The diagnostic pre-test and the post-evaluation exam; absent in the old groups. */
+  assessments?: StoryAssessments | null;
+}
+
+/** The two exams around the course (2026-10-28). */
+export interface StoryAssessments {
+  diagnosticDone: boolean;
+  /** The post-exam opens once the final exam is passed. */
+  postExamOpen: boolean;
+  postExamDone: boolean;
+  diagnosticItems: readonly BankItem[];
+  postExamItems: readonly BankItem[];
+  submitDiagnostic: (choices: (number | null)[]) => Promise<void>;
+  submitPostExam: (choices: (number | null)[]) => Promise<void>;
 }
 
 export interface StoryRunContext {
