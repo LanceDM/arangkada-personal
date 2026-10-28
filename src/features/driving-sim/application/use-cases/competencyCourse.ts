@@ -24,6 +24,7 @@ import {
   postExamCompleted,
   quizReviewDone,
   quizSubmitted,
+  quizMeasured,
   reviewShown,
   startingCourse,
   type CourseCursor,
@@ -67,10 +68,10 @@ export const loadCompetencyCourse = async (uid: string): Promise<CourseState> =>
   };
 };
 
-/** Every graded answer BKT reads, oldest first: drives (tutorial left out), quiz and diagnostic answers. */
+/** Every graded answer BKT reads, oldest first: drives (tutorial left out), quiz, diagnostic and post-exam answers. */
 export const loadEvidence = async (uid: string): Promise<ActionLog[]> => {
   const [history, sittings] = await Promise.all([loadLearnerHistory(uid), drivingSimDeps().assessments.load(uid)]);
-  const answers = sittings.filter(s => s.kind !== 'post_exam').flatMap(s => s.answers);
+  const answers = sittings.flatMap(s => s.answers);
   return historyLogs(history, answers);
 };
 
@@ -137,17 +138,52 @@ export const submitCourseQuiz = async (
     timestamp: at,
   });
   const graded: QuizAnswer[] = items.map((item, i) => ({ itemId: item.id, competency: item.competency, correct: choices[i] === item.answer }));
-  const next = quizSubmitted(cursor, graded);
-  await saveCursor(uid, next);
   const competencies = [...new Set(items.map(item => item.competency))];
-  return {
-    cursor: next,
-    results: competencies.map(competency => {
-      const mine = graded.filter(answer => answer.competency === competency);
-      const correct = mine.filter(answer => answer.correct).length;
-      return { competency, correct, total: mine.length, passed: correct >= QUIZ_PASS_CORRECT };
-    }),
-  };
+  const results = competencies.map(competency => {
+    const mine = graded.filter(answer => answer.competency === competency);
+    const correct = mine.filter(answer => answer.correct).length;
+    return { competency, correct, total: mine.length, passed: correct >= QUIZ_PASS_CORRECT };
+  });
+
+  // The quiz is a measurement: pending decisions on these competencies are
+  // rewarded now (Tentative; OPEN, see quizMeasured).
+  let next = quizSubmitted(cursor, graded);
+  const level = phaseLevel(cursor.phase);
+  if (next.pending.some(p => competencies.includes(p.competency))) {
+    const evidence = await loadEvidence(uid);
+    const mastery = buildBKTProfile(evidence);
+    const counts = buildBKTEvidence(evidence);
+    const measurements = results.map(r => ({
+      competency: r.competency,
+      accuracy: r.total > 0 ? r.correct / r.total : 0,
+      passed: r.passed,
+      masteryP: mastery[r.competency],
+      driveEvidence: counts[r.competency].drive,
+    }));
+    const deps = drivingSimDeps();
+    const table = await deps.competencyCourse.loadQTable();
+    const outcome = quizMeasured(next, measurements, table, at);
+    next = outcome.cursor;
+    if (outcome.operations.length > 0) {
+      const tableAfter = await deps.competencyCourse.applyQOperations(outcome.operations);
+      await deps.competencyCourse.appendLog(uid, {
+        schemaVersion: 1,
+        kind: 'quiz',
+        levelId: level ?? 0,
+        phase: phaseId(cursor.phase),
+        attemptId: null,
+        verdicts: measurements.map((m, i) => ({
+          competency: m.competency, total: results[i].total, correct: results[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
+        })),
+        decisions: [],
+        rewards: outcome.rewards,
+        tableAfter,
+        timestamp: at,
+      });
+    }
+  }
+  await saveCursor(uid, next);
+  return { cursor: next, results };
 };
 
 export const finishCourseQuizReview = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
@@ -314,9 +350,16 @@ export const completeCourseDrive = async ({
   if (cursor.phase.kind === 'FINAL') {
     const passed = result.completed;
     const next = finalCompleted(cursor, passed, scenarioIds);
+    // The final exam's decisions update BKT like any drive; it makes no routing decision.
+    const finalEvidence = await loadEvidence(uid);
+    const finalMastery = buildBKTProfile(finalEvidence);
+    const finalCounts = buildBKTEvidence(finalEvidence);
     await deps.competencyCourse.appendLog(uid, {
       schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId,
-      verdicts: verdicts.map(v => ({ competency: v.competency, total: v.total, correct: v.correct, passed: v.passed, masteryP: 0, driveEvidence: 0 })),
+      verdicts: verdicts.map(v => ({
+        competency: v.competency, total: v.total, correct: v.correct, passed: v.passed,
+        masteryP: finalMastery[v.competency], driveEvidence: finalCounts[v.competency].drive,
+      })),
       decisions: [], rewards: [], tableAfter: await deps.competencyCourse.loadQTable(), timestamp: now,
       ...(passed ? { endReason: 'certified' as const } : {}),
     });

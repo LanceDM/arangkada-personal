@@ -69,6 +69,6 @@ describe('historyLogs', () => {
     const fixedScore = buildBKTLearnerProfile(fixed).road_signs.score;
 
     expect(naiveScore).toBeLessThan(50);
-    expect(fixedScore).toBeGreaterThan(90);
+    expect(fixedScore).toBeGreaterThan(80);
   });
 });

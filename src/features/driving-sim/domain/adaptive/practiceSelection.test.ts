@@ -75,28 +75,28 @@ describe('the support level a level entry is played at', () => {
 });
 
 describe('the weakest competency the decision reads', () => {
-  /** `road_signs` missed once and `driver_legality` right once then missed twice: both at BKT 15. */
+  /** `road_signs` missed once and `driver_legality` missed, right, missed: both at BKT 8 (default model). */
   const tied: ActionLog[] = [
     ...COMPETENCIES.filter(c => c !== 'road_signs' && c !== 'driver_legality').flatMap(c => [
       graded(c, 'correct'),
       graded(c, 'correct'),
     ]),
-    graded('driver_legality', 'correct'),
     graded('driver_legality', 'violation'),
+    graded('driver_legality', 'correct'),
     graded('driver_legality', 'violation'),
     graded('road_signs', 'violation'),
   ];
 
   it('goes to the first in COMPETENCIES on a tie by default, as the earlier studies read it', () => {
     const decision = decidePractice(tied)!;
-    expect(decision.weakestScore).toBe(15);
+    expect(decision.weakestScore).toBe(8);
     expect(decision.weakest).toBe('driver_legality');
   });
 
   it('goes to the least observed on a tie under least-observed, and reads the state on that one', () => {
     const decision = decidePractice(tied, 'least-observed')!;
     expect(decision.weakest).toBe('road_signs');
-    expect(decision.weakestScore).toBe(15);
+    expect(decision.weakestScore).toBe(8);
     // Recent form is read on road_signs, missed on its only attempt.
     expect(decision.state).toBe(practiceState(decision.profile, tied, 'road_signs'));
     expect(decision.state.startsWith('critical:struggling')).toBe(true);

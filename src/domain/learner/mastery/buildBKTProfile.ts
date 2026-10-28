@@ -27,39 +27,51 @@ export type BKTEvidenceParams = Pick<BKTParams, 'pTransit' | 'pSlip' | 'pGuess'>
  * - `quiz`: short-quiz answers and retakes.
  * - `diagnostic`: the pre-test. T = 0, because no feedback is given and nothing
  *   is taught during it; the diagnostic only moves the starting value.
- *
- * Post-evaluation exam answers never enter BKT: the exam is the outcome that is
- * independent of the models.
+ * - `post_exam`: the post-evaluation exam. Like the diagnostic: no feedback, so
+ *   T = 0. Its answers update each learner's final mastery (Lance, 2026-10-28,
+ *   reversing the earlier exclusion). IRT scoring of the exam is separate and
+ *   is not part of this model.
  */
 export interface BKTModel {
   pInit: number;
   drive: BKTEvidenceParams;
   quiz: BKTEvidenceParams;
   diagnostic: BKTEvidenceParams;
+  post_exam: BKTEvidenceParams;
 }
 
 /**
- * TENTATIVE values, until the pilot group (5-10 people, kept out of the main
- * study) fits T and S by grid search and the driving guess rate. Sources:
+ * TENTATIVE defaults taken from published studies, because no study data
+ * exists yet to fit them (no pilot fitting for now; no value here comes from
+ * simulated learners). To be discussed: where the real values come from.
  *
- * - pInit 0.30: the starting point before the diagnostic; the diagnostic then
- *   sets each learner's own starting value per competency.
- * - T 0.10, S 0.10: inside the bounds Zhang et al. (2025) report; to be refit.
- *   Sensitivity runs at S = 0.05 and 0.15.
- * - G 0.25 for quiz and diagnostic items: 1/k for 4-choice items.
- * - G 0.20 for driving decisions: a placeholder; fitted on the pilot, because
- *   it depends on how many options a decision really has.
+ * - pInit 0.30: inside the fitting bounds of Zhang et al. (2025), P(L0)
+ *   0.001-0.5. It is only the value before the diagnostic; the diagnostic's
+ *   answers then move each learner's own starting value per competency.
+ * - T 0.03 per opportunity: the fitted learn rates of Zhang, Pradhan, Lee,
+ *   Pei, Sales & Ottmar (JEDM, perceptual scaffolding study) run 0.014-0.038
+ *   across conditions; 0.03 sits in that range and inside Zhang et al. (2025)'s
+ *   0.001-0.1 bound. T = 0 for the diagnostic and post-exam (no feedback).
+ * - S 0.10: the low end of the slips fitted by Zhang, Pradhan et al.
+ *   (0.107-0.243) and inside Zhang et al. (2025)'s 0.01-0.3 bound.
+ * - G 0.25 for 4-choice items (quiz, diagnostic, post-exam): 1/k, which is
+ *   also the prior mean Zhang, Pradhan et al. place on guess.
+ * - G 0.20 for driving decisions: inside the 0.01-0.3 bound; how many real
+ *   options a decision has is not known yet.
  *
- * G and S stay well below 0.5 to avoid model degeneracy (Baker et al., 2008).
- * No value here comes from simulated learners.
+ * Every class keeps G and S below 0.5 (Zhang, Pradhan et al.; Baker et al.,
+ * 2008) and G + S < 1, the non-degeneracy constraint of Shchepakin,
+ * Sankaranarayanan & Zimmaro (2024), so a right answer always raises mastery
+ * and a wrong one always lowers it.
  */
 export const DEFAULT_BKT_MODEL: BKTModel = {
   pInit: 0.3,
-  drive: { pTransit: 0.1, pSlip: 0.1, pGuess: 0.2 },
+  drive: { pTransit: 0.03, pSlip: 0.1, pGuess: 0.2 },
   // OPEN: whether the quiz shows feedback after each answer decides whether
   // the learning step applies during the quiz. Kept on until that is decided.
-  quiz: { pTransit: 0.1, pSlip: 0.1, pGuess: 0.25 },
+  quiz: { pTransit: 0.03, pSlip: 0.1, pGuess: 0.25 },
   diagnostic: { pTransit: 0, pSlip: 0.1, pGuess: 0.25 },
+  post_exam: { pTransit: 0, pSlip: 0.1, pGuess: 0.25 },
 };
 
 /**
@@ -75,8 +87,7 @@ export const DEFAULT_BKT_PARAMS: BKTParams = {
 export const evidenceSourceOf = (log: Pick<ActionLog, 'source'>): EvidenceSource => log.source ?? 'drive';
 
 /** The parameters one answer is updated with. */
-export const paramsForSource = (model: BKTModel, source: EvidenceSource): BKTEvidenceParams | null =>
-  source === 'post_exam' ? null : model[source];
+export const paramsForSource = (model: BKTModel, source: EvidenceSource): BKTEvidenceParams => model[source];
 
 /**
  * One Bayesian update step: infer the posterior probability of mastery given
@@ -106,19 +117,19 @@ const asModel = (params: BKTModel | BKTParams): BKTModel =>
         drive: params,
         quiz: params,
         diagnostic: { ...params, pTransit: 0 },
+        post_exam: { ...params, pTransit: 0 },
       };
 
 /** Whether a log is graded evidence BKT reads: a tagged, non-neutral answer from a source that feeds the model. */
 const isBKTEvidence = (log: ActionLog): log is ActionLog & { competency: DrivingCompetency } =>
   !!log.competency &&
   (COMPETENCIES as string[]).includes(log.competency) &&
-  log.result !== 'neutral' &&
-  evidenceSourceOf(log) !== 'post_exam';
+  log.result !== 'neutral';
 
 /**
  * Replays `logs` in order, updating a per-competency mastery probability.
  * A competency with no evidence stays at `pInit` - "not yet demonstrated", not
- * "fine". Neutral logs and post-exam answers are skipped. The tutorial is kept
+ * "fine". Neutral logs are skipped. The tutorial is kept
  * out by the caller (`historyLogs` leaves Level 0 out of the stream), because
  * its steps teach the controls, not a competency.
  *
@@ -137,7 +148,6 @@ export const buildBKTProfile = (
   for (const log of logs) {
     if (!isBKTEvidence(log)) continue;
     const evidence = paramsForSource(model, evidenceSourceOf(log));
-    if (!evidence) continue;
     mastery[log.competency] = updateMastery(mastery[log.competency], log.result === 'correct', evidence);
   }
 
@@ -150,17 +160,17 @@ export interface CompetencyEvidence {
   drive: number;
   quiz: number;
   diagnostic: number;
+  post_exam: number;
 }
 
 export const buildBKTEvidence = (logs: ActionLog[]): Record<DrivingCompetency, CompetencyEvidence> => {
   const evidence = COMPETENCIES.reduce((acc, competency) => {
-    acc[competency] = { total: 0, drive: 0, quiz: 0, diagnostic: 0 };
+    acc[competency] = { total: 0, drive: 0, quiz: 0, diagnostic: 0, post_exam: 0 };
     return acc;
   }, {} as Record<DrivingCompetency, CompetencyEvidence>);
   for (const log of logs) {
     if (!isBKTEvidence(log)) continue;
     const source = evidenceSourceOf(log);
-    if (source === 'post_exam') continue;
     evidence[log.competency].total += 1;
     evidence[log.competency][source] += 1;
   }

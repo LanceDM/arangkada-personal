@@ -8,6 +8,7 @@ import {
   driveCompleted,
   lessonsRead,
   postExamCompleted,
+  quizMeasured,
   quizReviewDone,
   quizSubmitted,
   reviewShown,
@@ -157,6 +158,24 @@ describe('the per-competency routing FSM', () => {
     expect(exam.rewards.map(r => r.competency)).toEqual(['driver_legality']);
     expect(exam.rewards[0].next).toBeNull();
     expect(exam.unrewarded.map(p => p.competency)).toEqual(['document_awareness']);
+  });
+
+  it('rewards a pending decision at the next quiz that measures its competency (Tentative)', () => {
+    const cursor: CourseCursor = {
+      ...startingCourse(),
+      phase: { kind: 'DRIVE', level: 2 },
+      pending: [
+        { id: '1:document_awareness:0', competency: 'document_awareness', levelId: 1, state: { mastery: 3, result: 'passed' }, action: 'none', addedDecisions: 0, decidedAt: 0 },
+        { id: '1:driver_legality:1', competency: 'driver_legality', levelId: 1, state: { mastery: 3, result: 'passed' }, action: 'none', addedDecisions: 0, decidedAt: 0 },
+      ],
+    };
+    const out = quizMeasured(cursor, [measured('document_awareness', 2, 0.85)], emptyQTable(), 5);
+    expect(out.rewards).toHaveLength(1);
+    expect(out.rewards[0]).toMatchObject({ competency: 'document_awareness', measuredBy: 'quiz', next: { mastery: 3, result: 'passed' } });
+    expect(out.rewards[0].reward).toBeCloseTo(2 / 3 + 0.5, 10);
+    // Driver legality is not in Level 2's quiz: it keeps waiting.
+    expect(out.cursor.pending.map(p => p.competency)).toEqual(['driver_legality']);
+    expect(applyQOperations(emptyQTable(), out.operations)).toEqual(out.table);
   });
 
   it('applies the same operations to the stored table as it applied locally', () => {

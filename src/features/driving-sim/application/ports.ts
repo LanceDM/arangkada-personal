@@ -108,7 +108,7 @@ export interface BriefingProgressRepository {
 /** One entry of a player's course log: a drive's decisions and rewards, with the table they were taken against. */
 export interface CourseLogEntry {
   schemaVersion: 1;
-  kind: 'drive' | 'post_exam' | 'final';
+  kind: 'drive' | 'quiz' | 'post_exam' | 'final';
   levelId: number;
   phase: string;
   /** The attempt the drive was saved as, where there is one. */

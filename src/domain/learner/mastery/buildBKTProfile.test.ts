@@ -46,9 +46,27 @@ describe('BKT with separate guess and slip per item class', () => {
     expect(run([true, true, true, true, false])).toBeCloseTo(0.91, 2);
   });
 
-  it('never reads post-exam answers, neutral logs or untagged logs', () => {
+  it('reads post-exam answers with no learning step', () => {
+    const after = buildBKTProfile([log('parking', true, { source: 'post_exam' })]).parking;
+    expect(after).toBeCloseTo(updateMastery(0.3, true, DEFAULT_BKT_MODEL.post_exam), 10);
+    expect(DEFAULT_BKT_MODEL.post_exam.pTransit).toBe(0);
+  });
+
+  it('keeps every item class non-degenerate: G and S below 0.5, G + S below 1', () => {
+    for (const cls of [DEFAULT_BKT_MODEL.drive, DEFAULT_BKT_MODEL.quiz, DEFAULT_BKT_MODEL.diagnostic, DEFAULT_BKT_MODEL.post_exam]) {
+      expect(cls.pGuess).toBeLessThan(0.5);
+      expect(cls.pSlip).toBeLessThan(0.5);
+      expect(cls.pGuess + cls.pSlip).toBeLessThan(1);
+      // A right answer raises mastery and a wrong one lowers it, at any prior.
+      for (const p of [0.05, 0.3, 0.6, 0.9]) {
+        expect(updateMastery(p, true, { ...cls, pTransit: 0 })).toBeGreaterThan(p);
+        expect(updateMastery(p, false, { ...cls, pTransit: 0 })).toBeLessThan(p);
+      }
+    }
+  });
+
+  it('never reads neutral logs or untagged logs', () => {
     const mastery = buildBKTProfile([
-      log('parking', true, { source: 'post_exam' }),
       { ...log('parking', true), result: 'neutral' },
       { ...log('parking', true), competency: undefined },
     ]);
@@ -62,6 +80,6 @@ describe('BKT with separate guess and slip per item class', () => {
       log('parking', true),
       log('parking', true, { source: 'post_exam' }),
     ]);
-    expect(evidence.parking).toEqual({ total: 3, drive: 1, quiz: 1, diagnostic: 1 });
+    expect(evidence.parking).toEqual({ total: 4, drive: 1, quiz: 1, diagnostic: 1, post_exam: 1 });
   });
 });

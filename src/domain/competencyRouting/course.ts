@@ -251,6 +251,7 @@ export const reviewShown = (cursor: CourseCursor): CourseCursor => {
 
 /** What one competency's drive measured, with its BKT mastery after the attempt. */
 export interface CompetencyMeasurement {
+  /** A drive's verdict, or the competency's answers in one quiz sitting. */
   competency: DrivingCompetency;
   accuracy: number;
   passed: boolean;
@@ -295,7 +296,7 @@ export interface RewardRecord {
   addedDecisions: number;
   next: QState | null;
   /** Where the next measurement came from. */
-  measuredBy: 'drive' | 'post_exam';
+  measuredBy: 'drive' | 'quiz' | 'post_exam';
   timestamp: number;
 }
 
@@ -328,12 +329,82 @@ const markSeen = (seen: Record<string, number>, ids: readonly string[], seq: num
   ...Object.fromEntries(ids.map(id => [id, seq])),
 });
 
+/** The Q-state a measurement puts a competency in. */
+const measuredState = (m: CompetencyMeasurement): QState => ({
+  mastery: masteryLevel(m.masteryP, m.driveEvidence) as MasteryLevel,
+  result: m.passed ? 'passed' : 'failed',
+});
+
+/**
+ * Rewards every pending decision whose competency `measurements` measured,
+ * r = A_next + 0.5 Pass - 0.02 H, with s' the measured state, or null (Q = 0)
+ * when no decision for that competency follows.
+ */
+const rewardPending = (
+  pending: readonly PendingDecision[],
+  measurements: readonly CompetencyMeasurement[],
+  willDecide: ReadonlySet<DrivingCompetency>,
+  table: QTable,
+  measuredBy: RewardRecord['measuredBy'],
+  now: number,
+  weights: RewardWeights
+) => {
+  const measuredHere = new Map(measurements.map(m => [m.competency, m]));
+  const rewards: RewardRecord[] = [];
+  const operations: QOperation[] = [];
+  const stillPending: PendingDecision[] = [];
+  let next = table;
+  for (const decision of pending) {
+    const m = measuredHere.get(decision.competency);
+    if (!m) {
+      stillPending.push(decision);
+      continue;
+    }
+    const nextState = willDecide.has(m.competency) ? measuredState(m) : null;
+    const reward = rewardOf({ accuracy: m.accuracy, passed: m.passed }, decision.addedDecisions, weights);
+    next = updateQ(next, decision.state, decision.action, reward, nextState, GAMMA).table;
+    operations.push({ kind: 'update', state: decision.state, action: decision.action, reward, next: nextState, gamma: GAMMA });
+    rewards.push({
+      decisionId: decision.id, competency: decision.competency, state: decision.state, action: decision.action, reward,
+      accuracy: m.accuracy, passed: m.passed, addedDecisions: decision.addedDecisions, next: nextState, measuredBy, timestamp: now,
+    });
+  }
+  return { rewards, operations, stillPending, table: next };
+};
+
+/**
+ * A short-quiz sitting was graded. Reward timing is "the competency's next
+ * measurement anywhere" (Tentative, OPEN for discussion, 2026-10-28): a
+ * pending decision is rewarded by the first graded answers its competency gets
+ * after it, so a quiz that covers the competency settles it before the drive.
+ *
+ * The quiz only covers the stage's own competencies, and every one of them
+ * gets a drive decision next, so s' is the quiz's state (mastery after the
+ * quiz, passed at it) and never terminal.
+ *
+ * OPEN: s' is the state after the quiz, but the next decision is taken at the
+ * drive's state, so the max over Q(s', a') looks at a state the learner moves
+ * on from before deciding. To discuss with the reward function.
+ */
+export const quizMeasured = (
+  cursor: CourseCursor,
+  measurements: readonly CompetencyMeasurement[],
+  table: QTable,
+  now: number,
+  weights: RewardWeights = DEFAULT_REWARD
+): { cursor: CourseCursor; rewards: RewardRecord[]; operations: QOperation[]; table: QTable } => {
+  const willDecide = new Set(measurements.map(m => m.competency));
+  const rewarded = rewardPending(cursor.pending, measurements, willDecide, table, 'quiz', now, weights);
+  return { cursor: { ...cursor, pending: rewarded.stillPending }, rewards: rewarded.rewards, operations: rewarded.operations, table: rewarded.table };
+};
+
 /**
  * A drive or repeat drive ended. In order:
  *
- * 1. Every pending decision whose competency this drive measured is rewarded,
- *    r = A_next + 0.5 Pass - 0.02 H, with s' this measurement's state; s' is
- *    null (Q = 0) when the competency has no decision after it.
+ * 1. Every pending decision whose competency this drive measured (and no quiz
+ *    measured first) is rewarded, r = A_next + 0.5 Pass - 0.02 H, with s' this
+ *    measurement's state; s' is null (Q = 0) when the competency has no
+ *    decision after it.
  * 2. Each counted competency gets its decision, unless the attempt cap ends it.
  * 3. The stage advances when every competency is done; otherwise a repeat drive.
  *
@@ -359,11 +430,6 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
   const flagged = [...cursor.flagged];
   const newPending: PendingDecision[] = [];
 
-  const measuredState = (m: CompetencyMeasurement): QState => ({
-    mastery: masteryLevel(m.masteryP, m.driveEvidence) as MasteryLevel,
-    result: m.passed ? 'passed' : 'failed',
-  });
-
   // 2 first (without touching the table), so step 1 knows which competencies
   // will have a decision after this measurement.
   const willDecide = new Set<DrivingCompetency>();
@@ -373,24 +439,11 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
   }
 
   // 1. Rewards for pending decisions measured here.
-  const measuredHere = new Map(input.measurements.map(m => [m.competency, m]));
-  const stillPending: PendingDecision[] = [];
-  for (const pending of cursor.pending) {
-    const m = measuredHere.get(pending.competency);
-    if (!m) {
-      stillPending.push(pending);
-      continue;
-    }
-    const next = willDecide.has(m.competency) ? measuredState(m) : null;
-    const reward = rewardOf({ accuracy: m.accuracy, passed: m.passed }, pending.addedDecisions, weights);
-    const applied = updateQ(table, pending.state, pending.action, reward, next, GAMMA);
-    table = applied.table;
-    operations.push({ kind: 'update', state: pending.state, action: pending.action, reward, next, gamma: GAMMA });
-    rewards.push({
-      decisionId: pending.id, competency: pending.competency, state: pending.state, action: pending.action, reward,
-      accuracy: m.accuracy, passed: m.passed, addedDecisions: pending.addedDecisions, next, measuredBy: 'drive', timestamp: input.now,
-    });
-  }
+  const rewarded = rewardPending(cursor.pending, input.measurements, willDecide, table, 'drive', input.now, weights);
+  table = rewarded.table;
+  operations.push(...rewarded.operations);
+  rewards.push(...rewarded.rewards);
+  const stillPending = rewarded.stillPending;
 
   // 2. Decisions.
   for (const m of input.measurements) {
@@ -486,6 +539,9 @@ export const finalCompleted = (cursor: CourseCursor, passed: boolean, scenarioId
  * did not cover leaves its decisions unrewarded: they are excluded from
  * learning and counted per action in the report.
  *
+ * With the quiz now a measurement, a decision reaches the post-exam only when
+ * no later quiz or drive covered its competency.
+ *
  * OPEN: whether the post-exam is the right measurement for a `none` taken many
  * stages earlier (per-competency reward timing).
  */
@@ -496,25 +552,22 @@ export const postExamCompleted = (
   now: number,
   weights: RewardWeights = DEFAULT_REWARD
 ): { cursor: CourseCursor; rewards: RewardRecord[]; operations: QOperation[]; table: QTable; unrewarded: PendingDecision[] } => {
-  const rewards: RewardRecord[] = [];
-  const operations: QOperation[] = [];
-  const unrewarded: PendingDecision[] = [];
-  let next = table;
-  for (const pending of cursor.pending) {
-    const m = byCompetency[pending.competency];
-    if (!m) {
-      unrewarded.push(pending);
-      continue;
-    }
-    const reward = rewardOf(m, pending.addedDecisions, weights);
-    next = updateQ(next, pending.state, pending.action, reward, null, GAMMA).table;
-    operations.push({ kind: 'update', state: pending.state, action: pending.action, reward, next: null, gamma: GAMMA });
-    rewards.push({
-      decisionId: pending.id, competency: pending.competency, state: pending.state, action: pending.action, reward,
-      accuracy: m.accuracy, passed: m.passed, addedDecisions: pending.addedDecisions, next: null, measuredBy: 'post_exam', timestamp: now,
-    });
-  }
-  return { cursor: { ...cursor, pending: unrewarded }, rewards, operations, table: next, unrewarded };
+  const measurements: CompetencyMeasurement[] = Object.entries(byCompetency).map(([competency, m]) => ({
+    competency: competency as DrivingCompetency,
+    accuracy: m!.accuracy,
+    passed: m!.passed,
+    masteryP: 0,
+    driveEvidence: 0,
+  }));
+  // Nothing follows the post-exam: every s' is terminal.
+  const rewarded = rewardPending(cursor.pending, measurements, new Set(), table, 'post_exam', now, weights);
+  return {
+    cursor: { ...cursor, pending: rewarded.stillPending },
+    rewards: rewarded.rewards,
+    operations: rewarded.operations,
+    table: rewarded.table,
+    unrewarded: rewarded.stillPending,
+  };
 };
 
 /** Applies operations to a table: what the store runs inside its transaction on the newest table. */

@@ -1,10 +1,9 @@
 import type { DrivingCompetency, SupportLevel } from './competency';
 
 /**
- * Where a graded answer came from. BKT reads `drive`, `quiz` and `diagnostic`
- * with separate guess and slip per class (`mastery/buildBKTProfile.ts`);
- * `post_exam` answers are logged but never enter BKT, because the
- * post-evaluation exam is the outcome independent of the models.
+ * Where a graded answer came from. BKT reads every class, with separate guess
+ * and slip per class (`mastery/buildBKTProfile.ts`). The diagnostic and the
+ * post-evaluation exam use no learning step (T = 0).
  */
 export type EvidenceSource = 'drive' | 'quiz' | 'diagnostic' | 'post_exam';
 
