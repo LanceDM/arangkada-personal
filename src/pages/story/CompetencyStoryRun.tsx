@@ -222,6 +222,19 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       if (flagged.length > 0) notes.push(`Last attempt for ${labels(flagged)}: after it, the stage moves on.`);
     }
     if (phase.kind === 'FINAL') notes.push('The final exam: one scenario per competency, 70% to pass.');
+    // Progress per competency in this stage: done, or which attempt comes next.
+    if ((phase.kind === 'DRIVE' || phase.kind === 'REPEAT') && stageCompetencies.length > 0) {
+      notes.push(
+        'Progress: ' +
+          stageCompetencies
+            .map(c => {
+              const progress = cursor.stage[c];
+              if (progress?.done) return `${getCompetencyLabel(c)} done${progress.flagged ? ' (flagged)' : ''}`;
+              return `${getCompetencyLabel(c)} attempt ${(progress?.attempts ?? 0) + 1} of ${COMPETENCY_ATTEMPT_CAP}`;
+            })
+            .join(' · ')
+      );
+    }
 
     const review =
       phase.kind === 'QUIZ_REVIEW'

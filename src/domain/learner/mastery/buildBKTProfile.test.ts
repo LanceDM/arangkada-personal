@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ActionLog } from '@/domain/learner/attempt';
+import type { DrivingCompetency } from '@/domain/learner/competency';
 import {
   DEFAULT_BKT_MODEL,
   buildBKTEvidence,
@@ -7,7 +8,7 @@ import {
   updateMastery,
 } from './buildBKTProfile';
 
-const log = (competency: string, correct: boolean, extra: Partial<ActionLog> = {}): ActionLog => ({
+const log = (competency: DrivingCompetency, correct: boolean, extra: Partial<ActionLog> = {}): ActionLog => ({
   timestamp: 0,
   action: 'x',
   result: correct ? 'correct' : 'violation',

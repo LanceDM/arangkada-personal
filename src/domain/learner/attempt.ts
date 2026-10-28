@@ -1,4 +1,4 @@
-import type { SupportLevel } from './competency';
+import type { DrivingCompetency, SupportLevel } from './competency';
 
 /**
  * Where a graded answer came from. BKT reads `drive`, `quiz` and `diagnostic`
@@ -27,7 +27,8 @@ export interface ActionLog {
    */
   reactionCensored?: true;
   ruleId?: string;
-  competency?: string;
+  /** One of the 11 competencies: a misspelled tag fails to compile instead of being dropped by BKT. */
+  competency?: DrivingCompetency;
   severity?: string;
   weight?: number;
   expectedAction?: string;
