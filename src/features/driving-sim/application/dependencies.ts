@@ -9,7 +9,9 @@
 import type { OptimizedRouting } from '@/features/driving-sim/domain/adaptive/courseRouting';
 import type { RoutingMode } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type {
+  AssessmentRepository,
   BriefingProgressRepository,
+  CompetencyCourseRepository,
   LearnerHistoryRepository,
   RoutingOverrideRepository,
   RoutingRepository,
@@ -31,6 +33,10 @@ export interface DrivingSimDependencies {
   routingOverride: RoutingOverrideRepository;
   /** The designated routing table, loaded on first use by the Optimized group. */
   optimizedRouting: () => Promise<OptimizedRouting>;
+  /** The per-competency routing FSM's cursor, shared Q-table and log (2026-10-28). */
+  competencyCourse: CompetencyCourseRepository;
+  /** Quiz, diagnostic and post-exam answers. */
+  assessments: AssessmentRepository;
 }
 
 let bound: DrivingSimDependencies | null = null;

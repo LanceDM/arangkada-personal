@@ -11,6 +11,10 @@ rules_version = '2';
 //   users/{uid}/attempts/{id}/telemetry/routing    RoutingTelemetryDoc
 //   users/{uid}/routing/assignment                 the pilot group the developers assigned
 //   users/{uid}/routing/cursor                     StoredRoutingCursor
+//   users/{uid}/routing/competencyCourse           CourseCursor (per-competency routing FSM)
+//   users/{uid}/courseLog/{id}                     CourseLogEntry: decisions, rewards, table snapshot
+//   users/{uid}/assessmentSittings/{id}            AssessmentSitting: quiz, diagnostic, post-exam answers
+//   policy/competencyQ                             the shared Q-table, learned online by every participant
 //   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
 //   users/{uid}/dailyStreak/summary                DailyStreakSummary
 //   users/{uid}/dailyAttempts/{id}                 DailyAttempt, append-only
@@ -158,6 +162,47 @@ service cloud.firestore {
         && data.updatedAt is number;
     }
 
+    function isCourseCursor(data) {
+      return data.keys().hasAll(['schemaVersion', 'phase', 'stage', 'pending', 'seen', 'flagged', 'seq', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.phase is map
+        && data.phase.kind in ['MODULE', 'QUIZ', 'QUIZ_REVIEW', 'DRIVE', 'REPEAT', 'FINAL', 'CERTIFIED']
+        && data.stage is map
+        && data.pending is list
+        && data.seen is map
+        && data.flagged is list
+        && isCount(data.seq)
+        && data.updatedAt is number;
+    }
+
+    function isCourseLogEntry(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'decisions', 'rewards', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind in ['drive', 'post_exam', 'final']
+        && data.decisions is list
+        && data.rewards is list
+        && data.timestamp is number;
+    }
+
+    function isAssessmentSitting(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind in ['quiz', 'diagnostic', 'post_exam']
+        && data.answers is list
+        && data.timestamp is number;
+    }
+
+    // The shared table holds 8 states; every update is the whole table,
+    // written in a transaction on the newest version.
+    function isQTableDoc(data) {
+      return data.keys().hasAll(['schemaVersion', 'table', 'updates', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.table is map
+        && data.table.size() <= 8
+        && isCount(data.updates)
+        && data.updatedAt is number;
+    }
+
     function isExamAttempt(data) {
       return data.keys().hasAll(['score', 'passed', 'wrongIds', 'questionIds', 'timestamp'])
         && isCount(data.score)
@@ -240,8 +285,24 @@ service cloud.firestore {
       // course, rewritten as they play.
       match /routing/{docId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create, update: if isOwner(uid) && docId == 'cursor' && isRoutingCursor(request.resource.data);
+        allow create, update: if isOwner(uid)
+          && ((docId == 'cursor' && isRoutingCursor(request.resource.data))
+            || (docId == 'competencyCourse' && isCourseCursor(request.resource.data)));
         allow delete: if false;
+      }
+
+      // Every policy decision and reward of the per-competency routing FSM, append-only.
+      match /courseLog/{entryId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isCourseLogEntry(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      // Quiz, diagnostic and post-exam answers, append-only; BKT reads quiz and diagnostic.
+      match /assessmentSittings/{sittingId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isAssessmentSitting(request.resource.data);
+        allow update, delete: if false;
       }
 
       match /examAttempts/{attemptId} {
@@ -276,6 +337,24 @@ service cloud.firestore {
 
     match /{path=**}/dailyAttempts/{attemptId} {
       allow read: if isAdmin();
+    }
+
+    match /{path=**}/courseLog/{entryId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/assessmentSittings/{sittingId} {
+      allow read: if isAdmin();
+    }
+
+    // ── The shared Q-table ─────────────────────────────────
+    // Learned online from the participants themselves: any signed-in player's
+    // drive updates it, in a transaction. The rules check its shape only; a
+    // value cannot be checked here, as with every score.
+    match /policy/competencyQ {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isQTableDoc(request.resource.data);
+      allow delete: if false;
     }
 
     // ── Shared content ─────────────────────────────────────

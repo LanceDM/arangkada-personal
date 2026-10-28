@@ -25,6 +25,7 @@ import { POST_TEST_SEED } from '@/features/driving-sim/domain/adaptive/pilotPost
 import { completeCourseAttempt, completeFreeReplay, completeMission, completePostTest } from './completeMission';
 import { resolveRoutingGroup, routingGroupNow, type RoutingGroupResolution } from './resolveRoutingGroup';
 import { loadCourseCursor, startCourseEntry, startFreeReplay, startPostTest } from './startCourseEntry';
+import { memoryAssessments, memoryCompetencyCourse, memoryCourseStore } from '@/features/driving-sim/application/testDependencies';
 
 const graded = (competency: DrivingCompetency, result: ActionLog['result'], timestamp: number): ActionLog => ({
   timestamp, action: 'brake', result, points: result === 'correct' ? 10 : -10, competency,
@@ -85,6 +86,8 @@ const provide = () =>
       world.saved.tableLoads += 1;
       return { table: PRACTISE_WEAKEST, tableId: 'test', seed: 0, budgetSize: 336 };
     },
+    competencyCourse: memoryCompetencyCourse(memoryCourseStore()),
+    assessments: memoryAssessments(memoryCourseStore()),
   } satisfies DrivingSimDependencies);
 
 beforeEach(() => {

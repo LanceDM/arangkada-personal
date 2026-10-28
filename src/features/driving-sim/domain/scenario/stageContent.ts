@@ -23,6 +23,11 @@ import { SLOTS as level8Slots, SLOT_DISTANCES as level8Distances } from './conte
 import { SLOTS as level9Slots, SLOT_DISTANCES as level9Distances } from './content/levels/level9';
 import { SLOTS as level10Slots, SLOT_DISTANCES as level10Distances } from './content/levels/level10';
 import { SLOTS as level11Slots, SLOT_DISTANCES as level11Distances } from './content/levels/level11';
+import {
+  assembleLevel12,
+  SLOTS as level12Slots,
+  SLOT_DISTANCES as level12Distances,
+} from './content/levels/level12';
 
 /** One inspection point and the content that can stand at it. */
 export interface StagePoint {
@@ -57,6 +62,8 @@ const SLOTS: Record<number, { slots: SlotVariant[][]; distances: number[] }> = {
   9: { slots: level9Slots, distances: level9Distances },
   10: { slots: level10Slots, distances: level10Distances },
   11: { slots: level11Slots, distances: level11Distances },
+  // The final exam: its own enforcement slots and the slots it borrows into.
+  12: { slots: level12Slots, distances: level12Distances },
 };
 
 /** A point holding exactly the one variant it was authored with: its own id is its scenario id. */
@@ -89,7 +96,7 @@ export const stageContent = (levelId: number): StageContent | null => {
     slots: slots.slots,
     distances: slots.distances,
     base,
-    ...(levelId === 4 ? { assemble: assembleLevel4 } : {}),
+    ...(levelId === 4 ? { assemble: assembleLevel4 } : levelId === 12 ? { assemble: assembleLevel12 } : {}),
     garage: levelId === 2 ? level2Points() : fixedPoints(levelId, 'garage', base.garage?.hotspots),
     aftermath: fixedPoints(levelId, 'aftermath', base.aftermath?.hotspots),
   };

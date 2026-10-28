@@ -13,6 +13,9 @@ import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCo
 import type { DecisionTelemetryDoc } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import type { RoutingTelemetryDoc } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type { GroupInEffect, RoutingCursor, RoutingGroup } from '@/features/driving-sim/domain/adaptive/courseRouting';
+import type { CourseCursor, DecisionRecord, QOperation, RewardRecord } from '@/domain/competencyRouting/course';
+import type { QTable } from '@/domain/competencyRouting/qLearning';
+import type { EvidenceSource } from '@/domain/learner/attempt';
 
 /** One recorded run, whichever source it came from. */
 export interface LearnerAttempt {
@@ -98,4 +101,51 @@ export interface BriefingProgressRepository {
   load(moduleId: string): Partial<BriefingProgress>;
   save(moduleId: string, progress: BriefingProgress): void;
   markLessonsRead(moduleId: string): void;
+}
+
+// --- the per-competency routing FSM (2026-10-28) -------------------------------
+
+/** One entry of a player's course log: a drive's decisions and rewards, with the table they were taken against. */
+export interface CourseLogEntry {
+  schemaVersion: 1;
+  kind: 'drive' | 'post_exam' | 'final';
+  levelId: number;
+  phase: string;
+  /** The attempt the drive was saved as, where there is one. */
+  attemptId: string | null;
+  /** Per competency: scenarios counted, correct, passed. */
+  verdicts: { competency: string; total: number; correct: number; passed: boolean; masteryP: number; driveEvidence: number }[];
+  decisions: DecisionRecord[];
+  rewards: RewardRecord[];
+  /** The shared table after this entry's operations: the per-participant snapshot. */
+  tableAfter: QTable;
+  timestamp: number;
+}
+
+export interface CompetencyCourseRepository {
+  loadCursor(uid: string): Promise<CourseCursor | null>;
+  saveCursor(uid: string, cursor: CourseCursor): Promise<void>;
+  /** The shared Q-table; empty until the first participant's first decision. */
+  loadQTable(): Promise<QTable>;
+  /** Applies operations to the newest shared table, atomically, and returns it. */
+  applyQOperations(operations: readonly QOperation[]): Promise<QTable>;
+  appendLog(uid: string, entry: CourseLogEntry): Promise<void>;
+}
+
+/** One sitting of a quiz attempt, the diagnostic or the post-exam: its answers as graded logs. */
+export interface AssessmentSitting {
+  schemaVersion: 1;
+  kind: Extract<EvidenceSource, 'quiz' | 'diagnostic' | 'post_exam'>;
+  levelId: number | null;
+  attempt: number | null;
+  answers: ActionLog[];
+  /** The post-exam's Rasch ability and its standard error. */
+  ability?: { theta: number; se: number };
+  timestamp: number;
+}
+
+export interface AssessmentRepository {
+  /** Every sitting, oldest first. */
+  load(uid: string): Promise<AssessmentSitting[]>;
+  save(uid: string, sitting: AssessmentSitting): Promise<void>;
 }

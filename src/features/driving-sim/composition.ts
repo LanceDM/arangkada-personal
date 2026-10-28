@@ -17,6 +17,10 @@ import { firebaseStoryAttemptRepository } from './infrastructure/FirebaseStoryAt
 import { localRoutingOverrideRepository } from './infrastructure/LocalRoutingOverrideRepository';
 import { localSignCoverageRepository } from './infrastructure/LocalSignCoverageRepository';
 import { localBriefingProgressRepository } from './infrastructure/LocalBriefingProgressRepository';
+import {
+  firebaseAssessmentRepository,
+  firebaseCompetencyCourseRepository,
+} from './infrastructure/FirebaseCompetencyCourseRepository';
 
 export type { LearnerHistoryRepository, OptimizedRouting, RoutingMode };
 
@@ -40,4 +44,6 @@ export const composeDrivingSim = ({ learnerHistory, routing }: DrivingSimComposi
     routing: firebaseRoutingRepository,
     routingOverride: localRoutingOverrideRepository,
     optimizedRouting: routing.optimized,
+    competencyCourse: firebaseCompetencyCourseRepository,
+    assessments: firebaseAssessmentRepository,
   });
