@@ -82,6 +82,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   const [resultNote, setResultNote] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [startedRun, setStartedRun] = useState<number | null>(null);
+  const startedAt = useRef<number | null>(null);
   const [quizSeed, setQuizSeed] = useState(() => nextAttemptSeed());
   const attempts = useRef(0);
   const busy = useRef(false);
@@ -172,7 +173,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       ? completeFreeReplayDrive(uid, result, telemetry).then(() =>
           setResultNote('A replay outside your course: Continue picks your course up where you left it.')
         )
-      : completeCourseDrive({ uid, cursor, run: planned.run, result, telemetry }).then(settled => {
+      : completeCourseDrive({ uid, cursor, run: planned.run, result, telemetry, startedAt: startedAt.current ?? undefined }).then(settled => {
           setCursor(settled.cursor);
           setResultNote([...settled.lines, settled.note].join('\n'));
         });
@@ -317,7 +318,10 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
     totalScore,
     completedLevels: Object.values(levelResults).filter(r => r.completed).length,
     nextLevelId: null,
-    beginDrive: setStartedRun,
+    beginDrive: levelId => {
+      startedAt.current = Date.now();
+      setStartedRun(levelId);
+    },
     completeRun,
     restartAttempt: () => {},
     routing,

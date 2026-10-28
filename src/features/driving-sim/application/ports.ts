@@ -119,6 +119,12 @@ export interface CourseLogEntry {
   rewards: RewardRecord[];
   /** The shared table after this entry's operations: the per-participant snapshot. */
   tableAfter: QTable;
+  /**
+   * Why this entry ended something: the final exam passed (`certified`), or a
+   * competency reached its 3-attempt cap (`cap_reached`). A session the
+   * participant left shows as the absence of later entries.
+   */
+  endReason?: 'certified' | 'cap_reached';
   timestamp: number;
 }
 

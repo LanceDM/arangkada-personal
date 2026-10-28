@@ -39,6 +39,7 @@ import { composeDrive, type ComposedDrive } from '@/features/driving-sim/domain/
 import { buildLevelConfig } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { competencyVerdicts, type CompetencyVerdict } from '@/features/driving-sim/domain/scoring/competencyVerdict';
+import { pausedMsOf } from '@/features/driving-sim/domain/scoring/levelAttempt';
 import { buildDecisionTelemetry, recordRoutedDecision } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import { getCompetencyLabel } from '@/domain/learner/profile';
 import { drivingSimDeps } from '../dependencies';
@@ -248,12 +249,15 @@ export const completeCourseDrive = async ({
   run,
   result,
   telemetry,
+  startedAt,
 }: {
   uid: string;
   cursor: CourseCursor;
   run: CourseDriveRun;
   result: LevelResult;
   telemetry?: LevelFsmTelemetry;
+  /** When the drive began, for the attempt's timing record. */
+  startedAt?: number;
 }): Promise<CourseDriveSettled> => {
   const deps = drivingSimDeps();
   const now = Date.now();
@@ -266,6 +270,15 @@ export const completeCourseDrive = async ({
     correctDecisions: result.correctActions,
     logs: result.logs,
     ...(telemetry ? { fsmMetrics: telemetry.metrics, reactionLatencies: telemetry.reactionLatencies } : {}),
+    session: {
+      startedAt: startedAt ?? now,
+      endedAt: now,
+      durationMs: now - (startedAt ?? now),
+      pausedMs: telemetry ? pausedMsOf(telemetry.transitions, now) : 0,
+      routeLength: level.roadLength,
+      crashed: Boolean(result.crashReason),
+      phase: phaseId(cursor.phase),
+    },
   });
   if (telemetry) {
     await Promise.all([
@@ -305,6 +318,7 @@ export const completeCourseDrive = async ({
       schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId,
       verdicts: verdicts.map(v => ({ competency: v.competency, total: v.total, correct: v.correct, passed: v.passed, masteryP: 0, driveEvidence: 0 })),
       decisions: [], rewards: [], tableAfter: await deps.competencyCourse.loadQTable(), timestamp: now,
+      ...(passed ? { endReason: 'certified' as const } : {}),
     });
     await saveCursor(uid, next);
     return {
@@ -343,6 +357,7 @@ export const completeCourseDrive = async ({
     rewards: outcome.rewards,
     tableAfter,
     timestamp: now,
+    ...(outcome.decisions.some(d => d.source === 'cap') ? { endReason: 'cap_reached' as const } : {}),
   });
   await saveCursor(uid, outcome.cursor);
 
