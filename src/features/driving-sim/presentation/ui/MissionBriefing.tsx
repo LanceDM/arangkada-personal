@@ -110,7 +110,9 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
     markQuizPassed,
   } = useBriefing(level.moduleId);
   const [showReview, setShowReview] = useState(false);
-  const [showBankQuiz, setShowBankQuiz] = useState(false);
+  // The attempt being sat, held while it is open: submitting it moves the
+  // cursor (and the gate's quiz) on before its results are shown.
+  const [activeQuiz, setActiveQuiz] = useState<NonNullable<BriefingGate['quiz']> | null>(null);
 
   const gatedSteps = gate && [
     {
@@ -136,7 +138,7 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
             active: gate.lessonsRead && gate.quiz !== null,
             disabled: !gate.lessonsRead || gate.quiz === null,
             actionText: gate.quizPassed ? 'Passed' : 'Start',
-            onClick: () => setShowBankQuiz(true),
+            onClick: () => gate.quiz && setActiveQuiz(gate.quiz),
             icon: BrainCircuit,
           },
         ]
@@ -458,20 +460,20 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
         </div>
       </div>
 
-      {gate && showBankQuiz && gate.quiz && (
+      {activeQuiz && (
         <BankQuiz
           // A new attempt is a new paper.
-          key={`attempt-${gate.quiz.attempt}`}
-          items={gate.quiz.items}
+          key={`attempt-${activeQuiz.attempt}`}
+          items={activeQuiz.items}
           kind="quiz"
           title="Short Quiz"
-          subtitle={`Attempt ${gate.quiz.attempt} of ${gate.quiz.cap}`}
-          onSubmit={gate.quiz.onSubmit}
+          subtitle={`Attempt ${activeQuiz.attempt} of ${activeQuiz.cap}`}
+          onSubmit={activeQuiz.onSubmit}
           onDone={() => {
-            setShowBankQuiz(false);
-            gate.quiz?.onDone();
+            setActiveQuiz(null);
+            activeQuiz.onDone();
           }}
-          onClose={() => setShowBankQuiz(false)}
+          onClose={() => setActiveQuiz(null)}
         />
       )}
 
