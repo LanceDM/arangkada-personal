@@ -62,7 +62,7 @@ const envelope: Check = (data, id) => [
 
 const EVENT_TYPES = [
   'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered', 'background_submitted',
-  'survey_submitted', 'drive_planned', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision', 'reward_computed', 'app_error',
+  'drive_planned', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision', 'reward_computed', 'app_error',
 ];
 const SOURCES = ['drive', 'quiz', 'diagnostic', 'post_exam'];
 
@@ -71,10 +71,10 @@ const SOURCES = ['drive', 'quiz', 'diagnostic', 'post_exam'];
 export const SCHEMA: SchemaEntry[] = [
   {
     path: 'users/{uid}',
-    description: 'Profile: email, username, created, totals; status and participantCode set by the scripts',
+    description: 'Profile: email, username, created, totals; participantCode set by the enrolment script',
     writer: 'app', writes: 'overwrite', sqlInB: 'User',
     source: { kind: 'collection', path: 'users' },
-    check: fields({ email: is.nullOr(is.string), username: is.nullOr(is.string), createdAt: is.nullOr(is.number), status: is.nullOr(is.oneOf('active', 'withdrawn')), participantCode: is.nullOr(is.string) }),
+    check: fields({ email: is.nullOr(is.string), username: is.nullOr(is.string), createdAt: is.nullOr(is.number), participantCode: is.nullOr(is.string) }),
   },
   {
     path: 'users/{uid}/events/{eventId}',
@@ -146,15 +146,6 @@ export const SCHEMA: SchemaEntry[] = [
     check: fields({ schemaVersion: is.oneOf(1), formVersion: is.int, answers: is.map, timestamp: is.number }),
   },
   {
-    path: 'users/{uid}/surveys/{instrument}',
-    description: 'ISO/IEC 25010 or TAM answers, item id to 1-5',
-    writer: 'app', writes: 'write-once', sqlInB: 'SurveyResponse',
-    source: { kind: 'group', id: 'surveys' },
-    check: all(fields({ schemaVersion: is.oneOf(1), instrument: is.oneOf('iso25010', 'tam'), formVersion: is.int, answers: is.map, timestamp: is.number }), (data, id) =>
-      data.instrument === id ? [] : ['instrument differs from the document id']
-    ),
-  },
-  {
     path: 'policy/competencyQ',
     description: 'The shared Q-table, each state\'s phase and tag, the last change',
     writer: 'app', writes: 'transaction',
@@ -187,7 +178,7 @@ export const SCHEMA: SchemaEntry[] = [
     description: 'Study enrolment under a participant code',
     writer: 'script', writes: 'overwrite', sqlInB: 'Participant',
     source: { kind: 'collection', path: 'participants' },
-    check: fields({ uid: is.string, consentVersion: is.string, consentedAt: is.number, enrolledAt: is.number, finishedAt: is.nullOr(is.number), withdrawnAt: is.nullOr(is.number) }),
+    check: fields({ uid: is.string, consentVersion: is.string, consentedAt: is.number, enrolledAt: is.number, finishedAt: is.nullOr(is.number) }),
   },
   {
     path: 'roleGrants/{id}',

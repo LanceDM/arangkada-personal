@@ -1,7 +1,8 @@
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, runTransaction, serverTimestamp, setDoc } from 'firebase/firestore';
+import { CourseConflictError } from '@/features/driving-sim/application/errors';
 import { db } from '@/shared/infrastructure/firebase/client';
-import { COURSE_SCHEMA_VERSION, type CourseCursor } from '@/domain/competencyRouting/course';
-import { applyQLog, statesOf } from '@/domain/study/qLog';
+import { COURSE_SCHEMA_VERSION, sameCursor, type CourseCursor } from '@/domain/competencyRouting/course';
+import { applyQLog, pairQOperations, statesOf } from '@/domain/study/qLog';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
 import type {
   AssessmentRepository,
@@ -17,25 +18,32 @@ const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 const cursorDoc = (uid: string) => doc(db, 'users', uid, 'routing', 'competencyCourse');
 const tableDoc = () => doc(db, 'policy', 'competencyQ');
 
+/** How often a step is retried when other participants keep changing the table under it. */
+const MAX_COMMIT_ATTEMPTS = 12;
+
+const storedCursor = (data: (CourseCursor & { updatedAt?: number }) | undefined): CourseCursor | null => {
+  if (!data || data.schemaVersion !== COURSE_SCHEMA_VERSION) return null;
+  const cursor: CourseCursor & { updatedAt?: number } = { ...data, quiz: data.quiz ?? null };
+  delete cursor.updatedAt;
+  return cursor;
+};
+
 /**
  * `users/{uid}/routing/competencyCourse`, `users/{uid}/courseLog`, and the
- * shared table at `policy/competencyQ`. The table is updated only inside a
- * transaction that re-applies this drive's operations to the newest version,
- * so two participants finishing at once never overwrite each other's learning.
+ * shared table at `policy/competencyQ` with its log.
+ *
+ * Every course step is one transaction: the participant's cursor is compared
+ * with the one the step started from, the decisions are taken on the table as
+ * it is inside the transaction, and the table, its log, the course-log entry
+ * and the cursor are written together. Firestore retries the transaction when
+ * another participant changed the table first, so updates are applied one
+ * after another in `globalSeq` order and none is lost; a step from a stale
+ * cursor (a second tab, a double submit) is refused and writes nothing.
  */
 export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
   async loadCursor(uid) {
     const snap = await getDoc(cursorDoc(uid));
-    if (!snap.exists()) return null;
-    const data = snap.data() as CourseCursor & { updatedAt?: number };
-    if (data.schemaVersion !== COURSE_SCHEMA_VERSION) return null;
-    const cursor: CourseCursor & { updatedAt?: number } = { ...data, quiz: data.quiz ?? null };
-    delete cursor.updatedAt;
-    return cursor;
-  },
-
-  async saveCursor(uid, cursor) {
-    await setDoc(cursorDoc(uid), plain({ ...cursor, updatedAt: Date.now() }));
+    return snap.exists() ? storedCursor(snap.data() as CourseCursor & { updatedAt?: number }) : null;
   },
 
   async loadQTable() {
@@ -43,35 +51,53 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
     return snap.exists() ? ((snap.data().table as QTable) ?? emptyQTable()) : emptyQTable();
   },
 
-  async applyQLog({ items, context, envelope }) {
-    return runTransaction(db, async transaction => {
-      const snap = await transaction.get(tableDoc());
-      const current: QTable = snap.exists() ? (snap.data().table as QTable) : emptyQTable();
-      const updates = snap.exists() ? Number(snap.data().updates ?? 0) : 0;
-      const applied = applyQLog({ table: current, items, firstGlobalSeq: updates + 1, context, envelope });
-      const last = applied.entries.at(-1);
-      // The live document the dashboard listens to: the table, each state's
-      // warm-up phase and exploring/exploiting tag, and the last change.
-      transaction.set(
-        tableDoc(),
-        plain({
-          schemaVersion: 1,
-          table: applied.table,
-          updates: updates + items.length,
-          updatedAt: Date.now(),
-          states: statesOf(applied.table),
-          lastUpdate: last ? { updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid, participantCode: last.participantCode, at: last.at } : null,
-        })
-      );
-      for (const entry of applied.entries) {
-        transaction.set(doc(collection(db, 'policy', 'competencyQ', 'updates'), entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
-      }
-      return applied;
-    });
-  },
+  async commitStep(uid, { expected, compute, context, envelope }) {
+    return runTransaction(
+      db,
+      async transaction => {
+        const [cursorSnap, tableSnap] = await Promise.all([transaction.get(cursorDoc(uid)), transaction.get(tableDoc())]);
+        const stored = cursorSnap.exists() ? storedCursor(cursorSnap.data() as CourseCursor & { updatedAt?: number }) : null;
+        // No stored cursor yet: the course starts here. Otherwise it must be
+        // exactly the cursor this step was computed from.
+        if (stored && !sameCursor(stored, plain(expected))) throw new CourseConflictError(stored);
 
-  async appendLog(uid, entry) {
-    await addDoc(collection(db, 'users', uid, 'courseLog'), plain(entry));
+        const current: QTable = tableSnap.exists() ? (tableSnap.data().table as QTable) : emptyQTable();
+        const updates = tableSnap.exists() ? Number(tableSnap.data().updates ?? 0) : 0;
+        const step = compute(current);
+        const items = pairQOperations(step.operations, step.decisions, step.rewards);
+        const applied =
+          items.length > 0
+            ? applyQLog({ table: current, items, firstGlobalSeq: updates + 1, context, envelope })
+            : { table: current, entries: [] };
+
+        if (applied.entries.length > 0) {
+          const last = applied.entries.at(-1)!;
+          transaction.set(
+            tableDoc(),
+            plain({
+              schemaVersion: 1,
+              table: applied.table,
+              updates: updates + applied.entries.length,
+              updatedAt: Date.now(),
+              states: statesOf(applied.table),
+              lastUpdate: { updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid, participantCode: last.participantCode, at: last.at },
+            })
+          );
+          for (const entry of applied.entries) {
+            transaction.set(doc(collection(db, 'policy', 'competencyQ', 'updates'), entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
+          }
+        }
+        if (step.log) {
+          transaction.set(
+            doc(collection(db, 'users', uid, 'courseLog')),
+            plain({ ...step.log, decisions: step.decisions, rewards: step.rewards, tableAfter: applied.table })
+          );
+        }
+        transaction.set(cursorDoc(uid), plain({ ...step.cursor, updatedAt: Date.now() }));
+        return { step, entries: applied.entries, table: applied.table };
+      },
+      { maxAttempts: MAX_COMMIT_ATTEMPTS }
+    );
   },
 };
 

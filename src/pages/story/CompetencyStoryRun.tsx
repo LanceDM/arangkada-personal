@@ -23,6 +23,7 @@ import {
   drawCourseQuiz,
   finishCourseQuizReview,
   loadCompetencyCourse,
+  CourseConflictError,
   logStudyEvent,
   markCourseLessonsRead,
   markCourseReviewShown,
@@ -138,12 +139,21 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       setError(null);
       await action();
     } catch (failure) {
+      if (failure instanceof CourseConflictError) {
+        // Another tab, or a second click, moved the course on first: show
+        // where the course really is rather than saving this step twice.
+        setError('Your course had already moved on (another tab or a second click). It has been reloaded.');
+        setPlanned(null);
+        const reloaded = await loadCompetencyCourse(uid).catch(() => null);
+        if (reloaded) setState(reloaded);
+        return;
+      }
       console.error(`Failed to ${what}:`, failure);
       setError(`Could not ${what}. Check your connection and try again.`);
     } finally {
       busy.current = false;
     }
-  }, []);
+  }, [uid]);
 
   /** Plans the drive the cursor is now at, so the briefing can start it. */
   const planDrive = useCallback(
@@ -210,8 +220,12 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
         });
     done
       .catch(async failure => {
-        console.error('Failed to save the attempt:', failure);
-        setResultNote('Your result could not be saved. Continue will give you this drive again.');
+        if (failure instanceof CourseConflictError) {
+          setResultNote('This drive was already saved, or your course moved on in another tab. Continue picks it up where it is.');
+        } else {
+          console.error('Failed to save the attempt:', failure);
+          setResultNote('Your result could not be saved. Continue will give you this drive again.');
+        }
         setState(await loadCompetencyCourse(uid).catch(() => state));
       })
       .finally(() => setSaving(false));

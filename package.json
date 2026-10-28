@@ -18,6 +18,7 @@
     "emulators": "firebase emulators:start --only auth,firestore",
     "db:init": "tsx scripts/db/init.ts",
     "db:validate": "tsx scripts/db/validate.ts",
+    "db:audit": "tsx scripts/db/audit.ts",
     "db:role": "tsx scripts/db/role.ts",
     "db:participant": "tsx scripts/db/participant.ts",
     "db:deploy": "firebase deploy --only firestore:rules,firestore:indexes",

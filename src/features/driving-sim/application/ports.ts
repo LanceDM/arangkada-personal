@@ -14,14 +14,13 @@ import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCo
 import type { DecisionTelemetryDoc } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import type { RoutingTelemetryDoc } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type { GroupInEffect, RoutingCursor, RoutingGroup } from '@/features/driving-sim/domain/adaptive/courseRouting';
-import type { CourseCursor, DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
+import type { CourseCursor, DecisionRecord, QOperation, RewardRecord } from '@/domain/competencyRouting/course';
 import type { QTable } from '@/domain/competencyRouting/qLearning';
 import type { EvidenceSource } from '@/domain/learner/attempt';
 import type { StudyEvent } from '@/domain/study/studyEvent';
 import type { BKTProfileDoc, BKTUpdateRecord } from '@/domain/study/bktLog';
-import type { QLogContext, QLogEntry, QLogItem } from '@/domain/study/qLog';
+import type { QLogContext, QLogEntry } from '@/domain/study/qLog';
 import type { StudyEnvelope } from '@/domain/study/studyEvent';
-import type { SurveyResponse } from '@/domain/study/survey';
 
 /** One recorded run, whichever source it came from. */
 export interface LearnerAttempt {
@@ -134,19 +133,45 @@ export interface CourseLogEntry {
   timestamp: number;
 }
 
+/**
+ * One step of the course, computed from the cursor it starts at and the
+ * newest shared table: the cursor it leads to, the decisions and rewards it
+ * made, the table operations they cause, and the course-log entry that
+ * records it (null for a plain move, such as lessons read).
+ */
+export interface CourseStep {
+  cursor: CourseCursor;
+  decisions: DecisionRecord[];
+  rewards: RewardRecord[];
+  operations: QOperation[];
+  log: Omit<CourseLogEntry, 'decisions' | 'rewards' | 'tableAfter'> | null;
+}
+
 export interface CompetencyCourseRepository {
   loadCursor(uid: string): Promise<CourseCursor | null>;
-  saveCursor(uid: string, cursor: CourseCursor): Promise<void>;
   /** The shared Q-table; empty until the first participant's first decision. */
   loadQTable(): Promise<QTable>;
   /**
-   * Applies the operations to the newest shared table, atomically, and writes
-   * one log entry per operation (`policy/competencyQ/updates`) in the same
-   * transaction, numbered by the table's own counter. Returns the table after
-   * and the entries written.
+   * Commits one course step atomically, in one transaction:
+   *
+   * 1. reads the stored cursor and the newest shared table;
+   * 2. refuses with CourseConflictError if the stored cursor is not `expected`
+   *    (another tab moved the course on, or this step was already saved);
+   * 3. runs `compute` on the newest table, so every decision is chosen from the
+   *    table as it is at that moment (it may run again if the table changes
+   *    under it, and must be pure apart from its random draws);
+   * 4. writes the table with its update log (`globalSeq` from the table's own
+   *    counter), the course-log entry, and the new cursor, all or nothing.
    */
-  applyQLog(input: { items: readonly QLogItem[]; context: QLogContext; envelope: (index: number) => StudyEnvelope }): Promise<{ table: QTable; entries: QLogEntry[] }>;
-  appendLog(uid: string, entry: CourseLogEntry): Promise<void>;
+  commitStep(
+    uid: string,
+    input: {
+      expected: CourseCursor;
+      compute: (table: QTable) => CourseStep;
+      context: QLogContext;
+      envelope: (index: number) => StudyEnvelope;
+    }
+  ): Promise<{ step: CourseStep; entries: QLogEntry[]; table: QTable }>;
 }
 
 /** One sitting of a quiz attempt, the diagnostic or the post-exam: its answers as graded logs. */
@@ -186,10 +211,4 @@ export interface StudyEventRepository {
 export interface BKTLogRepository {
   loadProfile(uid: string): Promise<BKTProfileDoc | null>;
   record(uid: string, profile: BKTProfileDoc, entries: readonly BKTUpdateRecord[]): Promise<void>;
-}
-
-/** ISO/IEC 25010 and TAM answers: one record per participant per instrument. */
-export interface SurveyRepository {
-  load(uid: string, instrument: SurveyResponse['instrument']): Promise<SurveyResponse | null>;
-  save(uid: string, response: SurveyResponse): Promise<void>;
 }

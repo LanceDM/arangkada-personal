@@ -9,15 +9,6 @@ query MyBackground @auth(level: USER) {
   }
 }
 
-query MySurvey($instrument: String!) @auth(level: USER) {
-  surveyResponses(where: { userUid: { eq_expr: "auth.uid" }, instrument: { eq: $instrument } }) {
-    itemId
-    formVersion
-    value
-    answeredAt
-  }
-}
-
 # Admin reads: only a token with the admin claim.
 
 query ListParticipants @auth(expr: "auth.token.admin == true") {
@@ -28,7 +19,6 @@ query ListParticipants @auth(expr: "auth.token.admin == true") {
     consentedAt
     enrolledAt
     finishedAt
-    withdrawnAt
     note
   }
 }
@@ -62,17 +52,6 @@ query ListBackgroundResponses @auth(expr: "auth.token.admin == true") {
     questionId
     formVersion
     answer
-    answeredAt
-  }
-}
-
-query ListSurveyResponses @auth(expr: "auth.token.admin == true") {
-  surveyResponses {
-    user { uid }
-    instrument
-    itemId
-    formVersion
-    value
     answeredAt
   }
 }

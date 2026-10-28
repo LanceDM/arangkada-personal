@@ -73,6 +73,18 @@ describe.skipIf(!host)('security rules for the study logs', () => {
     await assertSucceeds(getDoc(doc(env.authenticatedContext('lance', { admin: true }).firestore(), 'policy/competencyQ/updates/q1')));
   });
 
+  it('never writes an older course cursor over a newer one', async () => {
+    const db = env.authenticatedContext('alice').firestore();
+    const cursor = (seq: number) => ({
+      schemaVersion: 1, phase: { kind: 'DRIVE', level: 1 }, stage: {}, pending: [], seen: {}, flagged: [], seq, updatedAt: 1,
+    });
+    const ref = doc(db, 'users/alice/routing/competencyCourse');
+    await assertSucceeds(setDoc(ref, cursor(4)));
+    await assertSucceeds(setDoc(ref, cursor(4)));
+    await assertSucceeds(setDoc(ref, cursor(6)));
+    await assertFails(setDoc(ref, cursor(5)));
+  });
+
   it('keeps settings, enrolment and roles to the scripts', async () => {
     const admin = env.authenticatedContext('lance', { admin: true }).firestore();
     await assertFails(setDoc(doc(admin, 'roleGrants/x'), { uid: 'a' }));

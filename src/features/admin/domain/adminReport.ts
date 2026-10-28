@@ -189,7 +189,6 @@ export interface ParticipantRow {
   consentedAt: number;
   enrolledAt: number;
   finishedAt: number | null;
-  withdrawnAt: number | null;
   note: string | null;
 }
 

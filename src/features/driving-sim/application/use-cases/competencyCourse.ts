@@ -28,6 +28,7 @@ import {
   finalMeasured,
   reviewShown,
   startingCourse,
+  type CompetencyMeasurement,
   type CourseCursor,
   type QuizAnswer,
 } from '@/domain/competencyRouting/course';
@@ -47,14 +48,14 @@ import { buildDecisionTelemetry, recordRoutedDecision } from '@/features/driving
 import { getCompetencyLabel } from '@/domain/learner/profile';
 import { drivingSimDeps } from '../dependencies';
 import { envelopeFor, recordBKT, recordEvents } from '../studyRecorder';
-import { pairQOperations, type QLogContext, type QLogEntry } from '@/domain/study/qLog';
+import type { QLogContext, QLogEntry } from '@/domain/study/qLog';
 import type { StudyEventDraft } from '@/domain/study/studyEvent';
 import { scenarioFormat, type ScenarioFormat } from '@/features/driving-sim/domain/scenario/scenarioFormat';
-import { isLikert, type SurveyResponse } from '@/domain/study/survey';
-import type { DecisionRecord, QOperation, RewardRecord } from '@/domain/competencyRouting/course';
+import { sameCursor } from '@/domain/competencyRouting/course';
 import type { QTable } from '@/domain/competencyRouting/qLearning';
 import { historyLogs, loadLearnerHistory } from '../learnerHistory';
-import type { AssessmentSitting } from '../ports';
+import type { AssessmentSitting, CourseStep } from '../ports';
+import { CourseConflictError } from '../errors';
 import type { AdaptivePlan } from './buildAdaptivePlan';
 
 // --- loading ------------------------------------------------------------------
@@ -106,76 +107,91 @@ export const loadEvidence = async (uid: string): Promise<ActionLog[]> => {
   return historyLogs(history, answers);
 };
 
-/** Saves the cursor and logs the transition: from, to, and what triggered it. */
-const moveCursor = async (uid: string, from: CourseCursor, to: CourseCursor, trigger: string) => {
-  await drivingSimDeps().competencyCourse.saveCursor(uid, to);
-  await recordEvents(uid, [
-    {
-      type: 'course_transition',
-      levelId: phaseLevel(to.phase),
-      phase: phaseId(to.phase),
-      payload: {
-        from: phaseId(from.phase),
-        to: phaseId(to.phase),
-        trigger,
-        quiz: to.quiz,
-        pendingDecisions: to.pending.length,
-        seq: to.seq,
-        flagged: to.flagged.length,
-      },
-    },
-  ]);
-};
+/** The course_transition event: from, to, and what triggered it. */
+const transitionEvent = (from: CourseCursor, to: CourseCursor, trigger: string): StudyEventDraft => ({
+  type: 'course_transition',
+  levelId: phaseLevel(to.phase),
+  phase: phaseId(to.phase),
+  payload: {
+    from: phaseId(from.phase),
+    to: phaseId(to.phase),
+    trigger,
+    quiz: to.quiz,
+    pendingDecisions: to.pending.length,
+    seq: to.seq,
+    flagged: to.flagged.length,
+  },
+});
 
-/**
- * Applies a drive's, quiz's or post-exam's Q operations to the shared table,
- * writes the table's update log in the same transaction, and mirrors each
- * decision and reward into the participant's event stream.
- */
-const applyAndLogQ = async (
-  uid: string,
-  input: { operations: readonly QOperation[]; decisions: readonly DecisionRecord[]; rewards: readonly RewardRecord[]; context: Omit<QLogContext, 'participantCode'> }
-): Promise<{ tableAfter: QTable; entries: QLogEntry[] }> => {
-  const deps = drivingSimDeps();
-  const now = Date.now();
-  let entries: QLogEntry[] = [];
-  let tableAfter = await deps.competencyCourse.loadQTable();
-  if (input.operations.length > 0) {
-    const applied = await deps.competencyCourse.applyQLog({
-      items: pairQOperations(input.operations, input.decisions, input.rewards),
-      context: { ...input.context, participantCode: null },
-      envelope: i => envelopeFor(uid, now + i),
-    });
-    tableAfter = applied.table;
-    entries = applied.entries;
-  }
+/** Each decision and reward mirrored into the participant's event stream, linked to its Q-log entry. */
+const policyEvents = (step: CourseStep, entries: readonly QLogEntry[], context: Omit<QLogContext, 'participantCode'>): StudyEventDraft[] => {
   const byDecision = new Map(entries.map(e => [`${e.kind}:${e.decisionId}`, e]));
-  const drafts: StudyEventDraft[] = [
-    ...input.rewards.map(reward => {
+  return [
+    ...step.rewards.map(reward => {
       const entry = byDecision.get(`learn:${reward.decisionId}`);
       return {
         type: 'reward_computed' as const,
-        levelId: input.context.levelId,
-        phase: input.context.phase,
-        attemptId: input.context.attemptId,
+        ...context,
         payload: { ...reward, qUpdateId: entry?.eventId ?? null, globalSeq: entry?.globalSeq ?? null, learning: entry?.learning ?? null },
       };
     }),
-    ...input.decisions.map(decision => {
+    ...step.decisions.map(decision => {
       const decisionId = `${decision.levelId}:${decision.competency}:${decision.seq}`;
       const entry = byDecision.get(`visit:${decisionId}`);
       return {
         type: 'policy_decision' as const,
-        levelId: input.context.levelId,
-        phase: input.context.phase,
-        attemptId: input.context.attemptId,
+        ...context,
         payload: { ...decision, decisionId, qUpdateId: entry?.eventId ?? null, globalSeq: entry?.globalSeq ?? null, stateAfter: entry?.statesAfter[entry.stateKey] ?? null },
       };
     }),
   ];
-  await recordEvents(uid, drafts);
-  return { tableAfter, entries };
 };
+
+/**
+ * Commits one course step: the cursor move, and with it any decisions and
+ * rewards, the shared table's update and its log, and the course log entry,
+ * all in one transaction (see CompetencyCourseRepository.commitStep).
+ *
+ * `compute` gets the newest shared table and may run more than once when
+ * other participants change the table meanwhile, so it must be pure: read the
+ * table, return the step, write nothing. The events are recorded after the
+ * commit, from what was actually committed.
+ *
+ * Throws CourseConflictError when the stored cursor is no longer `from` (a
+ * second tab, a double click, a step already saved).
+ */
+const commit = async (
+  uid: string,
+  from: CourseCursor,
+  trigger: string,
+  compute: (table: QTable) => CourseStep,
+  context: Omit<QLogContext, 'participantCode'> = { levelId: phaseLevel(from.phase), phase: phaseId(from.phase), attemptId: null }
+): Promise<{ step: CourseStep; entries: QLogEntry[]; table: QTable }> => {
+  const now = Date.now();
+  const committed = await drivingSimDeps().competencyCourse.commitStep(uid, {
+    expected: from,
+    compute,
+    context: { ...context, participantCode: null },
+    envelope: i => envelopeFor(uid, now + i),
+  });
+  await recordEvents(uid, [...policyEvents(committed.step, committed.entries, context), transitionEvent(from, committed.step.cursor, trigger)]);
+  return committed;
+};
+
+/** A cursor move with nothing for the shared table. */
+const moveCursor = async (uid: string, from: CourseCursor, to: CourseCursor, trigger: string): Promise<CourseCursor> =>
+  (await commit(uid, from, trigger, () => ({ cursor: to, decisions: [], rewards: [], operations: [], log: null }))).step.cursor;
+
+/**
+ * Refuses early when the stored cursor has already moved on, before a step
+ * writes its answers or its attempt. The commit checks again atomically; this
+ * only keeps a double submit from saving the same answers twice.
+ */
+const ensureCurrent = async (uid: string, cursor: CourseCursor): Promise<void> => {
+  const stored = await drivingSimDeps().competencyCourse.loadCursor(uid);
+  if (stored && !sameCursor(stored, JSON.parse(JSON.stringify(cursor)))) throw new CourseConflictError(stored);
+};
+
 
 /** One event per answered item, then one for the sitting. */
 const sittingEvents = (
@@ -298,9 +314,7 @@ export const answerLog = (
 // --- module and quiz ----------------------------------------------------------------
 
 export const markCourseLessonsRead = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
-  const next = lessonsRead(cursor);
-  await moveCursor(uid, cursor, next, 'lessons_read');
-  return next;
+  return moveCursor(uid, cursor, lessonsRead(cursor), 'lessons_read');
 };
 
 /** This attempt's quiz: 3 items per competency still to pass, unseen first. */
@@ -330,6 +344,7 @@ export const submitCourseQuiz = async (
   choices: readonly (number | null)[],
   responseMs: readonly (number | null)[] = []
 ): Promise<{ cursor: CourseCursor; results: QuizCompetencyResult[] }> => {
+  await ensureCurrent(uid, cursor);
   const at = Date.now();
   const attempt = cursor.quiz?.attempt ?? 1;
   const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'quiz', at + i, attempt, responseMs[i]));
@@ -352,32 +367,31 @@ export const submitCourseQuiz = async (
   });
 
   // The quiz is a measurement: pending decisions on these competencies are
-  // rewarded now (Tentative; OPEN, see quizMeasured).
-  let next = quizSubmitted(cursor, graded);
+  // rewarded now (Tentative; OPEN, see quizMeasured), on the newest table.
+  const submitted = quizSubmitted(cursor, graded);
   const level = phaseLevel(cursor.phase);
-  if (next.pending.some(p => competencies.includes(p.competency))) {
+  let measurements: CompetencyMeasurement[] = [];
+  if (submitted.pending.some(p => competencies.includes(p.competency))) {
     const evidence = await loadEvidence(uid);
     const mastery = buildBKTProfile(evidence);
     const counts = buildBKTEvidence(evidence);
-    const measurements = results.map(r => ({
+    measurements = results.map(r => ({
       competency: r.competency,
       accuracy: r.total > 0 ? r.correct / r.total : 0,
       passed: r.passed,
       masteryP: mastery[r.competency],
       driveEvidence: counts[r.competency].drive,
     }));
-    const deps = drivingSimDeps();
-    const table = await deps.competencyCourse.loadQTable();
-    const outcome = quizMeasured(next, measurements, table, at);
-    next = outcome.cursor;
-    if (outcome.operations.length > 0) {
-      const { tableAfter } = await applyAndLogQ(uid, {
-        operations: outcome.operations,
-        decisions: [],
-        rewards: outcome.rewards,
-        context: { levelId: level, phase: phaseId(cursor.phase), attemptId: null },
-      });
-      await deps.competencyCourse.appendLog(uid, {
+  }
+  const { step } = await commit(uid, cursor, 'quiz_submitted', table => {
+    if (measurements.length === 0) return { cursor: submitted, decisions: [], rewards: [], operations: [], log: null };
+    const outcome = quizMeasured(submitted, measurements, table, at);
+    return {
+      cursor: outcome.cursor,
+      decisions: [],
+      rewards: outcome.rewards,
+      operations: outcome.operations,
+      log: outcome.operations.length === 0 ? null : {
         schemaVersion: 1,
         kind: 'quiz',
         levelId: level ?? 0,
@@ -386,27 +400,20 @@ export const submitCourseQuiz = async (
         verdicts: measurements.map((m, i) => ({
           competency: m.competency, total: results[i].total, correct: results[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
         })),
-        decisions: [],
-        rewards: outcome.rewards,
-        tableAfter,
         timestamp: at,
-      });
-    }
-  }
-  await moveCursor(uid, cursor, next, 'quiz_submitted');
+      },
+    };
+  });
+  const next = step.cursor;
   return { cursor: next, results };
 };
 
 export const finishCourseQuizReview = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
-  const next = quizReviewDone(cursor);
-  await moveCursor(uid, cursor, next, 'quiz_review_done');
-  return next;
+  return moveCursor(uid, cursor, quizReviewDone(cursor), 'quiz_review_done');
 };
 
 export const markCourseReviewShown = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
-  const next = reviewShown(cursor);
-  await moveCursor(uid, cursor, next, 'review_shown');
-  return next;
+  return moveCursor(uid, cursor, reviewShown(cursor), 'review_shown');
 };
 
 // --- the drive ----------------------------------------------------------------------
@@ -522,6 +529,7 @@ export const completeCourseDrive = async ({
   /** When the drive began, for the attempt's timing record. */
   startedAt?: number;
 }): Promise<CourseDriveSettled> => {
+  await ensureCurrent(uid, cursor);
   const deps = drivingSimDeps();
   const now = Date.now();
   const level = run.plan.level!;
@@ -569,8 +577,8 @@ export const completeCourseDrive = async ({
   if (!run.composed) {
     const outcome = driveCompleted(cursor, { measurements: [], scenarioIds, table: {}, rng: Math.random, now });
     await recordEvents(uid, driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now }, formatsOf(level)));
-    await moveCursor(uid, cursor, outcome.cursor, 'drive_completed');
-    return { cursor: outcome.cursor, verdicts: [], lines: [], note: 'Tutorial done. Continue to Level 1.' };
+    const moved = await moveCursor(uid, cursor, outcome.cursor, 'drive_completed');
+    return { cursor: moved, verdicts: [], lines: [], note: 'Tutorial done. Continue to Level 1.' };
   }
 
   const verdicts = competencyVerdicts(run.composed.items, result.logs);
@@ -600,24 +608,25 @@ export const completeCourseDrive = async ({
       masteryP: finalMastery[v.competency],
       driveEvidence: finalCounts[v.competency].drive,
     }));
-    const settled = finalMeasured(cursor, finalMeasurements, await deps.competencyCourse.loadQTable(), now);
-    const { tableAfter } = await applyAndLogQ(uid, {
-      operations: settled.operations,
-      decisions: [],
-      rewards: settled.rewards,
-      context: { levelId: 12, phase: phaseId(cursor.phase), attemptId },
-    });
-    const next = finalCompleted(settled.cursor, passed, scenarioIds);
-    await deps.competencyCourse.appendLog(uid, {
-      schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId,
-      verdicts: finalMeasurements.map((m, i) => ({
-        competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed,
-        masteryP: m.masteryP, driveEvidence: m.driveEvidence,
-      })),
-      decisions: [], rewards: settled.rewards, tableAfter, timestamp: now,
-      ...(passed ? { endReason: 'certified' as const } : {}),
-    });
-    await moveCursor(uid, cursor, next, passed ? 'final_passed' : 'final_failed');
+    const { step } = await commit(uid, cursor, passed ? 'final_passed' : 'final_failed', table => {
+      const settled = finalMeasured(cursor, finalMeasurements, table, now);
+      return {
+        cursor: finalCompleted(settled.cursor, passed, scenarioIds),
+        decisions: [],
+        rewards: settled.rewards,
+        operations: settled.operations,
+        log: {
+          schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId,
+          verdicts: finalMeasurements.map((m, i) => ({
+            competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed,
+            masteryP: m.masteryP, driveEvidence: m.driveEvidence,
+          })),
+          timestamp: now,
+          ...(passed ? { endReason: 'certified' as const } : {}),
+        },
+      };
+    }, { levelId: 12, phase: phaseId(cursor.phase), attemptId });
+    const next = step.cursor;
     return {
       cursor: next,
       verdicts,
@@ -638,30 +647,29 @@ export const completeCourseDrive = async ({
     driveEvidence: counts[v.competency].drive,
   }));
 
-  const table = await deps.competencyCourse.loadQTable();
-  const outcome = driveCompleted(cursor, { measurements, scenarioIds, table, rng: Math.random, now });
-  const { tableAfter } = await applyAndLogQ(uid, {
-    operations: outcome.operations,
-    decisions: outcome.decisions,
-    rewards: outcome.rewards,
-    context: { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId },
-  });
-  await deps.competencyCourse.appendLog(uid, {
-    schemaVersion: 1,
-    kind: 'drive',
-    levelId: run.levelId,
-    phase: phaseId(cursor.phase),
-    attemptId,
-    verdicts: measurements.map((m, i) => ({
-      competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
-    })),
-    decisions: outcome.decisions,
-    rewards: outcome.rewards,
-    tableAfter,
-    timestamp: now,
-    ...(outcome.decisions.some(d => d.source === 'cap') ? { endReason: 'cap_reached' as const } : {}),
-  });
-  await moveCursor(uid, cursor, outcome.cursor, 'drive_completed');
+  // The decisions are chosen from the shared table as it is when the step
+  // commits: if another participant changes it first, they are chosen again.
+  const { step: outcome } = await commit(uid, cursor, 'drive_completed', table => {
+    const drive = driveCompleted(cursor, { measurements, scenarioIds, table, rng: Math.random, now });
+    return {
+      cursor: drive.cursor,
+      decisions: drive.decisions,
+      rewards: drive.rewards,
+      operations: drive.operations,
+      log: {
+        schemaVersion: 1,
+        kind: 'drive',
+        levelId: run.levelId,
+        phase: phaseId(cursor.phase),
+        attemptId,
+        verdicts: measurements.map((m, i) => ({
+          competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
+        })),
+        timestamp: now,
+        ...(drive.decisions.some(d => d.source === 'cap') ? { endReason: 'cap_reached' as const } : {}),
+      },
+    };
+  }, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId });
 
   const lines = verdicts.map(v => {
     const decision = outcome.decisions.find(d => d.competency === v.competency);
@@ -719,6 +727,7 @@ export const completePostExam = async (
   choices: readonly (number | null)[],
   responseMs: readonly (number | null)[] = []
 ): Promise<{ cursor: CourseCursor; theta: number; se: number; correct: number }> => {
+  await ensureCurrent(uid, cursor);
   const deps = drivingSimDeps();
   const at = Date.now();
   const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'post_exam', at + i, undefined, responseMs[i]));
@@ -734,19 +743,16 @@ export const completePostExam = async (
     const correct = mine.filter(({ item, i }) => choices[i] === item.answer).length;
     byCompetency[competency] = { accuracy: correct / mine.length, passed: correct / mine.length >= 2 / 3 };
   }
-  const table = await deps.competencyCourse.loadQTable();
-  const settled = postExamCompleted(cursor, byCompetency, table, at);
-  const { tableAfter } = await applyAndLogQ(uid, {
-    operations: settled.operations,
-    decisions: [],
-    rewards: settled.rewards,
-    context: { levelId: null, phase: phaseId(cursor.phase), attemptId: null },
-  });
-  await deps.competencyCourse.appendLog(uid, {
-    schemaVersion: 1, kind: 'post_exam', levelId: 0, phase: phaseId(cursor.phase), attemptId: null,
-    verdicts: [], decisions: [], rewards: settled.rewards, tableAfter, timestamp: at,
-  });
-  await moveCursor(uid, cursor, settled.cursor, 'post_exam_completed');
+  const { step: settled } = await commit(uid, cursor, 'post_exam_completed', table => {
+    const done = postExamCompleted(cursor, byCompetency, table, at);
+    return {
+      cursor: done.cursor,
+      decisions: [],
+      rewards: done.rewards,
+      operations: done.operations,
+      log: { schemaVersion: 1, kind: 'post_exam', levelId: 0, phase: phaseId(cursor.phase), attemptId: null, verdicts: [], timestamp: at },
+    };
+  }, { levelId: null, phase: phaseId(cursor.phase), attemptId: null });
   return { cursor: settled.cursor, theta: ability.theta, se: ability.se, correct: answers.filter(a => a.result === 'correct').length };
 };
 
@@ -798,18 +804,6 @@ export const completeFreeReplayDrive = async (uid: string, result: LevelResult, 
   if (telemetry) await storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions);
   await recordEvents(uid, driveEvents(result, { levelId: result.levelId, phase: 'FREE_REPLAY', attemptId }, { freeReplay: true }));
   await recordBKT(uid);
-};
-
-// --- questionnaires ----------------------------------------------------------------------
-
-/**
- * Saves one questionnaire (ISO/IEC 25010 or TAM): every value 1-5. The items
- * are not in the app yet; this is the save path they will use.
- */
-export const saveSurvey = async (uid: string, response: SurveyResponse): Promise<void> => {
-  if (!Object.values(response.answers).every(isLikert)) throw new Error('Every answer must be a whole number from 1 to 5.');
-  await drivingSimDeps().surveys.save(uid, response);
-  await recordEvents(uid, [{ type: 'survey_submitted', payload: { instrument: response.instrument, formVersion: response.formVersion, answers: response.answers } }]);
 };
 
 /** Logs something that happened outside the course's own steps (a session start, a page view). */

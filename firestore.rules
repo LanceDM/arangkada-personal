@@ -19,7 +19,6 @@ rules_version = '2';
 //   users/{uid}/state/events                       { nextSeq }: the event stream's counter
 //   users/{uid}/bkt/profile                        BKTProfileDoc: the participant's own BKT now
 //   users/{uid}/bktUpdates/{updateId}              BKTUpdateRecord: one per graded answer, append-only
-//   users/{uid}/surveys/{instrument}               SurveyResponse: ISO/IEC 25010 or TAM, written once
 //   policy/competencyQ                             the shared Q-table, learned online by every participant
 //   policy/competencyQ/updates/{updateId}          QLogEntry: every table change, append-only
 //   policy/config                                  the settings version in force (written by db:init)
@@ -29,7 +28,7 @@ rules_version = '2';
 //   meta/schema                                    which schema version the database was set up with
 //
 // Implementation B (VITE_DATABASE_MODE=firestore+sql) keeps participants,
-// role grants, settings versions and form answers in SQL Connect instead
+// role grants, settings versions and the background form in SQL Connect instead
 // (dataconnect/); the paths above for them are then unused. See DATABASE.md.
 //   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
 //   users/{uid}/dailyStreak/summary                DailyStreakSummary
@@ -241,7 +240,7 @@ service cloud.firestore {
         && data.keys().hasAll(['type', 'seq', 'payload'])
         && data.type in [
           'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered',
-          'background_submitted', 'survey_submitted', 'drive_planned', 'decision_made', 'drive_ended',
+          'background_submitted', 'drive_planned', 'decision_made', 'drive_ended',
           'verdict_computed', 'policy_decision', 'reward_computed', 'app_error'
         ]
         && (data.seq == null || data.seq is int)
@@ -265,16 +264,6 @@ service cloud.firestore {
         && data.updates is int
         && data.competencies is map
         && data.competencies.size() == 11;
-    }
-
-    function isSurvey(data, instrument) {
-      return data.keys().hasOnly(['schemaVersion', 'instrument', 'formVersion', 'answers', 'timestamp'])
-        && data.schemaVersion == 1
-        && data.instrument == instrument
-        && instrument in ['iso25010', 'tam']
-        && data.formVersion is int
-        && data.answers is map
-        && data.timestamp is number;
     }
 
     function isQLogEntry(data, id) {
@@ -388,9 +377,15 @@ service cloud.firestore {
       // course, rewritten as they play.
       match /routing/{docId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create, update: if isOwner(uid)
+        allow create: if isOwner(uid)
           && ((docId == 'cursor' && isRoutingCursor(request.resource.data))
             || (docId == 'competencyCourse' && isCourseCursor(request.resource.data)));
+        // The course cursor's decision counter never goes back: an old cursor
+        // (a stale tab, a replayed request) cannot be written over a newer one.
+        allow update: if isOwner(uid)
+          && ((docId == 'cursor' && isRoutingCursor(request.resource.data))
+            || (docId == 'competencyCourse' && isCourseCursor(request.resource.data)
+              && request.resource.data.seq >= resource.data.seq));
         allow delete: if false;
       }
 
@@ -437,12 +432,6 @@ service cloud.firestore {
         allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId);
         allow update: if isOwner(uid) && onlyServerTimeChanged();
         allow delete: if false;
-      }
-
-      match /surveys/{instrument} {
-        allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isSurvey(request.resource.data, instrument);
-        allow update, delete: if false;
       }
 
       // Quiz, diagnostic and post-exam answers, append-only; BKT reads all of them.
@@ -503,10 +492,6 @@ service cloud.firestore {
     }
 
     match /{path=**}/bktUpdates/{updateId} {
-      allow read: if isAdmin();
-    }
-
-    match /{path=**}/surveys/{instrument} {
       allow read: if isAdmin();
     }
 

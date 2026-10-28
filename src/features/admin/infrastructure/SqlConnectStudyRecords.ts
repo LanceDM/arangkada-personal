@@ -17,7 +17,6 @@ interface ParticipantSql {
   consentedAt: string;
   enrolledAt: string;
   finishedAt: string | null;
-  withdrawnAt: string | null;
   note: string | null;
 }
 
@@ -51,7 +50,6 @@ export const sqlStudyRecords: StudyRecordsRepository = {
       consentedAt: ms(p.consentedAt)!,
       enrolledAt: ms(p.enrolledAt)!,
       finishedAt: ms(p.finishedAt),
-      withdrawnAt: ms(p.withdrawnAt),
       note: p.note,
     }));
   },

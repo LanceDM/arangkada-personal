@@ -25,9 +25,8 @@ import {
 import {
   firebaseBKTLogRepository,
   firebaseStudyEventRepository,
-  firebaseSurveyRepository,
 } from './infrastructure/FirebaseStudyLogRepositories';
-import { sqlBackgroundFormRepository, sqlSurveyRepository } from './infrastructure/SqlConnectStudyRecords';
+import { sqlBackgroundFormRepository } from './infrastructure/SqlConnectStudyRecords';
 import type { DatabaseMode } from '@/shared/infrastructure/firebase/dataConnect';
 
 export type { LearnerHistoryRepository, OptimizedRouting, RoutingMode };
@@ -37,7 +36,7 @@ export type { DatabaseMode };
 interface DrivingSimComposition {
   /**
    * Implementation A (`firestore`): every record in Firestore. Implementation
-   * B (`firestore+sql`): the form records (background, questionnaires) in SQL
+   * B (`firestore+sql`): the background form in SQL
    * Connect; the logs, the Q-table and BKT stay in Firestore either way.
    */
   databaseMode?: DatabaseMode;
@@ -65,7 +64,6 @@ export const composeDrivingSim = ({ learnerHistory, routing, databaseMode = 'fir
     competencyCourse: firebaseCompetencyCourseRepository,
     assessments: firebaseAssessmentRepository,
     background: databaseMode === 'firestore+sql' ? sqlBackgroundFormRepository : firebaseBackgroundFormRepository,
-    surveys: databaseMode === 'firestore+sql' ? sqlSurveyRepository : firebaseSurveyRepository,
     studyEvents: firebaseStudyEventRepository,
     bktLog: firebaseBKTLogRepository,
     appBuild,

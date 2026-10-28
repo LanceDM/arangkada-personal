@@ -64,11 +64,11 @@ export {
   postExamItems,
   saveDiagnostic,
   saveBackground,
-  saveSurvey,
   logStudyEvent,
   submitCourseQuiz,
 } from './application/use-cases/competencyCourse';
 export type { CourseDriveRun, CourseState } from './application/use-cases/competencyCourse';
+export { CourseConflictError } from './application/errors';
 export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';
 // In-memory ports, for tests that click through the course from outside the feature.
 export { memoryCourseStore, provideInMemoryDrivingSim } from './application/testDependencies';
@@ -81,7 +81,6 @@ export type { AttemptStart } from './application/use-cases/completeMission';
 export type { LevelRecommendation, PracticeChoice } from './domain/adaptive/practiceSelection';
 export { BACKGROUND_QUESTIONS, isCompleteBackground } from '@/domain/study/backgroundForm';
 export type { BackgroundQuestion } from '@/domain/study/backgroundForm';
-export type { SurveyResponse, SurveyInstrument } from '@/domain/study/survey';
 export { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 export { drivePreview } from './domain/scenario/drivePreview';
 export type { DrivePreview, PreviewScenario } from './domain/scenario/drivePreview';

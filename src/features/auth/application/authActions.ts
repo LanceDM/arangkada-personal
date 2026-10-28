@@ -24,5 +24,3 @@ export const requestPasswordReset = (email: string): Promise<void> =>
 export const confirmNewPassword = (oobCode: string, newPassword: string): Promise<void> =>
   authDeps().auth.confirmNewPassword(oobCode, newPassword);
 
-export const verifyEmailCode = (oobCode: string): Promise<void> =>
-  authDeps().auth.verifyEmailCode(oobCode);

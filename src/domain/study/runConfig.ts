@@ -55,15 +55,8 @@ export const RUN_CONFIG = {
 
 export type RunConfig = typeof RUN_CONFIG;
 
-/** A stable text form of the config: keys sorted at every level. */
-export const canonicalJSON = (value: unknown): string => {
-  if (Array.isArray(value)) return `[${value.map(canonicalJSON).join(',')}]`;
-  if (value && typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalJSON(v)}`).join(',')}}`;
-  }
-  return JSON.stringify(value);
-};
+export { canonicalJSON } from './canonical';
+import { canonicalJSON } from './canonical';
 
 /** FNV-1a, 32-bit, as 8 hex digits: a fingerprint, not security. */
 export const fingerprint = (text: string): string => {

@@ -5,7 +5,7 @@ Everything the study records lives in Firebase. There are two implementations:
 | | A: Firestore only (default) | B: Firestore + SQL Connect |
 |---|---|---|
 | Logs, Q-table, BKT, course state | Firestore | Firestore |
-| Participants, admin grants, settings versions, background and survey answers | Firestore collections | SQL Connect (PostgreSQL) tables |
+| Participants, admin grants, settings versions, background form answers | Firestore collections | SQL Connect (PostgreSQL) tables |
 | Plan needed | Spark (free) | Blaze (SQL Connect's database is billed after its 3-month trial) |
 | Switch | `VITE_DATABASE_MODE=firestore` | `VITE_DATABASE_MODE=firestore+sql` |
 
@@ -46,7 +46,7 @@ One document per thing that happened, numbered 1, 2, 3... per participant (`seq`
 | `verdict_computed` | Each competency in a drive | Counted, correct, passed, the rule, the scenarios |
 | `policy_decision` | Each routing decision | State, legal actions, Q and visits per action, probabilities, random draw, chosen action, warm-up phase, explore/exploit/forced, Q-log id |
 | `reward_computed` | Each reward | A_next, Pass, H, r, what measured it, next state, the Q update it caused |
-| `background_submitted`, `survey_submitted` | Forms | Answers |
+| `background_submitted` | The background form (muted for now) | Answers |
 
 ### BKT, per participant: `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates/{updateId}`
 
@@ -58,12 +58,25 @@ Each update entry (one per graded answer, `userSeq` 1, 2, 3...) holds: the sourc
 
 The table document holds Q, n and visits per state and action, each state's warm-up phase and tag (`exploring`, `exploiting`, `no_choice`), and the last change. The admin dashboard's **Q-table (live)** tab listens to it and to the newest log entries.
 
-Every change writes a log entry in the same transaction, numbered by the table's own counter (`globalSeq`):
+Every change writes a log entry in the same transaction, numbered by the table's own counter (`globalSeq`, assigned inside the transaction, so two participants can never get the same number):
 
 - `visit` (a decision was made): the decision with its probabilities, random draw, tag (`explore`, `exploit`, `forced`), warm-up phase, and visits before and after;
 - `learn` (a reward arrived): A_next, Pass, H, weights, r, what measured it (a quiz, a drive, the final exam or the post-exam), next state, max Q of the next state, γ, α, target, Q and n before and after.
 
 Each entry also holds the whole table and every state's tag after it.
+
+### Simultaneous participants: one transaction per course step
+
+Every participant reads and changes the same shared table, often at the same moment, so each course step (lessons read, quiz submitted, review done, drive or final finished, post-exam submitted) is committed as **one Firestore transaction** (`commitStep` in `FirebaseCompetencyCourseRepository`) that:
+
+1. reads the participant's stored cursor and the newest shared table;
+2. refuses the step (`CourseConflictError`) if the stored cursor is not the one the step started from: a second tab, a double click, or a request sent twice;
+3. chooses the routing decisions and computes the rewards **from that newest table**;
+4. writes the table, its numbered log entries, the participant's course log entry and the new cursor together.
+
+If another participant changes the table between the read and the write, Firestore discards the attempt and runs it again on the newer table (up to 12 times), so a decision is never made from a stale table and no update is lost or applied twice. The random draw is redone with it, and the logged draw is the one that was committed. A step that is refused shows the participant where their course really is; answers and drives are checked against the stored cursor before they are saved, so a double submit does not record them twice.
+
+The rules back this up: a table change must come with its log entry under the new counter, and the course cursor's decision counter cannot go backwards, so an old cursor cannot be written over a newer one. `competencyCourse.concurrency.test.ts` plays two participants committing at the same moment and checks that the log is numbered without gaps, that replaying it gives the stored table, and that a double submit is refused without a second record.
 
 ### Settings versions
 
@@ -89,8 +102,9 @@ Admin → Export → **Study data**: the study JSON, and CSVs of the replayed BK
 | `npm run db:deploy:sql` | Deploys `dataconnect/` (Implementation B) |
 | `npm run db:init` | Settings version, active config, empty Q-table, schema version |
 | `npm run db:validate` | Checks every document against the schema and the logs' numbering |
+| `npm run db:audit [-- --out table.json]` | Recomputes the values from the raw records (see below); `--out` writes the table the log replays to |
 | `npm run db:role -- grant\|revoke <email>` / `list` | Admin role, with an audit record |
-| `npm run db:participant -- enroll\|finish\|withdraw <code> ...` / `list` | Study enrolment |
+| `npm run db:participant -- enroll\|finish <code> ...` / `list` | Study enrolment |
 | `npm run emulators` / `npm run emulators:sql` | Local Firestore and Auth / local SQL Connect |
 
 Run the scripts against the emulators with `FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099`.
@@ -103,7 +117,13 @@ Every record is written from the participant's browser, so the rules decide who 
 - **A participant's own records** (course cursor, events, BKT profile and log) can only be written by that participant, append-only where they are logs.
 - **Admin** is a custom claim only the role script can set; settings versions, enrolment and role grants are written only by the scripts.
 
-Checking the values themselves needs server code (Cloud Functions, which need the Blaze plan) that recomputes each update from the logged inputs. Until then, `npm run db:validate` and the replay from the logs are how tampering would be found.
+The rules cannot check the values themselves: that would need server code (Cloud Functions, which need the Blaze plan) recomputing each step. Instead, **`npm run db:audit`** recomputes them after the fact from the raw records and reports every difference:
+
+- **The shared Q-table:** the update log is replayed from an empty table, entry by entry: numbering, each reward from its parts, the target, Q, n and visits before and after, and each entry's table snapshot. The stored table must equal the replay.
+- **Each participant's course log against the table's log:** every decision has its `visit` entry and every reward its `learn` entry (same participant, decision, action and reward); every table change by a participant is in their course log; each reward's accuracy and pass match the verdict recorded with it.
+- **Each participant's BKT:** the whole log is rebuilt from the raw answers (drive attempts and sittings) and compared entry by entry, and the profile with the rebuilt profile. This also catches answers logged out of time order (a device clock that jumped, two tabs at once).
+
+Run it after each session and before any analysis. A participant whose records fail it can be set aside, and `--out` gives the table the honest log adds up to.
 
 ## Not yet verified
 

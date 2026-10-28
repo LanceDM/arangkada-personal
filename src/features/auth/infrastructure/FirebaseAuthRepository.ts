@@ -8,9 +8,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-  sendEmailVerification,
   signOut as firebaseSignOut,
-  applyActionCode,
   confirmPasswordReset,
   onAuthStateChanged,
   GoogleAuthProvider,
@@ -70,7 +68,6 @@ const signIn = async (email: string, password: string): Promise<AuthUser> => {
 
 const signUp = async (email: string, password: string, username: string): Promise<AuthUser> => {
   const result = await createUserWithEmailAndPassword(auth, email, password);
-  await sendEmailVerification(result.user);
   await createUserProfile(result.user.uid, {
     email,
     username,
@@ -123,9 +120,6 @@ export const firebaseAuthGateway: AuthGateway = {
   },
   confirmNewPassword: async (oobCode, newPassword) => {
     await confirmPasswordReset(auth, oobCode, newPassword);
-  },
-  verifyEmailCode: async oobCode => {
-    await applyActionCode(auth, oobCode);
   },
   completeRedirectSignIn,
   observeUser: onChange => {

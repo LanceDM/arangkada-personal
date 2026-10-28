@@ -17,7 +17,6 @@ export interface AuthGateway {
   signOut(): Promise<void>;
   requestPasswordReset(email: string): Promise<void>;
   confirmNewPassword(oobCode: string, newPassword: string): Promise<void>;
-  verifyEmailCode(oobCode: string): Promise<void>;
   /**
    * Finishes a sign-in that left the page for a full-screen redirect, on the
    * load that follows it. Resolves to null when no redirect was pending.

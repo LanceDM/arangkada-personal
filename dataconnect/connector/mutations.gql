@@ -21,24 +21,5 @@ mutation SaveBackgroundAnswer(
   )
 }
 
-mutation SaveSurveyAnswer(
-  $instrument: String!
-  $itemId: String!
-  $formVersion: Int!
-  $value: Int!
-  $answeredAt: Timestamp!
-) @auth(level: USER) {
-  surveyResponse_upsert(
-    data: {
-      userUid_expr: "auth.uid"
-      instrument: $instrument
-      itemId: $itemId
-      formVersion: $formVersion
-      value: $value
-      answeredAt: $answeredAt
-    }
-  )
-}
-
 # Participants, roles and settings versions are written by the scripts in
 # scripts/db with the service account (admin privileges), not by the app.

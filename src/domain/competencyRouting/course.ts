@@ -38,6 +38,7 @@ import {
   type CompetencyStage,
 } from '@/domain/learner/stageCompetencies';
 import { masteryLevel, type MasteryLevel } from './mastery';
+import { canonicalJSON } from '@/domain/study/canonical';
 import {
   chooseAction,
   legalActions,
@@ -132,6 +133,9 @@ export interface CourseCursor {
 }
 
 export const COURSE_SCHEMA_VERSION = 1;
+
+/** Whether two cursors are the same position: equal as stored data, whatever their key order. */
+export const sameCursor = (a: CourseCursor, b: CourseCursor): boolean => canonicalJSON(a) === canonicalJSON(b);
 
 export const startingCourse = (): CourseCursor => ({
   schemaVersion: COURSE_SCHEMA_VERSION,

@@ -16,6 +16,7 @@ import {
   Q_STATES,
   legalActions,
   recordVisit,
+  rewardOf,
   stateKey,
   statePhase,
   updateQ,
@@ -183,3 +184,71 @@ export const applyQLog = (input: {
   });
   return { table, entries };
 };
+
+// --- replay ------------------------------------------------------------------------------
+
+const near = (a: number, b: number) => Math.abs(a - b) <= 1e-9;
+
+/**
+ * Replays the shared table's log from an empty table and checks every entry
+ * against what its own logged inputs give: the numbering (1, 2, 3... with no gap
+ * or repeat), the reward from its parts, the target, Q, n and visits before and
+ * after, and the whole table it says it left. This is the check that the shared
+ * table is exactly the sum of its logged changes, so a lost update, a write that
+ * skipped the log, or an altered value shows up.
+ *
+ * Returns the replayed table and every problem found (empty when the log is sound).
+ */
+export const replayQLog = (
+  entries: readonly QLogEntry[],
+  options: { start?: QTable; tableEquals?: (a: QTable, b: QTable) => boolean } = {}
+): { table: QTable; problems: string[] } => {
+  const equals = options.tableEquals ?? sameTable;
+  const ordered = [...entries].sort((a, b) => a.globalSeq - b.globalSeq);
+  const problems: string[] = [];
+  let table: QTable = options.start ?? {};
+  ordered.forEach((entry, i) => {
+    const at = `globalSeq ${entry.globalSeq}`;
+    if (entry.globalSeq !== i + 1) problems.push(`${at}: expected globalSeq ${i + 1}`);
+    if (stateKey(entry.state) !== entry.stateKey) problems.push(`${at}: stateKey ${entry.stateKey} does not match the state`);
+    const before = cellOf(table, entry.state, entry.action);
+    if (entry.kind === 'visit') {
+      if (!entry.decision) problems.push(`${at}: a visit with no decision`);
+      else if (entry.decision.visitsBefore !== before.visits) problems.push(`${at}: visitsBefore ${entry.decision.visitsBefore}, replay has ${before.visits}`);
+      table = recordVisit(table, entry.state, entry.action);
+    } else {
+      const l = entry.learning;
+      if (!l) {
+        problems.push(`${at}: a learn entry with no learning`);
+      } else {
+        const reward = rewardOf({ accuracy: l.accuracy, passed: l.passed }, l.addedDecisions, l.weights);
+        if (!near(reward, l.reward)) problems.push(`${at}: reward ${l.reward}, its parts give ${reward}`);
+        const next = l.nextStateKey === null ? null : Q_STATES.find(s => stateKey(s) === l.nextStateKey) ?? null;
+        if (l.nextStateKey !== null && !next) problems.push(`${at}: unknown next state ${l.nextStateKey}`);
+        const maxNextQ = next ? Math.max(...legalActions(next).map(a => cellOf(table, next, a).q)) : 0;
+        if (!near(maxNextQ, l.maxNextQ)) problems.push(`${at}: maxNextQ ${l.maxNextQ}, replay has ${maxNextQ}`);
+        if (l.nBefore !== before.n) problems.push(`${at}: nBefore ${l.nBefore}, replay has ${before.n}`);
+        if (!near(l.qBefore, before.q)) problems.push(`${at}: qBefore ${l.qBefore}, replay has ${before.q}`);
+        const applied = updateQ(table, entry.state, entry.action, l.reward, next, l.gamma);
+        if (!near(applied.target, l.target)) problems.push(`${at}: target ${l.target}, replay has ${applied.target}`);
+        if (!near(applied.after, l.qAfter)) problems.push(`${at}: qAfter ${l.qAfter}, replay has ${applied.after}`);
+        table = applied.table;
+      }
+    }
+    if (entry.tableAfter && !equals(entry.tableAfter, table)) problems.push(`${at}: tableAfter differs from the replay`);
+  });
+  return { table, problems };
+};
+
+/** Two tables hold the same cells (a state with no cells yet equals a missing state). */
+export const sameTable = (a: QTable, b: QTable): boolean => {
+  const filled = (t: QTable) => Object.fromEntries(Object.entries(t).filter(([, cells]) => cells && Object.keys(cells).length > 0));
+  return JSON.stringify(sortKeys(filled(a))) === JSON.stringify(sortKeys(filled(b)));
+};
+
+const sortKeys = (value: unknown): unknown =>
+  Array.isArray(value)
+    ? value.map(sortKeys)
+    : value && typeof value === 'object'
+      ? Object.fromEntries(Object.keys(value as object).sort().map(key => [key, sortKeys((value as Record<string, unknown>)[key])]))
+      : value;

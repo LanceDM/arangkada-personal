@@ -4,7 +4,7 @@ import { buildBKTProfile } from '@/domain/learner/mastery/buildBKTProfile';
 import { applyQOperations, type DecisionRecord, type QOperation, type RewardRecord } from '@/domain/competencyRouting/course';
 import { chooseAction, emptyQTable, recordVisit, statePhase, type QState } from '@/domain/competencyRouting/qLearning';
 import { buildBKTLog, type EvidenceOrigin } from './bktLog';
-import { applyQLog, pairQOperations } from './qLog';
+import { applyQLog, pairQOperations, replayQLog, sameTable } from './qLog';
 import type { StudyEnvelope } from './studyEvent';
 
 const envelope = (i: number): StudyEnvelope => ({
@@ -74,6 +74,24 @@ describe('the Q-table update log', () => {
     expect(entries[1].decisionId).toBe('2:parking:1');
     expect(entries[1].tableAfter).toEqual(table);
     expect(entries[1].statesAfter['M3-passed'].tag).toBe('exploring');
+  });
+
+  it('replays a sound log to the same table, and finds a lost entry or an altered value', () => {
+    const items = pairQOperations(operations, [decision(1)], [reward]);
+    const { table, entries } = applyQLog({ table: emptyQTable(), items, firstGlobalSeq: 1, context: { participantCode: null, levelId: 2, phase: 'DRIVE(2)', attemptId: 'a' }, envelope });
+    const sound = replayQLog(entries);
+    expect(sound.problems).toEqual([]);
+    expect(sameTable(sound.table, table)).toBe(true);
+
+    // An entry lost: the numbering has a gap and the next snapshot no longer follows.
+    expect(replayQLog([entries[1]]).problems.join('\n')).toMatch(/expected globalSeq 1/);
+    // A reward that does not follow from its parts, and a Q value that does not follow from the update.
+    const tampered = structuredClone(entries);
+    tampered[0].learning!.reward = 5;
+    tampered[0].learning!.qAfter = 5;
+    const found = replayQLog(tampered).problems.join('\n');
+    expect(found).toMatch(/reward 5, its parts give/);
+    expect(found).toMatch(/tableAfter differs/);
   });
 });
 

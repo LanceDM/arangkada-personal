@@ -2,20 +2,17 @@
  * Implementation A (Firestore) of the study logs:
  *
  * - `users/{uid}/events/{eventId}`, numbered from `users/{uid}/state/events`;
- * - `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates/{updateId}`;
- * - `users/{uid}/surveys/{instrument}`.
+ * - `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates/{updateId}`.
  *
  * Every document id is the record's own `eventId`, made on the device, so a
  * retried write overwrites itself instead of adding a duplicate.
  */
-import { collection, doc, getDoc, runTransaction, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDoc, runTransaction, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
 import type { BKTProfileDoc } from '@/domain/study/bktLog';
-import type { SurveyResponse } from '@/domain/study/survey';
 import type {
   BKTLogRepository,
   StudyEventRepository,
-  SurveyRepository,
 } from '@/features/driving-sim/application/ports';
 
 /** Firestore rejects `undefined`; every payload here is plain data, so a JSON round trip drops it. */
@@ -70,15 +67,5 @@ export const firebaseBKTLogRepository: BKTLogRepository = {
       if (i === parts.length - 1) batch.set(profileDoc(uid), plain(profile));
       await batch.commit();
     }
-  },
-};
-
-export const firebaseSurveyRepository: SurveyRepository = {
-  async load(uid, instrument) {
-    const snap = await getDoc(doc(db, 'users', uid, 'surveys', instrument));
-    return snap.exists() ? (snap.data() as SurveyResponse) : null;
-  },
-  async save(uid, response) {
-    await setDoc(doc(db, 'users', uid, 'surveys', response.instrument), plain(response));
   },
 };

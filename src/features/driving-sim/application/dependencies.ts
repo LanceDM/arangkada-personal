@@ -13,7 +13,6 @@ import type {
   BackgroundFormRepository,
   BKTLogRepository,
   StudyEventRepository,
-  SurveyRepository,
   BriefingProgressRepository,
   CompetencyCourseRepository,
   LearnerHistoryRepository,
@@ -49,8 +48,6 @@ export interface DrivingSimDependencies {
   studyEvents: StudyEventRepository;
   /** The participant's own BKT profile and its update log. */
   bktLog: BKTLogRepository;
-  /** Questionnaire answers (ISO/IEC 25010, TAM). */
-  surveys: SurveyRepository;
   /** The commit the app was built from, stamped on every logged record. */
   appBuild?: string;
 }

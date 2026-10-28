@@ -34,7 +34,6 @@ export type StudyEventType =
   | 'sitting_submitted'
   | 'item_answered'
   | 'background_submitted'
-  | 'survey_submitted'
   | 'drive_planned'
   | 'decision_made'
   | 'drive_ended'

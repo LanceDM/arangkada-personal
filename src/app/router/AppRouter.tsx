@@ -25,7 +25,6 @@ import { DiagnosticPage, PostExamPage } from '@/pages/story/AssessmentPage';
 import BackgroundFormPage from '@/pages/story/BackgroundFormPage';
 import NotFound from '@/pages/NotFoundPage';
 import ResetPassword from '@/pages/auth/ResetPasswordPage';
-import VerifyEmail from '@/pages/auth/VerifyEmailPage';
 
 // The modes that share nothing with each other: their own content, their own
 // screens, no state carried in from anywhere else. Split so that opening the
@@ -84,7 +83,6 @@ export const AppRouter = () => (
 
     {/* Firebase email link landing pages */}
     <Route path="/auth/reset-password" element={<ResetPassword />} />
-    <Route path="/auth/verify-email" element={<VerifyEmail />} />
 
     {import.meta.env.DEV && [
       lazyRoute('/dev/gallery', <ComponentGallery />),
