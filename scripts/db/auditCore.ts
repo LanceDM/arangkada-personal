@@ -25,9 +25,8 @@ import { rewardOf, type QTable } from '@/domain/competencyRouting/qLearning';
 import type { DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
 import { replayQLog, sameTable, type QLogEntry } from '@/domain/study/qLog';
 import { buildBKTLog, type BKTProfileDoc, type BKTUpdateRecord, type EvidenceOrigin } from '@/domain/study/bktLog';
+import { orderEvidence } from '@/domain/study/evidence';
 
-/** The tutorial (level 0) is not evidence. */
-const TUTORIAL_LEVEL_ID = 0;
 
 export interface AuditCourseLog {
   id: string;
@@ -42,8 +41,8 @@ export interface AuditCourseLog {
 export interface AuditUser {
   uid: string;
   courseLogs: AuditCourseLog[];
-  attempts: { levelId: number; logs: ActionLog[] }[];
-  sittings: { kind: 'quiz' | 'diagnostic' | 'post_exam'; levelId: number | null; attempt: number | null; answers: ActionLog[] }[];
+  attempts: { levelId: number; logs: ActionLog[]; timestamp?: number; evidenceSeq?: number | null }[];
+  sittings: { kind: 'quiz' | 'diagnostic' | 'post_exam'; levelId: number | null; attempt: number | null; answers: ActionLog[]; timestamp?: number; evidenceSeq?: number | null; id?: string }[];
   bktUpdates: BKTUpdateRecord[];
   bktProfile: BKTProfileDoc | null;
 }
@@ -67,19 +66,12 @@ export interface AuditReport {
 const near = (a: number, b: number) => Math.abs(a - b) <= 1e-9;
 const decisionIdOf = (d: DecisionRecord) => `${d.levelId}:${d.competency}:${d.seq}`;
 
-/** The participant's graded answers in the order BKT reads them, as the app's recorder tags them. */
-export const taggedEvidence = (user: Pick<AuditUser, 'attempts' | 'sittings'>): { logs: ActionLog[]; origins: EvidenceOrigin[] } => {
-  const tagged = [
-    ...user.attempts
-      .filter(attempt => attempt.levelId !== TUTORIAL_LEVEL_ID)
-      .flatMap(attempt => attempt.logs.map(log => ({ log, origin: { kind: 'attempt' as const, levelId: attempt.levelId, ref: null, attempt: null } }))),
-    ...user.sittings.flatMap(sitting =>
-      sitting.answers.map(log => ({ log, origin: { kind: sitting.kind, levelId: sitting.levelId, ref: null, attempt: sitting.attempt } }))
-    ),
-  ];
-  tagged.sort((a, b) => a.log.timestamp - b.log.timestamp);
-  return { logs: tagged.map(t => t.log), origins: tagged.map(t => t.origin) };
-};
+/** The participant's graded answers in the order BKT reads them: the app's own ordering (domain/study/evidence). */
+export const taggedEvidence = (user: Pick<AuditUser, 'attempts' | 'sittings'>): { logs: ActionLog[]; origins: EvidenceOrigin[] } =>
+  orderEvidence([
+    ...user.attempts.map(a => ({ kind: 'attempt' as const, levelId: a.levelId, attempt: null, evidenceSeq: a.evidenceSeq ?? null, timestamp: a.timestamp ?? 0, logs: a.logs })),
+    ...user.sittings.map(s => ({ kind: s.kind, levelId: s.levelId, attempt: s.attempt, evidenceSeq: s.evidenceSeq ?? null, timestamp: s.timestamp ?? 0, logs: s.answers, ref: s.id ?? null })),
+  ]);
 
 const auditQTable = (input: AuditInput, problems: string[], summary: string[]): QTable => {
   const replay = replayQLog(input.qUpdates);
@@ -89,7 +81,10 @@ const auditQTable = (input: AuditInput, problems: string[], summary: string[]): 
   if (input.tableUpdates !== null && input.tableUpdates !== input.qUpdates.length) {
     problems.push(`policy/competencyQ counts ${input.tableUpdates} updates; the log has ${input.qUpdates.length}`);
   }
-  summary.push(`Q-table log: ${input.qUpdates.length} entries replayed, ${replay.problems.length} problem(s)`);
+  const byVersion = new Map<string, number>();
+  for (const entry of input.qUpdates) byVersion.set(entry.configVersion, (byVersion.get(entry.configVersion) ?? 0) + 1);
+  const versions = [...byVersion].map(([tag, n]) => `${tag}: ${n}`).join(', ');
+  summary.push(`Q-table log: ${input.qUpdates.length} entries replayed${versions ? ` (${versions})` : ''}, ${replay.problems.length} problem(s)`);
   return replay.table;
 };
 

@@ -32,6 +32,7 @@ export const firebaseLearnerHistoryRepository: LearnerHistoryRepository = {
         timestamp: attempt.timestamp,
         logs: attempt.logs,
         passed: passedRun(attempt),
+        evidenceSeq: attempt.evidenceSeq ?? null,
       })),
     };
   },

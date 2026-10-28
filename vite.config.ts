@@ -45,12 +45,27 @@ const appBuild = (() => {
   }
 })()
 
+const build = process.env.VITE_APP_BUILD ?? appBuild
+
+/**
+ * Writes `version.json` ({ build }) next to the built app. A static host
+ * (GitHub Pages) serves it like any file; an open tab fetches it before each
+ * course step and refuses to save with an older build (see composition.ts).
+ */
+const versionFile = (): Plugin => ({
+  name: 'arangkada:version-file',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ build }) })
+  },
+})
+
 // https://vite.dev/config/
 export default defineConfig({
   define: {
-    'import.meta.env.VITE_APP_BUILD': JSON.stringify(process.env.VITE_APP_BUILD ?? appBuild),
+    'import.meta.env.VITE_APP_BUILD': JSON.stringify(build),
   },
-  plugins: [react(), tailwindcss(), stripDevPages()],
+  plugins: [react(), tailwindcss(), stripDevPages(), versionFile()],
   cacheDir: '.vite-cache',
     resolve: {
     alias: {

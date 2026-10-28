@@ -43,7 +43,7 @@ const main = async () => {
 
   const logsOf = byOwner(courseLogs.docs, d => ({ id: d.id, ...d.data() }) as AuditCourseLog);
   const attemptsOf = byOwner(attempts.docs, d => d.data() as AuditUser['attempts'][number]);
-  const sittingsOf = byOwner(sittings.docs, d => d.data() as AuditUser['sittings'][number]);
+  const sittingsOf = byOwner(sittings.docs, d => ({ ...d.data(), id: d.id }) as AuditUser['sittings'][number]);
   const bktOf = byOwner(bktUpdates.docs, d => d.data() as BKTUpdateRecord);
   const profiles = new Map(bktDocs.docs.filter(d => d.id === 'profile').map(d => [ownerOf(d), d.data() as BKTProfileDoc]));
 

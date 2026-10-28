@@ -35,6 +35,8 @@ export type StudyEventType =
   | 'item_answered'
   | 'background_submitted'
   | 'drive_planned'
+  /** A quiz or drive opened again at the same course position (a reload, a second tab): the same seed. */
+  | 'activity_reopened'
   | 'decision_made'
   | 'drive_ended'
   | 'verdict_computed'

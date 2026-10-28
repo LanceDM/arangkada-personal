@@ -50,6 +50,12 @@ export interface DrivingSimDependencies {
   bktLog: BKTLogRepository;
   /** The commit the app was built from, stamped on every logged record. */
   appBuild?: string;
+  /**
+   * The build the site serves now (its `version.json`), or null when it cannot
+   * be read (offline, the dev server). A course step from an older build is
+   * refused, so a tab left open across a deploy writes nothing with old code.
+   */
+  latestBuild?: () => Promise<string | null>;
 }
 
 let bound: DrivingSimDependencies | null = null;

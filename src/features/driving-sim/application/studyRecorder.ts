@@ -12,7 +12,8 @@ import { buildBKTLog, type EvidenceOrigin } from '@/domain/study/bktLog';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { newEventId, type StudyEnvelope, type StudyEventDraft } from '@/domain/study/studyEvent';
 import { drivingSimDeps } from './dependencies';
-import { TUTORIAL_LEVEL_ID, loadLearnerHistory } from './learnerHistory';
+import { loadLearnerHistory } from './learnerHistory';
+import { orderEvidence, type EvidenceRecord } from '@/domain/study/evidence';
 
 /** One per app load: every record written in this sitting shares it. */
 const SESSION_ID = newEventId(Date.now());
@@ -54,21 +55,31 @@ export const recordEvents = async (uid: string, drafts: readonly StudyEventDraft
  * drives (tutorial left out) and quiz, diagnostic and post-exam answers.
  * `loadEvidence` returns the same logs in the same order.
  */
-export const loadTaggedEvidence = async (uid: string): Promise<{ logs: ActionLog[]; origins: EvidenceOrigin[] }> => {
+export const loadTaggedEvidence = async (uid: string): Promise<{ logs: ActionLog[]; origins: EvidenceOrigin[] }> =>
+  orderEvidence(await loadEvidenceRecords(uid));
+
+/** Every record of graded answers the participant has saved: drives and sittings. */
+export const loadEvidenceRecords = async (uid: string): Promise<EvidenceRecord[]> => {
   const [history, sittings] = await Promise.all([loadLearnerHistory(uid), drivingSimDeps().assessments.load(uid)]);
-  const tagged: { log: ActionLog; origin: EvidenceOrigin }[] = [
-    ...history.attempts
-      .filter(attempt => attempt.levelId !== TUTORIAL_LEVEL_ID)
-      .flatMap(attempt =>
-        attempt.logs.map(log => ({ log, origin: { kind: 'attempt' as const, levelId: attempt.levelId, ref: null, attempt: null } }))
-      ),
-    ...sittings.flatMap(sitting =>
-      sitting.answers.map(log => ({ log, origin: { kind: sitting.kind, levelId: sitting.levelId, ref: null, attempt: sitting.attempt } }))
-    ),
+  return [
+    ...history.attempts.map(attempt => ({
+      kind: 'attempt' as const,
+      levelId: attempt.levelId,
+      attempt: null,
+      evidenceSeq: attempt.evidenceSeq ?? null,
+      timestamp: attempt.timestamp ?? 0,
+      logs: attempt.logs,
+    })),
+    ...sittings.map(sitting => ({
+      kind: sitting.kind,
+      levelId: sitting.levelId,
+      attempt: sitting.attempt,
+      evidenceSeq: sitting.evidenceSeq ?? null,
+      timestamp: sitting.timestamp,
+      logs: sitting.answers,
+      ref: sitting.id ?? null,
+    })),
   ];
-  // Stable sort by the answer's own time, as historyLogs does.
-  tagged.sort((a, b) => a.log.timestamp - b.log.timestamp);
-  return { logs: tagged.map(t => t.log), origins: tagged.map(t => t.origin) };
 };
 
 /**

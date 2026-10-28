@@ -31,7 +31,7 @@ For Implementation B, also: move the project to Blaze, set `VITE_DATABASE_MODE=f
 
 ### The event stream: `users/{uid}/events/{eventId}`
 
-One document per thing that happened, numbered 1, 2, 3... per participant (`seq`, from `users/{uid}/state/events`). Every event carries the envelope: `eventId` (made on the device, also the document id), `uid`, `at`, `serverAt`, `sessionId`, `appBuild` (the git commit), `configVersion`.
+One document per thing that happened (the `activity_reopened` type marks a quiz or drive opened again at the same position), numbered 1, 2, 3... per participant (`seq`, from `users/{uid}/state/events`). Every event carries the envelope: `eventId` (made on the device, also the document id), `uid`, `at`, `serverAt`, `sessionId`, `appBuild` (the git commit), `configVersion`.
 
 | Type | Written when | Payload |
 |---|---|---|
@@ -69,14 +69,37 @@ Each entry also holds the whole table and every state's tag after it.
 
 Every participant reads and changes the same shared table, often at the same moment, so each course step (lessons read, quiz submitted, review done, drive or final finished, post-exam submitted) is committed as **one Firestore transaction** (`commitStep` in `FirebaseCompetencyCourseRepository`) that:
 
-1. reads the participant's stored cursor and the newest shared table;
-2. refuses the step (`CourseConflictError`) if the stored cursor is not the one the step started from: a second tab, a double click, or a request sent twice;
+1. reads the participant's stored cursor, the newest shared table, the settings version in force (`policy/config`) and the participant's evidence counter;
+2. refuses the step if the stored cursor is not the one the step started from (`CourseConflictError`: a second tab, a double click, a retry of a step already saved), or if this copy of the app runs other settings than the ones in force (`OutdatedAppError`);
 3. chooses the routing decisions and computes the rewards **from that newest table**;
-4. writes the table, its numbered log entries, the participant's course log entry and the new cursor together.
+4. writes, all or nothing: the step's own record (the quiz or post-exam sitting, or the drive, under a fixed id and numbered by the evidence counter), the table, its numbered log entries, the course log entry and the new cursor.
 
-If another participant changes the table between the read and the write, Firestore discards the attempt and runs it again on the newer table (up to 12 times), so a decision is never made from a stale table and no update is lost or applied twice. The random draw is redone with it, and the logged draw is the one that was committed. A step that is refused shows the participant where their course really is; answers and drives are checked against the stored cursor before they are saved, so a double submit does not record them twice.
+If another participant changes the table between the read and the write, Firestore discards the attempt and runs it again on the newer table (up to 12 times), so a decision is never made from a stale table and no update is lost or applied twice. The random draw is redone with it, and the logged draw is the one that was committed.
 
-The rules back this up: a table change must come with its log entry under the new counter, and the course cursor's decision counter cannot go backwards, so an old cursor cannot be written over a newer one. `competencyCourse.concurrency.test.ts` plays two participants committing at the same moment and checks that the log is numbered without gaps, that replaying it gives the stored table, and that a double submit is refused without a second record.
+What is derived from those records is written right after the transaction: the event stream, the BKT log and the drive telemetry. If that write is lost, the next step catches the BKT log up, and the raw records it is built from are already saved.
+
+### What keeps the algorithm's data whole
+
+| Edge case | What happens |
+|---|---|
+| The save fails (connection, closed tab) and the participant retries | Nothing of the failed step was written, so the retry saves the answers once. |
+| A step is submitted twice (double click, second tab, retry after a lost reply) | The second is refused: the cursor already moved. The page reloads the course. |
+| The diagnostic is submitted twice | It has one fixed id (`assessmentSittings/diagnostic`); the second finds it saved and writes nothing. |
+| The page is reloaded in a quiz or before a drive | The quiz or drive open at that course position is kept in `users/{uid}/state/active` with its seed, so the reload gets the same items or the same drive. A reopen is logged (`activity_reopened`); a new position (the next attempt) opens a new one. |
+| A tab is left open across a settings change | The transaction refuses the step (`OutdatedAppError`), and the rules refuse any Q-table change not made under the settings in force. |
+| A tab is left open across a deploy | Each build writes `version.json` next to the app. Before each step the app reads it, past every cache; if the site now serves a newer build, the step is refused and the participant reloads. (If the file cannot be read, offline or on the dev server, the step goes ahead.) |
+| Two tabs bring BKT up to date at once | Each BKT entry's id is fixed, `{settings version}_{userSeq}`, and written in a transaction that first checks it is not there yet: one tab writes, the other is skipped. |
+| The device clock jumps (a manual change, a time sync) | BKT reads the drives and sittings in the order they were saved, by `evidenceSeq` (1, 2, 3... per participant, from `users/{uid}/state/evidence`, assigned in the saving transaction), and each one's answers in the order given. The device time is kept as a recorded field only. Records saved before the counter have no number and are read first, by their own time. |
+
+The rules back this up: a table change must come with its log entry under the new counter and under the settings in force; a numbered drive or sitting must move the evidence counter in the same write; records are never rewritten; and the course cursor's decision counter cannot go backwards.
+
+`competencyCourse.concurrency.test.ts` plays two participants committing at the same moment; `competencyCourse.integrity.test.ts` plays each edge case above.
+
+### The shared Q-table is never reset
+
+The table is shared by every participant, so it is never emptied, not even when the settings change: `npm run db:init` creates it only if it does not exist. Each update is tagged with the settings version it was made under (`configVersion` on every log entry), and the table document records, under `versions`, each settings version with the first `globalSeq` made under it. The analysis can therefore split the table's history by version, and `db:audit` reports the number of updates per version.
+
+If the settings ever change mid-study, the table carries on learning from where it is; changing the reward weights means updates before and after the change were made with different reward functions, which the analysis should treat as two periods.
 
 ### Settings versions
 
@@ -113,7 +136,7 @@ Run the scripts against the emulators with `FIRESTORE_EMULATOR_HOST=127.0.0.1:80
 
 Every record is written from the participant's browser, so the rules decide who may write and in what shape, never whether a value is true. In particular:
 
-- **The shared Q-table** can only change together with its log entry: the counter only moves forward, the last change must name the participant writing it, and the named log entry must exist under the new counter in the same transaction. Every change is therefore attributed and on the record, but the numbers themselves are not checked.
+- **The shared Q-table** can only change together with its log entry, under the settings in force: the counter only moves forward, the last change must name the participant writing it and the settings version in `policy/config`, and the named log entry must exist under the new counter in the same transaction. Every change is therefore attributed and on the record, but the numbers themselves are not checked.
 - **A participant's own records** (course cursor, events, BKT profile and log) can only be written by that participant, append-only where they are logs.
 - **Admin** is a custom claim only the role script can set; settings versions, enrolment and role grants are written only by the scripts.
 
@@ -124,6 +147,11 @@ The rules cannot check the values themselves: that would need server code (Cloud
 - **Each participant's BKT:** the whole log is rebuilt from the raw answers (drive attempts and sittings) and compared entry by entry, and the profile with the rebuilt profile. This also catches answers logged out of time order (a device clock that jumped, two tabs at once).
 
 Run it after each session and before any analysis. A participant whose records fail it can be set aside, and `--out` gives the table the honest log adds up to.
+
+## Open decisions
+
+- **Free replays and BKT** (Tentative): a stage replayed from the map is saved like any drive and counts toward BKT and the drive-answer cap, as before. The alternative is to log replays but leave them out of BKT, so the routing is evaluated on the course's own measurements only. To be decided by the group.
+- **Hosting on GitHub Pages**: the build already writes `version.json`. A project site served under `/<repo>/` will also need Vite's `base`, the router's `basename`, and a `404.html` fallback for client-side routes.
 
 ## Not yet verified
 

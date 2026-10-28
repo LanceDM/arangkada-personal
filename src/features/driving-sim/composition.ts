@@ -49,6 +49,22 @@ interface DrivingSimComposition {
   };
 }
 
+/**
+ * The build the site serves now: `version.json`, written next to the app by
+ * the build (vite.config.ts). Fetched past every cache, so a tab opened before
+ * a deploy learns that a newer build is out. Null when it cannot be read.
+ */
+const fetchLatestBuild = async (): Promise<string | null> => {
+  try {
+    const response = await fetch(`${import.meta.env.BASE_URL}version.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) return null;
+    const body = (await response.json()) as { build?: unknown };
+    return typeof body.build === 'string' ? body.build : null;
+  } catch {
+    return null;
+  }
+};
+
 export const composeDrivingSim = ({ learnerHistory, routing, databaseMode = 'firestore', appBuild }: DrivingSimComposition) =>
   provideDrivingSimDependencies({
     learnerHistory: learnerHistory
@@ -67,4 +83,5 @@ export const composeDrivingSim = ({ learnerHistory, routing, databaseMode = 'fir
     studyEvents: firebaseStudyEventRepository,
     bktLog: firebaseBKTLogRepository,
     appBuild,
+    latestBuild: fetchLatestBuild,
   });

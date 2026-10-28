@@ -5,9 +5,12 @@
  * exam. Every participant plays the same flow; there is no comparison group.
  *
  * Each function loads what it needs, applies one move of the routing FSM
- * (`@/domain/competencyRouting/course`), and saves the result before it
- * returns: the attempt first, then the shared table and the course log, then
- * the cursor, so a cursor never names a move whose evidence is missing.
+ * (`@/domain/competencyRouting/course`), and saves the result in one
+ * transaction before it returns: the step's own record (the drive or the
+ * sitting, under a fixed id), the shared table and its log, the course log and
+ * the cursor, all or nothing. What is derived from those records (the event
+ * stream, the BKT log, drive telemetry) is written right after, under ids a
+ * second write cannot duplicate, and is rebuilt by the next step if lost.
  */
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { DrivingCompetency } from '@/domain/learner/competency';
@@ -53,9 +56,12 @@ import type { StudyEventDraft } from '@/domain/study/studyEvent';
 import { scenarioFormat, type ScenarioFormat } from '@/features/driving-sim/domain/scenario/scenarioFormat';
 import { sameCursor } from '@/domain/competencyRouting/course';
 import type { QTable } from '@/domain/competencyRouting/qLearning';
-import { historyLogs, loadLearnerHistory } from '../learnerHistory';
-import type { AssessmentSitting, CourseStep } from '../ports';
-import { CourseConflictError } from '../errors';
+import type { AssessmentSitting, CourseStep, EvidenceWrite } from '../ports';
+import { CourseConflictError, OutdatedAppError } from '../errors';
+import { loadEvidenceRecords } from '../studyRecorder';
+import { nextAttemptSeed } from '../attemptSeed';
+import { DIAGNOSTIC_RECORD_ID, fingerprintOf, orderEvidence, stepRecordId, type EvidenceRecord } from '@/domain/study/evidence';
+import { newEventId } from '@/domain/study/studyEvent';
 import type { AdaptivePlan } from './buildAdaptivePlan';
 
 // --- loading ------------------------------------------------------------------
@@ -100,12 +106,35 @@ export const saveBackground = async (uid: string, answers: Record<string, string
   await recordEvents(uid, [{ type: 'background_submitted', payload: { formVersion: BACKGROUND_FORM_VERSION, answers } }]);
 };
 
-/** Every graded answer BKT reads, oldest first: drives (tutorial left out), quiz, diagnostic and post-exam answers. */
-export const loadEvidence = async (uid: string): Promise<ActionLog[]> => {
-  const [history, sittings] = await Promise.all([loadLearnerHistory(uid), drivingSimDeps().assessments.load(uid)]);
-  const answers = sittings.flatMap(s => s.answers);
-  return historyLogs(history, answers);
+/** Every graded answer BKT reads, in the order saved: drives (tutorial left out), quiz, diagnostic and post-exam answers. */
+export const loadEvidence = async (uid: string): Promise<ActionLog[]> => orderEvidence(await loadEvidenceRecords(uid)).logs;
+
+/**
+ * The evidence as it will be once `record` is saved: it is numbered after
+ * every record already saved, so its answers come last. A step computes its
+ * BKT-based measurements from this before it commits, so the record and the
+ * decisions it leads to are saved together.
+ */
+const evidenceWith = async (uid: string, record: Omit<EvidenceRecord, 'evidenceSeq'>): Promise<ActionLog[]> => {
+  const records = await loadEvidenceRecords(uid);
+  const last = Math.max(0, ...records.map(r => r.evidenceSeq ?? 0));
+  return orderEvidence([...records, { ...record, evidenceSeq: last + 1 }]).logs;
 };
+
+/**
+ * Refuses, writing nothing, when the site now serves a newer build than this
+ * tab runs (a tab left open across a deploy). The settings version is checked
+ * again inside every transaction.
+ */
+const ensureLatestApp = async (): Promise<void> => {
+  const { latestBuild, appBuild } = drivingSimDeps();
+  if (!latestBuild || !appBuild || appBuild === 'unknown') return;
+  const latest = await latestBuild();
+  if (latest && latest !== appBuild) throw new OutdatedAppError(appBuild, latest);
+};
+
+/** A course position's fingerprint: what an open quiz or drive is tied to. */
+export const coursePosition = (cursor: CourseCursor): string => fingerprintOf(cursor);
 
 /** The course_transition event: from, to, and what triggered it. */
 const transitionEvent = (from: CourseCursor, to: CourseCursor, trigger: string): StudyEventDraft => ({
@@ -165,16 +194,31 @@ const commit = async (
   from: CourseCursor,
   trigger: string,
   compute: (table: QTable) => CourseStep,
-  context: Omit<QLogContext, 'participantCode'> = { levelId: phaseLevel(from.phase), phase: phaseId(from.phase), attemptId: null }
+  options: {
+    context?: Omit<QLogContext, 'participantCode'>;
+    /** The step's own record: the drive or the sitting, saved in the same transaction. */
+    evidence?: EvidenceWrite;
+    /** Events about that record, recorded first once it is saved. */
+    events?: StudyEventDraft[];
+  } = {}
 ): Promise<{ step: CourseStep; entries: QLogEntry[]; table: QTable }> => {
+  const context = options.context ?? { levelId: phaseLevel(from.phase), phase: phaseId(from.phase), attemptId: null };
+  await ensureLatestApp();
   const now = Date.now();
   const committed = await drivingSimDeps().competencyCourse.commitStep(uid, {
     expected: from,
     compute,
     context: { ...context, participantCode: null },
     envelope: i => envelopeFor(uid, now + i),
+    evidence: options.evidence ?? null,
   });
-  await recordEvents(uid, [...policyEvents(committed.step, committed.entries, context), transitionEvent(from, committed.step.cursor, trigger)]);
+  await recordEvents(uid, [
+    ...(options.events ?? []),
+    ...policyEvents(committed.step, committed.entries, context),
+    transitionEvent(from, committed.step.cursor, trigger),
+  ]);
+  // BKT reads the record just saved; its log catches up now.
+  if (options.evidence) await recordBKT(uid);
   return committed;
 };
 
@@ -184,8 +228,9 @@ const moveCursor = async (uid: string, from: CourseCursor, to: CourseCursor, tri
 
 /**
  * Refuses early when the stored cursor has already moved on, before a step
- * writes its answers or its attempt. The commit checks again atomically; this
- * only keeps a double submit from saving the same answers twice.
+ * does any work. The commit checks again, atomically, together with saving
+ * the step's record: that check is the one that keeps a record from being
+ * saved twice.
  */
 const ensureCurrent = async (uid: string, cursor: CourseCursor): Promise<void> => {
   const stored = await drivingSimDeps().competencyCourse.loadCursor(uid);
@@ -330,6 +375,36 @@ export const drawCourseQuiz = (cursor: CourseCursor, seed: number): QuizDraw => 
   return drawQuiz(cursor.phase.level, cursor.quiz.remaining, seen, createRng(seed));
 };
 
+/**
+ * The quiz or drive open at this course position: the same seed on every
+ * reload until the step is saved. A reopen is logged.
+ */
+const openCourseActivity = async (uid: string, cursor: CourseCursor, kind: 'quiz' | 'drive', freshSeed: number = nextAttemptSeed()) => {
+  const activity = await drivingSimDeps().competencyCourse.openActivity(uid, {
+    kind,
+    position: coursePosition(cursor),
+    seed: freshSeed,
+    openedAt: Date.now(),
+  });
+  if (activity.opens > 1) {
+    await recordEvents(uid, [
+      {
+        type: 'activity_reopened',
+        levelId: phaseLevel(cursor.phase),
+        phase: phaseId(cursor.phase),
+        payload: { kind, seed: activity.seed, opens: activity.opens, openedAt: activity.openedAt },
+      },
+    ]);
+  }
+  return activity;
+};
+
+/** The quiz at this course position: drawn from the seed it was first opened with. */
+export const openCourseQuiz = async (uid: string, cursor: CourseCursor, freshSeed?: number): Promise<QuizDraw> => {
+  const { seed } = await openCourseActivity(uid, cursor, 'quiz', freshSeed);
+  return drawCourseQuiz(cursor, seed);
+};
+
 export interface QuizCompetencyResult {
   competency: DrivingCompetency;
   correct: number;
@@ -348,16 +423,7 @@ export const submitCourseQuiz = async (
   const at = Date.now();
   const attempt = cursor.quiz?.attempt ?? 1;
   const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'quiz', at + i, attempt, responseMs[i]));
-  await drivingSimDeps().assessments.save(uid, {
-    schemaVersion: 1,
-    kind: 'quiz',
-    levelId: phaseLevel(cursor.phase),
-    attempt,
-    answers,
-    timestamp: at,
-  });
-  await recordEvents(uid, sittingEvents('quiz', items, answers, { levelId: phaseLevel(cursor.phase), phase: phaseId(cursor.phase), attempt }));
-  await recordBKT(uid);
+  const sitting: AssessmentSitting = { schemaVersion: 1, kind: 'quiz', levelId: phaseLevel(cursor.phase), attempt, answers, timestamp: at };
   const graded: QuizAnswer[] = items.map((item, i) => ({ itemId: item.id, competency: item.competency, correct: choices[i] === item.answer }));
   const competencies = [...new Set(items.map(item => item.competency))];
   const results = competencies.map(competency => {
@@ -372,7 +438,7 @@ export const submitCourseQuiz = async (
   const level = phaseLevel(cursor.phase);
   let measurements: CompetencyMeasurement[] = [];
   if (submitted.pending.some(p => competencies.includes(p.competency))) {
-    const evidence = await loadEvidence(uid);
+    const evidence = await evidenceWith(uid, { kind: 'quiz', levelId: level, attempt, timestamp: at, logs: answers });
     const mastery = buildBKTProfile(evidence);
     const counts = buildBKTEvidence(evidence);
     measurements = results.map(r => ({
@@ -403,9 +469,11 @@ export const submitCourseQuiz = async (
         timestamp: at,
       },
     };
+  }, {
+    evidence: { kind: 'sitting', id: stepRecordId('quiz', `${phaseId(cursor.phase)}-a${attempt}`, cursor), sitting },
+    events: sittingEvents('quiz', items, answers, { levelId: level, phase: phaseId(cursor.phase), attempt }),
   });
-  const next = step.cursor;
-  return { cursor: next, results };
+  return { cursor: step.cursor, results };
 };
 
 export const finishCourseQuizReview = async (uid: string, cursor: CourseCursor): Promise<CourseCursor> => {
@@ -435,8 +503,10 @@ const FINAL_POINTS = 25;
  * REPEAT), unseen first; the final exam with one scenario per competency
  * (TENTATIVE), every item on one 25-point scale.
  */
-export const planCourseDrive = async (uid: string, cursor: CourseCursor, attemptSeed: number): Promise<CourseDriveRun> => {
+export const planCourseDrive = async (uid: string, cursor: CourseCursor, freshSeed: number = nextAttemptSeed()): Promise<CourseDriveRun> => {
   const { phase } = cursor;
+  // The drive open at this position keeps its seed: a reload plans the same drive.
+  const { seed: attemptSeed, opens } = await openCourseActivity(uid, cursor, 'drive', freshSeed);
   const history = await loadEvidence(uid);
   const seen = new Map(Object.entries(cursor.seen));
   let level: LevelConfig;
@@ -468,6 +538,8 @@ export const planCourseDrive = async (uid: string, cursor: CourseCursor, attempt
       phase: phaseId(phase),
       payload: {
         attemptSeed,
+        // More than 1: the same drive planned again (a reload, a second tab, a restart).
+        opens,
         counted: composed?.items.map(item => ({ ...item, format: formatsOf(level).get(item.scenarioId) ?? null })) ?? [],
         structural: composed?.structural ?? [],
         shortfall: composed?.shortfall ?? {},
@@ -530,10 +602,13 @@ export const completeCourseDrive = async ({
   startedAt?: number;
 }): Promise<CourseDriveSettled> => {
   await ensureCurrent(uid, cursor);
-  const deps = drivingSimDeps();
   const now = Date.now();
   const level = run.plan.level!;
-  const attemptId = await deps.storyAttempts.save(uid, {
+  // The drive's fixed id: where in the course and the exact position it was
+  // played from. The transaction that moves the course on saves it, so a
+  // retried or doubled submit cannot save it twice.
+  const attemptId = stepRecordId(cursor.phase.kind === 'FINAL' ? 'final' : 'drive', phaseId(cursor.phase), cursor);
+  const attempt = {
     levelId: result.levelId,
     timestamp: now,
     finalScore: result.score,
@@ -550,22 +625,31 @@ export const completeCourseDrive = async ({
       crashed: Boolean(result.crashReason),
       phase: phaseId(cursor.phase),
     },
-  });
-  if (telemetry) {
-    await Promise.all([
-      deps.storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions),
-      deps.storyAttempts.saveDecisionTelemetry(
-        uid,
-        attemptId,
-        buildDecisionTelemetry({
-          entry: { levelId: result.levelId, attemptSeed: run.attemptSeed, route: level.events.map(e => e.id), policy: run.plan.record },
-          logs: result.logs,
-          traces: telemetry.decisions,
-          rerolls: telemetry.rerolls,
-        })
-      ),
-    ]);
-  }
+  };
+  const evidence: EvidenceWrite = { kind: 'attempt', id: attemptId, attempt };
+
+  /** The telemetry beside the attempt, once the attempt is saved: fixed paths, so a rewrite lands on itself. */
+  const saveTelemetry = async () => {
+    if (!telemetry) return;
+    const { storyAttempts } = drivingSimDeps();
+    try {
+      await Promise.all([
+        storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions),
+        storyAttempts.saveDecisionTelemetry(
+          uid,
+          attemptId,
+          buildDecisionTelemetry({
+            entry: { levelId: result.levelId, attemptSeed: run.attemptSeed, route: level.events.map(e => e.id), policy: run.plan.record },
+            logs: result.logs,
+            traces: telemetry.decisions,
+            rerolls: telemetry.rerolls,
+          })
+        ),
+      ]);
+    } catch (failure) {
+      console.error('Could not save the drive telemetry:', failure);
+    }
+  };
 
   const scenarioIds = [
     ...level.events.map(event => event.id),
@@ -575,70 +659,37 @@ export const completeCourseDrive = async ({
 
   // The tutorial: no verdicts, no decisions.
   if (!run.composed) {
-    const outcome = driveCompleted(cursor, { measurements: [], scenarioIds, table: {}, rng: Math.random, now });
-    await recordEvents(uid, driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now }, formatsOf(level)));
-    const moved = await moveCursor(uid, cursor, outcome.cursor, 'drive_completed');
-    return { cursor: moved, verdicts: [], lines: [], note: 'Tutorial done. Continue to Level 1.' };
+    const { step } = await commit(
+      uid,
+      cursor,
+      'drive_completed',
+      () => ({ cursor: driveCompleted(cursor, { measurements: [], scenarioIds, table: {}, rng: Math.random, now }).cursor, decisions: [], rewards: [], operations: [], log: null }),
+      {
+        context: { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId },
+        evidence,
+        events: driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now }, formatsOf(level)),
+      }
+    );
+    await saveTelemetry();
+    return { cursor: step.cursor, verdicts: [], lines: [], note: 'Tutorial done. Continue to Level 1.' };
   }
 
   const verdicts = competencyVerdicts(run.composed.items, result.logs);
   const where = { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId };
-  await recordEvents(uid, [
+  const events: StudyEventDraft[] = [
     ...driveEvents(result, where, { startedAt: startedAt ?? null, endedAt: now, routeLength: level.roadLength }, formatsOf(level)),
     ...verdicts.map(v => ({
       type: 'verdict_computed' as const,
       ...where,
       payload: { ...v, rule: cursor.phase.kind === 'FINAL' ? 'final exam: 1 item, 25-point scale' : `${DRIVE_PASS_CORRECT} of ${v.total}`, scenarios: run.composed!.items.filter(item => item.competency === v.competency).map(item => item.scenarioId) },
     })),
-  ]);
-  await recordBKT(uid);
+  ];
 
-  if (cursor.phase.kind === 'FINAL') {
-    const passed = result.completed;
-    // The final exam's decisions update BKT like any drive (recordBKT above);
-    // it makes no routing decision, but it is a measurement: pending decisions
-    // on the competencies it measured are rewarded now, terminally.
-    const finalEvidence = await loadEvidence(uid);
-    const finalMastery = buildBKTProfile(finalEvidence);
-    const finalCounts = buildBKTEvidence(finalEvidence);
-    const finalMeasurements = verdicts.map(v => ({
-      competency: v.competency,
-      accuracy: v.accuracy,
-      passed: v.passed,
-      masteryP: finalMastery[v.competency],
-      driveEvidence: finalCounts[v.competency].drive,
-    }));
-    const { step } = await commit(uid, cursor, passed ? 'final_passed' : 'final_failed', table => {
-      const settled = finalMeasured(cursor, finalMeasurements, table, now);
-      return {
-        cursor: finalCompleted(settled.cursor, passed, scenarioIds),
-        decisions: [],
-        rewards: settled.rewards,
-        operations: settled.operations,
-        log: {
-          schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId,
-          verdicts: finalMeasurements.map((m, i) => ({
-            competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed,
-            masteryP: m.masteryP, driveEvidence: m.driveEvidence,
-          })),
-          timestamp: now,
-          ...(passed ? { endReason: 'certified' as const } : {}),
-        },
-      };
-    }, { levelId: 12, phase: phaseId(cursor.phase), attemptId });
-    const next = step.cursor;
-    return {
-      cursor: next,
-      verdicts,
-      lines: [],
-      note: passed ? 'Final exam passed: certified. The post-evaluation exam is next.' : 'Final exam not passed. Continue to sit it again.',
-    };
-  }
-
-  // BKT after this attempt: the history now includes it.
-  const evidence = await loadEvidence(uid);
-  const mastery = buildBKTProfile(evidence);
-  const counts = buildBKTEvidence(evidence);
+  // BKT with this drive's answers in it, before the drive is saved: the
+  // drive, the decisions it leads to and their rewards are saved together.
+  const history = await evidenceWith(uid, { kind: 'attempt', levelId: result.levelId, attempt: null, timestamp: now, logs: result.logs });
+  const mastery = buildBKTProfile(history);
+  const counts = buildBKTEvidence(history);
   const measurements = verdicts.map(v => ({
     competency: v.competency,
     accuracy: v.accuracy,
@@ -646,6 +697,38 @@ export const completeCourseDrive = async ({
     masteryP: mastery[v.competency],
     driveEvidence: counts[v.competency].drive,
   }));
+  const loggedVerdicts = measurements.map((m, i) => ({
+    competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
+  }));
+
+  if (cursor.phase.kind === 'FINAL') {
+    const passed = result.completed;
+    // The final exam's decisions update BKT like any drive; it makes no
+    // routing decision, but it is a measurement: pending decisions on the
+    // competencies it measured are rewarded now, terminally.
+    const { step } = await commit(uid, cursor, passed ? 'final_passed' : 'final_failed', table => {
+      const settled = finalMeasured(cursor, measurements, table, now);
+      return {
+        cursor: finalCompleted(settled.cursor, passed, scenarioIds),
+        decisions: [],
+        rewards: settled.rewards,
+        operations: settled.operations,
+        log: {
+          schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId,
+          verdicts: loggedVerdicts,
+          timestamp: now,
+          ...(passed ? { endReason: 'certified' as const } : {}),
+        },
+      };
+    }, { context: { levelId: 12, phase: phaseId(cursor.phase), attemptId }, evidence, events });
+    await saveTelemetry();
+    return {
+      cursor: step.cursor,
+      verdicts,
+      lines: [],
+      note: passed ? 'Final exam passed: certified. The post-evaluation exam is next.' : 'Final exam not passed. Continue to sit it again.',
+    };
+  }
 
   // The decisions are chosen from the shared table as it is when the step
   // commits: if another participant changes it first, they are chosen again.
@@ -662,14 +745,13 @@ export const completeCourseDrive = async ({
         levelId: run.levelId,
         phase: phaseId(cursor.phase),
         attemptId,
-        verdicts: measurements.map((m, i) => ({
-          competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
-        })),
+        verdicts: loggedVerdicts,
         timestamp: now,
         ...(drive.decisions.some(d => d.source === 'cap') ? { endReason: 'cap_reached' as const } : {}),
       },
     };
-  }, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId });
+  }, { context: { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, evidence, events });
+  await saveTelemetry();
 
   const lines = verdicts.map(v => {
     const decision = outcome.decisions.find(d => d.competency === v.competency);
@@ -700,19 +782,20 @@ export const saveDiagnostic = async (
   items: readonly BankItem[],
   choices: readonly (number | null)[],
   responseMs: readonly (number | null)[] = []
-) => {
+): Promise<'saved' | 'exists'> => {
+  await ensureLatestApp();
   const at = Date.now();
   const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'diagnostic', at + i, undefined, responseMs[i]));
-  await drivingSimDeps().assessments.save(uid, {
-    schemaVersion: 1,
-    kind: 'diagnostic',
-    levelId: null,
-    attempt: null,
-    answers,
-    timestamp: at,
+  // One fixed id: a second tab or a second submit finds it saved and writes nothing.
+  const saved = await drivingSimDeps().competencyCourse.saveEvidence(uid, {
+    kind: 'sitting',
+    id: DIAGNOSTIC_RECORD_ID,
+    sitting: { schemaVersion: 1, kind: 'diagnostic', levelId: null, attempt: null, answers, timestamp: at },
   });
+  if (saved === 'exists') return saved;
   await recordEvents(uid, sittingEvents('diagnostic', items, answers, { levelId: null, phase: null, attempt: null }));
   await recordBKT(uid);
+  return saved;
 };
 
 /**
@@ -728,13 +811,10 @@ export const completePostExam = async (
   responseMs: readonly (number | null)[] = []
 ): Promise<{ cursor: CourseCursor; theta: number; se: number; correct: number }> => {
   await ensureCurrent(uid, cursor);
-  const deps = drivingSimDeps();
   const at = Date.now();
   const answers = items.map((item, i) => answerLog(item, choices[i] ?? null, 'post_exam', at + i, undefined, responseMs[i]));
   const ability = raschEAP(items.map((item, i) => ({ b: 0, correct: choices[i] === item.answer })));
-  await deps.assessments.save(uid, { schemaVersion: 1, kind: 'post_exam', levelId: null, attempt: null, answers, ability, timestamp: at });
-  await recordEvents(uid, sittingEvents('post_exam', items, answers, { levelId: null, phase: phaseId(cursor.phase), attempt: null }));
-  await recordBKT(uid);
+  const sitting: AssessmentSitting = { schemaVersion: 1, kind: 'post_exam', levelId: null, attempt: null, answers, ability, timestamp: at };
 
   const byCompetency: Partial<Record<DrivingCompetency, { accuracy: number; passed: boolean }>> = {};
   for (const competency of COMPETENCIES) {
@@ -752,7 +832,11 @@ export const completePostExam = async (
       operations: done.operations,
       log: { schemaVersion: 1, kind: 'post_exam', levelId: 0, phase: phaseId(cursor.phase), attemptId: null, verdicts: [], timestamp: at },
     };
-  }, { levelId: null, phase: phaseId(cursor.phase), attemptId: null });
+  }, {
+    context: { levelId: null, phase: phaseId(cursor.phase), attemptId: null },
+    evidence: { kind: 'sitting', id: stepRecordId('post_exam', phaseId(cursor.phase), cursor), sitting },
+    events: sittingEvents('post_exam', items, answers, { levelId: null, phase: phaseId(cursor.phase), attempt: null }),
+  });
   return { cursor: settled.cursor, theta: ability.theta, se: ability.se, correct: answers.filter(a => a.result === 'correct').length };
 };
 
@@ -791,17 +875,25 @@ export const planFreeReplay = async (uid: string, levelId: number, attemptSeed: 
 };
 
 export const completeFreeReplayDrive = async (uid: string, result: LevelResult, telemetry?: LevelFsmTelemetry) => {
-  const { storyAttempts } = drivingSimDeps();
-  const attemptId = await storyAttempts.save(uid, {
-    levelId: result.levelId,
-    timestamp: Date.now(),
-    finalScore: result.score,
-    violations: result.violations,
-    correctDecisions: result.correctActions,
-    logs: result.logs,
-    ...(telemetry ? { fsmMetrics: telemetry.metrics, reactionLatencies: telemetry.reactionLatencies } : {}),
+  await ensureLatestApp();
+  const { storyAttempts, competencyCourse } = drivingSimDeps();
+  const now = Date.now();
+  // Numbered in the evidence order like any drive; its id is its own (it moves no course step).
+  const attemptId = `replay_L${result.levelId}_${newEventId(now)}`;
+  await competencyCourse.saveEvidence(uid, {
+    kind: 'attempt',
+    id: attemptId,
+    attempt: {
+      levelId: result.levelId,
+      timestamp: now,
+      finalScore: result.score,
+      violations: result.violations,
+      correctDecisions: result.correctActions,
+      logs: result.logs,
+      ...(telemetry ? { fsmMetrics: telemetry.metrics, reactionLatencies: telemetry.reactionLatencies } : {}),
+    },
   });
-  if (telemetry) await storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions);
+  if (telemetry) await storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions).catch(failure => console.error('Could not save the drive telemetry:', failure));
   await recordEvents(uid, driveEvents(result, { levelId: result.levelId, phase: 'FREE_REPLAY', attemptId }, { freeReplay: true }));
   await recordBKT(uid);
 };

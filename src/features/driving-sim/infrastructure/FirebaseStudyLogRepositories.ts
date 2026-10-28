@@ -4,8 +4,9 @@
  * - `users/{uid}/events/{eventId}`, numbered from `users/{uid}/state/events`;
  * - `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates/{updateId}`.
  *
- * Every document id is the record's own `eventId`, made on the device, so a
- * retried write overwrites itself instead of adding a duplicate.
+ * Every document id is the record's own `eventId`: made on the device for
+ * events, fixed (`{settings version}_{userSeq}`) for BKT entries, so a second
+ * writer of the same entry is refused instead of adding a duplicate.
  */
 import { collection, doc, getDoc, runTransaction, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
@@ -58,14 +59,28 @@ export const firebaseBKTLogRepository: BKTLogRepository = {
     const snap = await getDoc(profileDoc(uid));
     return snap.exists() ? (snap.data() as BKTProfileDoc) : null;
   },
+  /**
+   * Each entry's id is fixed: `{settings version}_{userSeq}`. Each chunk is a
+   * transaction that first checks its first and last entry are not there yet;
+   * when another tab already wrote them, it writes nothing and the call
+   * reports 'skipped' (the other tab wrote the same entries, from the same
+   * answers). The profile goes with the last chunk, so it never runs ahead of
+   * the log.
+   */
   async record(uid, profile, entries) {
+    const entryDoc = (id: string) => doc(collection(db, 'users', uid, 'bktUpdates'), id);
     const parts = entries.length === 0 ? [[]] : chunks(entries);
     for (const [i, part] of parts.entries()) {
-      const batch = writeBatch(db);
-      part.forEach(entry => batch.set(doc(collection(db, 'users', uid, 'bktUpdates'), entry.eventId), { ...plain(entry), serverAt: serverTimestamp() }));
-      // The profile goes with the last chunk, so it never runs ahead of the log.
-      if (i === parts.length - 1) batch.set(profileDoc(uid), plain(profile));
-      await batch.commit();
+      const written = await runTransaction(db, async transaction => {
+        const ends = part.length === 0 ? [] : [...new Set([part[0].eventId, part.at(-1)!.eventId])];
+        const found = await Promise.all(ends.map(id => transaction.get(entryDoc(id))));
+        if (found.some(snap => snap.exists())) return false;
+        part.forEach(entry => transaction.set(entryDoc(entry.eventId), { ...plain(entry), serverAt: serverTimestamp() }));
+        if (i === parts.length - 1) transaction.set(profileDoc(uid), plain(profile));
+        return true;
+      });
+      if (!written) return 'skipped';
     }
+    return 'written';
   },
 };

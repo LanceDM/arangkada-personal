@@ -20,10 +20,12 @@ import {
   completePostExam,
   diagnosticItems,
   drivePreview,
-  drawCourseQuiz,
   finishCourseQuizReview,
   loadCompetencyCourse,
   CourseConflictError,
+  OutdatedAppError,
+  openCourseQuiz,
+  coursePosition,
   logStudyEvent,
   markCourseLessonsRead,
   markCourseReviewShown,
@@ -42,6 +44,7 @@ import {
   type LevelFsmTelemetry,
 } from '@/features/driving-sim';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
+import type { QuizDraw } from '@/domain/assessment/drawQuiz';
 import { getCompetencyLabel } from '@/domain/learner/profile';
 import {
   COMPETENCY_ATTEMPT_CAP,
@@ -111,7 +114,6 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   const [saving, setSaving] = useState(false);
   const [startedRun, setStartedRun] = useState<number | null>(null);
   const startedAt = useRef<number | null>(null);
-  const [quizSeed, setQuizSeed] = useState(() => nextAttemptSeed());
   const attempts = useRef(0);
   const busy = useRef(false);
 
@@ -139,6 +141,11 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       setError(null);
       await action();
     } catch (failure) {
+      if (failure instanceof OutdatedAppError) {
+        // A tab left open across an update: nothing was saved.
+        setError(failure.message);
+        return;
+      }
       if (failure instanceof CourseConflictError) {
         // Another tab, or a second click, moved the course on first: show
         // where the course really is rather than saving this step twice.
@@ -158,7 +165,8 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   /** Plans the drive the cursor is now at, so the briefing can start it. */
   const planDrive = useCallback(
     async (at: CourseCursor) => {
-      const run = await planCourseDrive(uid, at, nextAttemptSeed());
+      // The seed is the one this position's drive was first opened with: a reload plans the same drive.
+      const run = await planCourseDrive(uid, at);
       setPlanned({ attempt: ++attempts.current, run, free: false, forCursor: cursorKey(at) });
       setStartedRun(null);
       return run;
@@ -220,6 +228,10 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
         });
     done
       .catch(async failure => {
+        if (failure instanceof OutdatedAppError) {
+          setResultNote(`${failure.message} This drive was not saved.`);
+          return;
+        }
         if (failure instanceof CourseConflictError) {
           setResultNote('This drive was already saved, or your course moved on in another tab. Continue picks it up where it is.');
         } else {
@@ -233,12 +245,27 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
 
   // --- the briefing gate ---------------------------------------------------------
 
-  const quizDraw = useMemo(
-    () => (cursor && cursor.phase.kind === 'QUIZ' && cursor.quiz ? drawCourseQuiz(cursor, quizSeed) : null),
-    // A new draw per attempt: the attempt number and the remaining competencies change it.
+  // The quiz open at this course position, drawn from the seed it was first
+  // opened with: a reload shows the same items. A new position (the next
+  // attempt) opens a new quiz.
+  const [openQuiz, setOpenQuiz] = useState<{ key: string; draw: QuizDraw } | null>(null);
+  const quizKey = cursor && cursor.phase.kind === 'QUIZ' && cursor.quiz ? coursePosition(cursor) : null;
+  useEffect(() => {
+    if (!quizKey || !cursor) return;
+    let cancelled = false;
+    openCourseQuiz(uid, cursor)
+      .then(draw => !cancelled && setOpenQuiz({ key: quizKey, draw }))
+      .catch(failure => {
+        console.error('Failed to open the quiz:', failure);
+        if (!cancelled) setError('The quiz could not be opened. Check your connection and reload.');
+      });
+    return () => {
+      cancelled = true;
+    };
+    // The position (quizKey) decides the quiz; the cursor object itself changes with it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cursor?.phase.kind, cursor?.quiz?.attempt, cursor?.quiz?.remaining.join(','), quizSeed]
-  );
+  }, [uid, quizKey]);
+  const quizDraw = openQuiz && openQuiz.key === quizKey ? openQuiz.draw : null;
 
   const gate: BriefingGate | null = useMemo(() => {
     if (!cursor || activeLevel === null) return null;
@@ -331,7 +358,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
                 if (submitted.cursor.phase.kind === 'DRIVE') await planDrive(submitted.cursor);
                 return submitted.results;
               },
-              onDone: () => setQuizSeed(nextAttemptSeed()),
+              onDone: () => {},
             }
           : null,
       review,

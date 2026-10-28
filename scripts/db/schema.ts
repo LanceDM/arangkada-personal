@@ -14,7 +14,9 @@
  * bump DATABASE_SCHEMA_VERSION.
  */
 
-export const DATABASE_SCHEMA_VERSION = 2;
+import { bktUpdateId } from '@/domain/study/bktLog';
+
+export const DATABASE_SCHEMA_VERSION = 3;
 
 type Data = Record<string, unknown>;
 type Check = (data: Data, id: string) => string[];
@@ -62,7 +64,7 @@ const envelope: Check = (data, id) => [
 
 const EVENT_TYPES = [
   'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered', 'background_submitted',
-  'drive_planned', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision', 'reward_computed', 'app_error',
+  'drive_planned', 'activity_reopened', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision', 'reward_computed', 'app_error',
 ];
 const SOURCES = ['drive', 'quiz', 'diagnostic', 'post_exam'];
 
@@ -91,6 +93,20 @@ export const SCHEMA: SchemaEntry[] = [
     check: fields({ nextSeq: is.int }),
   },
   {
+    path: 'users/{uid}/state/evidence',
+    description: 'The evidence counter: the next drive\'s or sitting\'s number in BKT\'s order',
+    writer: 'app', writes: 'transaction',
+    source: { kind: 'group', id: 'state', docId: 'evidence' },
+    check: fields({ nextSeq: is.int }),
+  },
+  {
+    path: 'users/{uid}/state/active',
+    description: 'The quiz or drive open now, with its seed: a reload gets the same one',
+    writer: 'app', writes: 'transaction',
+    source: { kind: 'group', id: 'state', docId: 'active' },
+    check: fields({ kind: is.oneOf('quiz', 'drive'), position: is.string, seed: is.int, openedAt: is.number, opens: is.int }),
+  },
+  {
     path: 'users/{uid}/bkt/profile',
     description: 'The participant\'s own BKT now: P(L), level, counts per competency',
     writer: 'app', writes: 'overwrite',
@@ -102,20 +118,20 @@ export const SCHEMA: SchemaEntry[] = [
   },
   {
     path: 'users/{uid}/bktUpdates/{updateId}',
-    description: 'One BKT update per graded answer, with the raw answer and every computed value',
+    description: 'One BKT update per graded answer, with the raw answer and every computed value; id {settings version}_{userSeq}',
     writer: 'app', writes: 'append-only',
     source: { kind: 'group', id: 'bktUpdates' },
-    check: all(envelope, fields({
+    check: all(envelope, (data, id) => (typeof data.configVersion === 'string' && typeof data.userSeq === 'number' && id === bktUpdateId(data.configVersion, data.userSeq) ? [] : ['id is not {settings version}_{userSeq}']), fields({
       userSeq: is.int, competency: is.string, source: is.oneOf(...SOURCES), correct: is.bool, action: is.string, params: is.map,
       pBefore: is.number, predictedCorrect: is.number, posterior: is.number, pAfter: is.number, levelBefore: is.int, levelAfter: is.int,
     })),
   },
   {
     path: 'users/{uid}/attempts/{id}',
-    description: 'One drive: score, every graded decision, timing',
+    description: 'One drive: score, every graded decision, timing; numbered by the evidence counter',
     writer: 'app', writes: 'append-only',
     source: { kind: 'group', id: 'attempts' },
-    check: fields({ levelId: is.int, timestamp: is.number, finalScore: is.number, violations: is.number, correctDecisions: is.number, logs: is.list }),
+    check: fields({ levelId: is.int, timestamp: is.number, finalScore: is.number, violations: is.number, correctDecisions: is.number, logs: is.list, evidenceSeq: is.nullOr(is.int) }),
   },
   {
     path: 'users/{uid}/courseLog/{id}',
@@ -126,10 +142,13 @@ export const SCHEMA: SchemaEntry[] = [
   },
   {
     path: 'users/{uid}/assessmentSittings/{id}',
-    description: 'Quiz, diagnostic and post-exam answers',
+    description: 'Quiz, diagnostic (id `diagnostic`, once) and post-exam answers; numbered by the evidence counter',
     writer: 'app', writes: 'append-only',
     source: { kind: 'group', id: 'assessmentSittings' },
-    check: fields({ schemaVersion: is.oneOf(1), kind: is.oneOf('quiz', 'diagnostic', 'post_exam'), answers: is.list, timestamp: is.number }),
+    check: all(
+      fields({ schemaVersion: is.oneOf(1), kind: is.oneOf('quiz', 'diagnostic', 'post_exam'), answers: is.list, timestamp: is.number, evidenceSeq: is.nullOr(is.int) }),
+      (data, id) => (data.kind === 'diagnostic' && typeof data.evidenceSeq === 'number' && id !== 'diagnostic' ? ['a numbered diagnostic must have the id `diagnostic`'] : [])
+    ),
   },
   {
     path: 'users/{uid}/routing/competencyCourse',
@@ -147,10 +166,10 @@ export const SCHEMA: SchemaEntry[] = [
   },
   {
     path: 'policy/competencyQ',
-    description: 'The shared Q-table, each state\'s phase and tag, the last change',
+    description: 'The shared Q-table (never reset), each state\'s phase and tag, the last change, and each settings version with its first update',
     writer: 'app', writes: 'transaction',
     source: { kind: 'doc', path: 'policy/competencyQ' },
-    check: fields({ schemaVersion: is.oneOf(1), table: is.map, updates: is.int, updatedAt: is.number, states: is.nullOr(is.map) }),
+    check: fields({ schemaVersion: is.oneOf(1), table: is.map, updates: is.int, updatedAt: is.number, states: is.nullOr(is.map), versions: is.nullOr(is.map), configVersion: is.nullOr(is.string) }),
   },
   {
     path: 'policy/competencyQ/updates/{updateId}',

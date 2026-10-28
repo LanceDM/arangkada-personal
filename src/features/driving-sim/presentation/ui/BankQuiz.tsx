@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { AlertCircle, BrainCircuit, CheckCircle2, ClipboardList } from 'lucide-react';
 import type { BankItem } from '@/domain/assessment/questionBank';
 import { getCompetencyLabel } from '@/domain/learner/profile';
+import { CourseConflictError, OutdatedAppError } from '@/features/driving-sim/application/errors';
 
 /** One competency's result on a short quiz attempt. */
 export interface BankQuizResult {
@@ -54,8 +55,12 @@ const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onDone, onClose }: B
       setResults(await onSubmit(final, [...timings.current]));
       setSubmitted(true);
     } catch (failure) {
-      console.error('Failed to save the answers:', failure);
-      setError('Your answers could not be saved. Check your connection and try again.');
+      if (failure instanceof OutdatedAppError) setError(failure.message);
+      else if (failure instanceof CourseConflictError) setError('These answers were already saved, or your course moved on in another tab. Reload the page to continue.');
+      else {
+        console.error('Failed to save the answers:', failure);
+        setError('Your answers could not be saved. Check your connection and try again.');
+      }
     } finally {
       setSaving(false);
     }

@@ -14,3 +14,20 @@ export class CourseConflictError extends Error {
     this.stored = stored;
   }
 }
+
+/**
+ * This copy of the app is older than the one in force: the settings version in
+ * `policy/config`, or the build the site now serves, differs from the one it
+ * was built with (a tab left open across an update). Nothing was written; the
+ * participant reloads to continue on the current version.
+ */
+export class OutdatedAppError extends Error {
+  readonly running: string;
+  readonly current: string;
+  constructor(running: string, current: string) {
+    super('A newer version of Arangkada is available. Reload the page to continue.');
+    this.name = 'OutdatedAppError';
+    this.running = running;
+    this.current = current;
+  }
+}

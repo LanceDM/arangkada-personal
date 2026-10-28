@@ -26,7 +26,13 @@ beforeEach(() => {
   store = memoryCourseStore();
   attempts = [];
   provideDrivingSimDependencies({
-    learnerHistory: { load: async () => ({ source: 'firestore', attempts: attempts.map(a => ({ levelId: a.levelId, timestamp: a.timestamp, logs: a.logs })) }) },
+    // Course drives are saved with their step (commitStep); anything else through storyAttempts.
+    learnerHistory: {
+      load: async uid => ({
+        source: 'firestore',
+        attempts: [...(store.attempts.get(uid ?? '') ?? []), ...attempts].map(a => ({ levelId: a.levelId, timestamp: a.timestamp, logs: a.logs, evidenceSeq: a.evidenceSeq ?? null })),
+      }),
+    },
     storyAttempts: {
       save: async (_uid, attempt) => {
         attempts.push(attempt);
@@ -54,7 +60,7 @@ beforeEach(() => {
 /** A drive's result where every counted scenario of `failing` is answered wrong and every other right. */
 const resultFor = (run: CourseDriveRun, failing: readonly string[] = []): LevelResult => {
   const logs: ActionLog[] = (run.composed?.items ?? []).map((item, i) => ({
-    timestamp: 1_000 + attempts.length * 100 + i,
+    timestamp: 1_000 + (store.attempts.get(UID)?.length ?? 0) * 100 + i,
     action: 'x',
     result: failing.includes(item.competency) ? 'violation' : 'correct',
     points: 0,

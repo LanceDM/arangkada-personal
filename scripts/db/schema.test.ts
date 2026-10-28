@@ -53,13 +53,18 @@ describe('the database schema', () => {
     run_('users/{uid}/bkt/profile', [store.bktProfiles.get(uid)!], () => 'profile');
     run_('policy/competencyQ/updates/{updateId}', store.qUpdates, r => String(r.eventId));
     run_('users/{uid}/courseLog/{id}', store.logs, () => 'x');
-    run_('users/{uid}/assessmentSittings/{id}', store.sittings.get(uid)!, () => 'x');
+    run_('users/{uid}/assessmentSittings/{id}', store.sittings.get(uid)!, r => String(r.id));
+    run_('users/{uid}/attempts/{id}', store.attempts.get(uid)!, () => 'x');
+    run_('users/{uid}/state/active', [store.active.get(uid)!], () => 'active');
     run_('users/{uid}/routing/competencyCourse', [store.cursors.get(uid)!], () => 'competencyCourse');
     expect(problems).toEqual([]);
 
     expect(sequenceProblems('events', store.events.get(uid)!.map(e => e.seq))).toEqual([]);
     expect(sequenceProblems('bkt', store.bktUpdates.get(uid)!.map(e => e.userSeq))).toEqual([]);
     expect(sequenceProblems('q', store.qUpdates.map(e => e.globalSeq))).toEqual([]);
+    const evidence = [...store.attempts.get(uid)!, ...store.sittings.get(uid)!].map(r => r.evidenceSeq);
+    expect(sequenceProblems('evidence', evidence)).toEqual([]);
+    expect(store.evidenceCounters.get(uid)).toBe(evidence.length + 1);
   });
 
   it('reports a gap or a repeat in a log', () => {

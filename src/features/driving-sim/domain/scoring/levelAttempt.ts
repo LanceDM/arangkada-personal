@@ -26,6 +26,8 @@ export interface LevelAttempt {
   reactionLatencies?: ReactionLatency[];
   /** Per-attempt timing (2026-10-28): the course's drives record it. */
   session?: AttemptSession;
+  /** The drive's place in the participant's evidence order (see domain/study/evidence). */
+  evidenceSeq?: number | null;
 }
 
 /** When a drive started and ended, and how long it was held still at decisions. */

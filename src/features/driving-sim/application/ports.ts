@@ -39,6 +39,8 @@ export interface LearnerAttempt {
    * absent where the source cannot say.
    */
   passed?: boolean;
+  /** The record's place in the participant's evidence order (see domain/study/evidence). */
+  evidenceSeq?: number | null;
 }
 
 export type HistorySource = 'firestore' | 'local';
@@ -147,6 +149,25 @@ export interface CourseStep {
   log: Omit<CourseLogEntry, 'decisions' | 'rewards' | 'tableAfter'> | null;
 }
 
+/** A record of graded answers saved by a step: a drive, or a quiz, diagnostic or post-exam sitting. */
+export type EvidenceWrite =
+  | { kind: 'attempt'; id: string; attempt: LevelAttempt }
+  | { kind: 'sitting'; id: string; sitting: AssessmentSitting };
+
+/**
+ * The quiz or drive a participant has open, kept so that a reload gives the
+ * same quiz items or the same drive back. `position` is the fingerprint of the
+ * course position it was opened at; it no longer matches once the step is saved.
+ */
+export interface ActiveActivity {
+  kind: 'quiz' | 'drive';
+  position: string;
+  seed: number;
+  openedAt: number;
+  /** How many times it was opened: more than 1 means a reload or a second tab. */
+  opens: number;
+}
+
 export interface CompetencyCourseRepository {
   loadCursor(uid: string): Promise<CourseCursor | null>;
   /** The shared Q-table; empty until the first participant's first decision. */
@@ -160,8 +181,13 @@ export interface CompetencyCourseRepository {
    * 3. runs `compute` on the newest table, so every decision is chosen from the
    *    table as it is at that moment (it may run again if the table changes
    *    under it, and must be pure apart from its random draws);
-   * 4. writes the table with its update log (`globalSeq` from the table's own
-   *    counter), the course-log entry, and the new cursor, all or nothing.
+   * 4. writes the step's own record (the drive or the sitting, under its fixed
+   *    id, numbered by the participant's evidence counter), the table with its
+   *    update log (`globalSeq` from the table's own counter), the course-log
+   *    entry, and the new cursor, all or nothing.
+   *
+   * Refuses with OutdatedAppError, writing nothing, when the settings version
+   * in force (`policy/config`) is not the one this app was built with.
    */
   commitStep(
     uid: string,
@@ -170,8 +196,21 @@ export interface CompetencyCourseRepository {
       compute: (table: QTable) => CourseStep;
       context: QLogContext;
       envelope: (index: number) => StudyEnvelope;
+      evidence?: EvidenceWrite | null;
     }
-  ): Promise<{ step: CourseStep; entries: QLogEntry[]; table: QTable }>;
+  ): Promise<{ step: CourseStep; entries: QLogEntry[]; table: QTable; evidenceSeq: number | null }>;
+  /**
+   * Saves a record that moves no course step (the diagnostic, a free replay)
+   * under its id, numbered by the evidence counter, in one transaction.
+   * Returns 'exists' and writes nothing when a record with that id is already
+   * saved. Refuses with OutdatedAppError like commitStep.
+   */
+  saveEvidence(uid: string, evidence: EvidenceWrite): Promise<'saved' | 'exists'>;
+  /**
+   * The quiz or drive open at `position`: the one already open there if there
+   * is one (its open count raised), otherwise `fresh` opened now.
+   */
+  openActivity(uid: string, fresh: Omit<ActiveActivity, 'opens'>): Promise<ActiveActivity>;
 }
 
 /** One sitting of a quiz attempt, the diagnostic or the post-exam: its answers as graded logs. */
@@ -184,6 +223,10 @@ export interface AssessmentSitting {
   /** The post-exam's Rasch ability and its standard error. */
   ability?: { theta: number; se: number };
   timestamp: number;
+  /** The sitting's place in the participant's evidence order (see domain/study/evidence). */
+  evidenceSeq?: number | null;
+  /** The sitting's id in the store. */
+  id?: string;
 }
 
 /** `users/{uid}/study/background`: the background form, written once. */
@@ -193,9 +236,8 @@ export interface BackgroundFormRepository {
 }
 
 export interface AssessmentRepository {
-  /** Every sitting, oldest first. */
+  /** Every sitting, oldest first. Sittings are saved through CompetencyCourseRepository, with their step. */
   load(uid: string): Promise<AssessmentSitting[]>;
-  save(uid: string, sitting: AssessmentSitting): Promise<void>;
 }
 
 /**
@@ -210,5 +252,10 @@ export interface StudyEventRepository {
 /** `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates`: the participant's own BKT, written together. */
 export interface BKTLogRepository {
   loadProfile(uid: string): Promise<BKTProfileDoc | null>;
-  record(uid: string, profile: BKTProfileDoc, entries: readonly BKTUpdateRecord[]): Promise<void>;
+  /**
+   * Writes the entries under their fixed ids (`{settings version}_{userSeq}`)
+   * and the profile, only if none of the entries is there yet: when two tabs
+   * bring the log up to date at once, one writes and the other is skipped.
+   */
+  record(uid: string, profile: BKTProfileDoc, entries: readonly BKTUpdateRecord[]): Promise<'written' | 'skipped'>;
 }

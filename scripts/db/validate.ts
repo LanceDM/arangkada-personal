@@ -3,7 +3,8 @@
  *
  * Runs the schema (scripts/db/schema.ts) through the database: reads every
  * document of every path, checks its shape, then checks that the logs are
- * whole: each participant's events and BKT updates numbered 1, 2, 3..., the
+ * whole: each participant's events, BKT updates and evidence (drives and
+ * sittings) numbered 1, 2, 3..., the
  * BKT profile's count equal to its log, the Q-table's update count equal to
  * its log, and `policy/config` equal to the settings in code.
  *
@@ -60,6 +61,17 @@ const main = async () => {
     problems.push(...sequenceProblems(`BKT updates of ${uid}`, current.map(d => d.get('userSeq'))));
     const counted = profiles.get(uid)?.get('updates');
     if (counted !== current.length) problems.push(`BKT profile of ${uid} counts ${counted} updates; the log has ${current.length}`);
+  }
+
+  // Each participant's drives and sittings are numbered 1, 2, 3... by their evidence counter.
+  const counters = new Map((byPath.get('users/{uid}/state/evidence') ?? []).map(d => [ownerOf(d), d.get('nextSeq') as number]));
+  const records = groupBy([...(byPath.get('users/{uid}/attempts/{id}') ?? []), ...(byPath.get('users/{uid}/assessmentSittings/{id}') ?? [])]);
+  for (const [uid, docs] of records) {
+    const numbered = docs.map(d => d.get('evidenceSeq')).filter((v): v is number => typeof v === 'number');
+    problems.push(...sequenceProblems(`evidence of ${uid}`, numbered));
+    if (numbered.length > 0 && counters.get(uid) !== numbered.length + 1) {
+      problems.push(`evidence counter of ${uid} is ${counters.get(uid)}; ${numbered.length} numbered records`);
+    }
   }
 
   // The shared table's counter equals its log.

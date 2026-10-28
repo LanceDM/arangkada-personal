@@ -54,8 +54,9 @@ export {
   completeFreeReplayDrive,
   completePostExam,
   diagnosticItems,
-  drawCourseQuiz,
   finishCourseQuizReview,
+  openCourseQuiz,
+  coursePosition,
   loadCompetencyCourse,
   markCourseLessonsRead,
   markCourseReviewShown,
@@ -68,7 +69,7 @@ export {
   submitCourseQuiz,
 } from './application/use-cases/competencyCourse';
 export type { CourseDriveRun, CourseState } from './application/use-cases/competencyCourse';
-export { CourseConflictError } from './application/errors';
+export { CourseConflictError, OutdatedAppError } from './application/errors';
 export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';
 // In-memory ports, for tests that click through the course from outside the feature.
 export { memoryCourseStore, provideInMemoryDrivingSim } from './application/testDependencies';

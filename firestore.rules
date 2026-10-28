@@ -17,6 +17,8 @@ rules_version = '2';
 //   users/{uid}/study/background                   BackgroundResponse: the background form (muted by default)
 //   users/{uid}/events/{eventId}                   StudyEvent: the participant's event stream, append-only
 //   users/{uid}/state/events                       { nextSeq }: the event stream's counter
+//   users/{uid}/state/evidence                     { nextSeq }: numbers each drive and sitting (BKT's order)
+//   users/{uid}/state/active                       the quiz or drive open now, with its seed
 //   users/{uid}/bkt/profile                        BKTProfileDoc: the participant's own BKT now
 //   users/{uid}/bktUpdates/{updateId}              BKTUpdateRecord: one per graded answer, append-only
 //   policy/competencyQ                             the shared Q-table, learned online by every participant
@@ -208,6 +210,15 @@ service cloud.firestore {
         && data.timestamp is number;
     }
 
+    function isActiveActivity(data) {
+      return data.keys().hasAll(['kind', 'position', 'seed', 'openedAt', 'opens'])
+        && data.kind in ['quiz', 'drive']
+        && data.position is string
+        && data.seed is int
+        && data.openedAt is number
+        && data.opens is int && data.opens >= 1;
+    }
+
     function isAssessmentSitting(data) {
       return data.keys().hasAll(['schemaVersion', 'kind', 'answers', 'timestamp'])
         && data.schemaVersion == 1
@@ -240,7 +251,7 @@ service cloud.firestore {
         && data.keys().hasAll(['type', 'seq', 'payload'])
         && data.type in [
           'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered',
-          'background_submitted', 'drive_planned', 'decision_made', 'drive_ended',
+          'background_submitted', 'drive_planned', 'activity_reopened', 'decision_made', 'drive_ended',
           'verdict_computed', 'policy_decision', 'reward_computed', 'app_error'
         ]
         && (data.seq == null || data.seq is int)
@@ -271,7 +282,24 @@ service cloud.firestore {
         && data.keys().hasAll(['globalSeq', 'kind', 'stateKey', 'action', 'tableAfter', 'statesAfter'])
         && data.globalSeq is int
         && data.kind in ['visit', 'learn']
+        && data.configVersion == settingsInForce()
         && data.tableAfter is map;
+    }
+
+    // The settings version in force: written by `npm run db:init` only.
+    function settingsInForce() {
+      return get(/databases/$(database)/documents/policy/config).data.tag;
+    }
+
+    // A record of graded answers (a drive or a sitting) is numbered by the
+    // participant's evidence counter, moved on in the same transaction.
+    // Records from before the counter carry no number.
+    function isNumberedEvidence(uid, data) {
+      let counter = /databases/$(database)/documents/users/$(uid)/state/evidence;
+      return !data.keys().hasAny(['evidenceSeq'])
+        || (data.evidenceSeq is int
+          && existsAfter(counter)
+          && getAfter(counter).data.nextSeq == data.evidenceSeq + 1);
     }
 
     function isLoggedTableChange(previousUpdates) {
@@ -281,6 +309,9 @@ service cloud.firestore {
         && next.lastUpdate is map
         && next.lastUpdate.uid == request.auth.uid
         && next.lastUpdate.globalSeq == next.updates
+        // Only the settings in force may change the shared table: a tab left
+        // open across a settings change cannot write with the old ones.
+        && next.lastUpdate.configVersion == settingsInForce()
         && existsAfter(entryPath)
         && getAfter(entryPath).data.globalSeq == next.updates
         && getAfter(entryPath).data.uid == request.auth.uid;
@@ -351,7 +382,7 @@ service cloud.firestore {
 
       match /attempts/{attemptId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data);
+        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
         allow update, delete: if false; // append-only, never rewrite history
 
         // The raw FSM transition log, the per-decision record and the routing
@@ -413,10 +444,14 @@ service cloud.firestore {
 
       match /state/{docId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && docId == 'events'
-          && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1;
-        allow update: if isOwner(uid) && docId == 'events'
-          && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq;
+        // The event and evidence counters only move forward; `active` is the
+        // quiz or drive open now (its seed, so a reload gets the same one).
+        allow create: if isOwner(uid)
+          && ((docId in ['events', 'evidence'] && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1)
+            || (docId == 'active' && isActiveActivity(request.resource.data)));
+        allow update: if isOwner(uid)
+          && ((docId in ['events', 'evidence'] && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq)
+            || (docId == 'active' && isActiveActivity(request.resource.data)));
         allow delete: if false;
       }
 
@@ -437,7 +472,7 @@ service cloud.firestore {
       // Quiz, diagnostic and post-exam answers, append-only; BKT reads all of them.
       match /assessmentSittings/{sittingId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isAssessmentSitting(request.resource.data);
+        allow create: if isOwner(uid) && isAssessmentSitting(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
         allow update, delete: if false;
       }
 

@@ -114,6 +114,10 @@ export const emptyBKTProfile = (uid: string, configVersion: string, at: number, 
  * logged (those past `alreadyLogged`). Replaying from the start each time keeps
  * the profile and the log equal to what the raw answers say.
  */
+/** A BKT log entry's fixed id: its settings version and its place in the participant's log. */
+export const bktUpdateId = (configVersion: string, userSeq: number): string =>
+  `${configVersion.replace(/[^A-Za-z0-9-]+/g, '-')}_${String(userSeq).padStart(6, '0')}`;
+
 export const buildBKTLog = (input: {
   uid: string;
   logs: readonly ActionLog[];
@@ -153,6 +157,8 @@ export const buildBKTLog = (input: {
     const envelope = input.envelope(entries.length);
     entries.push({
       ...envelope,
+      // A fixed id: the same entry written twice lands on the same document.
+      eventId: bktUpdateId(input.configVersion, i + 1),
       uid: input.uid,
       userSeq: i + 1,
       competency: step.competency,
