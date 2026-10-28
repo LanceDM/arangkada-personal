@@ -12,6 +12,8 @@ import CheckpointInspection from '@/features/driving-sim/presentation/ui/decisio
 import RoadDecision from '@/features/driving-sim/presentation/ui/decisions/RoadDecision';
 import EmergencyDecision from '@/features/driving-sim/presentation/ui/decisions/EmergencyDecision';
 import ParkingDecision from '@/features/driving-sim/presentation/ui/decisions/ParkingDecision';
+import QuestionTimer from '@/features/driving-sim/presentation/ui/decisions/QuestionTimer';
+import { IN_DRIVE_QUESTION_LIMIT_SEC } from '@/domain/learner/stageCompetencies';
 import GarageStage from './GarageStage';
 import CrashResponseStage from './stage/CrashResponseStage';
 import { nextAttemptSeed } from '@/features/driving-sim/application/attemptSeed';
@@ -191,6 +193,7 @@ const GameScreen = ({
     jolted,
     answerInspection,
     answerCutscene,
+    timeoutQuestion,
     playParking,
     playRightOfWay,
     dismissAdaptationNotice,
@@ -244,6 +247,11 @@ const GameScreen = ({
     holdingForCorrection,
     weakCompetency,
   } = drive;
+
+  // Which emergency question has its answer picked and playing out: its clock
+  // is held from then on. Keyed by the event, so the next question starts clean.
+  const [emergencyChosenId, setEmergencyChosenId] = useState<string | null>(null);
+  const emergencyChosen = cutsceneEvent !== null && cutsceneEvent !== undefined && emergencyChosenId === cutsceneEvent.id;
 
   // Whether the screen may mark the response the active scenario is graded on:
   // the lane strip's wanted lane, and the lane and speed a merge asks for. The
@@ -682,6 +690,16 @@ const GameScreen = ({
         <ScenarioBriefing event={briefingEvent} support={support} onContinue={dismissBriefing} />
       )}
 
+      {/* The in-drive question's clock: one per question, held once the answer is chosen and playing out. */}
+      {(inspectionEvent ?? cutsceneEvent) && (
+        <QuestionTimer
+          key={(inspectionEvent ?? cutsceneEvent)!.id}
+          limitSec={IN_DRIVE_QUESTION_LIMIT_SEC}
+          paused={Boolean(adaptationNotice) || rightOfWayPlayed || parkingPlayed || emergencyChosen}
+          onExpire={timeoutQuestion}
+        />
+      )}
+
       {inspectionEvent && (
         <CheckpointInspection
           event={inspectionEvent}
@@ -694,6 +712,7 @@ const GameScreen = ({
         <EmergencyDecision
           event={emergencyCutsceneEvent}
           onAnswer={answerCutscene}
+          onChoose={() => setEmergencyChosenId(emergencyCutsceneEvent.id)}
           choiceSeed={choiceSeed}
           hintText={
             emergencyCutsceneEvent.competency === weakCompetency

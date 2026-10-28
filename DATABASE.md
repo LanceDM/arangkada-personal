@@ -41,7 +41,7 @@ One document per thing that happened, numbered 1, 2, 3... per participant (`seq`
 | `item_answered` | Each quiz, diagnostic or post-exam item | Item, position, choice, expected, correct, response ms |
 | `sitting_submitted` | Each sitting | Kind, attempt, items, correct |
 | `drive_planned` | A course drive is composed | Seed, counted scenarios and where each came from, route, shortfall |
-| `decision_made` | Each graded decision in a drive (course, final, free replay) | Scenario, rule, competency, action, expected, result, points, reaction ms, timed out |
+| `decision_made` | Each graded decision in a drive (course, final, free replay) | Scenario and its format, rule, competency, action, expected, result, points, reaction ms, timed out, question timed out |
 | `drive_ended` | Each drive | Completed, score, crash reason, end reason, start and end time |
 | `verdict_computed` | Each competency in a drive | Counted, correct, passed, the rule, the scenarios |
 | `policy_decision` | Each routing decision | State, legal actions, Q and visits per action, probabilities, random draw, chosen action, warm-up phase, explore/exploit/forced, Q-log id |
@@ -52,7 +52,7 @@ One document per thing that happened, numbered 1, 2, 3... per participant (`seq`
 
 The profile is the participant's BKT now: for each of the 11 competencies, P(L), level, whether the 3-drive-answer cap holds it below level 4, the starting P(L) after the diagnostic, and answers and correct answers per item class. It is rebuilt from every saved answer after each graded action, so it always equals what the answers say.
 
-Each update entry (one per graded answer, `userSeq` 1, 2, 3...) holds: the source (item class, stage, scenario or question, rule), the raw answer and the expected one, response time, the T, S and G used, P(L) before, predicted P(correct), the posterior, P(L) after, level before and after, and all 11 P(L) values after. When the settings version changes, the whole history is replayed into new entries under the new version; the old entries stay.
+Each update entry (one per graded answer, `userSeq` 1, 2, 3...) holds: the source (item class, stage, scenario or question, rule), the raw answer and the expected one, response time, the T, S and G used, P(L) before, predicted P(correct), the posterior, P(L) after, level before and after, and all 11 P(L) values after. When the settings version changes, the whole history is replayed into new entries under the new version; the old entries stay. An in-drive question that ran out of time (30 s, Tentative) fails its scenario but has no BKT entry: it is logged as `decision_made` with `questionTimedOut`.
 
 ### The shared Q-table: `policy/competencyQ` and `policy/competencyQ/updates/{updateId}`
 

@@ -22,11 +22,12 @@ import {
   QUIZ_ITEMS_PER_COMPETENCY,
   QUIZ_PASS_CORRECT,
   STAGE_COMPETENCIES,
+  IN_DRIVE_QUESTION_LIMIT_SEC,
 } from '@/domain/learner/stageCompetencies';
 import { BACKGROUND_FORM_ENABLED, BACKGROUND_FORM_VERSION } from './backgroundForm';
 
 /** Bump when any value below changes: `<date><letter>`. */
-export const RUN_CONFIG_VERSION = '2026-10-28a';
+export const RUN_CONFIG_VERSION = '2026-10-28b';
 
 export const RUN_CONFIG = {
   bktModel: DEFAULT_BKT_MODEL,
@@ -44,6 +45,8 @@ export const RUN_CONFIG = {
     quizPassCorrect: QUIZ_PASS_CORRECT,
     quizAttemptCap: QUIZ_ATTEMPT_CAP,
     diagnosticItemsPerCompetency: DIAGNOSTIC_ITEMS_PER_COMPETENCY,
+    inDriveQuestionLimitSec: IN_DRIVE_QUESTION_LIMIT_SEC,
+    timedOutQuestionsInBKT: false,
   },
   stageCompetencies: STAGE_COMPETENCIES,
   backgroundForm: { enabled: BACKGROUND_FORM_ENABLED, version: BACKGROUND_FORM_VERSION },

@@ -25,6 +25,13 @@ export interface ActionLog {
    * only when true, like the provenance fields below.
    */
   reactionCensored?: true;
+  /**
+   * An in-drive question (checkpoint, right-of-way, emergency, parking) whose
+   * time limit ran out before it was answered. The scenario counts as not
+   * passed, but BKT does not read the answer: running out of time is not
+   * evidence about the rule (Lance, 2026-10-28). Written only when true.
+   */
+  questionTimedOut?: true;
   ruleId?: string;
   /** One of the 11 competencies: a misspelled tag fails to compile instead of being dropped by BKT. */
   competency?: DrivingCompetency;

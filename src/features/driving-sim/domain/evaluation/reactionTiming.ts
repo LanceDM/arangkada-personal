@@ -21,6 +21,11 @@ export type DecisionSettlement =
   | 'lapse'
   /** Answered at a prompt the drive froze for: a checkpoint, a cutscene, a parking decision. */
   | 'question'
+  /**
+   * The same prompt, not answered within its time limit (TENTATIVE 30 s):
+   * graded as not passed, logged with `questionTimedOut`, and never read by BKT.
+   */
+  | 'question_timeout'
   /** A tutorial step, completed or not while its instruction was on screen. */
   | 'guided';
 

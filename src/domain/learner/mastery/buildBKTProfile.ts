@@ -120,8 +120,12 @@ const asModel = (params: BKTModel | BKTParams): BKTModel =>
         post_exam: { ...params, pTransit: 0 },
       };
 
-/** Whether a log is graded evidence BKT reads: a tagged, non-neutral answer from a source that feeds the model. */
+/**
+ * Whether a log is graded evidence BKT reads: a tagged, non-neutral answer.
+ * A question whose time ran out is not evidence (it still fails its scenario).
+ */
 const isBKTEvidence = (log: ActionLog): log is ActionLog & { competency: DrivingCompetency } =>
+  !log.questionTimedOut &&
   !!log.competency &&
   (COMPETENCIES as string[]).includes(log.competency) &&
   log.result !== 'neutral';

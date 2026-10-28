@@ -7,6 +7,8 @@ import { useChoiceOrder } from './useChoiceOrder';
 interface EmergencyDecisionProps {
   event: ScenarioEvent;
   onAnswer: (action: string) => void;
+  /** Called the moment an answer is picked, before it plays out (stops the question's clock). */
+  onChoose?: () => void;
   /** Shown before the player answers, only when this event matches their current weak competency. */
   hintText?: string;
   /**
@@ -346,7 +348,7 @@ const DIAGRAMS: Record<EmergencyKind, (props: DiagramProps) => ReactElement> = {
  * dismissed the verdict — so the score, the FSM transition and the car being
  * released all happen after the consequence has been watched.
  */
-const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyDecisionProps) => {
+const EmergencyDecision = ({ event, onAnswer, onChoose, hintText, choiceSeed }: EmergencyDecisionProps) => {
   const [phase, setPhase] = useState<Phase>('deciding');
   const [chosen, setChosen] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -377,7 +379,8 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
   const choose = useCallback((action: string) => {
     setChosen(action);
     setPhase('resolving');
-  }, []);
+    onChoose?.();
+  }, [onChoose]);
 
   const commit = useCallback(() => {
     if (chosen !== null) onAnswer(chosen);

@@ -19,6 +19,7 @@ import {
   completeFreeReplayDrive,
   completePostExam,
   diagnosticItems,
+  drivePreview,
   drawCourseQuiz,
   finishCourseQuizReview,
   loadCompetencyCourse,
@@ -225,6 +226,9 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       return {
         lessonsRead: true, onLessonsRead: async () => {}, quiz: null, hasQuiz: false, quizPassed: true, review: null,
         canDrive: true, driveDetail: 'A replay outside your course', notes: ['A replay of a finished stage: it does not move your course.'],
+        preview: planned.run.plan.level
+          ? drivePreview(planned.run.plan.level, planned.run.composed ? new Set(planned.run.composed.items.map(item => item.scenarioId)) : undefined)
+          : null,
       };
     }
     const { phase } = cursor;
@@ -312,6 +316,13 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
           : null,
       review,
       canDrive: drivePhase && planned !== null && planned.run.levelId === activeLevel && review === null,
+      preview:
+        planned && planned.run.levelId === activeLevel && planned.run.plan.level
+          ? drivePreview(
+              planned.run.plan.level,
+              planned.run.composed ? new Set(planned.run.composed.items.map(item => item.scenarioId)) : undefined
+            )
+          : null,
       driveDetail: planned?.run.composed
         ? `${planned.run.composed.items.length} scenarios: 3 per competency${phase.kind === 'FINAL' ? '' : ', 2 of 3 to pass each'}`
         : `${planned?.run.plan.level?.events.length ?? 0} road events`,

@@ -379,6 +379,27 @@ export class DrivingSession {
     return events;
   }
 
+  /**
+   * The open in-drive question ran out of time (TENTATIVE 30 s): settled as
+   * not passed, with no answer. Idempotent; does nothing once answered.
+   */
+  timeoutQuestion(): GameEvent[] {
+    const { world } = this;
+    const event = world.inspectionEvent ?? world.cutsceneEvent;
+    if (!event) return [];
+    if (world.inspectionEvent) world.inspectionEvent = null;
+    else {
+      world.cutsceneEvent = null;
+      world.parkingPlayed = false;
+      world.rightOfWayPlayed = false;
+      world.rightOfWay = null;
+    }
+    this.syncPaused();
+    const events: GameEvent[] = [];
+    this.decide(events, event, 'timeout', 'question_timeout');
+    return events;
+  }
+
   /** Player answered a right-of-way, parking or emergency call. */
   answerCutscene(action: string): GameEvent[] {
     const { world } = this;

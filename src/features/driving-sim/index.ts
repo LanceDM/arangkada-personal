@@ -83,3 +83,7 @@ export { BACKGROUND_QUESTIONS, isCompleteBackground } from '@/domain/study/backg
 export type { BackgroundQuestion } from '@/domain/study/backgroundForm';
 export type { SurveyResponse, SurveyInstrument } from '@/domain/study/survey';
 export { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
+export { drivePreview } from './domain/scenario/drivePreview';
+export type { DrivePreview, PreviewScenario } from './domain/scenario/drivePreview';
+export { scenarioFormat, SCENARIO_FORMAT_LABEL } from './domain/scenario/scenarioFormat';
+export type { ScenarioFormat } from './domain/scenario/scenarioFormat';

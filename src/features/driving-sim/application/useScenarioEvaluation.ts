@@ -135,13 +135,24 @@ export const useScenarioEvaluation = ({
     // Only a scenario answered with the car was presented at a support level;
     // a question, a tutorial step and a standing penalty were not.
     const presented = !isStandingPenalty && answeredWithTheCar(settlement);
-    const result = evaluatePlayerAction(
+    const evaluated = evaluatePlayerAction(
       event,
       playerAction,
       isStandingPenalty ? 0 : violationStreakRef.current,
       reaction,
       presented ? support : undefined
     );
+    // A question whose time ran out fails its scenario like a wrong answer,
+    // and is flagged so BKT leaves it out (TENTATIVE).
+    const timedOut = settlement === 'question_timeout';
+    const result = timedOut
+      ? {
+          ...evaluated,
+          isCorrect: false,
+          message: 'Time ran out before an answer: counted as not passed.',
+          log: { ...evaluated.log, result: 'violation' as const, questionTimedOut: true as const },
+        }
+      : evaluated;
 
     // The level's requiredScore/stars thresholds were calibrated against its
     // own authored events, and a practice item is appended on some runs and

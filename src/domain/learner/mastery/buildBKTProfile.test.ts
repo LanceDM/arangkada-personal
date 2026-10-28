@@ -66,6 +66,11 @@ describe('BKT with separate guess and slip per item class', () => {
     }
   });
 
+  it('never reads a question whose time ran out', () => {
+    const mastery = buildBKTProfile([log('right_of_way', false, { questionTimedOut: true })]);
+    expect(mastery.right_of_way).toBe(DEFAULT_BKT_MODEL.pInit);
+  });
+
   it('never reads neutral logs or untagged logs', () => {
     const mastery = buildBKTProfile([
       { ...log('parking', true), result: 'neutral' },

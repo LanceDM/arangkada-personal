@@ -23,6 +23,9 @@ import { useBriefing } from '@/features/driving-sim/application/useBriefing';
 import LessonReader from './LessonReader';
 import MissionQuiz from './MissionQuiz';
 import BankQuiz, { type BankQuizResult } from './BankQuiz';
+import DriveOverview from './DriveOverview';
+import type { DrivePreview } from '@/features/driving-sim/domain/scenario/drivePreview';
+import { IN_DRIVE_QUESTION_LIMIT_SEC } from '@/domain/learner/stageCompetencies';
 import type { BankItem } from '@/domain/assessment/questionBank';
 import type { Lesson } from '@/features/driving-sim/domain/scenario/lessonModule';
 
@@ -49,6 +52,8 @@ export interface BriefingGate {
   review: { title: string; lessons: Lesson[]; onDone: () => Promise<void> } | null;
   canDrive: boolean;
   driveDetail: string;
+  /** The planned drive's setting and scenarios, shown before it starts. */
+  preview: DrivePreview | null;
   /** Short lines for the course panel. */
   notes: string[];
 }
@@ -110,6 +115,8 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
     markQuizPassed,
   } = useBriefing(level.moduleId);
   const [showReview, setShowReview] = useState(false);
+  // The drive's overview, opened by the Drive step before the drive starts.
+  const [showOverview, setShowOverview] = useState(false);
   // The attempt being sat, held while it is open: submitting it moves the
   // cursor (and the gate's quiz) on before its results are shown.
   const [activeQuiz, setActiveQuiz] = useState<NonNullable<BriefingGate['quiz']> | null>(null);
@@ -164,7 +171,7 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
       active: gate.canDrive,
       disabled: !gate.canDrive,
       actionText: 'Drive',
-      onClick: onStartGame,
+      onClick: () => (gate.preview ? setShowOverview(true) : onStartGame()),
       icon: Route,
     },
   ];
@@ -459,6 +466,18 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
           </aside>
         </div>
       </div>
+
+      {showOverview && gate?.preview && (
+        <DriveOverview
+          preview={gate.preview}
+          questionLimitSec={IN_DRIVE_QUESTION_LIMIT_SEC}
+          onClose={() => setShowOverview(false)}
+          onStart={() => {
+            setShowOverview(false);
+            onStartGame();
+          }}
+        />
+      )}
 
       {activeQuiz && (
         <BankQuiz

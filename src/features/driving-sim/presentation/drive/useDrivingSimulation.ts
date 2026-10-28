@@ -103,6 +103,8 @@ export interface DrivingSimulation {
   jolted: boolean;
   answerInspection: (action: string) => void;
   answerCutscene: (action: string) => void;
+  /** The open in-drive question's time limit ran out. */
+  timeoutQuestion: () => void;
   playParking: (action: string) => void;
   playRightOfWay: (action: string) => void;
   /** Player has read the scenario and released the drive. */
@@ -319,6 +321,7 @@ export const useDrivingSimulation = ({
     jolted,
     answerInspection: useCallback((action: string) => handle(session.answerInspection(action)), [handle, session]),
     answerCutscene: useCallback((action: string) => handle(session.answerCutscene(action)), [handle, session]),
+    timeoutQuestion: useCallback(() => handle(session.timeoutQuestion()), [handle, session]),
     playParking: useCallback((action: string) => session.playParking(action), [session]),
     playRightOfWay: useCallback((action: string) => session.playRightOfWay(action), [session]),
     dismissAdaptationNotice: useCallback(

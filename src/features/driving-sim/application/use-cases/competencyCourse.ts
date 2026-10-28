@@ -48,6 +48,7 @@ import { drivingSimDeps } from '../dependencies';
 import { envelopeFor, recordBKT, recordEvents } from '../studyRecorder';
 import { pairQOperations, type QLogContext, type QLogEntry } from '@/domain/study/qLog';
 import type { StudyEventDraft } from '@/domain/study/studyEvent';
+import { scenarioFormat, type ScenarioFormat } from '@/features/driving-sim/domain/scenario/scenarioFormat';
 import { isLikert, type SurveyResponse } from '@/domain/study/survey';
 import type { DecisionRecord, QOperation, RewardRecord } from '@/domain/competencyRouting/course';
 import type { QTable } from '@/domain/competencyRouting/qLearning';
@@ -213,11 +214,20 @@ const sittingEvents = (
   },
 ];
 
+/** Every scenario of a level by id, with its format: road events, garage and aftermath points. */
+const formatsOf = (level: LevelConfig | null | undefined): Map<string, ScenarioFormat> =>
+  new Map<string, ScenarioFormat>([
+    ...(level?.events ?? []).map(event => [event.id, scenarioFormat(event)] as const),
+    ...(level?.garage?.hotspots ?? []).map(point => [point.scenarioId ?? point.id, scenarioFormat({}, 'garage')] as const),
+    ...(level?.aftermath?.hotspots ?? []).map(point => [point.scenarioId ?? point.id, scenarioFormat({}, 'aftermath')] as const),
+  ]);
+
 /** One event per graded decision a drive logged, then the drive's end. */
 const driveEvents = (
   result: LevelResult,
   context: { levelId: number; phase: string | null; attemptId: string | null },
-  ended: Record<string, unknown>
+  ended: Record<string, unknown>,
+  formats: Map<string, ScenarioFormat> = new Map()
 ): StudyEventDraft[] => [
   ...result.logs.map(log => ({
     type: 'decision_made' as const,
@@ -227,6 +237,7 @@ const driveEvents = (
     attemptId: context.attemptId,
     payload: {
       scenarioId: log.scenarioId ?? null,
+      format: log.scenarioId ? formats.get(log.scenarioId) ?? null : null,
       ruleId: log.ruleId ?? null,
       competency: log.competency ?? null,
       action: log.action,
@@ -235,6 +246,7 @@ const driveEvents = (
       points: log.points,
       reactionMs: log.reactionTime ?? null,
       timedOut: log.reactionCensored === true,
+      questionTimedOut: log.questionTimedOut === true,
       severity: log.severity ?? null,
       weight: log.weight ?? null,
       support: log.support ?? null,
@@ -442,7 +454,7 @@ export const planCourseDrive = async (uid: string, cursor: CourseCursor, attempt
       phase: phaseId(phase),
       payload: {
         attemptSeed,
-        counted: composed?.items.map(item => ({ ...item })) ?? [],
+        counted: composed?.items.map(item => ({ ...item, format: formatsOf(level).get(item.scenarioId) ?? null })) ?? [],
         structural: composed?.structural ?? [],
         shortfall: composed?.shortfall ?? {},
         route: level.events.map(event => event.id),
@@ -549,7 +561,7 @@ export const completeCourseDrive = async ({
   // The tutorial: no verdicts, no decisions.
   if (!run.composed) {
     const outcome = driveCompleted(cursor, { measurements: [], scenarioIds, table: {}, rng: Math.random, now });
-    await recordEvents(uid, driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now }));
+    await recordEvents(uid, driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now }, formatsOf(level)));
     await moveCursor(uid, cursor, outcome.cursor, 'drive_completed');
     return { cursor: outcome.cursor, verdicts: [], lines: [], note: 'Tutorial done. Continue to Level 1.' };
   }
@@ -557,7 +569,7 @@ export const completeCourseDrive = async ({
   const verdicts = competencyVerdicts(run.composed.items, result.logs);
   const where = { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId };
   await recordEvents(uid, [
-    ...driveEvents(result, where, { startedAt: startedAt ?? null, endedAt: now, routeLength: level.roadLength }),
+    ...driveEvents(result, where, { startedAt: startedAt ?? null, endedAt: now, routeLength: level.roadLength }, formatsOf(level)),
     ...verdicts.map(v => ({
       type: 'verdict_computed' as const,
       ...where,

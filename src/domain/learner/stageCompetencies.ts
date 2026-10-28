@@ -44,6 +44,13 @@ export const QUIZ_PASS_CORRECT = 2;
 /** Short-quiz attempts before the learner is sent to review the module. */
 export const QUIZ_ATTEMPT_CAP = 3;
 
+/**
+ * TENTATIVE: seconds to answer an in-drive question (checkpoint, right-of-way,
+ * emergency, parking). Running out fails the scenario without updating BKT.
+ * The garage (pre-drive) and aftermath (post-drive) questions are untimed.
+ */
+export const IN_DRIVE_QUESTION_LIMIT_SEC = 30;
+
 /** Diagnostic pre-test items per competency (55 for the 11). */
 export const DIAGNOSTIC_ITEMS_PER_COMPETENCY = 5;
 
