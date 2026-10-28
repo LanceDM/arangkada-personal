@@ -8,13 +8,7 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { provideDrivingSimDependencies } from '@/features/driving-sim/application/dependencies';
-import {
-  memoryAssessments,
-  memoryCompetencyCourse,
-  memoryCourseStore,
-  type MemoryCourseStore,
-} from '@/features/driving-sim/application/testDependencies';
+import { memoryCourseStore, provideInMemoryDrivingSim, type MemoryCourseStore } from '@/features/driving-sim';
 import CompetencyStoryRun from './CompetencyStoryRun';
 import LevelMapPage from './LevelMapPage';
 import BriefingPage from './BriefingPage';
@@ -32,25 +26,7 @@ let store: MemoryCourseStore;
 
 beforeEach(() => {
   store = memoryCourseStore();
-  provideDrivingSimDependencies({
-    learnerHistory: { load: async () => ({ source: 'firestore', attempts: [] }) },
-    storyAttempts: {
-      save: async () => 'attempt',
-      saveFsmTelemetry: async () => {},
-      saveDecisionTelemetry: async () => {},
-      saveRoutingTelemetry: async () => {},
-    },
-    signCoverage: { load: () => ({}), record: () => {} },
-    briefingProgress: { load: () => ({}), save: () => {}, markLessonsRead: () => {} },
-    routingMode: 'new',
-    routing: { loadAssignment: async () => null, loadCursor: async () => null, saveCursor: async () => {} },
-    routingOverride: { load: () => 'assigned', save: () => {} },
-    optimizedRouting: async () => {
-      throw new Error('unused');
-    },
-    competencyCourse: memoryCompetencyCourse(store),
-    assessments: memoryAssessments(store),
-  });
+  provideInMemoryDrivingSim(store);
 });
 
 const routing: StoryRouting = {

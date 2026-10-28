@@ -6,6 +6,7 @@ import type { AssessmentRepository, AssessmentSitting, CompetencyCourseRepositor
 import type { CourseCursor } from '@/domain/competencyRouting/course';
 import { applyQOperations } from '@/domain/competencyRouting/course';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
+import { provideDrivingSimDependencies } from './dependencies';
 
 export interface MemoryCourseStore {
   cursors: Map<string, CourseCursor>;
@@ -36,3 +37,28 @@ export const memoryAssessments = (store: MemoryCourseStore): AssessmentRepositor
   load: async uid => [...(store.sittings.get(uid) ?? [])],
   save: async (uid, sitting) => void store.sittings.set(uid, [...(store.sittings.get(uid) ?? []), sitting]),
 });
+
+/**
+ * Binds every Driving Sim port to in-memory stand-ins: no Firebase, nothing
+ * persisted. For tests that click through the course from outside the feature.
+ */
+export const provideInMemoryDrivingSim = (store: MemoryCourseStore) =>
+  provideDrivingSimDependencies({
+    learnerHistory: { load: async () => ({ source: 'firestore', attempts: [] }) },
+    storyAttempts: {
+      save: async () => 'attempt',
+      saveFsmTelemetry: async () => {},
+      saveDecisionTelemetry: async () => {},
+      saveRoutingTelemetry: async () => {},
+    },
+    signCoverage: { load: () => ({}), record: () => {} },
+    briefingProgress: { load: () => ({}), save: () => {}, markLessonsRead: () => {} },
+    routingMode: 'new',
+    routing: { loadAssignment: async () => null, loadCursor: async () => null, saveCursor: async () => {} },
+    routingOverride: { load: () => 'assigned', save: () => {} },
+    optimizedRouting: async () => {
+      throw new Error('the course reads no designated table');
+    },
+    competencyCourse: memoryCompetencyCourse(store),
+    assessments: memoryAssessments(store),
+  });

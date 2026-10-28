@@ -67,6 +67,9 @@ export {
 } from './application/use-cases/competencyCourse';
 export type { CourseDriveRun, CourseState } from './application/use-cases/competencyCourse';
 export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';
+// In-memory ports, for tests that click through the course from outside the feature.
+export { memoryCourseStore, provideInMemoryDrivingSim } from './application/testDependencies';
+export type { MemoryCourseStore } from './application/testDependencies';
 
 export type { LevelConfig, ScenarioEvent } from './domain/scenario/scenarioDefinition';
 export type { LevelFsmTelemetry } from './domain/fsm/fsmMetrics';
