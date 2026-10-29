@@ -43,6 +43,8 @@ export interface BriefingGate {
     attempt: number;
     cap: number;
     onSubmit: (choices: (number | null)[], responseMs: (number | null)[]) => Promise<BankQuizResult[]>;
+    /** Each answer as it is given, for the log. */
+    onAnswer?: (position: number, item: BankItem, choice: number, responseMs: number) => void;
     onDone: () => void;
   } | null;
   /** Whether the stage has a quiz at all (the tutorial has none). */
@@ -56,6 +58,8 @@ export interface BriefingGate {
   preview: DrivePreview | null;
   /** Short lines for the course panel. */
   notes: string[];
+  /** Every action on the briefing, for the study log (module, quiz, review, overview, drive). */
+  log?: (action: string, detail?: Record<string, unknown>) => void;
 }
 
 interface MissionBriefingProps {
@@ -129,7 +133,10 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
       active: !gate.lessonsRead,
       disabled: false,
       actionText: gate.lessonsRead ? 'Review' : 'Open',
-      onClick: openReader,
+      onClick: () => {
+        gate.log?.('module_opened', { review: gate.lessonsRead });
+        openReader();
+      },
       icon: BookOpen,
     },
     ...(gate.hasQuiz
@@ -145,7 +152,11 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
             active: gate.lessonsRead && gate.quiz !== null,
             disabled: !gate.lessonsRead || gate.quiz === null,
             actionText: gate.quizPassed ? 'Passed' : 'Start',
-            onClick: () => gate.quiz && setActiveQuiz(gate.quiz),
+            onClick: () => {
+              if (!gate.quiz) return;
+              gate.log?.('quiz_opened', { attempt: gate.quiz.attempt, items: gate.quiz.items.map(item => item.id) });
+              setActiveQuiz(gate.quiz);
+            },
             icon: BrainCircuit,
           },
         ]
@@ -159,7 +170,10 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
             active: true,
             disabled: false,
             actionText: 'Read',
-            onClick: () => setShowReview(true),
+            onClick: () => {
+              gate.log?.('review_opened', { title: gate.review?.title ?? null, lessons: gate.review?.lessons.map(lesson => lesson.id) ?? [] });
+              setShowReview(true);
+            },
             icon: BookOpen,
           },
         ]
@@ -171,7 +185,11 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
       active: gate.canDrive,
       disabled: !gate.canDrive,
       actionText: 'Drive',
-      onClick: () => (gate.preview ? setShowOverview(true) : onStartGame()),
+      onClick: () => {
+        gate.log?.(gate.preview ? 'drive_overview_opened' : 'drive_start_clicked');
+        if (gate.preview) setShowOverview(true);
+        else onStartGame();
+      },
       icon: Route,
     },
   ];
@@ -214,9 +232,14 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
     return (
       <LessonReader
         module={levelModule}
-        onClose={closeReader}
+        onReadEvent={gate?.log ? event => gate.log?.(`lesson_${event.action}`, { ...event, module: levelModule.id }) : undefined}
+        onClose={() => {
+          gate?.log?.('module_closed', { module: levelModule.id });
+          closeReader();
+        }}
         onFinish={() => {
           if (gate) {
+            gate.log?.('module_finished', { module: levelModule.id });
             closeReader();
             void gate.onLessonsRead();
           } else {
@@ -232,8 +255,13 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
     return (
       <LessonReader
         module={{ ...levelModule, title: `${levelModule.title}: ${review.title}`, lessons: review.lessons }}
-        onClose={() => setShowReview(false)}
+        onReadEvent={gate?.log ? event => gate.log?.(`review_${event.action}`, { ...event, module: levelModule.id }) : undefined}
+        onClose={() => {
+          gate?.log?.('review_closed', { module: levelModule.id });
+          setShowReview(false);
+        }}
         onFinish={() => {
+          gate?.log?.('review_finished', { module: levelModule.id });
           setShowReview(false);
           void review.onDone();
         }}
@@ -246,7 +274,10 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <button
-            onClick={onBack}
+            onClick={() => {
+              gate?.log?.('briefing_back');
+              onBack();
+            }}
             className="inline-flex w-fit items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -471,8 +502,12 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
         <DriveOverview
           preview={gate.preview}
           questionLimitSec={IN_DRIVE_QUESTION_LIMIT_SEC}
-          onClose={() => setShowOverview(false)}
+          onClose={() => {
+            gate.log?.('drive_overview_closed');
+            setShowOverview(false);
+          }}
           onStart={() => {
+            gate.log?.('drive_start_clicked');
             setShowOverview(false);
             onStartGame();
           }}
@@ -488,11 +523,15 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
           title="Short Quiz"
           subtitle={`Attempt ${activeQuiz.attempt} of ${activeQuiz.cap}`}
           onSubmit={activeQuiz.onSubmit}
+          onAnswer={activeQuiz.onAnswer}
           onDone={() => {
             setActiveQuiz(null);
             activeQuiz.onDone();
           }}
-          onClose={() => setActiveQuiz(null)}
+          onClose={() => {
+            gate?.log?.('quiz_closed', { attempt: activeQuiz.attempt });
+            setActiveQuiz(null);
+          }}
         />
       )}
 

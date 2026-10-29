@@ -5,10 +5,17 @@ import { useDailyChallenge } from '../application/useDailyChallenge';
 
 interface DailyChallengeProps {
   onBack: () => void;
+  /** Every action and answer, for the study log (the page decides where it goes). */
+  onEvent?: (action: string, detail?: Record<string, unknown>) => void;
 }
 
-export const DailyChallenge = ({ onBack }: DailyChallengeProps) => {
-  const { scenario, streak, selectedIndex, revealed, alreadyDone, answer } = useDailyChallenge();
+export const DailyChallenge = ({ onBack, onEvent }: DailyChallengeProps) => {
+  const daily = useDailyChallenge();
+  const { scenario, streak, selectedIndex, revealed, alreadyDone } = daily;
+  const answer = (index: number) => {
+    onEvent?.('daily_answer', { scenarioId: scenario.id, choice: index, correct: scenario.choices[index]?.correct ?? null });
+    daily.answer(index);
+  };
 
   const settled = revealed || alreadyDone;
   const selectedChoice = selectedIndex !== null ? scenario.choices[selectedIndex] : null;

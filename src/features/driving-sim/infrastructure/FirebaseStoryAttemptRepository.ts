@@ -3,6 +3,7 @@ import { db } from '@/shared/infrastructure/firebase/client';
 import type { TransitionLogEntry } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
 import type { StoryAttemptRepository } from '@/features/driving-sim/application/ports';
+import { inputTelemetryDoc } from '@/features/driving-sim/domain/telemetry/controlInputs';
 import { capDecisionsForFirestore, capRoutingForFirestore, capTransitionsForFirestore } from './telemetryCap';
 
 const attemptsOf = (uid: string) => collection(db, 'users', uid, 'attempts');
@@ -40,6 +41,11 @@ export const firebaseStoryAttemptRepository: StoryAttemptRepository = {
       doc(db, 'users', uid, 'attempts', attemptId, 'telemetry', 'decisions'),
       capDecisionsForFirestore(record)
     );
+  },
+
+  /** Every key pressed and released on the road; capped to one document, the earliest kept. */
+  async saveInputTelemetry(uid, attemptId, inputs) {
+    await setDoc(doc(db, 'users', uid, 'attempts', attemptId, 'telemetry', 'inputs'), inputTelemetryDoc(inputs));
   },
 
   /**

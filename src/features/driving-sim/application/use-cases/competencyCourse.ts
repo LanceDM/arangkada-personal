@@ -62,6 +62,7 @@ import { loadEvidenceRecords } from '../studyRecorder';
 import { nextAttemptSeed } from '../attemptSeed';
 import { DIAGNOSTIC_RECORD_ID, fingerprintOf, orderEvidence, stepRecordId, type EvidenceRecord } from '@/domain/study/evidence';
 import { newEventId } from '@/domain/study/studyEvent';
+import { summarizeInputs, type DriveExit } from '@/features/driving-sim/domain/telemetry/controlInputs';
 import type { AdaptivePlan } from './buildAdaptivePlan';
 
 // --- loading ------------------------------------------------------------------
@@ -284,14 +285,14 @@ const formatsOf = (level: LevelConfig | null | undefined): Map<string, ScenarioF
     ...(level?.aftermath?.hotspots ?? []).map(point => [point.scenarioId ?? point.id, scenarioFormat({}, 'aftermath')] as const),
   ]);
 
-/** One event per graded decision a drive logged, then the drive's end. */
-const driveEvents = (
-  result: LevelResult,
+/** One event per graded decision, with the scenario's format; `partial` marks a drive left before its end. */
+const decisionEvents = (
+  logs: readonly ActionLog[],
   context: { levelId: number; phase: string | null; attemptId: string | null },
-  ended: Record<string, unknown>,
-  formats: Map<string, ScenarioFormat> = new Map()
-): StudyEventDraft[] => [
-  ...result.logs.map(log => ({
+  formats: Map<string, ScenarioFormat> = new Map(),
+  partial = false
+): StudyEventDraft[] =>
+  logs.map(log => ({
     type: 'decision_made' as const,
     at: log.timestamp,
     levelId: context.levelId,
@@ -312,8 +313,18 @@ const driveEvents = (
       severity: log.severity ?? null,
       weight: log.weight ?? null,
       support: log.support ?? null,
+      ...(partial ? { partial: true } : {}),
     },
-  })),
+  }));
+
+/** One event per graded decision a drive logged, then the drive's end. */
+const driveEvents = (
+  result: LevelResult,
+  context: { levelId: number; phase: string | null; attemptId: string | null },
+  ended: Record<string, unknown>,
+  formats: Map<string, ScenarioFormat> = new Map()
+): StudyEventDraft[] => [
+  ...decisionEvents(result.logs, context, formats),
   {
     type: 'drive_ended' as const,
     levelId: context.levelId,
@@ -377,7 +388,7 @@ export const drawCourseQuiz = (cursor: CourseCursor, seed: number): QuizDraw => 
 
 /**
  * The quiz or drive open at this course position: the same seed on every
- * reload until the step is saved. A reopen is logged.
+ * reload until the step is saved. Every open is logged.
  */
 const openCourseActivity = async (uid: string, cursor: CourseCursor, kind: 'quiz' | 'drive', freshSeed: number = nextAttemptSeed()) => {
   const activity = await drivingSimDeps().competencyCourse.openActivity(uid, {
@@ -386,16 +397,15 @@ const openCourseActivity = async (uid: string, cursor: CourseCursor, kind: 'quiz
     seed: freshSeed,
     openedAt: Date.now(),
   });
-  if (activity.opens > 1) {
-    await recordEvents(uid, [
-      {
-        type: 'activity_reopened',
-        levelId: phaseLevel(cursor.phase),
-        phase: phaseId(cursor.phase),
-        payload: { kind, seed: activity.seed, opens: activity.opens, openedAt: activity.openedAt },
-      },
-    ]);
-  }
+  // Every open is logged; opens > 1 is a reload or a second tab getting the same seed.
+  await recordEvents(uid, [
+    {
+      type: 'activity_opened',
+      levelId: phaseLevel(cursor.phase),
+      phase: phaseId(cursor.phase),
+      payload: { kind, seed: activity.seed, opens: activity.opens, openedAt: activity.openedAt, position: activity.position },
+    },
+  ]);
   return activity;
 };
 
@@ -635,6 +645,7 @@ export const completeCourseDrive = async ({
     try {
       await Promise.all([
         storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions),
+        telemetry.inputs && storyAttempts.saveInputTelemetry ? storyAttempts.saveInputTelemetry(uid, attemptId, telemetry.inputs) : Promise.resolve(),
         storyAttempts.saveDecisionTelemetry(
           uid,
           attemptId,
@@ -667,7 +678,7 @@ export const completeCourseDrive = async ({
       {
         context: { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId },
         evidence,
-        events: driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now }, formatsOf(level)),
+        events: driveEvents(result, { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId }, { startedAt: startedAt ?? null, endedAt: now, inputs: telemetry?.inputs ? summarizeInputs(telemetry.inputs) : null }, formatsOf(level)),
       }
     );
     await saveTelemetry();
@@ -677,7 +688,7 @@ export const completeCourseDrive = async ({
   const verdicts = competencyVerdicts(run.composed.items, result.logs);
   const where = { levelId: run.levelId, phase: phaseId(cursor.phase), attemptId };
   const events: StudyEventDraft[] = [
-    ...driveEvents(result, where, { startedAt: startedAt ?? null, endedAt: now, routeLength: level.roadLength }, formatsOf(level)),
+    ...driveEvents(result, where, { startedAt: startedAt ?? null, endedAt: now, routeLength: level.roadLength, inputs: telemetry?.inputs ? summarizeInputs(telemetry.inputs) : null }, formatsOf(level)),
     ...verdicts.map(v => ({
       type: 'verdict_computed' as const,
       ...where,
@@ -858,6 +869,19 @@ export const planFreeReplay = async (uid: string, levelId: number, attemptSeed: 
     ? composeDrive({ levelId, competencies: STAGE_COMPETENCIES[levelId], rng: createRng(attemptSeed) })
     : null;
   const level = composed?.level ?? buildLevelConfig(levelId, undefined, null, createRng(attemptSeed))!;
+  await recordEvents(uid, [
+    {
+      type: 'drive_planned',
+      levelId,
+      phase: 'FREE_REPLAY',
+      payload: {
+        attemptSeed,
+        freeReplay: true,
+        counted: composed?.items.map(item => ({ ...item, format: formatsOf(level).get(item.scenarioId) ?? null })) ?? [],
+        route: level.events.map(event => event.id),
+      },
+    },
+  ]);
   return {
     levelId,
     composed,
@@ -893,10 +917,125 @@ export const completeFreeReplayDrive = async (uid: string, result: LevelResult, 
       ...(telemetry ? { fsmMetrics: telemetry.metrics, reactionLatencies: telemetry.reactionLatencies } : {}),
     },
   });
-  if (telemetry) await storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions).catch(failure => console.error('Could not save the drive telemetry:', failure));
-  await recordEvents(uid, driveEvents(result, { levelId: result.levelId, phase: 'FREE_REPLAY', attemptId }, { freeReplay: true }));
+  if (telemetry) {
+    await Promise.all([
+      storyAttempts.saveFsmTelemetry(uid, attemptId, telemetry.transitions),
+      telemetry.inputs && storyAttempts.saveInputTelemetry ? storyAttempts.saveInputTelemetry(uid, attemptId, telemetry.inputs) : Promise.resolve(),
+    ]).catch(failure => console.error('Could not save the drive telemetry:', failure));
+  }
+  await recordEvents(uid, driveEvents(result, { levelId: result.levelId, phase: 'FREE_REPLAY', attemptId }, { freeReplay: true, inputs: telemetry?.inputs ? summarizeInputs(telemetry.inputs) : null }));
   await recordBKT(uid);
 };
 
 /** Logs something that happened outside the course's own steps (a session start, a page view). */
 export const logStudyEvent = (uid: string, draft: StudyEventDraft): Promise<void> => recordEvents(uid, [draft]);
+
+// --- everything else the participant does ---------------------------------------------
+
+/** A menu choice, a setting changed, signing in or out, a button that starts something. */
+export const logUiAction = (uid: string, action: string, detail: Record<string, unknown> = {}): Promise<void> =>
+  recordEvents(uid, [{ type: 'ui_action', payload: { action, ...detail } }]);
+
+/** One answer, the moment it is given: an abandoned sitting still shows how far it got. */
+export const logAnswerGiven = (
+  uid: string,
+  input: {
+    sitting: 'quiz' | 'diagnostic' | 'post_exam';
+    attempt: number | null;
+    levelId: number | null;
+    phase: string | null;
+    position: number;
+    item: BankItem;
+    choice: number | null;
+    responseMs: number | null;
+  }
+): Promise<void> =>
+  recordEvents(uid, [
+    {
+      type: 'answer_given',
+      levelId: input.levelId,
+      phase: input.phase,
+      payload: {
+        sitting: input.sitting,
+        quizAttempt: input.attempt,
+        position: input.position,
+        itemId: input.item.id,
+        competency: input.item.competency,
+        choice: input.choice === null ? 'unanswered' : `choice_${'ABCD'[input.choice]}`,
+        expected: `choice_${'ABCD'[input.item.answer]}`,
+        correct: input.choice === input.item.answer,
+        responseMs: input.responseMs,
+      },
+    },
+  ]);
+
+/** A drive began (course drive or free replay). */
+export const logDriveStarted = (uid: string, run: CourseDriveRun, phase: string): Promise<void> =>
+  recordEvents(uid, [
+    {
+      type: 'drive_started',
+      levelId: run.levelId,
+      phase,
+      payload: {
+        attemptSeed: run.attemptSeed,
+        counted: run.composed?.items.map(item => item.scenarioId) ?? [],
+        route: run.plan.level?.events.map(event => event.id) ?? [],
+      },
+    },
+  ]);
+
+/**
+ * A drive left before its end (Exit, or the page closed): every decision made
+ * so far, marked partial, and the drive_exited event with the full key trace
+ * (up to 2,000 inputs). Nothing is graded and the course does not move.
+ */
+export const logDriveExited = (uid: string, run: CourseDriveRun, phase: string, partial: DriveExit): Promise<void> =>
+  recordEvents(uid, [
+    ...decisionEvents(partial.logs, { levelId: run.levelId, phase, attemptId: null }, formatsOf(run.plan.level), true),
+    {
+      type: 'drive_exited',
+      levelId: run.levelId,
+      phase,
+      payload: {
+        reason: partial.reason,
+        stage: partial.stage,
+        elapsedMs: partial.elapsedMs,
+        score: partial.score,
+        decisions: partial.logs.length,
+        attemptSeed: run.attemptSeed,
+        inputSummary: summarizeInputs(partial.inputs),
+        inputs: partial.inputs.slice(0, 2_000),
+        inputsTruncated: partial.inputs.length > 2_000,
+      },
+    },
+  ]);
+
+// --- the initial exam (diagnostic) ------------------------------------------------------
+
+export interface InitialExamStatus {
+  /** The study course is on (the New switch): the initial exam gates the other modes. */
+  required: boolean;
+  done: boolean;
+  /** When it was taken (device ms). */
+  takenAt: number | null;
+  /** The background form comes first when it is asked. */
+  backgroundRequired: boolean;
+  backgroundDone: boolean;
+}
+
+/** Whether this participant has taken the initial exam, for the main menu and the locks. */
+export const loadInitialExamStatus = async (uid: string): Promise<InitialExamStatus> => {
+  const { routingMode, assessments, background, backgroundFormEnabled } = drivingSimDeps();
+  const required = routingMode === 'new';
+  const backgroundRequired = required && (backgroundFormEnabled ?? BACKGROUND_FORM_ENABLED);
+  const [sittings, form] = await Promise.all([
+    assessments.load(uid),
+    backgroundRequired ? background.load(uid) : Promise.resolve(null),
+  ]);
+  const diagnostic = sittings.find(sitting => sitting.kind === 'diagnostic') ?? null;
+  return { required, done: diagnostic !== null, takenAt: diagnostic?.timestamp ?? null, backgroundRequired, backgroundDone: form !== null };
+};
+
+/** Whether the study course (and so the initial-exam gate) is on, without reading anything. */
+export const initialExamRequired = (): boolean => drivingSimDeps().routingMode === 'new';
+

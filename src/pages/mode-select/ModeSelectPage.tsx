@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Car, FileText, CalendarDays, Lock, Flame, Star, ChevronRight, Trophy, ShieldAlert } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Car, FileText, CalendarDays, Lock, Flame, Star, ChevronRight, Trophy, ShieldAlert, ClipboardCheck, CheckCircle2 } from 'lucide-react';
 import { useProgressStore } from '@/features/progression';
 import { getDailyKey } from '@/features/daily-challenge';
 import { getDailyStreak, loadGuestStreak, type StreakData } from '@/features/daily-challenge';
-import { LEVELS } from '@/features/driving-sim';
+import { LEVELS, logUiAction } from '@/features/driving-sim';
+import { useInitialExam } from '@/app/initialExam/useInitialExam';
 import AppLayout from '@/app/layout/AppLayout';
 import { useAuthSession } from '@/features/auth';
 
@@ -36,6 +37,11 @@ const ModeSelect = () => {
   const totalStars = Object.values(levelResults).reduce((sum, r) => sum + r.stars, 0);
 
   const { user, isLoggedIn, profile } = useAuthSession();
+  const exam = useInitialExam();
+  const lockedFrom = (useLocation().state as { lockedFrom?: string } | null)?.lockedFrom ?? null;
+  // The initial exam gates every mode while the study course is on.
+  const examLock = exam.required && (exam.locked || exam.loading);
+  const examDone = exam.status !== null && exam.status.done && (!exam.status.backgroundRequired || exam.status.backgroundDone);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +100,7 @@ const ModeSelect = () => {
       borderColor: 'border-yellow-400/40 hover:border-yellow-400/70',
       iconColor: 'text-yellow-400',
       route: '/play/daily',
-      locked: false,
+      locked: examLock,
       badge: dailyLoading ? 'Loading...' : (todayDone ? '✅ Done Today' : '🔥 New Today'),
       stars: 0,
     },
@@ -108,7 +114,7 @@ const ModeSelect = () => {
       borderColor: 'border-sky-400/40 hover:border-sky-400/70',
       iconColor: 'text-sky-400',
       route: '/play/story',
-      locked: false,
+      locked: examLock,
       badge: completedLevels > 0 ? `${completedLevels}/${totalLevels} Levels` : null,
       stars: totalStars,
     },
@@ -122,7 +128,7 @@ const ModeSelect = () => {
       borderColor: eksamenUnlocked ? 'border-red-400/40 hover:border-red-400/70' : 'border-muted/30',
       iconColor: eksamenUnlocked ? 'text-accent' : 'text-muted-foreground',
       route: '/play/eksamen',
-      locked: !eksamenUnlocked,
+      locked: examLock || !eksamenUnlocked,
       badge: null,
       stars: 0,
     },
@@ -177,6 +183,45 @@ const ModeSelect = () => {
           </p>
         </div>
 
+        {/* The initial exam: taken first, from here; it opens the other modes. */}
+        {exam.required && (
+          <section className="mb-8">
+            <button
+              onClick={() => {
+                if (user) void logUiAction(user.uid, 'menu_selected', { mode: 'initial_exam', done: examDone });
+                navigate('/play/initial-exam');
+              }}
+              className={`relative flex w-full items-center gap-8 overflow-hidden rounded-[3rem] border p-10 text-left shadow-2xl transition-all duration-500 hover:scale-[1.01] ${
+                examDone ? 'border-emerald-400/30 bg-gradient-to-r from-emerald-500/10 to-transparent' : 'border-primary/60 bg-gradient-to-r from-primary/20 to-transparent glow-yellow'
+              }`}
+            >
+              {examDone ? <CheckCircle2 className="h-14 w-14 shrink-0 text-emerald-400" /> : <ClipboardCheck className="h-14 w-14 shrink-0 text-primary" />}
+              <div className="flex-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Step 1 · Required</p>
+                <h2 className="mt-1 text-4xl font-black uppercase italic leading-none text-white">Initial Exam</h2>
+                <p className="mt-3 max-w-xl text-sm italic text-muted-foreground">
+                  {!exam.signedIn
+                    ? 'Sign in, then take the 55-item initial exam. It sets your starting point and opens every mode.'
+                    : exam.loading
+                      ? 'Checking your initial exam…'
+                      : exam.error
+                        ? exam.error
+                        : examDone
+                          ? 'Done. Every mode is open.'
+                          : '55 items, 5 per driving competency, no pass mark. It sets your starting point and opens every mode.'}
+                </p>
+                {exam.bypass && !examDone && !exam.loading && (
+                  <p className="mt-2 text-[10px] font-black uppercase text-muted-foreground">Admin or developer build: the modes stay open for testing</p>
+                )}
+                {lockedFrom && examLock && (
+                  <p className="mt-2 text-xs font-bold text-red-400">That mode opens after the initial exam.</p>
+                )}
+              </div>
+              <ChevronRight className="h-10 w-10 shrink-0 text-primary" />
+            </button>
+          </section>
+        )}
+
         {/* Cards grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-[auto_1fr] gap-8">
 
@@ -187,7 +232,10 @@ const ModeSelect = () => {
             return (
               <button
                 key={mode.id}
-                onClick={() => !isLocked && navigate(mode.route)}
+                onClick={() => {
+                  if (user) void logUiAction(user.uid, 'menu_selected', { mode: mode.id, locked: isLocked });
+                  if (!isLocked) navigate(mode.route);
+                }}
                 disabled={isLocked}
                 className={`relative text-left p-12 rounded-[3rem] border transition-all duration-500 group overflow-hidden shadow-2xl
                   ${mode.id === 'daily'
@@ -211,7 +259,14 @@ const ModeSelect = () => {
                 )}
                 </div>
 
-                {mode.id === 'eksamen' && isLocked && (
+                {examLock && (
+                  <div className="absolute bottom-12 left-12 flex items-center gap-2 text-red-400 text-xs font-black uppercase">
+                    <ShieldAlert className="w-4 h-4" />
+                    Take the initial exam first
+                  </div>
+                )}
+
+                {!examLock && mode.id === 'eksamen' && isLocked && (
                   <div className="absolute bottom-12 left-12 flex items-center gap-2 text-red-400 text-xs font-black uppercase">
                     <ShieldAlert className="w-4 h-4" />
                     Story Mode: Level 3 required

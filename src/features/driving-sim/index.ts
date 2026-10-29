@@ -66,9 +66,16 @@ export {
   saveDiagnostic,
   saveBackground,
   logStudyEvent,
+  logUiAction,
+  logAnswerGiven,
+  logDriveStarted,
+  logDriveExited,
+  loadInitialExamStatus,
+  initialExamRequired,
   submitCourseQuiz,
 } from './application/use-cases/competencyCourse';
-export type { CourseDriveRun, CourseState } from './application/use-cases/competencyCourse';
+export type { CourseDriveRun, CourseState, InitialExamStatus } from './application/use-cases/competencyCourse';
+export type { DriveExit } from './domain/telemetry/controlInputs';
 export { CourseConflictError, OutdatedAppError } from './application/errors';
 export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';
 // In-memory ports, for tests that click through the course from outside the feature.

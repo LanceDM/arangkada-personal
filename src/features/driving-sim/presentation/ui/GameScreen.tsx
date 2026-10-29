@@ -24,7 +24,8 @@ import AdaptationNotice from './AdaptationNotice';
 import ScenarioBriefing from './ScenarioBriefing';
 import { roadPositionCue } from './roadPositionLabel';
 import { resolveLaneRole } from '@/features/driving-sim/domain/world/vehiclePhysics';
-import { useKeyboard } from '@/features/driving-sim/presentation/input/useKeyboard';
+import { useKeyboard, type KeyboardListener } from '@/features/driving-sim/presentation/input/useKeyboard';
+import { createInputRecorder, type DriveExit } from '@/features/driving-sim/domain/telemetry/controlInputs';
 import { useFSM } from '@/features/driving-sim/application/useFSM';
 import { registerActiveFSM } from '@/features/driving-sim/domain/fsm/devRegistry';
 import { DEFAULT_TRANSITION_PARAMS, type TransitionParams } from '@/features/driving-sim/domain/fsm/fsmTypes';
@@ -40,7 +41,10 @@ import { buildLevelFsmTelemetry, type LevelFsmTelemetry } from '@/features/drivi
 interface GameScreenProps {
   level: LevelConfig;
   onComplete: (result: LevelResult, telemetry: LevelFsmTelemetry) => void;
-  onExit: () => void;
+  /** Leaving before the end: everything done so far comes with it, for the log. */
+  onExit: (partial?: DriveExit) => void;
+  /** The page is closing mid-drive (tab closed, reload): a last chance to log what was done. Best effort. */
+  onAbandon?: (partial: DriveExit) => void;
   /** Dev-only: starts the drive at this road distance instead of 0. */
   initialDistance?: number;
   /**
@@ -84,6 +88,7 @@ const GameScreen = ({
   level,
   onComplete,
   onExit,
+  onAbandon,
   initialDistance,
   transitionParams,
   support = 'full',
@@ -125,7 +130,10 @@ const GameScreen = ({
 
   const reducedMotion = useReducedMotion();
   const { fsm, fsmState, snapshot, prevFsmState, transitionLabel } = useFSM();
-  const { releaseHeldKeys } = useKeyboard(keysRef);
+  // Every key pressed and released on the road, for the drive's input log.
+  const [recorder] = useState(() => createInputRecorder());
+  const listenerRef = useRef<KeyboardListener | null>(recorder);
+  const { releaseHeldKeys } = useKeyboard(keysRef, listenerRef);
 
   // Apply the learned transition-guard parameters to this drive's machine.
   // This is where the Q-learning decision reaches the FSM: from here on, the
@@ -175,6 +183,16 @@ const GameScreen = ({
    * scene under their own control, and asking them to work through a crash
    * response they did not reach would be inventing a stop that never happened.
    */
+  const finishedRef = useRef(false);
+  /** The run is over: its result, with every key pressed on the road. */
+  const completeWithInputs = useCallback(
+    (result: LevelResult, telemetry: LevelFsmTelemetry) => {
+      finishedRef.current = true;
+      onComplete(result, { ...telemetry, inputs: recorder.snapshot() });
+    },
+    [onComplete, recorder]
+  );
+
   const handleSimComplete = useCallback(
     (result: LevelResult, telemetry: LevelFsmTelemetry) => {
       if (level.aftermath && !result.crashReason) {
@@ -182,9 +200,9 @@ const GameScreen = ({
         setStage('aftermath');
         return;
       }
-      onComplete(result, telemetry);
+      completeWithInputs(result, telemetry);
     },
-    [level.aftermath, onComplete]
+    [level.aftermath, completeWithInputs]
   );
 
   const {
@@ -307,7 +325,7 @@ const GameScreen = ({
     // counts and the competency mix, so the parked totals are stale by now.
     // Same single assembly path the drive itself ends through. The scene
     // re-rolls nothing, so the drive's re-rolls are the run's.
-    onComplete(
+    completeWithInputs(
       buildLevelResult(level, {
         score: scoreRef.current,
         violations: violationsRef.current,
@@ -317,7 +335,35 @@ const GameScreen = ({
       }),
       buildLevelFsmTelemetry(fsm.getTransitionLog(), logsRef.current, tracesRef.current, pending.telemetry.rerolls)
     );
-  }, [correctRef, fsm, level, logsRef, onComplete, scoreRef, signOutcomesRef, tracesRef, violationsRef]);
+  }, [correctRef, fsm, level, logsRef, completeWithInputs, scoreRef, signOutcomesRef, tracesRef, violationsRef]);
+
+  /** What was done so far, for a drive left before its end. */
+  const partial = useCallback(
+    (reason: DriveExit['reason']): DriveExit => ({
+      logs: [...logsRef.current],
+      score: scoreRef.current,
+      stage,
+      elapsedMs: recorder.elapsedMs(),
+      inputs: recorder.snapshot(),
+      reason,
+    }),
+    [logsRef, scoreRef, stage, recorder]
+  );
+  const exit = useCallback(() => {
+    finishedRef.current = true;
+    onExit(partial('exit'));
+  }, [onExit, partial]);
+
+  // Closing or reloading the tab mid-drive: log what was done (best effort; the
+  // browser may not finish the write).
+  useEffect(() => {
+    if (!onAbandon) return;
+    const onPageHide = () => {
+      if (!finishedRef.current) onAbandon(partial('page_closed'));
+    };
+    window.addEventListener('pagehide', onPageHide);
+    return () => window.removeEventListener('pagehide', onPageHide);
+  }, [onAbandon, partial]);
 
   const feedbackCards = <FeedbackStack result={result} onDismiss={dismissResult} />;
 
@@ -333,7 +379,7 @@ const GameScreen = ({
           choiceSeed={choiceSeed}
           onAnswer={handleGarageAnswer}
           onComplete={() => setStage('driving')}
-          onExit={onExit}
+          onExit={exit}
         />
         <div className="fixed bottom-3 left-3 z-[60] flex w-[min(340px,calc(100vw-1.5rem))] flex-col gap-3">
           {feedbackCards}
@@ -359,7 +405,7 @@ const GameScreen = ({
           choiceSeed={choiceSeed}
           onAnswer={handleGarageAnswer}
           onComplete={finishAftermath}
-          onExit={onExit}
+          onExit={exit}
         />
         <div className="fixed bottom-3 left-3 z-[60] flex w-[min(340px,calc(100vw-1.5rem))] flex-col gap-3">
           {feedbackCards}
@@ -494,7 +540,7 @@ const GameScreen = ({
                 speed={speed}
                 levelName={level.name}
                 levelId={level.id}
-                onExit={onExit}
+                onExit={exit}
                 position={roadPosition}
                 cue={positionCue}
                 requiredLanes={showsResponse ? requiredLanes : NO_LANES}

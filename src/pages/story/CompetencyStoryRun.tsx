@@ -26,7 +26,10 @@ import {
   OutdatedAppError,
   openCourseQuiz,
   coursePosition,
-  logStudyEvent,
+  logUiAction,
+  logAnswerGiven,
+  logDriveStarted,
+  logDriveExited,
   markCourseLessonsRead,
   markCourseReviewShown,
   nextAttemptSeed,
@@ -87,23 +90,8 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
 
   const { saveLevelResult, totalScore, levelResults } = useProgressStore();
 
-  // The study log: one session_started per sign-in in this app load, and a
-  // page_viewed for every Story Mode screen.
+  // session_started and page_viewed are logged app-wide (app/sync/StudyActivityLog).
   const { pathname } = useLocation();
-  useEffect(() => {
-    void logStudyEvent(uid, {
-      type: 'session_started',
-      payload: {
-        userAgent: typeof navigator === 'undefined' ? null : navigator.userAgent,
-        language: typeof navigator === 'undefined' ? null : navigator.language,
-        screen: typeof window === 'undefined' ? null : { width: window.screen?.width ?? null, height: window.screen?.height ?? null, dpr: window.devicePixelRatio ?? null },
-        viewport: typeof window === 'undefined' ? null : { width: window.innerWidth, height: window.innerHeight },
-      },
-    });
-  }, [uid]);
-  useEffect(() => {
-    void logStudyEvent(uid, { type: 'page_viewed', payload: { path: pathname } });
-  }, [uid, pathname]);
 
   const [state, setState] = useState<CourseState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -178,14 +166,14 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
     void step('continue your course', async () => {
       if (!state) return;
       const { cursor: at } = state;
-      if (state.backgroundRequired && !state.backgroundDone) {
-        navigate('/play/story/background');
+      // The initial exam (and the background form, when asked) is taken from
+      // the main menu; the course does not start without it.
+      if ((state.backgroundRequired && !state.backgroundDone) || !state.diagnosticDone) {
+        void logUiAction(uid, 'continue_blocked', { reason: 'initial_exam_not_taken' });
+        navigate('/play/initial-exam');
         return;
       }
-      if (!state.diagnosticDone) {
-        navigate('/play/story/diagnostic');
-        return;
-      }
+      void logUiAction(uid, 'continue_course', { phase: phaseId(at.phase) });
       if (at.phase.kind === 'CERTIFIED') {
         navigate('/play/story/post-exam');
         return;
@@ -203,6 +191,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
 
   const playFreeReplay = (levelId: number) =>
     void step('prepare that level', async () => {
+      void logUiAction(uid, 'free_replay_selected', { levelId });
       const run = await planFreeReplay(uid, levelId, nextAttemptSeed());
       setPlanned({ attempt: ++attempts.current, run, free: true, forCursor: null });
       setStartedRun(null);
@@ -271,6 +260,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
     if (!cursor || activeLevel === null) return null;
     if (planned?.free) {
       return {
+        log: (action, detail = {}) => void logUiAction(uid, action, { levelId: activeLevel, phase: 'FREE_REPLAY', ...detail }),
         lessonsRead: true, onLessonsRead: async () => {}, quiz: null, hasQuiz: false, quizPassed: true, review: null,
         canDrive: true, driveDetail: 'A replay outside your course', notes: ['A replay of a finished stage: it does not move your course.'],
         preview: planned.run.plan.level
@@ -336,6 +326,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
 
     const drivePhase = phase.kind === 'DRIVE' || phase.kind === 'REPEAT' || phase.kind === 'FINAL';
     return {
+      log: (action, detail = {}) => void logUiAction(uid, action, { levelId: activeLevel, phase: phaseId(phase), ...detail }),
       lessonsRead: !inModule,
       onLessonsRead: () =>
         step('save your progress', async () => {
@@ -358,6 +349,11 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
                 if (submitted.cursor.phase.kind === 'DRIVE') await planDrive(submitted.cursor);
                 return submitted.results;
               },
+              onAnswer: (position, item, choice, responseMs) =>
+                void logAnswerGiven(uid, {
+                  sitting: 'quiz', attempt: cursor.quiz?.attempt ?? null, levelId: activeLevel, phase: phaseId(phase),
+                  position, item, choice, responseMs,
+                }),
               onDone: () => {},
             }
           : null,
@@ -441,8 +437,15 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
     beginDrive: levelId => {
       startedAt.current = Date.now();
       setStartedRun(levelId);
+      if (current) void logDriveStarted(uid, current.run, current.free ? 'FREE_REPLAY' : cursor ? phaseId(cursor.phase) : 'unknown');
     },
     completeRun,
+    exitRun: partial => {
+      if (current && partial) void logDriveExited(uid, current.run, current.free ? 'FREE_REPLAY' : cursor ? phaseId(cursor.phase) : 'unknown', partial);
+    },
+    abandonRun: partial => {
+      if (current) void logDriveExited(uid, current.run, current.free ? 'FREE_REPLAY' : cursor ? phaseId(cursor.phase) : 'unknown', partial);
+    },
     restartAttempt: () => {},
     routing,
     course: {

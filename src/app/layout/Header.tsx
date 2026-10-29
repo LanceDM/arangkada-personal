@@ -3,13 +3,16 @@ import { Gauge, LogOut, User } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import ThemeToggle from './ThemeToggle';
 import { signOut, useAuthModal, useAuthSession } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, profile, loading } = useAuthSession();
+  const { isLoggedIn, profile, loading, user } = useAuthSession();
   const { open } = useAuthModal();
 
   const handleSignOut = async () => {
+    // Logged first: once signed out, nothing more can be written for this participant.
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'header' }).catch(() => {});
     await signOut();
     navigate('/');
   };

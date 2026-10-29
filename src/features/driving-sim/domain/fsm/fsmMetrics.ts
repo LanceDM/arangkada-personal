@@ -10,6 +10,7 @@
 import type { ActionLog } from '@/domain/learner/attempt';
 import { DEFAULT_TRANSITION_PARAMS, type FSMState, type TransitionLogEntry, type TransitionParams } from './fsmTypes';
 import type { DecisionTrace, RerollTrace } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
+import type { ControlInput } from '@/features/driving-sim/domain/telemetry/controlInputs';
 
 export interface FsmMetrics {
   totalTransitions: number;
@@ -142,6 +143,8 @@ export interface LevelFsmTelemetry {
   /** One per entry of the run's logs, in the same order: what the log entry does not carry. */
   decisions: DecisionTrace[];
   rerolls: RerollTrace[];
+  /** Every key pressed and released on the road (domain/telemetry/controlInputs). */
+  inputs?: ControlInput[];
 }
 
 /**

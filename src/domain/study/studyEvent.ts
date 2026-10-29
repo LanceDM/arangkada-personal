@@ -35,14 +35,29 @@ export type StudyEventType =
   | 'item_answered'
   | 'background_submitted'
   | 'drive_planned'
-  /** A quiz or drive opened again at the same course position (a reload, a second tab): the same seed. */
-  | 'activity_reopened'
+  /** A quiz or drive opened at a course position; `opens` > 1 = the same one again (a reload, a second tab), same seed. */
+  | 'activity_opened'
+  /** One answer, logged the moment it is given (before the sitting is submitted). */
+  | 'answer_given'
+  /** A drive began: the clock on the road starts. */
+  | 'drive_started'
+  /** A drive left before it was finished (Exit, or the page closed): what was done so far. */
+  | 'drive_exited'
   | 'decision_made'
   | 'drive_ended'
   | 'verdict_computed'
   | 'policy_decision'
   | 'reward_computed'
+  /** Anything else the participant did: a menu choice, a setting changed, signing in or out, a button that starts something. */
+  | 'ui_action'
   | 'app_error';
+
+/** Every event type, for the schema check and the rules. */
+export const STUDY_EVENT_TYPES: readonly StudyEventType[] = [
+  'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered', 'background_submitted',
+  'drive_planned', 'activity_opened', 'answer_given', 'drive_started', 'drive_exited', 'decision_made', 'drive_ended',
+  'verdict_computed', 'policy_decision', 'reward_computed', 'ui_action', 'app_error',
+];
 
 /** What a caller hands the recorder; the envelope and `seq` are added for it. */
 export interface StudyEventDraft {

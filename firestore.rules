@@ -9,6 +9,7 @@ rules_version = '2';
 //   users/{uid}/attempts/{id}/telemetry/fsm        FsmTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/decisions  DecisionTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/routing    RoutingTelemetryDoc
+//   users/{uid}/attempts/{id}/telemetry/inputs     InputTelemetryDoc: every key pressed and released on the road
 //   users/{uid}/routing/assignment                 the pilot group the developers assigned
 //   users/{uid}/routing/cursor                     StoredRoutingCursor
 //   users/{uid}/routing/competencyCourse           CourseCursor (per-competency routing FSM)
@@ -147,6 +148,14 @@ service cloud.firestore {
         && isCount(data.totalCount);
     }
 
+    function isInputTelemetry(data) {
+      return data.keys().hasAll(['schemaVersion', 'inputs', 'truncated', 'totalCount'])
+        && data.schemaVersion == 1
+        && data.inputs is list
+        && data.truncated is bool
+        && isCount(data.totalCount);
+    }
+
     function isRoutingTelemetry(data) {
       return data.keys().hasAll([
           'schemaVersion', 'mode', 'assignedGroup', 'groupInEffect', 'override',
@@ -251,8 +260,9 @@ service cloud.firestore {
         && data.keys().hasAll(['type', 'seq', 'payload'])
         && data.type in [
           'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered',
-          'background_submitted', 'drive_planned', 'activity_reopened', 'decision_made', 'drive_ended',
-          'verdict_computed', 'policy_decision', 'reward_computed', 'app_error'
+          'background_submitted', 'drive_planned', 'activity_opened', 'answer_given', 'drive_started',
+          'drive_exited', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision',
+          'reward_computed', 'ui_action', 'app_error'
         ]
         && (data.seq == null || data.seq is int)
         && data.payload is map;
@@ -395,7 +405,8 @@ service cloud.firestore {
             && exists(/databases/$(database)/documents/users/$(uid)/attempts/$(attemptId))
             && ((docId == 'fsm' && isFsmTelemetry(request.resource.data))
               || (docId == 'decisions' && isDecisionTelemetry(request.resource.data))
-              || (docId == 'routing' && isRoutingTelemetry(request.resource.data)));
+              || (docId == 'routing' && isRoutingTelemetry(request.resource.data))
+              || (docId == 'inputs' && isInputTelemetry(request.resource.data)));
           allow update, delete: if false;
         }
       }

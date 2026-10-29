@@ -7,6 +7,7 @@ import { AdminDashboard, useAdminDashboard, useAdminData } from '@/features/admi
 import { useAuthSession } from '@/features/auth';
 import { useAuthModal } from '@/features/auth';
 import { signOut } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Admin = () => {
   const dashboard = useAdminDashboard(adminData);
 
   const handleSignOut = async () => {
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'admin' }).catch(() => {});
     await signOut();
     navigate('/');
   };
@@ -129,9 +131,18 @@ const Admin = () => {
       totalCorrect={dashboard.totalCorrect}
       averageScore={dashboard.averageScore}
       topWeakCompetencies={dashboard.topWeakCompetencies}
-      onExportJSON={dashboard.exportJSON}
-      onExportAttemptsCSV={dashboard.exportAttemptsCSV}
-      onExportStudy={kind => void dashboard.exportStudy(kind)}
+      onExportJSON={() => {
+        if (user) void logUiAction(user.uid, 'admin_export', { kind: 'report_json' });
+        dashboard.exportJSON();
+      }}
+      onExportAttemptsCSV={() => {
+        if (user) void logUiAction(user.uid, 'admin_export', { kind: 'attempts_csv' });
+        dashboard.exportAttemptsCSV();
+      }}
+      onExportStudy={kind => {
+        if (user) void logUiAction(user.uid, 'admin_export', { kind: `study_${kind}` });
+        void dashboard.exportStudy(kind);
+      }}
       studyParticipants={dashboard.studyParticipants}
     />
   );

@@ -1,6 +1,7 @@
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import AppLayout from '@/app/layout/AppLayout';
-import { LessonReader, LEVELS, LEVEL_MODULES, getLevelModule, markLessonsRead } from '@/features/driving-sim';
+import { LessonReader, LEVELS, LEVEL_MODULES, getLevelModule, logUiAction, markLessonsRead } from '@/features/driving-sim';
+import { useAuthSession } from '@/features/auth';
 
 /**
  * A level's LTO module, readable on its own.
@@ -14,6 +15,10 @@ import { LessonReader, LEVELS, LEVEL_MODULES, getLevelModule, markLessonsRead } 
 const LearnPage = () => {
   const navigate = useNavigate();
   const { levelId: levelIdParam } = useParams();
+  const { user } = useAuthSession();
+  const log = (action: string, detail: Record<string, unknown> = {}) => {
+    if (user) void logUiAction(user.uid, action, { levelId, from: 'learn_page', ...detail });
+  };
   const levelId = Number(levelIdParam);
   const level = Number.isInteger(levelId) ? LEVELS.find(l => l.id === levelId) : undefined;
 
@@ -28,8 +33,13 @@ const LearnPage = () => {
     <AppLayout showFooter={false}>
       <LessonReader
         module={levelModule}
-        onClose={leave}
+        onReadEvent={event => log(`lesson_${event.action}`, { ...event, module: levelModule.id })}
+        onClose={() => {
+          log('module_closed', { module: levelModule.id });
+          leave();
+        }}
         onFinish={() => {
+          log('module_finished', { module: levelModule.id });
           markLessonsRead(level.moduleId);
           leave();
         }}
