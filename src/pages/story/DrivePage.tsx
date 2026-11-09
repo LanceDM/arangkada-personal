@@ -1,5 +1,7 @@
 import { Navigate, useNavigate } from 'react-router-dom';
 import { GameScreen } from '@/features/driving-sim';
+import { Say } from '@/shared/i18n/language';
+import { storyMessages as m } from './messages';
 import { useStoryRun } from './storyRunContext';
 
 /**
@@ -36,7 +38,7 @@ const DrivePage = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <p className="font-display text-sm uppercase tracking-widest text-muted-foreground">
-          Preparing route...
+          <Say {...m.preparingRoute} />
         </p>
       </div>
     );
@@ -49,8 +51,8 @@ const DrivePage = () => {
       // also what registers the drive's session for /dev/profile.
       key={`${activeLevel}:${rollNonce}`}
       level={levelConfig}
-      onComplete={(result, telemetry) => {
-        completeRun(result, telemetry);
+      onComplete={(result, telemetry, play) => {
+        completeRun(result, telemetry, play);
         // Replace, not push: "back" out of a results screen belongs on the
         // briefing, not inside a drive that has already been scored.
         navigate(`/play/story/${activeLevel}/complete`, { replace: true });

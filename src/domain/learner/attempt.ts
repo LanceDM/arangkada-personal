@@ -41,9 +41,9 @@ export interface ActionLog {
    */
   remediation?: true;
   /**
-   * Attempts saved before support levels existed only: the timing multiplier an injected
+   * Attempts saved before support levels only: the timing multiplier an injected
    * practice item was placed with (1.5x, 1x or 0.65x its warning distance).
-   * Read, never written. It is not a support level: before support levels every
+   * Read, never written. It is not a support level: before them every
    * briefing showed the full instruction, whatever this says.
    */
   mode?: 'easy' | 'normal' | 'hard';
@@ -53,9 +53,22 @@ export interface ActionLog {
    * The support level h the scenario was presented at, on every decision a
    * driver answered with the car: a response, a window that closed, or a lapse.
    * Absent on a question, a tutorial step, and every attempt saved before
-   * support levels existed.
+   * support levels.
    */
   support?: SupportLevel;
+  /**
+   * A standing penalty (crawling, the wrong side of the road): a charge for
+   * something the driver kept doing on clear road, not a decision at a
+   * scenario. Written only when true. Attempts saved before evidence was marked carry none,
+   * and their penalties cannot be told from a scenario by any other field.
+   */
+  standing?: true;
+  /**
+   * A question whose panel's time ran out before an answer. Scored
+   * as a wrong answer, but it says nothing about what the player knows, so it
+   * is not BKT evidence. Written only when true.
+   */
+  unanswered?: true;
 }
 
 /**
@@ -89,6 +102,12 @@ export interface LevelResult {
   weakestCompetency?: string | null;
   /** Set when the run ended in a collision, explaining what was hit and why. */
   crashReason?: string;
+  /**
+   * Set when the run ended because the level's driving time ran out.
+   * A fail like a crash, but nothing was hit, so it carries no reason of its
+   * own and adds no violation.
+   */
+  timedOut?: true;
   /** Every signed event met on this run, for the review after it. */
   signOutcomes?: SignOutcome[];
 }

@@ -1,6 +1,5 @@
-// The learned routing policy, the Optimized group's: a Q-learning policy over
-// the routing FSM's moves. Its state, its four actions, and the table it is
-// read from.
+// The learned policy of the design: a Q-learning policy over the routing FSM's moves (step
+// R5). Its state, its four actions, and the table it is read from.
 //
 // The routing FSM decides what is legal (`legalTransitions`); this policy only
 // chooses. Each of its four actions names one kind of move - nothing added,
@@ -9,8 +8,9 @@
 // wherever the machine lists no such move. A masked action is never taken, and
 // a trainer never reads or updates its value there.
 //
-// The tables are trained in simulation, outside the game. The game reads one
-// designated table, through admin's composition.
+// Nothing here is shipped. The tables are trained in simulation by
+// a developers' script and written beside the other synthetic
+// results; no game code reads them (R9).
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { CourseLevel, Outcome, RoutingMove } from '@/domain/routing/routingTypes';
 import { stateId } from '@/domain/routing/routingTypes';
@@ -25,7 +25,7 @@ export type RoutingStage = 'early' | 'middle' | 'late';
 export const ROUTING_STAGES: readonly RoutingStage[] = ['early', 'middle', 'late'];
 
 /**
- * Levels 0-4 early, 5-8 middle, 9-11 late. The routing design names Levels 1-4 as the
+ * Levels 0-4 early, 5-8 middle, 9-11 late. The design names Levels 1-4 as the
  * first stage; the tutorial joins it because the only choice it ever gives is
  * the add-on to Level 1, on passing it.
  */
@@ -35,7 +35,7 @@ export const routingStage = (level: CourseLevel): RoutingStage => (level <= 4 ? 
 export type BudgetLeft = 'more' | 'less';
 export const BUDGET_LEFT: readonly BudgetLeft[] = ['more', 'less'];
 
-/** `spent` and `size` are in the budget's own unit: graded decisions for the learned policy's training. */
+/** `spent` and `size` are in the budget's own unit: graded decisions for C's training. */
 export const budgetLeft = ({ spent, size }: { spent: number; size: number }): BudgetLeft =>
   size - spent > size / 2 ? 'more' : 'less';
 
@@ -50,17 +50,17 @@ export const ROUTING_Q_STATES: readonly RoutingQState[] = ROUTING_STAGES.flatMap
   )
 );
 
-/** What the learned policy observes of the learner at a choice: BKT's weakest competency, and how much budget has been spent. */
+/** What C observes of the learner at a choice: BKT's weakest competency, and how much budget has been spent. */
 export interface RoutingObservation {
   readonly weakest: WeakestReading;
   readonly budget: { readonly spent: number; readonly size: number };
 }
 
 /**
- * The state the learned policy reads at a choice: the stage of the level just played, the
+ * The state C reads at a choice: the stage of the level just played, the
  * weakest competency's mastery bucket (`masteryBucket`, fixed at 40 and 70
  * whatever tau is), the verdict on that level, and the budget left. Only a
- * course level offers it a choice, so the state is read at DRIVE(L) alone.
+ * course level offers C a choice, so the state is read at DRIVE(L) alone.
  */
 export const routingQState = ({ state, context }: RoutingChoice, { weakest, budget }: RoutingObservation): RoutingQState => {
   if (state.kind !== 'DRIVE') throw new Error(`the learned policy was asked to choose at ${stateId(state)}, which offers no choice`);
@@ -83,7 +83,7 @@ export const ROUTING_ACTIONS: readonly RoutingAction[] = ['none', 'weakest', 're
  * - `related`: `+ practice(r)` for the first r in `relatedCompetencies(weakest)`
  *   that has one, confirmed edges first;
  * - `review`: a review of the weakest competency at the highest passed level
- *   that teaches it, as the threshold rule takes it.
+ *   that teaches it, as the BKT threshold rule takes it.
  */
 export const routingActionMove = (
   action: RoutingAction,
@@ -111,7 +111,7 @@ export const legalRoutingActions = (legal: readonly RoutingMove[], weakest: Driv
   ROUTING_ACTIONS.filter(action => routingActionMove(action, legal, weakest) !== undefined);
 
 /**
- * Whether the learned policy is asked here: at least two of its actions are legal. Everywhere
+ * Whether C is asked here: at least two of its actions are legal. Everywhere
  * else it takes the plain move unasked, and a trainer credits what follows to
  * the choice before.
  */
@@ -132,8 +132,8 @@ export type RoutingTable = Record<RoutingQState, readonly RoutingAction[]>;
 /**
  * One state's row, from its learned values `q` and how often each action was
  * taken there, `tried`, both indexed by `ROUTING_ACTIONS`. An action never
- * tried has no estimate, only its initial value, and is left out (the rule
- * for untrained entries). Ties go to the earlier action.
+ * tried has no estimate, only its initial value, and is left out (the
+ * rule for untrained entries). Ties go to the earlier action.
  */
 export const routingTableRow = (q: ArrayLike<number>, tried: ArrayLike<number>): RoutingAction[] => {
   const ranked = ROUTING_ACTIONS.map((action, index) => ({ action, index }))
@@ -145,7 +145,7 @@ export const routingTableRow = (q: ArrayLike<number>, tried: ArrayLike<number>):
 };
 
 /**
- * The learned policy, read from a trained table. Where it has no choice it returns the plain
+ * The learned policy, read from a trained table. Where C has no choice it returns the plain
  * move; otherwise the first action of its state's row that is legal here, and
  * the plain move where the row runs out - so an untrained row is the plain
  * FSM's move.

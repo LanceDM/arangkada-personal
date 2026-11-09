@@ -23,8 +23,11 @@ import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/s
 import type { BayCue, CoastCue, GapCue, HoldCue, LaneCue, ThrottleCue } from '@/features/driving-sim/domain/world/GameWorld';
 import { actionHints, tutorialCopy } from '@/features/driving-sim/domain/evaluation/evaluatePlayerAction';
 import RoadPrompt, { Keycap, type PromptMetric } from './RoadPrompt';
+import { shownKeys, useInputMode, type InputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { scenarioInstruction, scenarioLabel } from '@/features/driving-sim/domain/scenario/scenarioCopy';
 import { scenarioSupport } from '@/features/driving-sim/domain/scenario/scenarioSupport';
+import { useText, type TextOf } from '@/shared/i18n/useText';
+import { promptMessages as m } from './messages';
 
 interface RoadEventPromptProps {
   level: LevelConfig;
@@ -66,69 +69,70 @@ const liveMetric = (
   }: Pick<
     RoadEventPromptProps,
     'laneCue' | 'gapCue' | 'holdCue' | 'bayCue' | 'coastCue' | 'throttleCue'
-  >
+  >,
+  say: TextOf
 ): PromptMetric | null => {
   // First, and ahead of everything: a jammed throttle is the one failure with
   // nothing on the road to see. A driver who is not told the engine has stuck
   // reads the acceleration as the game misbehaving.
   if (throttleCue) {
     if (throttleCue.phase === 'freed') {
-      return { label: 'Engine', value: 'Under control', ok: true, note: 'Drive on gently' };
+      return { label: say(m.engine), value: say(m.underControl), ok: true, note: say(m.driveGently) };
     }
     if (throttleCue.phase === 'braking') {
       return throttleCue.dropping
-        ? { label: 'Engine', value: 'Speed dropping', ok: true, note: 'Keep the brake down' }
-        : { label: 'Engine', value: 'Brake held', ok: true, note: 'Keep it down' };
+        ? { label: say(m.engine), value: say(m.speedDropping), ok: true, note: say(m.keepBrakeDown) }
+        : { label: say(m.engine), value: say(m.brakeHeld), ok: true, note: say(m.keepItDown) };
     }
-    return { label: 'Engine', value: 'Throttle stuck', ok: false, note: 'Hold the brake down' };
+    return { label: say(m.engine), value: say(m.throttleStuck), ok: false, note: say(m.holdBrakeDown) };
   }
   // First, because it is the only requirement a single press can lose. A driver
   // who is told about it after the window closes is being told what they should
   // have known while there was still road.
   if (event.coast && coastCue) {
     if (coastCue.lost) {
-      return { label: 'Brake', value: 'Stood on it', ok: false, note: event.coast.hint };
+      return { label: say(m.brake), value: say(m.stoodOnIt), ok: false, note: event.coast.hint };
     }
     return coastCue.safeToBrake
-      ? { label: 'Brake', value: 'Safe to hold', ok: true, note: 'Brake gently and pull in' }
-      : { label: 'Brake', value: 'Tap, do not hold', ok: false, note: event.coast.hint };
+      ? { label: say(m.brake), value: say(m.safeToHold), ok: true, note: say(m.brakeGently) }
+      : { label: say(m.brake), value: say(m.tapDontHold), ok: false, note: event.coast.hint };
   }
   // A bay is the whole grade where it is declared — the car came to rest off
   // the carriageway, or it did not — so it outranks the lane and the speed the
   // same way the gap and the wander do.
   if (event.bay && bayCue) {
     if (bayCue.stopped) {
-      return { label: 'Bay', value: 'Stopped, off the lane', ok: true, note: 'Well done' };
+      return { label: say(m.bay), value: say(m.stoppedOffLane), ok: true, note: say(m.wellDone) };
     }
     return bayCue.inBay
-      ? { label: 'Bay', value: 'Off the lane', ok: true, note: 'Now brake to a stop' }
+      ? { label: say(m.bay), value: say(m.offLane), ok: true, note: say(m.nowBrake) }
       : {
-          label: 'Bay',
-          value: 'Still in the lane',
+          label: say(m.bay),
+          value: say(m.stillInLane),
           ok: false,
-          note: `Steer ${bayCue.side} off the road`,
+          note: say(m.steerOff(bayCue.side)),
         };
   }
   if (event.lineHold && holdCue) {
     return {
-      label: 'Line',
-      value: holdCue.steady ? 'Steady' : 'Wandering',
+      label: say(m.line),
+      value: say(holdCue.steady ? m.steady : m.wandering),
       ok: holdCue.steady,
-      note: holdCue.steady ? 'Hold it' : 'Come back straight',
+      note: say(holdCue.steady ? m.holdIt : m.comeBackStraight),
     };
   }
   if (event.following && gapCue) {
     return {
-      label: 'Gap',
+      label: say(m.gap),
       value: `${gapCue.seconds.toFixed(1)}s`,
       ok: gapCue.safe,
-      note: gapCue.safe ? 'Safe' : 'Ease off',
+      note: say(gapCue.safe ? m.safe : m.easeOff),
     };
   }
   if ((event.requiredLane || event.maneuver) && laneCue) {
     return {
-      label: 'Lane',
-      value: laneCue.inLane ? 'In position' : 'Move over',
+      label: say(m.lane),
+      value: say(laneCue.inLane ? m.inPosition : m.moveOver),
       ok: laneCue.inLane,
       note: laneCue.hint,
     };
@@ -148,13 +152,13 @@ const situationOnly = (metric: PromptMetric | null, throttleCue: ThrottleCue | n
   throttleCue && metric ? { label: metric.label, value: metric.value, ok: metric.ok } : null;
 
 /** The options an event offers, as the small keycap-like chips. */
-const choiceChips = (event: ScenarioEvent) =>
+const choiceChips = (event: ScenarioEvent, say: TextOf) =>
   (event.choices ?? []).map((choice, index) => (
     <span
       key={index}
       className="rounded-md border border-border bg-background px-2 py-1 font-display text-xs text-muted-foreground"
     >
-      {actionHints[choice.action] || choice.label}
+      {actionHints[choice.action] ? say(actionHints[choice.action]) : choice.label}
     </span>
   ));
 
@@ -180,11 +184,11 @@ const CONTROL_KEYS: Partial<Record<ScenarioEvent['correctAction'], string[]>> = 
   honk: ['H'],
 };
 
-const controlKeys = (event: ScenarioEvent) => {
-  if (event.choices?.length) return choiceChips(event);
+const controlKeys = (event: ScenarioEvent, mode: InputMode, say: TextOf) => {
+  if (event.choices?.length) return choiceChips(event, say);
   const keys = CONTROL_KEYS[event.correctAction];
   if (!keys) return null;
-  return keys.map(key => <Keycap key={key}>{key}</Keycap>);
+  return shownKeys(keys, mode).map(key => <Keycap key={key}>{key}</Keycap>);
 };
 
 const RoadEventPrompt = ({
@@ -200,6 +204,8 @@ const RoadEventPrompt = ({
   coastCue,
   throttleCue,
 }: RoadEventPromptProps) => {
+  const mode = useInputMode();
+  const say = useText();
   if (!activeEvent) return null;
 
   if (level.id === 0) {
@@ -207,16 +213,16 @@ const RoadEventPrompt = ({
     return (
       <RoadPrompt
         tone="instructor"
-        label={instruction?.label ?? scenarioLabel(activeEvent)}
-        instruction={instruction?.helper ?? scenarioInstruction(activeEvent)}
+        label={instruction ? say(instruction.label) : scenarioLabel(activeEvent)}
+        instruction={instruction ? say(instruction.helper) : scenarioInstruction(activeEvent, say)}
       >
         {instruction
-          ? instruction.keys.map(key => (
+          ? shownKeys(instruction.keys, mode).map(key => (
               <Keycap key={key} active>
                 {key}
               </Keycap>
             ))
-          : choiceChips(activeEvent)}
+          : choiceChips(activeEvent, say)}
       </RoadPrompt>
     );
   }
@@ -229,7 +235,7 @@ const RoadEventPrompt = ({
     return (
       <RoadPrompt
         tone={reacting ? 'react' : 'approach'}
-        label="Traffic stop"
+        label={say(m.trafficStop)}
         instruction={null}
         urgent={reacting}
         approach={eventApproach}
@@ -243,13 +249,13 @@ const RoadEventPrompt = ({
   // `scenarioInstruction`, because an inspection's `correctAction` is the
   // answer to the question asked after the stop, not the stop.
   if (activeEvent.inspection) {
-    const shown = scenarioSupport(activeEvent, support);
+    const shown = scenarioSupport(activeEvent, support, level, say);
     if (!shown.showsResponse) {
       const reacting = eventPhase !== 'approach';
       return (
         <RoadPrompt
           tone={reacting ? 'react' : 'approach'}
-          label="LTO checkpoint"
+          label={say(m.ltoCheckpoint)}
           instruction={null}
           cue={shown.cue}
           urgent={reacting}
@@ -261,21 +267,23 @@ const RoadEventPrompt = ({
     return (
       <RoadPrompt
         tone="checkpoint"
-        label="LTO checkpoint"
-        instruction={reacting ? 'Brake to a full stop at the line.' : 'Start slowing for the checkpoint.'}
+        label={say(m.ltoCheckpoint)}
+        instruction={say(reacting ? m.brakeAtLine : m.startSlowing)}
         urgent={reacting}
         approach={eventApproach}
       >
-        <Keycap active={reacting}>↓</Keycap>
-        <Keycap active={reacting}>S</Keycap>
-        <Keycap active={reacting}>Space</Keycap>
+        {shownKeys(['↓', 'S', 'Space'], mode).map(key => (
+          <Keycap key={key} active={reacting}>
+            {key}
+          </Keycap>
+        ))}
       </RoadPrompt>
     );
   }
 
   const reacting = eventPhase !== 'approach';
-  const shown = scenarioSupport(activeEvent, support);
-  const metric = liveMetric(activeEvent, { laneCue, gapCue, holdCue, bayCue, coastCue, throttleCue });
+  const shown = scenarioSupport(activeEvent, support, level, say);
+  const metric = liveMetric(activeEvent, { laneCue, gapCue, holdCue, bayCue, coastCue, throttleCue }, say);
   return (
     <RoadPrompt
       tone={reacting ? 'react' : 'approach'}
@@ -290,7 +298,7 @@ const RoadEventPrompt = ({
     >
       {/* The keys that make the graded move are the answer; a question's own
           options are not, and are the question at every level. */}
-      {shown.showsResponse ? controlKeys(activeEvent) : activeEvent.choices?.length ? choiceChips(activeEvent) : null}
+      {shown.showsResponse ? controlKeys(activeEvent, mode, say) : activeEvent.choices?.length ? choiceChips(activeEvent, say) : null}
     </RoadPrompt>
   );
 };

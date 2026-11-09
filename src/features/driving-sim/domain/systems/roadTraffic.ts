@@ -82,7 +82,10 @@ const DEFAULT_ENTRY_RANGE = 1000;
  */
 const RETIRE_BEHIND = 340;
 
-/** How fast a scenario vehicle changes speed, in km/h per frame. */
+/**
+ * How fast a scenario vehicle changes speed, in km/h per frame, and when it
+ * counts as settled, both on the level's `speedChangeScale`.
+ */
 const ACCELERATION = 0.35;
 const DECELERATION = 0.7;
 
@@ -175,10 +178,11 @@ export const advanceRoadTraffic = (
 
     const target = targetSpeed(event, level, playerDistance);
     const gap = target - existing.speed;
-    existing.braking = gap < -SETTLED;
+    const settled = SETTLED * pace.speedChangeScale;
+    existing.braking = gap < -settled;
     existing.speed =
-      gap > SETTLED ? Math.min(target, existing.speed + ACCELERATION)
-      : gap < -SETTLED ? Math.max(target, existing.speed - DECELERATION)
+      gap > settled ? Math.min(target, existing.speed + ACCELERATION * pace.speedChangeScale)
+      : gap < -settled ? Math.max(target, existing.speed - DECELERATION * pace.speedChangeScale)
       : target;
     existing.distance += perFrame(existing.speed, pace);
 

@@ -20,11 +20,11 @@
 //     the two mechanisms `related` and `review` exist to exploit; without them
 //     those actions had nothing to do and could never be worth choosing.
 //  4. Support has two effects, kept apart. What the screen shows raises the
-//     chance of a correct answer (an assumption about this game's own screens), and
+//     chance of a correct answer (assumption A1, this game's own screens), and
 //     it changes how much an attempt teaches, in opposite directions for a
 //     novice and an expert - the expertise reversal effect, calibrated to a
-//     published meta-analysis rather than chosen. The pre-registered experiment
-//     protocol fixed all of this before any run.
+//     published meta-analysis rather than chosen. the algorithm notes,
+//     "Experiment protocol" sections 2-3, fixed all of this before any run.
 import type { DrivingCompetency, SupportLevel } from '@/domain/learner/competency';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { relatedCompetencies } from '@/domain/learner/adaptive/relatedness';
@@ -44,7 +44,7 @@ import type { LearnerProfile } from '@/domain/learner/competency';
 export const PUBLISHED_EXPERTISE_REVERSAL = { dNovice: 0.505, dExpert: -0.428 } as const;
 
 /**
- * An assumption: how often a learner who would fail unaided gets the answer
+ * Assumption A1: how often a learner who would fail unaided gets the answer
  * right because the screen showed them the move. `cue` shows where to look,
  * not the move, and is taken at half of `full`. Specific to this game's
  * screens; not a literature value.
@@ -61,7 +61,7 @@ export interface EffectSizes {
   dNovice: number;
   /** Expertise reversal, experts: high minus low assistance (published). */
   dExpert: number;
-  /** What `full` adds to a failing learner's chance; `cue` adds half. */
+  /** A1: what `full` adds to a failing learner's chance; `cue` adds half. */
   assistFull: number;
   /** How much time pressure moves the chance of a correct answer. */
   timePressureChallenge: number;
@@ -73,8 +73,8 @@ export interface EffectSizes {
  * How support scales what an attempt teaches: `k(s) = betaNovice*(1 - s) -
  * betaExpert*s`, positive for a novice (support helps) and negative for an
  * expert (it gets in the way). Not chosen: calibrated so the simulator
- * reproduces the effect sizes above (`calibrateSupportGain`, in the
- * simulation environment).
+ * reproduces the effect sizes above (`calibrateSupportGain` in
+ * a developers' script).
  */
 export interface SupportGain {
   betaNovice: number;
@@ -122,7 +122,7 @@ export const LEARNING_SIGMA = 0.18;
 /** How much of a widened window's practice fails to transfer to baseline timing. */
 export const TRANSFER_PENALTY = 0.5;
 
-/** The effect sizes as committed: the literature's for h, and the model's own for theta and the screen. */
+/** The effect sizes as committed: the literature's for h, and the model's own for theta and A1. */
 export const COMMITTED_EFFECT_SIZES: EffectSizes = {
   ...PUBLISHED_EXPERTISE_REVERSAL,
   assistFull: ASSIST_FULL,
@@ -143,9 +143,9 @@ export const RELATED_TRANSFER = 0.35;
  * guessed: at 0.02 the world was decay-dominated (mean true skill *fell* over an
  * episode under every policy, so the simulation described forgetting faster than
  * learning, which is not a study period). At 0.005 a sensible policy ends above
- * where it started while forgetting still bites. Re-check it against the
- * experiment's true-skill outcomes, which are where each condition ends;
- * learners start at a mean of 25.
+ * where it started while forgetting still bites. Re-check it with
+ * a developers' script, whose true-skill outcomes are where each
+ * condition ends; learners start at a mean of 25.
  */
 export const RETENTION_DECAY = 0.005;
 /**
@@ -183,7 +183,7 @@ export const unaidedSuccess = (
 ): number =>
   Math.max(0.02, Math.min(0.98, skill - timePressure * effects.timePressureChallenge * CHALLENGE_SUCCESS_SHIFT));
 
-/** How much of the rest the screen makes up at each support level. */
+/** A1: how much of the rest the screen makes up at each support level. */
 export const assistOf = (support: SupportLevel, effects: EffectSizes = COMMITTED_EFFECT_SIZES): number =>
   support === 'full' ? effects.assistFull : support === 'cue' ? effects.assistFull / 2 : 0;
 
@@ -196,7 +196,7 @@ export const observedSuccess = (
 
 /**
  * How support scales what an attempt teaches a learner at `skill` in the
- * practised competency (the model's assumptions): `full` by `1 + k`, `none` by
+ * practised competency (assumptions A2-A4): `full` by `1 + k`, `none` by
  * `1 - k`, `cue` not at all, never below nothing. k is linear in skill and
  * crosses zero where support stops helping.
  */
@@ -337,15 +337,14 @@ export const readinessReward = (args: {
   RETENTION_WEIGHT * (args.trueAfter - args.trueBefore);
 
 /**
- * Which reward a training run uses.
+ * Which protocol's reward a training run uses.
  *
- * `mean-readiness` is the first study's, kept so it stays runnable exactly as
- * it was published. `weakest-link` is the second's: the same two terms over
- * the same syllabus, aggregated by the minimum instead of the mean, so the
- * policy is trained on the quantity the experiment judges it by -
- * weakest-competency readiness. The first study trained on the mean and judged
- * the floor, and reported the mismatch as a limitation; that is the defect the
- * second repairs.
+ * `mean-readiness` is the first experiment's, kept so that experiment stays runnable exactly as it
+ * was published. `weakest-link` is the second experiment's: the same two terms over the same
+ * syllabus, aggregated by the minimum instead of the mean, so the policy is
+ * trained on the quantity the experiment judges it by - weakest-competency
+ * readiness. That experiment trained on the mean and judged the floor, and reported the
+ * mismatch as a limitation; that is the defect the second experiment repairs.
  */
 export type RewardKind = 'mean-readiness' | 'weakest-link';
 

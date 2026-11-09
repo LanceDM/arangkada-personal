@@ -18,3 +18,4 @@ export interface AdminReportRepository {
   examResults(): Promise<ExamRow[]>;
   dailyResults(): Promise<DailyRow[]>;
 }
+

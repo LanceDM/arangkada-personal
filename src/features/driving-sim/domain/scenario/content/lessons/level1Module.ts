@@ -7,7 +7,6 @@ export const level1Module = {
   title: 'Legal To Drive',
   sourceLevel: 1,
   desc: 'Learn when a person is legally allowed to drive, which permit or license fits the situation, and why DL codes, clutch codes, conditions, and validity matter before a trip begins.',
-  passingScore: 4,
   lessons: [
     {
       id: 'level-1-mission-briefing',
@@ -356,74 +355,6 @@ export const level1Module = {
           text: 'SP is supervised learning. CL is conductor duty, not driving. NPDL is for private driving within allowed codes. PDL is for paid or professional driving within allowed codes. DL code, clutch code, conditions, and validity must all match before the trip may continue.',
         },
       ],
-    },
-  ],
-  quiz: [
-    {
-      question: "A student driver with only a Student-Driver's Permit wants to drive alone. What is the correct decision?",
-      options: [
-        'Do not proceed; a duly licensed companion with the proper vehicle code is required.',
-        'Proceed if the route is short.',
-        'Proceed if the vehicle is automatic.',
-        'Proceed if the student driver already finished the written exam.',
-      ],
-      correct: 0,
-      explanation: "A Student-Driver's Permit is learning authority. The student driver must be accompanied by a duly licensed driver with the proper authority for the vehicle.",
-    },
-    {
-      question: "A person presents only a Conductor's License and says they will drive the vehicle. What should happen?",
-      options: [
-        'Do not proceed as the driver; a Conductor License is not driving authority.',
-        'Proceed if the vehicle is a public utility vehicle.',
-        'Proceed if the conductor knows the route.',
-        'Proceed if there are passengers waiting.',
-      ],
-      correct: 0,
-      explanation: "A Conductor's License authorizes conductor duties, not operation of a motor vehicle.",
-    },
-    {
-      question: 'A driver has DL Code A only but is assigned to drive a passenger car. What is missing?',
-      options: [
-        'The proper DL code for a passenger car.',
-        'A conductor license.',
-        'A heavier vehicle category.',
-        'A public utility route permit.',
-      ],
-      correct: 0,
-      explanation: 'Code A covers motorcycles. A passenger car needs the proper light-vehicle authority, commonly Code B for this Level 1 situation.',
-    },
-    {
-      question: 'A driver has Code B with automatic-only authority. The assigned car is manual transmission. What is the legal decision?',
-      options: [
-        'Do not proceed unless the license allows manual transmission.',
-        'Proceed because Code B is enough by itself.',
-        'Proceed if a passenger can shift gears.',
-        'Proceed slowly until the checkpoint is passed.',
-      ],
-      correct: 0,
-      explanation: 'Automatic-only authority does not allow operation of a manual vehicle, even when the DL code matches the vehicle category.',
-    },
-    {
-      question: 'A driver has an NPDL and is asked to drive as paid work. What should be checked?',
-      options: [
-        'Whether professional authority is required for the trip purpose.',
-        'Whether the vehicle has a loud horn.',
-        'Whether the passenger owns the vehicle.',
-        'Whether the route is familiar.',
-      ],
-      correct: 0,
-      explanation: 'NPDL covers private motor vehicle operation. Paid or hired driving may require Professional Driver License authority plus the correct DL code.',
-    },
-    {
-      question: 'At the checkpoint, the license is expired or suspended. What is the correct Go / No-Go decision?',
-      options: [
-        'No-Go; valid authority is required before driving.',
-        'Go if the driver has used the license before.',
-        'Go if the road is clear.',
-        'Go if the driver promises to renew later.',
-      ],
-      correct: 0,
-      explanation: 'The document must be valid. Expired, suspended, revoked, or invalid authority means the driver should not proceed.',
     },
   ],
 } satisfies LevelModule;

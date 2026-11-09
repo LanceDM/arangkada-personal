@@ -9,6 +9,7 @@
  * entry's verdict settles the cursor, and the old practice policy, which the
  * suggestion reads, is never consulted.
  */
+import type { Language, Localized } from '@/shared/lib/localized';
 import type { LevelResult } from '@/domain/learner/attempt';
 import { POLICY_TABLE_ID } from '@/domain/learner/adaptive/qLearningPolicy';
 import type { Outcome, RoutingLogEntry } from '@/domain/routing/routingTypes';
@@ -19,6 +20,7 @@ import {
   buildRoutingTelemetry,
   recordCourseEntry,
   recordFreeReplay,
+  type PlayConditions,
   type RoutedEntryRecord,
 } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import { settleCourseEntry, type CourseEntry, type RoutingCursor } from '@/features/driving-sim/domain/adaptive/courseRouting';
@@ -39,6 +41,8 @@ export interface AttemptStart {
   plan: AdaptivePlan;
   /** The level as rolled for this attempt. */
   level: LevelConfig;
+  /** The language the player had chosen when the attempt began. */
+  language?: Language;
 }
 
 export interface CompleteMissionInput {
@@ -51,14 +55,16 @@ export interface CompleteMissionInput {
   start?: AttemptStart;
   /** The group the attempt was played in, recorded with it. */
   group: RoutingGroupResolution;
+  /** How the drive was played - its controls and how well the device kept up - where the drive reported it. */
+  play?: PlayConditions;
 }
 
-/** The verdict the routing FSM is handed: the level's pass mark, a crash counting as a fail. */
+/** The verdict the routing FSM is handed: the level's pass mark, a crash or a timeout counting as a fail. */
 export const routingOutcome = (result: LevelResult): Outcome => (result.completed ? 'passed' : 'failed');
 
 /**
- * The attempt's graded decisions, standing penalties excluded: the unit the
- * learned policy's budget is counted in, as the simulation counts it. Without the drive's
+ * The attempt's graded decisions, standing penalties excluded: the unit C's
+ * budget is counted in, as the simulation counts it. Without the drive's
  * traces, every log is counted.
  */
 export const gradedDecisionsOf = (result: LevelResult, telemetry?: LevelFsmTelemetry): number =>
@@ -72,7 +78,7 @@ export const gradedDecisionsOf = (result: LevelResult, telemetry?: LevelFsmTelem
  */
 const saveAttempt = async (
   uid: string,
-  { result, telemetry, start }: Pick<CompleteMissionInput, 'result' | 'telemetry' | 'start'>,
+  { result, telemetry, start, play }: Pick<CompleteMissionInput, 'result' | 'telemetry' | 'start' | 'play'>,
   routing: { group: RoutingGroupResolution; entry: RoutedEntryRecord | null; log: readonly RoutingLogEntry[] }
 ) => {
   const { storyAttempts } = drivingSimDeps();
@@ -86,6 +92,8 @@ const saveAttempt = async (
     ...(telemetry
       ? { fsmMetrics: telemetry.metrics, reactionLatencies: telemetry.reactionLatencies }
       : {}),
+    ...(result.timedOut ? { timedOut: true as const } : {}),
+    ...(start?.language ? { language: start.language } : {}),
   });
   const legacy = routing.group.groupInEffect === 'legacy';
   const plan = start?.plan;
@@ -131,6 +139,7 @@ const saveAttempt = async (
           practicePolicy: legacy ? POLICY_TABLE_ID : null,
         },
         entry: routing.entry,
+        play: play ?? null,
         log: routing.log,
         at: Date.now(),
       })
@@ -145,8 +154,9 @@ export const completeMission = async ({
   telemetry,
   start,
   group,
+  play,
 }: CompleteMissionInput): Promise<LevelRecommendation> => {
-  if (uid) await saveAttempt(uid, { result, telemetry, start }, { group, entry: null, log: [] });
+  if (uid) await saveAttempt(uid, { result, telemetry, start, play }, { group, entry: null, log: [] });
 
   return getLevelRecommendation(
     historyLogs(await loadLearnerHistory(uid)),
@@ -167,16 +177,17 @@ export const completeCourseAttempt = async ({
   telemetry,
   start,
   group,
+  play,
   course,
 }: CompleteMissionInput & { course: { cursor: RoutingCursor; entry: CourseEntry } }): Promise<{
   cursor: RoutingCursor;
-  note: string;
+  note: Localized;
 }> => {
   const outcome = routingOutcome(result);
   const gradedDecisions = gradedDecisionsOf(result, telemetry);
   const settled = settleCourseEntry(course.cursor, course.entry, outcome, gradedDecisions);
   if (uid) {
-    await saveAttempt(uid, { result, telemetry, start }, {
+    await saveAttempt(uid, { result, telemetry, start, play }, {
       group,
       entry: recordCourseEntry({ entry: course.entry, before: course.cursor, after: settled.cursor, outcome, gradedDecisions }),
       log: settled.log,
@@ -187,11 +198,11 @@ export const completeCourseAttempt = async ({
 };
 
 const completeOutsideCourse = async (
-  { uid, result, telemetry, start, group, route }: CompleteMissionInput & { route: string[] },
+  { uid, result, telemetry, start, group, route, play }: CompleteMissionInput & { route: string[] },
   kind: 'free-replay' | 'post-test'
 ): Promise<void> => {
   if (!uid) return;
-  await saveAttempt(uid, { result, telemetry, start }, {
+  await saveAttempt(uid, { result, telemetry, start, play }, {
     group,
     entry: recordFreeReplay({
       levelId: result.levelId,

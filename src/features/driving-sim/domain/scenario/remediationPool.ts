@@ -80,8 +80,8 @@ const LEVEL_SLOTS: Record<number, SlotVariant[][]> = {
  *   for the geometry of the level it was injected into. Same argument as
  *   `maneuver`, one step further along.
  * - `scene: 'route'` stands on its own level's `RouteLayout`, which is
- *   declared on that level's config and does not travel with the variant.
- *   Appended elsewhere, the acceleration lane, the lane gantry and
+ *   declared on that level's config and does not travel with the variant
+ *. Appended elsewhere, the acceleration lane, the lane gantry and
  *   the toll plaza it is graded against are simply not there - and a merge
  *   with no auxiliary lane to leave is graded correct by construction, which
  *   is `neutral`'s argument.
@@ -101,7 +101,7 @@ const LEVEL_SLOTS: Record<number, SlotVariant[][]> = {
  * What is left - roadside signs, pavement markings, hazards in the carriageway,
  * checkpoint inspections, speed and following-distance judgments - is graded
  * from speed, lane and whether the vehicle stopped, all of which the telemetry
- * grader measures on any road. Each of the route-bound cases was driven on
+ * grader measures on any road. A drive test drives each of the route-bound cases on
  * the levels they were being appended to.
  */
 const TURNS: ReadonlyArray<SlotVariant['correctAction']> = ['turn_left', 'turn_right'];

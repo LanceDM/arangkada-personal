@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, pickWeighted, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { DrivingCompetency } from '@/domain/learner/competency';
@@ -713,7 +714,10 @@ const level1Base = {
   moduleId: levelModule.id,
   description: levelModule.desc,
   roadLength: 3770,
-  speedLimit: 35,
+  roadClass: 'city_street',
+  speedLimit: 30,
+  // Spaced and measured at 35 on the dial; driven at 30 as it was at 35.
+  pace: spacedPace(30, 35),
   requiredScore: 45,
   stars2: 55,
   stars3: 65,

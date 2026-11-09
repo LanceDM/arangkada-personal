@@ -17,9 +17,13 @@ import {
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
   type User,
 } from 'firebase/auth';
 import { auth } from '@/shared/infrastructure/firebase/client';
+import { appUrl } from '@/shared/lib/appUrl';
 import type { AuthGateway } from '@/features/auth/application/ports';
 import type { AuthUser } from '@/features/auth/domain/userProfile';
 import { createUserProfile, getUserProfile } from './FirebaseUserRepository';
@@ -81,6 +85,22 @@ const signUp = async (email: string, password: string, username: string): Promis
 };
 
 /**
+ * A study account: its address is synthetic, so nothing is sent
+ * to it, and the profile carries no email. Its username becomes the
+ * participant code when the account enrols.
+ */
+const createStudyAccount = async (identity: string, password: string): Promise<AuthUser> => {
+  const result = await createUserWithEmailAndPassword(auth, identity, password);
+  await createUserProfile(result.user.uid, {
+    email: '',
+    username: 'Participant',
+    createdAt: Date.now(),
+    ...NEW_ACCOUNT,
+  });
+  return toAuthUser(result.user);
+};
+
+/**
  * Popup first, full-page redirect when the browser blocks it. The redirect
  * branch resolves to null: the page is about to navigate away, and the sign-in
  * completes on the way back in through `completeRedirectSignIn`.
@@ -114,12 +134,19 @@ const completeRedirectSignIn = async (): Promise<AuthUser | null> => {
 export const firebaseAuthGateway: AuthGateway = {
   signIn,
   signUp,
+  createStudyAccount,
+  changePassword: async (currentPassword, newPassword) => {
+    const user = auth.currentUser;
+    if (!user?.email) throw new Error('No password account is signed in.');
+    await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword));
+    await updatePassword(user, newPassword);
+  },
   signInWithGoogle,
   signOut: async () => {
     await firebaseSignOut(auth);
   },
   requestPasswordReset: async email => {
-    await sendPasswordResetEmail(auth, email, { url: `${window.location.origin}/play` });
+    await sendPasswordResetEmail(auth, email, { url: `${window.location.origin}${appUrl('/play')}` });
   },
   confirmNewPassword: async (oobCode, newPassword) => {
     await confirmPasswordReset(auth, oobCode, newPassword);

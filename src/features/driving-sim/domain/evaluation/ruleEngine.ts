@@ -1,5 +1,6 @@
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { DrivingCompetency, ViolationSeverity } from '@/domain/learner/competency';
+import { englishText, type TextOf } from '@/shared/lib/localized';
 
 /** One scored driving rule: what it expects, what it is worth, and why. */
 export interface WeightedRule {
@@ -101,7 +102,8 @@ const actionSatisfies = (action: string, expected: string): boolean => {
 export const evaluateWeightedRule = (
   event: ScenarioEvent,
   playerAction: string,
-  violationStreak: number
+  violationStreak: number,
+  say: TextOf = englishText
 ): RuleEvaluation => {
   const rule = buildRule(event);
   const isCorrect = actionSatisfies(playerAction, rule.expectedAction);
@@ -138,7 +140,7 @@ export const evaluateWeightedRule = (
     isCorrect,
     points,
     weightedPenalty,
-    message: `${rule.feedback}${violationStreak > 1 ? ` (${violationStreak}x streak!)` : ''}`,
+    message: `${rule.feedback}${violationStreak > 1 ? say({ en: ` (${violationStreak}x streak!)` }) : ''}`,
     trace: {
       ruleId: rule.id,
       competency: rule.competency,

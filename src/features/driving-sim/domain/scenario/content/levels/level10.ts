@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { GarageHotspot, LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
@@ -31,7 +32,7 @@ const levelModule = getLevelModule(10);
  * | 3 | Smoke in your lane  | the closest gap held to the jeepney ahead |
  * | 4 | LTO checkpoint      | a full stop, then the call made at the window |
  * | 5 | Losing its load     | the center line was never crossed |
- * | 6 | Bus on the grade    | the speed carried past the posted forty |
+ * | 6 | Bus on the grade    | the speed carried past the posted twenty |
  * | 7 | Rider down          | a full stop, short of the bike |
  *
  * Seven different answers. A level whose every correct answer is "slow down"
@@ -73,9 +74,9 @@ const levelModule = getLevelModule(10);
  *
  * ## Where every claim comes from
  *
- * Each scenario rests on quoted LTO material, by file and heading, and what
- * the sources do not settle is left ungraded. A verdict or a correct answer
- * says nothing the sources do not.
+ * The team's source notes quotes the LTO material each scenario
+ * rests on, by file and heading, and lists what the sources do not settle
+ *. A verdict or a correct answer says nothing the pack does not.
  */
 
 /* -------------------------------------------------------------------------
@@ -252,8 +253,8 @@ const hotspots: GarageHotspot[] = [
 // where the LTO's own review answer sends a driver who needs the phone.
 //
 // Hands-free is not the answer here: the three Level 10 decks never state it,
-// and the one list of prohibited acts they carry is an image. The lesson
-// mentions it, from FDM Vol. 1.
+// and the one list of prohibited acts they carry is an image (the pack's gap
+// list). The lesson mentions it, from FDM Vol. 1.
 const phoneRingsSlot: SlotVariant[] = [
   {
     id: 'level10.the-phone-rings',
@@ -528,7 +529,7 @@ const losingItsLoadSlot: SlotVariant[] = [
 ];
 
 // 6. The bus on the descent — module section 7. Driven, and graded against the
-// forty posted at the top of the grade, which is the one thing on this road a
+// twenty posted at the top of the grade, which is the one thing on this road a
 // driver's own discipline is being measured by.
 //
 // That pairing is the lesson. A speed limiter exists because discipline alone
@@ -547,14 +548,16 @@ const busOnTheGradeSlot: SlotVariant[] = [
     id: 'level10.bus-on-the-grade',
     label: 'Bus on the grade',
     type: 'speed_limit',
-    postedSpeed: 40,
+    // Labelled: a downgrade is one of §35(b) row 4's "similar dangerous
+    // circumstances" (speed-limits pack).
+    postedSpeed: 20,
     scene: 'gradient_down',
     sign: {
       name: 'Speed Limit',
       category: 'C. Regulatory Sign — Speed',
       meaning: 'The maximum speed allowed on this stretch of road.',
       art: 'circle_limit',
-      glyph: '40',
+      glyph: '20',
     },
     npc: {
       path: 'travelling_ahead',
@@ -566,15 +569,15 @@ const busOnTheGradeSlot: SlotVariant[] = [
       speed: { cruise: 1.5 },
     },
     description:
-      'A provincial bus is pulling away from you down the grade, brakes smoking, well past the forty posted at the top. The road is pulling you along with it.',
-    recommendedMove: 'Hold your speed down to the posted forty.',
+      'A provincial bus is pulling away from you down the grade, brakes smoking, well past the twenty posted at the top. The road is pulling you along with it.',
+    recommendedMove: 'Hold your speed down to the posted twenty.',
     correctAction: 'brake',
     points: 20,
     warningDistance: 560,
     penaltyMessage:
-      'You came down the grade over the posted forty. A bus with no working limiter has no ceiling of its own, and you are not obliged to match it.',
+      'You came down the grade over the posted twenty. A bus with no working limiter has no ceiling of its own, and you are not obliged to match it.',
     rewardMessage:
-      'Right — forty held all the way down, while the bus ran away from you. Its speed is not a limit you have to match.',
+      'Right — twenty held all the way down, while the bus ran away from you. Its speed is not a limit you have to match.',
     duration: 200,
     lawCitation:
       "RA 10916, the Road Speed Limiter Act, requires covered vehicles — closed vans, haulers and cargo trucks or trailers, public utility vehicles, shuttle services and tanker trucks, but not taxicabs or public utility jeepneys — to run with a standard speed limiter, set under LTO or LTFRB supervision to the maximum allowed on the route they ply, and a covered vehicle without one is not registered. Operating without one, or with one that does not work or has been tampered with, carries a Php 50,000 fine with the driver's license suspended for one month or the franchise for three months on a first offense, and the vehicle is impounded until the fine is paid. Tampering with a limiter carries six months to three years' imprisonment and a Php 30,000 fine. None of it applies to your car: yours is the posted limit, and on a descent a suitable speed, so that the brakes are not worked all the way down.",
@@ -599,7 +602,7 @@ const busOnTheGradeSlot: SlotVariant[] = [
 // The duty RA 4136 puts on a driver binds one "concerned in" the crash, which
 // this driver is not, so the stop is RO101's first aid rather than a legal duty
 // and none is claimed. The numbers are RO101's with one correction from a later
-// law: RO101 prints PNP 117, which Executive Order No. 56, s. 2018
+// law (pack K7): RO101 prints PNP 117, which Executive Order No. 56, s. 2018
 // replaced with Emergency 911. The Red Cross stays on 143.
 const riderDownSlot: SlotVariant[] = [
   {
@@ -674,13 +677,13 @@ export const level10: LevelConfig = {
   // Seven events 800 to 920 apart, plus a runway past the last one long enough
   // for its measurement window to close before the road ends.
   roadLength: 6920,
-  // A provincial national road, the same class Level 9 uses and for a related
-  // reason: this is a family trip out of the city, which is where checkpoints
-  // are set up, where a jeepney is followed for kilometers, and where a bus on
-  // a descent has enough grade to outrun its own brakes. A town speed would
-  // make the following gap unmeasurable; an expressway speed would leave no
-  // time to read any of it.
-  speedLimit: 60,
+  // The same road Level 9 drives: buildings along its verge, so RA 4136's city
+  // or municipal street rather than open country (speed-limits pack, O3). Its
+  // following gaps and its descent were spaced and measured at 60 on the dial;
+  // the pace drives that same road at 30.
+  roadClass: 'city_street',
+  speedLimit: 30,
+  pace: spacedPace(30, 60),
   requiredScore: 148,
   stars2: 178,
   stars3: 204,

@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { GarageHotspot, GarageStage, LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
@@ -159,7 +160,7 @@ const floodedDipSlot: SlotVariant[] = [
       'Flooded road: be aware, calm and ready; avoid stepping on the brake as much as possible while in the water; reduce speed by releasing the accelerator pedal; and gently step on the brake pedal after passing the flooded stretch, to dry the brake pads, rotors, linings and drums. Hydroplaning: slow down and drive in a lower gear, stay away from mud or stagnant water, do not jam the brake pedal, and do not make a sharp or quick turn.',
     competency: 'hazard_awareness',
     severity: 'critical',
-    effect: { grip: 0.42, jarringAbove: 38, span: 150 },
+    effect: { grip: 0.42, jarringAbove: 20, span: 150 },
     sign: {
       name: 'Flood-Prone Area',
       category: 'B. Warning Sign — Road Obstacle',
@@ -297,21 +298,21 @@ const tireBlowoutSlot: SlotVariant[] = [
       'Tire blowout: take your foot off the accelerator pedal, do not slam on the brakes, hold on to your steering wheel firmly, slow down gradually, apply the brake softly once the vehicle is under control, and pull the vehicle to the safe side of the road. Then switch on hazard lights and place your Early Warning Device about four meters behind the vehicle on a one-way road, or on both sides on a two-way road. Always carry an emergency kit: a first aid kit, a flashlight and an Early Warning Device.',
     competency: 'hazard_awareness',
     severity: 'critical',
-    // 36 is 60% of this level's limit, the share the rest of the game already
-    // treats as "slowed for this". Above it the car is still unstable and a
-    // held pedal is the mistake the module puts in bold; at or below it,
+    // 20 is the speed the rest of the game already treats as "slowed for this"
+    // (`slowTarget`, RA 4136 §35(b) row 4). Above it the car is still unstable
+    // and a held pedal is the mistake the module puts in bold; at or below it,
     // braking softly to a stop is what the module asks for next.
     //
     // 15 frames is a quarter of a second, and it is really a speed allowance
-    // wearing a clock: at the grip below, a quarter-second of held brake is
-    // about six km/h. Shedding that much in one application is a soft brake;
+    // wearing a clock: at the grip below and this level's pace, a quarter-second
+    // of held brake is about three km/h. Shedding that much in one application is a soft brake;
     // dragging the car down from the limit in one is the slam the module puts
-    // in bold, and takes nearer forty frames. A firm tap of ↓ is well inside
+    // in bold, and takes nearer fifty frames. A firm tap of ↓ is well inside
     // it. See `CoastRequirement` on why this is a duration at all: ↓ is the
     // brake *and* the only way to lower the setting, so "no brake" is not
     // something these controls can express.
     coast: {
-      brakeBelow: 36,
+      brakeBelow: 20,
       maxHeldFrames: 15,
       hint: 'Tap it down, hands firm',
       brakedMessage:
@@ -544,7 +545,7 @@ const aftermathHotspots: GarageHotspot[] = [
   //
   // The number is 911, which Executive Order No. 56, s. 2018 made the national
   // emergency hotline in place of the PNP 117 RO101 prints. The Red Cross stays
-  // on 143.
+  // on 143 (Level 10 pack, K7).
   {
     id: 'casualties',
     label: 'Who you attend to',
@@ -642,13 +643,14 @@ export const level9: LevelConfig = {
   // Six events, plus a runway past the crash long enough for its measurement
   // window to close before the road ends.
   roadLength: 6000,
-  // A provincial national road rather than a city street or an expressway.
-  // Every emergency in this module is one that a town speed would make
-  // survivable and an expressway speed would make unanswerable: a blowout has
-  // to be fast enough to pull the wheel, a descent long enough to cook the
-  // brakes, and standing water deep enough to matter. Sixty is where those are
-  // all true and the driver still has room to be taught something.
-  speedLimit: 60,
+  // A two-way road with buildings along its verge: closely bordered by
+  // habitations, so not §35(b)'s open country, and RA 4136's city or municipal
+  // street (speed-limits pack, O3). The emergencies were spaced and measured at
+  // 60 on the dial, where a blowout pulls the wheel and a descent cooks the
+  // brakes; the pace drives that same road at 30.
+  roadClass: 'city_street',
+  speedLimit: 30,
+  pace: spacedPace(30, 60),
   requiredScore: 186,
   stars2: 224,
   stars3: 257,

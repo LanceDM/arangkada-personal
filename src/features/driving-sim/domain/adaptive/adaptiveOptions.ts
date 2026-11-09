@@ -1,10 +1,11 @@
-// The five repairs made to the adaptive layer, each an option whose `legacy`
-// value is the rule the game-level simulation ran under. Each is justified by
-// the stated rule it restores, not by what it does to a result.
+// The five repairs made to the adaptive layer, each an option whose
+// `legacy` value is the rule the fourth experiment ran under. Each is
+// justified by the stated rule it restores, not by what it does to a result.
 //
-// The game plays `GAME_OPTIONS`. The offline simulation plays `LEGACY_OPTIONS`
-// unless told otherwise, which is what keeps its published results
-// reproducible. The shared learner-domain functions an
+// The game plays `GAME_OPTIONS`. The fourth experiment's environment
+// (a developers' script) plays `LEGACY_OPTIONS` unless told otherwise,
+// which is what keeps the fourth experiment reproducing as published and the audited system
+// reachable (the routing design, rule 7). The shared learner-domain functions an
 // option reaches default to their legacy rule for the same reason, so every
 // caller in the game passes its option explicitly.
 import type { WeakestTieBreak } from '@/domain/learner/profile';
@@ -37,7 +38,7 @@ export interface AdaptiveOptions {
   rerollHistory: RerollHistory;
 }
 
-/** The adaptive layer as the game-level simulation measured it. */
+/** The adaptive layer as the earlier experiment measured it and the audit read it. */
 export const LEGACY_OPTIONS: AdaptiveOptions = {
   practiceItemScoring: 'upside-only',
   finalExamRollBias: true,
@@ -50,7 +51,7 @@ export const LEGACY_OPTIONS: AdaptiveOptions = {
  * What the game plays on this branch.
  *
  * `untrainedRow` reaches the game only through a table trained under it. The
- * committed table was trained before the option existed and is
+ * committed table (`b30a1716`) was trained before the option existed and is
  * read as published, so its untrained rows still hold the first action.
  */
 export const GAME_OPTIONS: AdaptiveOptions = {

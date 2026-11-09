@@ -15,6 +15,7 @@ import { createDrivingWorld } from '@/features/driving-sim/domain/world/GameWorl
 import {
   CANVAS_WIDTH,
   ROAD_CENTRE_X,
+  SPEED_STEP,
   laneBounds,
   type CarState,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
@@ -76,5 +77,15 @@ describe('the tutorial steering exercises', () => {
 
     expect(reached(left)).toBe(true);
     expect(reached(right)).toBe(true);
+  });
+});
+
+describe('the press-Up step', () => {
+  const start = tutorial.events.find(event => event.id === 'level0.start-accelerate')!;
+  const at = tutorialStartX(ROAD_CENTRE_X);
+
+  it('is done at one tap, which the car eases up to and holds', () => {
+    expect(getTutorialCompletedAction(start, car(at, SPEED_STEP), ROAD_CENTRE_X)).toBe('accelerate');
+    expect(getTutorialCompletedAction(start, car(at, SPEED_STEP - 0.5), ROAD_CENTRE_X)).toBeNull();
   });
 });

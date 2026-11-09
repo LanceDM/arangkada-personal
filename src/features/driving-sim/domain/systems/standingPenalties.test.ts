@@ -1,9 +1,9 @@
 /**
- * The standing penalties' clock, and the hidden tab.
+ * The standing penalties' clock.
  *
- * The crawl's banner and its first −5 came on the same frame, so the
+ * G1: the crawl's banner and its first −5 came on the same frame, so the
  * warning warned of nothing. It now comes half the grace ahead, and the
- * charges stay where they were: 3, 8, 13 and 18 seconds.
+ * charges stay where they were documented: 3, 8, 13 and 18 seconds.
  *
  * And a frame is the drive running. The offence used to be timed on the wall
  * clock, so a tab left in the background with the car standing on clear road

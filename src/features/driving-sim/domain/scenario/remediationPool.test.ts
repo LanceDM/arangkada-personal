@@ -153,7 +153,7 @@ describe('remediationCandidates', () => {
   });
 
   it('offers only the lead van from Level 7', () => {
-    // Pinned rather than derived: each Level 7 variant was driven on the
+    // Pinned rather than derived: We drove each Level 7 variant on the
     // levels it was being appended to, and this is the one that can still be
     // both passed and failed there. A new route-bound variant that slips the
     // filter shows up here first.

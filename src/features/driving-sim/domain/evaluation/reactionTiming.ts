@@ -6,7 +6,7 @@
  * a scenario the window closed on recorded the time it took to drive through
  * the window, a checkpoint recorded the time spent reading its question, and a
  * stop sign the car had come to rest before recorded almost nothing at all.
- * The practice policy's latency bucket reads these numbers.
+ * The practice policy's latency bucket reads these numbers. 
  */
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { settlesWhenMet } from './eventTelemetry';
@@ -22,7 +22,12 @@ export type DecisionSettlement =
   /** Answered at a prompt the drive froze for: a checkpoint, a cutscene, a parking decision. */
   | 'question'
   /** A tutorial step, completed or not while its instruction was on screen. */
-  | 'guided';
+  | 'guided'
+  /**
+   * A question whose panel's time ran out before an answer: scored
+   * as wrong, but no evidence of what the player knows, so BKT never reads it.
+   */
+  | 'unanswered';
 
 /**
  * Whether the decision was answered with the car - a response, a window that

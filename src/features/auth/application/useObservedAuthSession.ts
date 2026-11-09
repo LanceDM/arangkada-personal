@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { AuthUser, UserProfile } from '@/features/auth/domain/userProfile';
+import { isStudyIdentity } from '@/features/auth/domain/studyIdentity';
 import { authDeps } from './dependencies';
 import type { AuthSession } from './authSession';
 
@@ -7,6 +8,8 @@ import type { AuthSession } from './authSession';
 export const useObservedAuthSession = (): AuthSession => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  // Whose account document `profile` is: it lags `user` by one read.
+  const [profileOf, setProfileOf] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,6 +39,7 @@ export const useObservedAuthSession = (): AuthSession => {
         : null;
       if (!subscribed) return;
       setProfile(nextProfile);
+      setProfileOf(nextUser?.uid ?? null);
       setLoading(false);
     });
 
@@ -48,8 +52,10 @@ export const useObservedAuthSession = (): AuthSession => {
   return {
     user,
     profile,
+    profileLoaded: (user?.uid ?? null) === profileOf,
     loading,
     isAdmin: user?.isAdmin ?? false,
     isLoggedIn: Boolean(user),
+    studyAccount: isStudyIdentity(user?.email),
   };
 };

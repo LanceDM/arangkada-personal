@@ -1,7 +1,8 @@
 /**
- * What makes Level 0 its own thing: a gentler acceleration curve, a shorter
- * top speed, wider action zones so a first-time player has room to react, and
- * its own definition of "done" — completion is read off the car's own state
+ * What makes Level 0 its own thing: a gentler acceleration curve, a top speed
+ * that is its limit, wider action zones so a first-time player has room to
+ * react, no standing penalties (`driveVehicle` skips all three for it), and its own
+ * definition of "done" — completion is read off the car's own state
  * (has it actually turned, actually slowed) rather than graded like every
  * other level's events.
  *
@@ -11,10 +12,9 @@
  * …` branches with no shared home.
  */
 import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
-import { LANE_WIDTH, ROAD_WIDTH, type CarState } from '@/features/driving-sim/domain/world/vehiclePhysics';
+import { LANE_WIDTH, ROAD_WIDTH, SPEED_STEP, type CarState } from '@/features/driving-sim/domain/world/vehiclePhysics';
 
 export const TUTORIAL_ACCELERATION = 0.22;
-export const TUTORIAL_MAX_SPEED = 55;
 export const TUTORIAL_ACTION_ZONE_ENTER = 180;
 export const TUTORIAL_ACTION_ZONE_EXIT = 90;
 export const TUTORIAL_SLOW_SPEED = 10;
@@ -39,8 +39,8 @@ export const TUTORIAL_STEER_TRAVEL = LANE_WIDTH;
  *
  * Every other level spawns at a lane centre on its own side of the road,
  * because every other level is a public road with a side to be on. Level 0 is a
- * closed practice course — it declares no `paint`, so it has no oncoming half,
- * charges no wrong-side penalty, and grades nothing on lane position. Both of
+ * closed practice course — it declares no `paint`, so it has no oncoming half
+ * and grades nothing on lane position. Both of
  * its steering exercises ask the learner to move the car *off centre*, which
  * only means anything if it started centred.
  *
@@ -71,7 +71,9 @@ export const getTutorialCompletedAction = (
   const centre = tutorialStartX(roadX);
 
   if (event.correctAction === 'accelerate') {
-    return car.speed >= 8 ? 'accelerate' : null;
+    // One tap's worth: the car eases up to its setting and holds it there, so
+    // anything above the step would ask a first-time player for a second press.
+    return car.speed >= SPEED_STEP ? 'accelerate' : null;
   }
 
   if (event.correctAction === 'turn_left') {

@@ -20,7 +20,7 @@ import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { isPortableRemediation } from '@/features/driving-sim/domain/scenario/remediationPool';
 import { scenarioInstruction, scenarioLabel } from '@/features/driving-sim/domain/scenario/scenarioCopy';
 import { composeWorldFrame } from '@/features/driving-sim/domain/world/composeWorldFrame';
-import { paceOf, unitsForSeconds } from '@/features/driving-sim/domain/world/DrivingPace';
+import { paceOf, spacedPace, unitsForSeconds } from '@/features/driving-sim/domain/world/DrivingPace';
 import { intersectionGeometry } from '@/features/driving-sim/domain/world/junctionGeometry';
 import type { RoadTraffic } from '@/features/driving-sim/domain/systems/roadTraffic';
 import { computeWarningDistances } from '@/features/driving-sim/domain/systems/eventScheduler';
@@ -335,7 +335,7 @@ describe('the Level 11 curriculum', () => {
     }
   });
 
-  it('claims nothing the LTO sources leave open', () => {
+  it('claims nothing the source notes leave open', () => {
     // An image-only fact is a gap, and a rule is applied only to the
     // vehicles its source names.
     const cited = events.map(event => `${event.id}: ${event.lawCitation ?? ''} ${event.penaltyMessage}`);
@@ -350,7 +350,7 @@ describe('the Level 11 curriculum', () => {
     expect(claimed).toEqual([]);
   });
 
-  it('grades the competencies the simulation reads', () => {
+  it('grades the competencies the simulation reads, as recorded', () => {
     // What the learner model and the routing FSM's review guard read. Slot 3
     // moved from general_rules to lane_discipline with the cyclist; the set of
     // competencies Level 11 presents is the same four it always was.
@@ -417,10 +417,12 @@ describe('Level 11 copy fits on the screen it is shown on', () => {
 });
 
 describe('the Level 11 road', () => {
-  it('is an ordinary two-way national road at 60, not over the line RA 10666 draws', () => {
+  it('is an ordinary two-way street at 30, not over the line RA 10666 draws', () => {
     expect(level11.paint?.oncomingLanes).toBe(2);
-    expect(level11.speedLimit).toBe(60);
-    expect(level11.pace).toBeUndefined();
+    expect(level11.roadClass).toBe('city_street');
+    expect(level11.speedLimit).toBe(30);
+    expect(level11.speedLimit).toBeLessThanOrEqual(60);
+    expect(level11.pace).toEqual(spacedPace(30, 60));
   });
 
   it('paints the motorcycle and bicycle lanes over the whole stretch each scenario is graded on', () => {

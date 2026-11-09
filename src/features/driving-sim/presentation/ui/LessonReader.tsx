@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useText } from '@/shared/i18n/useText';
+import { lessonMessages as m } from './messages';
 import {
   ArrowRight,
   BookOpen,
@@ -7,21 +9,34 @@ import {
   ListChecks,
   X,
 } from 'lucide-react';
-import type { LessonBlock, LevelModule } from '@/features/driving-sim/domain/scenario/lessonModule';
+import {
+  lessonTitleParts,
+  moduleReadMinutes,
+  type LessonBlock,
+  type LevelModule,
+} from '@/features/driving-sim/domain/scenario/lessonModule';
+import { publicAsset } from '@/shared/lib/publicAsset';
+import { ActionBar } from '@/shared/ui/ActionBar';
 
 interface LessonReaderProps {
   module: LevelModule;
+  /**
+   * The level's sitting size from the quiz bank: 0 for a level with
+   * no quiz, absent where the caller has not read the bank.
+   */
+  quizSize?: number;
   onClose: () => void;
   onFinish: () => void;
 }
 
-const estimateReadMinutes = (module: LevelModule) => {
-  const wordCount = module.lessons.reduce((total, lesson) => {
-    return total + lesson.text.split(/\s+/).filter(Boolean).length;
-  }, 0);
-
-  return Math.max(2, Math.ceil(wordCount / 180));
-};
+/**
+ * A lesson's badge carries the mark its title already opens with ("1.",
+ * "A."), so the outline never puts a second number beside it; a title with
+ * none, such as the module's opening briefing, gets the book instead.
+ */
+const LessonMark = ({ mark, className }: { mark: string | null; className: string }) => (
+  <span className={className}>{mark ?? <BookOpen className="h-3.5 w-3.5" />}</span>
+);
 
 const renderInline = (value: string) =>
   value
@@ -95,7 +110,7 @@ const TableCell = ({ value }: { value: string }) => {
     return (
       <div className={`flex ${sizeClasses.frame} flex-col items-center gap-2`}>
         <img
-          src={`/${image.src}`}
+          src={publicAsset(image.src)}
           alt={image.alt}
           className={`${sizeClasses.image} rounded-md border border-border bg-background object-contain p-2`}
           loading="lazy"
@@ -237,7 +252,7 @@ const LessonBlockView = ({ block }: { block: LessonBlock }) => {
     return (
       <figure className={`${isLargeImage ? 'max-w-5xl' : 'max-w-3xl'} overflow-hidden rounded-lg border border-border bg-card`}>
         <img
-          src={`/${block.src}`}
+          src={publicAsset(block.src)}
           alt={block.alt}
           className={`${isLargeImage ? 'max-h-[34rem]' : 'max-h-80'} w-full object-contain bg-background p-4`}
         />
@@ -253,9 +268,21 @@ const LessonBlockView = ({ block }: { block: LessonBlock }) => {
   return null;
 };
 
-const LessonReader = ({ module, onClose, onFinish }: LessonReaderProps) => {
-  const readMinutes = estimateReadMinutes(module);
-  const levelLabel = module.sourceLevel === 0 ? 'Level 0 / Tutorial' : `Level ${module.sourceLevel} / 13`;
+const LessonReader = ({ module, quizSize, onClose, onFinish }: LessonReaderProps) => {
+  const t = useText();
+  const readMinutes = moduleReadMinutes(module);
+  const hasQuiz = quizSize !== undefined && quizSize > 0;
+  const levelLabel = t(module.sourceLevel === 0 ? m.tutorial : m.level(module.sourceLevel ?? 0));
+
+  const finish = (
+    <button
+      onClick={onFinish}
+      className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-4 font-display text-sm font-black uppercase tracking-wider text-primary-foreground shadow-xl transition-all hover:translate-y-[-1px] hover:shadow-primary/30 active:translate-y-0"
+    >
+      {t(hasQuiz ? m.toCheckpoint : m.finishReading)}
+      <ArrowRight className="h-4 w-4" />
+    </button>
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -270,17 +297,17 @@ const LessonReader = ({ module, onClose, onFinish }: LessonReaderProps) => {
                   </div>
                   <div>
                     <p className="font-display text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                      Mission Academy
+                      {t(m.academy)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      LTO Manual Module
+                      {t(m.manualModule)}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
                   className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                  aria-label="Close learning module"
+                  aria-label={t(m.close)}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -298,61 +325,59 @@ const LessonReader = ({ module, onClose, onFinish }: LessonReaderProps) => {
                     {module.title}
                   </h2>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                    Read the module, review the checkpoints, then unlock the driving simulation.
+                    {t(quizSize === undefined ? m.readFromBriefing : hasQuiz ? m.readThenCheckpoint : m.readThenDrive)}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className={`grid gap-2 ${hasQuiz ? 'grid-cols-3' : 'grid-cols-2'}`}>
                   <div className="rounded-lg border border-border bg-secondary/40 p-2.5">
                     <BookOpen className="mb-2 h-4 w-4 text-primary" />
                     <p className="font-display text-lg font-black">{module.lessons.length}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Notes</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t(m.notes)}</p>
                   </div>
-                  <div className="rounded-lg border border-border bg-secondary/40 p-2.5">
-                    <ListChecks className="mb-2 h-4 w-4 text-primary" />
-                    <p className="font-display text-lg font-black">{module.quiz.length}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Quiz</p>
-                  </div>
+                  {hasQuiz && (
+                    <div className="rounded-lg border border-border bg-secondary/40 p-2.5">
+                      <ListChecks className="mb-2 h-4 w-4 text-primary" />
+                      <p className="font-display text-lg font-black">{quizSize}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t(m.quiz)}</p>
+                    </div>
+                  )}
                   <div className="rounded-lg border border-border bg-secondary/40 p-2.5">
                     <CheckCircle2 className="mb-2 h-4 w-4 text-primary" />
                     <p className="font-display text-lg font-black">{readMinutes}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Min</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{t(m.minutes)}</p>
                   </div>
                 </div>
               </div>
 
               <div className="min-h-0 flex-1 overflow-y-auto border-t border-border p-4">
                 <p className="mb-4 font-display text-xs font-black uppercase tracking-[0.2em] text-foreground">
-                  Module Outline
+                  {t(m.outline)}
                 </p>
                 <div className="space-y-2.5">
-                  {module.lessons.map((lesson, index) => (
-                    <a
-                      key={lesson.id}
-                      href={`#${lesson.id}`}
-                      title={lesson.title}
-                      className="group flex items-start gap-3 rounded-lg border border-border/70 bg-background/50 px-4 py-3.5 text-sm transition-colors hover:border-primary/40 hover:bg-primary/10"
-                    >
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/15 font-display text-[10px] font-black text-primary">
-                        {index + 1}
-                      </span>
-                      <span className="leading-5 text-foreground/90 group-hover:text-foreground">
-                        {lesson.title}
-                      </span>
-                    </a>
-                  ))}
+                  {module.lessons.map(lesson => {
+                    const { mark, text } = lessonTitleParts(lesson.title);
+                    return (
+                      <a
+                        key={lesson.id}
+                        href={`#${lesson.id}`}
+                        title={lesson.title}
+                        className="group flex items-start gap-3 rounded-lg border border-border/70 bg-background/50 px-4 py-3.5 text-sm transition-colors hover:border-primary/40 hover:bg-primary/10"
+                      >
+                        <LessonMark
+                          mark={mark}
+                          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/15 font-display text-[10px] font-black text-primary"
+                        />
+                        <span className="leading-5 text-foreground/90 group-hover:text-foreground">
+                          {text}
+                        </span>
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="shrink-0 border-t border-border p-4">
-                <button
-                  onClick={onFinish}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-4 font-display text-sm font-black uppercase tracking-wider text-primary-foreground shadow-xl transition-all hover:translate-y-[-1px] hover:shadow-primary/30 active:translate-y-0"
-                >
-                  Proceed to Checkpoint
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
+              <div className="hidden shrink-0 border-t border-border p-4 lg:block">{finish}</div>
             </div>
           </aside>
 
@@ -361,7 +386,7 @@ const LessonReader = ({ module, onClose, onFinish }: LessonReaderProps) => {
               <div className="mb-5 flex items-center gap-3">
                 <div className="h-px flex-1 bg-border" />
                 <p className="font-display text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-                  Learning Module
+                  {t(m.learningModule)}
                 </p>
                 <div className="h-px flex-1 bg-border" />
               </div>
@@ -374,35 +399,41 @@ const LessonReader = ({ module, onClose, onFinish }: LessonReaderProps) => {
             </div>
 
             <div className="space-y-5 p-4 md:p-8">
-              {module.lessons.map((lesson, index) => (
-                <section
-                  id={lesson.id}
-                  key={lesson.id}
-                  className="scroll-mt-8 rounded-lg border border-border bg-background/60 p-5 transition-colors hover:border-primary/40 md:p-7"
-                >
-                  <div className="mb-4 flex items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 font-display text-sm font-black text-primary">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-display text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                        Study Note
-                      </p>
-                      <h3 className="text-lg font-black uppercase leading-snug text-foreground">
-                        {lesson.title}
-                      </h3>
+              {module.lessons.map(lesson => {
+                const { mark, text } = lessonTitleParts(lesson.title);
+                return (
+                  <section
+                    id={lesson.id}
+                    key={lesson.id}
+                    className="scroll-mt-8 rounded-lg border border-border bg-background/60 p-5 transition-colors hover:border-primary/40 md:p-7"
+                  >
+                    <div className="mb-4 flex items-center gap-3">
+                      <LessonMark
+                        mark={mark}
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 font-display text-sm font-black text-primary"
+                      />
+                      <div>
+                        <p className="font-display text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                          {t(m.studyNote)}
+                        </p>
+                        <h3 className="text-lg font-black uppercase leading-snug text-foreground">
+                          {text}
+                        </h3>
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-5 pl-0 md:pl-12">
-                    {lesson.blocks.map((block, blockIndex) => (
-                      <LessonBlockView key={blockIndex} block={block} />
-                    ))}
-                  </div>
-                </section>
-              ))}
+                    <div className="space-y-5 pl-0 md:pl-12">
+                      {lesson.blocks.map((block, blockIndex) => (
+                        <LessonBlockView key={blockIndex} block={block} />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
           </main>
         </div>
+        {/* Below lg the side panel comes before the lesson, so its button would be left behind at the top. */}
+        <ActionBar className="mx-auto mt-6 -mb-8 max-w-7xl bg-background px-0 lg:hidden">{finish}</ActionBar>
       </div>
     </div>
   );

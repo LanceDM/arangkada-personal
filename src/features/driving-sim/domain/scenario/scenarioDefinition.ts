@@ -1,5 +1,6 @@
 import type { EnvironmentTrigger } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import type { DrivingPace } from '@/features/driving-sim/domain/world/DrivingPace';
+import type { RoadClass } from '@/features/driving-sim/domain/scenario/speedLimits';
 import type { DrivingCompetency, ViolationSeverity } from '@/domain/learner/competency';
 
 import type {
@@ -17,6 +18,7 @@ import type {
   ScenePrefab,
   SignPlate,
 } from './scenarioScene';
+import type { Language } from '@/shared/lib/localized';
 
 export interface QuestionChoice {
   label: string;
@@ -53,7 +55,7 @@ export interface CheckpointInspection {
    * Declared, because the two are different moves. At a checkpoint the driver
    * stops at the line in whatever lane they are in. Stopped by an enforcer,
    * they "safely pull over to the extreme right" (FDM Vol. 1, law enforcement
-   * officer), so the inspection opens only on a full stop in
+   * officer; Level 12 pack R3), so the inspection opens only on a full stop in
    * the curb lane, the scene draws the enforcer at the curb and no barrier, and
    * the panel is a traffic stop. `missedMessage` is the verdict for a driver
    * who drove through without doing it, which the question's own penalty
@@ -290,7 +292,8 @@ export interface CoastRequirement {
    * likes: the vehicle is back under control and braking softly to a stop is
    * the next instruction rather than a mistake.
    *
-   * Set it at the speed the rest of the game already calls "slowed for this".
+   * Set it at the speed the rest of the game already calls "slowed for this"
+   * (`slowTarget`).
    */
   brakeBelow: number;
   /**
@@ -646,8 +649,8 @@ export interface ScenarioEvent {
    * Never counted toward the pass mark in the game (`scoreDecision`'s
    * `neutral` rule): no points either way and the streak untouched, so a
    * level's `requiredScore`/`stars2`/`stars3` mean exactly what they were
-   * calibrated to whether or not remediation fired on this run. The game-level
-   * simulation scored it upside-only, which let the learners who got one pass on fewer
+   * calibrated to whether or not remediation fired on this run. The fourth experiment
+   * scored it upside-only, which let the learners who got one pass on fewer
    * authored points. It is still graded and still logged, because
    * the entire point of injecting it is to get fresh evidence back into the
    * learner model.
@@ -856,10 +859,14 @@ export interface GarageStage {
 }
 
 export interface LevelConfig {
+  /** Set on a level laid over with a language: what the world's own words are written in. */
+  language?: Language;
   id: number;
   name: string;
   description: string;
   roadLength: number;
+  /** What this road is under RA 4136 §35, which sets `speedLimit`. */
+  roadClass: RoadClass;
   speedLimit: number;
   events: ScenarioEvent[];
   requiredScore: number;

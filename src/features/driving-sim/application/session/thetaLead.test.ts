@@ -1,7 +1,7 @@
 /**
  * Theta moves where a scenario is announced, and only as far as the road allows.
  *
- * Before this was fixed, a widened approach reached
+ * Before it, a widened approach reached
  * back past the scenario in front of it - thirty of the game's eighty-three
  * static scenarios at the policy's own 1.5, and every level's first one into
  * the start runway - the approach cue read the unscaled window, so it sat at 1
@@ -25,6 +25,7 @@ import { isTutorial } from '@/features/driving-sim/domain/systems/tutorial';
 import { paceOf, unitsForSeconds } from '@/features/driving-sim/domain/world/DrivingPace';
 import { speedProfileFor } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { createDrivingSession, NO_INPUT } from './DrivingSession';
+import { tapsTo } from './driveSamples';
 import {
   THETAS,
   clearFrom,
@@ -50,7 +51,7 @@ beforeAll(() => {
 
 const label = (run: Run) => `level ${run.level.id} ${run.event.id} at theta ${run.theta}`;
 
-/** Held to be read: answered with the car, outside the tutorial. */
+/** Held to be read: answered with the car, outside the tutorial.  */
 const isRead = ({ level, event }: RolledScenario) =>
   !isTutorial(level) &&
   !event.inspection &&
@@ -176,14 +177,16 @@ describe('the stopping floor', () => {
     const session = createDrivingSession({ level, fsm: new DrivingFSM(), signCoverage: {} });
     const car = () => session.getFrame()!.scene.car;
     let frame = 0;
+    // Taps to the limit, a press every fourth frame.
+    const tapping = tapsTo(level.speedLimit) * 4;
     const step = (brake: boolean) => {
-      session.update({ ...NO_INPUT, throttle: !brake && frame < 12 && frame % 4 === 0, brake });
+      session.update({ ...NO_INPUT, throttle: !brake && frame < tapping && frame % 4 === 0, brake });
       if (session.getSnapshot().briefingEvent) session.dismissBriefing();
       frame += 1;
     };
     do {
       step(false);
-    } while (frame < 12 || car().speed !== session.getSnapshot().targetSpeed);
+    } while (frame < tapping || car().speed !== session.getSnapshot().targetSpeed);
 
     const from = car().speed;
     const at = car().distance;

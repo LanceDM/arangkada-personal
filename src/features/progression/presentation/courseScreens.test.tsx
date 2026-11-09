@@ -10,7 +10,9 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import type { LevelResult } from '@/domain/learner/attempt';
-import { LEVELS } from '@/features/driving-sim';
+import { getCompetencyLabel } from '@/domain/learner/profile';
+import { driveState } from '@/domain/routing/routingTypes';
+import { cursorFrontierLevel, LEVELS, type LevelRecommendation, type RoutingCursor } from '@/features/driving-sim';
 import LevelMap, { type LevelMapCourse } from './LevelMap';
 import LevelComplete from './LevelComplete';
 
@@ -65,7 +67,7 @@ describe('the ladder', () => {
 
   it('in a New group offers Continue, opens the levels passed as replays, and locks those ahead', () => {
     const onSelect = vi.fn();
-    const course: LevelMapCourse = { frontierLevelId: 4, certified: false, openAll: false, loading: false, onContinue: vi.fn() };
+    const course: LevelMapCourse = { frontierLevelId: 4, certified: false, openAll: false, replays: true, loading: false, onContinue: vi.fn() };
     const container = render(<LevelMap onSelectLevel={onSelect} course={course} />);
     const buttons = levelButtons(container);
     for (const [levelId, button] of buttons) expect(button.disabled).toBe(levelId > 4);
@@ -81,10 +83,26 @@ describe('the ladder', () => {
     expect(course.onContinue).toHaveBeenCalledTimes(2);
   });
 
+  it('once the tutorial is passed, replays it and puts Level 1 next', () => {
+    const passedTutorial: RoutingCursor = { state: driveState(0), outcome: 'passed', seq: 0, decisionsSpent: 0, pending: null };
+    const onSelect = vi.fn();
+    const course: LevelMapCourse = {
+      frontierLevelId: cursorFrontierLevel(passedTutorial), certified: false, openAll: false, replays: true, loading: false, onContinue: vi.fn(),
+    };
+    const buttons = levelButtons(render(<LevelMap onSelectLevel={onSelect} course={course} />));
+    expect(buttons.get(1)!.disabled).toBe(false);
+    expect(buttons.get(1)!.textContent).toContain('NEXT');
+    expect(buttons.get(0)!.textContent).not.toContain('NEXT');
+
+    act(() => buttons.get(0)!.click());
+    expect(onSelect).toHaveBeenCalledWith(0);
+    expect(course.onContinue).not.toHaveBeenCalled();
+  });
+
   it('opens every level once certified, or for a developer or admin', () => {
     for (const course of [
-      { frontierLevelId: null, certified: true, openAll: false, loading: false, onContinue: vi.fn() },
-      { frontierLevelId: 1, certified: false, openAll: true, loading: false, onContinue: vi.fn() },
+      { frontierLevelId: null, certified: true, openAll: false, replays: true, loading: false, onContinue: vi.fn() },
+      { frontierLevelId: 1, certified: false, openAll: true, replays: true, loading: false, onContinue: vi.fn() },
     ]) {
       const container = render(<LevelMap onSelectLevel={vi.fn()} course={course} />);
       for (const button of levelButtons(container).values()) expect(button.disabled).toBe(false);
@@ -115,7 +133,7 @@ describe('the results screen', () => {
     const container = render(
       <LevelComplete
         result={passed} level={level} onNext={vi.fn()} onRetry={vi.fn()} onMenu={vi.fn()} hasNextLevel
-        course={{ note: 'Continue to the next step of your course.', onContinue }}
+        course={{ note: { en: 'Continue to the next step of your course.' }, onContinue }}
       />
     );
     const text = buttonText(container).join('|');
@@ -126,5 +144,43 @@ describe('the results screen', () => {
     expect(container.textContent).toContain('Continue to the next step of your course.');
     act(() => [...container.querySelectorAll('button')].find(b => b.textContent?.includes('CONTINUE'))!.click());
     expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('the results screen after the tutorial', () => {
+  const tutorial = LEVELS.find(entry => entry.id === 0)!;
+  const step = (timestamp: number, competency: string, result: 'correct' | 'violation' = 'correct') => ({
+    timestamp, action: 'brake', result, points: 10, competency, expectedAction: 'brake',
+  });
+  const run: LevelResult = {
+    levelId: 0, score: 60, stars: 1, completed: true, violations: 1, correctActions: 4,
+    logs: [step(1, 'speed_control'), step(2, 'hazard_awareness'), step(3, 'right_of_way', 'violation')],
+    competencyScores: { speed_control: 80, hazard_awareness: 90, right_of_way: 40 },
+  };
+  const practice = { action: 'practice', recommendedLevelId: 3, competency: 'right_of_way' } as unknown as LevelRecommendation;
+
+  it('names no skill and suggests no practice, though its steps carry competencies', () => {
+    const container = render(
+      <LevelComplete
+        result={run} level={tutorial} onNext={vi.fn()} onRetry={vi.fn()} onMenu={vi.fn()} hasNextLevel
+        recommendation={practice} onPracticeRecommended={vi.fn()}
+      />
+    );
+    const text = container.textContent ?? '';
+    const skills = Object.keys(run.competencyScores!).map(getCompetencyLabel);
+    for (const label of ['Skill Breakdown', 'Focus Area', 'Strongest Skill', ...skills]) {
+      expect(text, label).not.toContain(label);
+    }
+    expect(buttonText(container).join('|')).not.toContain('PRACTICE');
+    expect(buttonText(container).join('|')).toContain('NEXT LEVEL');
+  });
+
+  it('still names them on every other level', () => {
+    const level = LEVELS.find(entry => entry.id === 3)!;
+    const container = render(
+      <LevelComplete result={{ ...run, levelId: 3 }} level={level} onNext={vi.fn()} onRetry={vi.fn()} onMenu={vi.fn()} hasNextLevel />
+    );
+    expect(container.textContent).toContain('Skill Breakdown');
+    expect(container.textContent).toContain(getCompetencyLabel('right_of_way'));
   });
 });

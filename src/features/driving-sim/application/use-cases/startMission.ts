@@ -6,7 +6,8 @@
  * they have not met, the weak competency so the pools lean toward it — and the
  * plan's one practice scenario is already on the end of it. Handing that level
  * back rather than rolling a second one is what keeps the route the practice
- * item was chosen against and the route the player drives the same route.
+ * item was chosen against and the route the player drives the same route
+ *.
  *
  * Before the plan lands there is no attempt yet, only a screen to fill: the
  * briefing is shown against an unseeded roll of the level as authored, which

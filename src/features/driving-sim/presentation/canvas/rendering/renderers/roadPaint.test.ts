@@ -170,8 +170,8 @@ const everyRoute = (): { label: string; level: LevelConfig }[] =>
 
 describe('a level’s own lines', () => {
   // Level 6's double yellow opened its zone 130 before it was painted, and
-  // Level 4 painted 260 before its point while grading from 400: a crossing
-  // over the broken yellow was failed for crossing the line.
+  // Level 4 painted 260 before its point while grading from 400
+  // A crossing over the broken yellow was failed for crossing the line.
   it('are painted on every frame their scenario is graded, on every route', () => {
     const gaps = everyRoute().flatMap(({ label, level }) =>
       level.events.flatMap(event => {

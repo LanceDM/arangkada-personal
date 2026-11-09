@@ -133,7 +133,7 @@ describe('the route a level entry drives, and the record of how it was chosen', 
   });
 
   it('still hands the final exam its weak area under the legacy rule, and the roll ignores it', async () => {
-    // What the legacy option still does: the plan names a weak area, which
+    // What the fourth experiment's option still does: the plan names a weak area, which
     // only the briefing's promise of extra questions reads. The route is the
     // seed's either way, as the test above holds.
     for (const weak of COMPETENCIES) {

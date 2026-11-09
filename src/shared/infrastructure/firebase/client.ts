@@ -32,6 +32,12 @@ if (useEmulator) {
   if (!configured && import.meta.env.VITE_USE_FIREBASE_EMULATOR !== 'true') {
     console.info('No Firebase key in .env: using the local emulators. Start them with `npm run emulators`.');
   }
-  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-  connectFirestoreEmulator(db, '127.0.0.1', 8080);
+  // The emulators run on the machine serving the page. Opened on that machine
+  // it is 127.0.0.1 (never `localhost`, which can resolve to an IPv6 address the
+  // emulators do not listen on); opened from a phone or tablet on the same
+  // network it is the address the page came from.
+  const page = typeof window === 'undefined' ? '' : window.location.hostname;
+  const emulatorHost = page === '' || page === 'localhost' || page === '127.0.0.1' || page === '[::1]' ? '127.0.0.1' : page;
+  connectAuthEmulator(auth, `http://${emulatorHost}:9099`, { disableWarnings: true });
+  connectFirestoreEmulator(db, emulatorHost, 8080);
 }

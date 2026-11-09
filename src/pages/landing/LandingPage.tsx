@@ -57,6 +57,18 @@ const Landing = () => {
               </Button>
             </div>
 
+            {/* The study's own way in: participants join with an invite and sign in by username. */}
+            <p className="text-sm text-muted-foreground">
+              Study participant? / Kalahok sa pag-aaral?{' '}
+              <button onClick={() => navigate('/study/join')} className="font-medium text-primary underline-offset-4 hover:underline">
+                Join the study
+              </button>
+              {' · '}
+              <button onClick={() => navigate('/study/sign-in')} className="font-medium text-primary underline-offset-4 hover:underline">
+                Participant sign-in
+              </button>
+            </p>
+
             <div className="pt-16 animate-bounce">
               <div className="w-6 h-10 border-2 border-muted-foregroundf/30 rounded-full mx-auto flex justify-center">
                 <div className="w-1.5 h-3 bg-muted-foreground/50 rounded-full mt-2 animate-pulse" />

@@ -15,6 +15,8 @@ export interface DrivingSnapshot {
   speed: number;
   /** The speed the driver has set, shown beside the speedometer. */
   targetSpeed: number;
+  /** The maximum in force where the car is (`limitInForce`), for the HUD. */
+  speedLimit: number;
   /** 0..1 along the route. */
   progress: number;
   lane: number;
@@ -64,24 +66,58 @@ export interface DrivingSnapshot {
   rightOfWayPlayed: boolean;
 
   crashed: boolean;
+  /**
+   * Whole seconds of driving left before "time's up", or null where the level
+   * has no limit. Counts only steps that drive the car, so it stands still
+   * while a panel is open.
+   */
+  drivingSecondsLeft: number | null;
+  /**
+   * Whole seconds left on the panel or panels holding the drive, or null when
+   * nothing is. At 0 the world closes them: a question goes unanswered.
+   */
+  panelSecondsLeft: number | null;
   /** True while the road is held still so a correction can be read. */
   holdingForCorrection: boolean;
   crawlWarning: boolean;
   wrongSideWarning: boolean;
+  overLimitWarning: boolean;
 
   /** The competency the drive is currently adapting toward, if any. */
   weakCompetency: DrivingCompetency | null;
 }
 
-/** Whether anything the screen shows changed between two frames. */
+/**
+ * A speed as precisely as the screen can tell two apart: half a km/h, which
+ * moves both where the dial rounds and where a whole-number threshold - a
+ * merge's minimum - is crossed.
+ */
+const shownSpeed = (speed: number) => Math.floor(speed * 2);
+
+/**
+ * A 0..1 fraction as precisely as the screen shows it: half a percent, which
+ * moves both where a percentage rounds and where a whole percent is crossed.
+ */
+const shownFraction = (fraction: number) => Math.floor(fraction * 200);
+
+/**
+ * Whether anything the screen shows changed between two frames.
+ *
+ * The continuous values - speed, set speed, route progress, the approach bar -
+ * change on nearly every frame the car moves, and compared exactly they
+ * re-rendered the whole drive screen on nearly every frame, which was most of
+ * the drive's cost per frame. They are compared at the precision they are
+ * shown at; the snapshot itself still carries them exactly.
+ */
 export const snapshotChanged = (a: DrivingSnapshot, b: DrivingSnapshot): boolean =>
-  a.speed !== b.speed ||
-  a.targetSpeed !== b.targetSpeed ||
-  a.progress !== b.progress ||
+  shownSpeed(a.speed) !== shownSpeed(b.speed) ||
+  shownSpeed(a.targetSpeed) !== shownSpeed(b.targetSpeed) ||
+  a.speedLimit !== b.speedLimit ||
+  shownFraction(a.progress) !== shownFraction(b.progress) ||
   a.lane !== b.lane ||
   a.activeEvent !== b.activeEvent ||
   a.eventPhase !== b.eventPhase ||
-  a.eventApproach !== b.eventApproach ||
+  shownFraction(a.eventApproach) !== shownFraction(b.eventApproach) ||
   a.laneCue !== b.laneCue ||
   a.gapCue !== b.gapCue ||
   a.holdCue !== b.holdCue ||
@@ -98,9 +134,12 @@ export const snapshotChanged = (a: DrivingSnapshot, b: DrivingSnapshot): boolean
   a.parkingPlayed !== b.parkingPlayed ||
   a.rightOfWayPlayed !== b.rightOfWayPlayed ||
   a.crashed !== b.crashed ||
+  a.drivingSecondsLeft !== b.drivingSecondsLeft ||
+  a.panelSecondsLeft !== b.panelSecondsLeft ||
   a.holdingForCorrection !== b.holdingForCorrection ||
   a.crawlWarning !== b.crawlWarning ||
   a.wrongSideWarning !== b.wrongSideWarning ||
+  a.overLimitWarning !== b.overLimitWarning ||
   a.weakCompetency !== b.weakCompetency ||
   a.requiredLanes.length !== b.requiredLanes.length ||
   a.requiredLanes.some((lane, i) => lane !== b.requiredLanes[i]);

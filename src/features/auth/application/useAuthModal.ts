@@ -1,11 +1,12 @@
 import { create } from 'zustand';
+import type { AuthView } from '@/features/auth/domain/credentials';
 
 interface AuthModalStore {
   isOpen: boolean;
   reason: string;
-  defaultView: 'login' | 'register';
+  defaultView: AuthView;
   onSuccess?: () => void;
-  open: (opts?: { reason?: string; defaultView?: 'login' | 'register'; onSuccess?: () => void }) => void;
+  open: (opts?: { reason?: string; defaultView?: AuthView; onSuccess?: () => void }) => void;
   close: () => void;
 }
 

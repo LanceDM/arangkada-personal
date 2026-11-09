@@ -12,6 +12,7 @@
  * plate it is showing, the id it is addressed by, the action it grades — rather
  * than from prose, so no level gets a worse label by having been left alone.
  */
+import { englishText, type Localized, type TextOf } from '@/shared/lib/localized';
 import type { ScenarioEvent } from './scenarioDefinition';
 
 /** `level3.priority-yield.merging-traffic` → `Merging Traffic`. */
@@ -35,13 +36,13 @@ export const scenarioLabel = (event: ScenarioEvent): string =>
   event.label?.trim() || event.sign?.name || event.marking?.name || fromId(event.id);
 
 /** What to do, for a level that has not authored an instruction of its own. */
-const DEFAULT_INSTRUCTION: Record<ScenarioEvent['correctAction'], string> = {
-  stop: 'Come to a full stop before the line.',
-  brake: 'Slow down before you reach it.',
-  accelerate: 'Keep going at a steady speed.',
-  turn_left: 'Move into the left lane and turn.',
-  turn_right: 'Move into the right lane and turn.',
-  honk: 'Sound the horn once to warn them.',
+const DEFAULT_INSTRUCTION: Record<ScenarioEvent['correctAction'], Localized> = {
+  stop: { en: 'Come to a full stop before the line.' },
+  brake: { en: 'Slow down before you reach it.' },
+  accelerate: { en: 'Keep going at a steady speed.' },
+  turn_left: { en: 'Move into the left lane and turn.' },
+  turn_right: { en: 'Move into the right lane and turn.' },
+  honk: { en: 'Sound the horn once to warn them.' },
 };
 
 /**
@@ -54,12 +55,12 @@ const DEFAULT_INSTRUCTION: Record<ScenarioEvent['correctAction'], string> = {
  * on the right" telling the driver to come to a full stop before a line there
  * is none of.
  */
-export const scenarioInstruction = (event: ScenarioEvent): string => {
+export const scenarioInstruction = (event: ScenarioEvent, say: TextOf = englishText): string => {
   const authored = event.recommendedMove?.trim();
   if (authored) return authored;
   const lane = (event.maneuver ?? event.requiredLane)?.hint?.trim();
   if (lane) return lane;
   const bay = event.bay?.hint?.trim();
   if (bay) return bay;
-  return DEFAULT_INSTRUCTION[event.correctAction];
+  return say(DEFAULT_INSTRUCTION[event.correctAction]);
 };

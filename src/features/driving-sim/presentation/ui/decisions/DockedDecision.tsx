@@ -30,6 +30,12 @@
  * else: the verdict waits for the manoeuvre to finish, and the road it is
  * playing on is the whole board.
  *
+ * On a touch screen it is not over the board at all (`side`). A phone held
+ * sideways draws the board at about half size, and a panel docked over that
+ * held the question and none of its answers; beside the road, in the column
+ * the frozen drive has emptied, it has the full height and leaves the whole
+ * road in view.
+ *
  * ## The phase is derived, never stored
  *
  * The canvas owns the timing: the verdict appears when the manoeuvre has
@@ -38,22 +44,26 @@
  * well would be a second source of truth for a fact neither half owns.
  */
 import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react';
+import { answerHint, useInputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { BookOpen, Check, ChevronDown, X } from 'lucide-react';
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { useChoiceOrder } from './useChoiceOrder';
+import { useText } from '@/shared/i18n/useText';
+import type { Localized } from '@/shared/lib/localized';
+import { decisionMessages as m } from '../messages';
 
 /** The words one kind of docked decision uses for the beats every one has. */
 export interface DockedDecisionCopy {
   /** What this panel is, in two or three words, for the header. */
-  eyebrow: string;
+  eyebrow: Localized;
   Icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
   /** Said while the answer is playing out on the canvas. */
-  resolving: string;
+  resolving: Localized;
   /** The verdict line, in two or three words, each way. */
-  verdictOk: string;
-  verdictBad: string;
+  verdictOk: Localized;
+  verdictBad: Localized;
   /** What the button back to the drive says. */
-  continueLabel: string;
+  continueLabel: Localized;
 }
 
 interface DockedDecisionProps {
@@ -83,6 +93,8 @@ interface DockedDecisionProps {
    */
   choiceSeed: number;
   testId: string;
+  /** `board`: docked over the top of the board. `side`: filling the column it is placed in. */
+  placement?: 'board' | 'side';
 }
 
 type Phase = 'deciding' | 'resolving' | 'verdict';
@@ -98,7 +110,10 @@ const DockedDecision = ({
   hintText,
   choiceSeed,
   testId,
+  placement = 'board',
 }: DockedDecisionProps) => {
+  const say = useText();
+  const inputMode = useInputMode();
   // The displayed order, which the number keys follow. Memoized on the seed and
   // the event, so it holds still across the pick, the resolution and the
   // verdict — the three phases this panel steps through.
@@ -186,12 +201,17 @@ const DockedDecision = ({
     <div
       // Clear of the HUD strip, which is drawn at the board's own scale — so
       // the strip is shorter on a phone and the panel may start higher there.
-      className="absolute inset-x-0 top-[48px] bottom-[22%] z-40 flex items-start justify-center p-2 sm:top-[64px] sm:p-3"
+      className={
+        placement === 'side'
+          ? 'absolute inset-0 z-[70] flex items-stretch justify-end'
+          : 'absolute inset-x-0 top-[48px] bottom-[22%] z-40 flex items-start justify-center p-2 sm:top-[64px] sm:p-3'
+      }
       data-testid={testId}
+      data-placement={placement}
     >
       {/* A barely-there scrim: enough to lift the panel off the road, not
           enough to hide the thing the question is about. */}
-      <div className="pointer-events-none absolute inset-0 bg-background/30" />
+      {placement === 'board' && <div className="pointer-events-none absolute inset-0 bg-background/30" />}
 
       <section
         ref={panelRef}
@@ -211,7 +231,7 @@ const DockedDecision = ({
             </p>
           </div>
           <p className="shrink-0 font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">
-            {copy.eyebrow}
+            {say(copy.eyebrow)}
           </p>
         </header>
 
@@ -231,7 +251,7 @@ const DockedDecision = ({
                 {hintText && (
                   <div className="rounded-md border border-primary/40 bg-primary/10 px-3 py-2">
                     <p className="font-display text-[12px] font-black uppercase tracking-[0.12em] text-primary">
-                      Extra guidance
+                      {say(m.extraGuidance)}
                     </p>
                     <p className="mt-1 text-[13px] leading-5 text-foreground">{hintText}</p>
                   </div>
@@ -256,7 +276,7 @@ const DockedDecision = ({
                 </div>
 
                 <p className="text-center text-[12px] text-muted-foreground">
-                  Click an answer, or press its number key
+                  {answerHint(inputMode)}
                 </p>
               </>
             )}
@@ -278,7 +298,7 @@ const DockedDecision = ({
                     <X className="h-4 w-4 shrink-0" aria-hidden />
                   )}
                   <p className="font-display text-[13px] font-black uppercase tracking-[0.12em]">
-                    {correct ? copy.verdictOk : copy.verdictBad}
+                    {say(correct ? copy.verdictOk : copy.verdictBad)}
                   </p>
                 </div>
 
@@ -299,7 +319,7 @@ const DockedDecision = ({
                     >
                       <BookOpen className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                       <span className="font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">
-                        Why this matters
+                        {say(m.whyMatters)}
                       </span>
                       <ChevronDown
                         className={`ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
@@ -323,7 +343,7 @@ const DockedDecision = ({
         {phase !== 'deciding' && (
           <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-border bg-background/50 px-4 py-3">
             <p className="text-[12px] leading-5 text-muted-foreground" aria-live="polite">
-              {phase === 'verdict' ? 'The drive is paused.' : copy.resolving}
+              {say(phase === 'verdict' ? m.drivePaused : copy.resolving)}
             </p>
             <button
               ref={continueRef}
@@ -331,7 +351,7 @@ const DockedDecision = ({
               disabled={phase !== 'verdict'}
               className="shrink-0 rounded-lg border border-primary/60 bg-primary/10 px-4 py-2 font-display text-[13px] font-black uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:opacity-40"
             >
-              {phase === 'verdict' ? copy.continueLabel : 'Watching…'}
+              {say(phase === 'verdict' ? copy.continueLabel : m.watching)}
             </button>
           </footer>
         )}

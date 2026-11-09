@@ -1,5 +1,5 @@
 // The routing FSM against its committed golden, section by section, and
-// against its definition of done. Regenerate the golden only
+// against the machine's definition of done. Regenerate the golden only
 // for an intended change, with `npm run routing:update-golden`, and say so in
 // the commit.
 import { describe, it, expect } from 'vitest';

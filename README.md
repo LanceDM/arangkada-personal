@@ -15,8 +15,7 @@ TypeScript, Vite, Tailwind CSS and Firebase.
   level, which level comes next and what practice is added to it.
 - A learner model: BKT mastery estimates per competency, and a Q-learning
   policy over the routing machine's legal moves.
-- Daily Challenge and a Mock Exam over an LTO-style question bank, with a
-  post-hoc IRT ability estimate.
+- Daily Challenge and a Mock Exam over an LTO-style question bank.
 - Firebase email/password and Google sign-in, and Firestore-backed progress.
 
 ## Setup
@@ -96,7 +95,7 @@ infrastructure.
 - `src/main.tsx` - entry point; binds feature dependencies, mounts the app.
 - `src/app/` - composition root: providers, router, progress sync, app shell.
 - `src/pages/<route>/` - one folder per route; composition only.
-- `src/features/` - `auth`, `progression`, `driving-sim`, `daily-challenge`,
+- `src/features/` - `auth`, `progression`, `driving-sim`, `daily-challenge`, `assessment`, `study`,
   `mock-exam`, `admin`. Each exposes a public API through its `index.ts`.
 - `src/domain/learner/` - the learner model shared across features.
 - `src/domain/routing/` - the routing FSM over the course's levels.

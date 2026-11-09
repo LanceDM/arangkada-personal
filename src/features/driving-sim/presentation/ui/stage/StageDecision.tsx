@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { answerHint, useInputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { Car, FileText, Route, TriangleAlert, Wrench } from 'lucide-react';
 import type {
   GarageDetailArt,
@@ -11,6 +12,8 @@ import {
   DETAIL_WIDTH,
   drawHotspotDetail,
 } from '@/features/driving-sim/presentation/canvas/rendering/renderers/garageRenderer';
+import { useText } from '@/shared/i18n/useText';
+import { stageMessages as m } from '../messages';
 
 /**
  * The question one point on a stage asks, whichever stage it is standing on.
@@ -65,6 +68,8 @@ export const StageDecision = ({
   onAnswer: (action: string) => void;
   choiceSeed: number;
 }) => {
+  const say = useText();
+  const inputMode = useInputMode();
   // The displayed order, which the number keys follow. Keyed on the point's own
   // id, so two points in one stage are ordered independently.
   const options = useChoiceOrder(hotspot.choices, choiceSeed, hotspot.id);
@@ -171,7 +176,7 @@ export const StageDecision = ({
                   <div className="flex items-start gap-2">
                     <Car className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <div>
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Vehicle</p>
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{say(m.vehicle)}</p>
                       <p className="text-[13px] font-semibold leading-5 text-foreground">
                         {hotspot.document.vehicle}
                       </p>
@@ -180,7 +185,7 @@ export const StageDecision = ({
                   <div className="flex items-start gap-2">
                     <Route className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     <div>
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Trip purpose</p>
+                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{say(m.tripPurpose)}</p>
                       <p className="text-[13px] font-semibold leading-5 text-foreground">
                         {hotspot.document.tripPurpose}
                       </p>
@@ -218,7 +223,7 @@ export const StageDecision = ({
             </div>
 
             <p className="text-center text-[12px] text-muted-foreground">
-              Click an answer, or press its number key
+              {answerHint(inputMode)}
             </p>
           </div>
         </div>

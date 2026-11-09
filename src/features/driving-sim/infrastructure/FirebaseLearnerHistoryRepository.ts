@@ -5,12 +5,17 @@ import { listLevelAttempts } from './FirebaseStoryAttemptRepository';
 
 /**
  * Whether a saved run passed its level: its score reached the pass mark and,
- * where the attempt carries its FSM summary, it did not end in a crash - the
- * rule `buildLevelResult` applies.
+ * where the attempt carries its FSM summary, it did not end in a crash, nor
+ * did its time run out - the rule `buildLevelResult` applies.
  */
-const passedRun = ({ levelId, finalScore, fsmMetrics }: LevelAttempt): boolean => {
+const passedRun = ({ levelId, finalScore, fsmMetrics, timedOut }: LevelAttempt): boolean => {
   const level = LEVELS.find(candidate => candidate.id === levelId);
-  return Boolean(level) && finalScore >= level!.requiredScore && !(fsmMetrics && fsmMetrics.crashes > 0);
+  return (
+    Boolean(level) &&
+    finalScore >= level!.requiredScore &&
+    !(fsmMetrics && fsmMetrics.crashes > 0) &&
+    !timedOut
+  );
 };
 
 /**

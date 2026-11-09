@@ -49,5 +49,21 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Pilot exports: participant data and emails
+# Pilot exports (a developers' script): participant data and nicknames
 pilot-export/
+
+# Pilot login cards: they hold the PINs
+pilot-cards/
+
+# Study password resets (a developers' script): they hold a temporary password
+study-resets/
+
+# Rasch analysis (analysis/rasch): participant codes and answers
+analysis/rasch/data/
+analysis/rasch/output/
+
+# Emulator test kit (a developers' script): placeholder calibration and design, emulator only
+/emulator-kit/
+# The team's worklist of texts with no Filipino (a developers' script)
+/language-report/
+/language-sheets/

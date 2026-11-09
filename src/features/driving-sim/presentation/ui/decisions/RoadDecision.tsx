@@ -24,6 +24,7 @@ import { Eye } from 'lucide-react';
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { scenarioLabel } from '@/features/driving-sim/domain/scenario/scenarioCopy';
 import DockedDecision, { type DockedDecisionCopy } from './DockedDecision';
+import { decisionMessages as m } from '../messages';
 
 interface RoadDecisionProps {
   event: ScenarioEvent;
@@ -40,6 +41,8 @@ interface RoadDecisionProps {
    * attempt, so the correct answer does not sit in the same place every run.
    */
   choiceSeed: number;
+  /** Over the board, or beside it on a touch screen. */
+  placement?: 'board' | 'side';
 }
 
 /**
@@ -51,15 +54,15 @@ interface RoadDecisionProps {
  * underneath.
  */
 const COPY: DockedDecisionCopy = {
-  eyebrow: 'Paused',
+  eyebrow: m.paused,
   Icon: Eye,
-  resolving: 'Watching what happens…',
-  verdictOk: 'Good call',
-  verdictBad: 'Wrong call',
-  continueLabel: 'Continue driving',
+  resolving: m.watchingHappens,
+  verdictOk: m.goodCall,
+  verdictBad: m.wrongCall,
+  continueLabel: m.continueDriving,
 };
 
-const RoadDecision = ({ event, onPlay, played, onAnswer, hintText, choiceSeed }: RoadDecisionProps) => (
+const RoadDecision = ({ event, onPlay, played, onAnswer, hintText, choiceSeed, placement }: RoadDecisionProps) => (
   <DockedDecision
     event={event}
     title={scenarioLabel(event)}
@@ -73,6 +76,7 @@ const RoadDecision = ({ event, onPlay, played, onAnswer, hintText, choiceSeed }:
     hintText={hintText}
     choiceSeed={choiceSeed}
     testId="road-decision"
+    placement={placement}
   />
 );
 

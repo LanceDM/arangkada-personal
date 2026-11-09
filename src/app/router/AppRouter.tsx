@@ -12,7 +12,7 @@
  * made-up numbers and has no business being reachable in a build.
  */
 import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Landing from '@/pages/landing/LandingPage';
 import ModeSelect from '@/pages/mode-select/ModeSelectPage';
 import StoryModeLayout from '@/pages/story/StoryModeLayout';
@@ -20,7 +20,6 @@ import LevelMapPage from '@/pages/story/LevelMapPage';
 import BriefingPage from '@/pages/story/BriefingPage';
 import DrivePage from '@/pages/story/DrivePage';
 import CompletePage from '@/pages/story/CompletePage';
-import PostTestPage from '@/pages/story/PostTestPage';
 import NotFound from '@/pages/NotFoundPage';
 import ResetPassword from '@/pages/auth/ResetPasswordPage';
 import VerifyEmail from '@/pages/auth/VerifyEmailPage';
@@ -38,7 +37,29 @@ const Learn = lazy(() => import('@/pages/learn/LearnPage'));
 const EksamenMode = lazy(() => import('@/pages/mock-exam/MockExamPage'));
 const DailyChallenge = lazy(() => import('@/pages/daily-challenge/DailyChallengePage'));
 const Settings = lazy(() => import('@/pages/settings/SettingsPage'));
-const Admin = lazy(() => import('@/pages/admin/AdminPage'));
+const PreTest = lazy(() => import('@/pages/pre-test/PreTestPage'));
+// The study's post-test, not the frozen pilot's at /play/story/post-test.
+const StudyPostTest = lazy(() => import('@/pages/post-test/PostTestPage'));
+// The admin area: one layout, and each section a chunk of its own.
+const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
+const AdminOverview = lazy(() => import('@/pages/admin/OverviewPage'));
+const Pilot = lazy(() => import('@/pages/admin/PilotPage'));
+const TestMode = lazy(() => import('@/pages/admin/TestModePage'));
+const AdminReport = lazy(() => import('@/pages/admin/ReportPage'));
+const AdminReplay = lazy(() => import('@/pages/admin/ReplayPage'));
+const AdminRouting = lazy(() => import('@/pages/admin/RoutingPage'));
+const AdminQLearning = lazy(() => import('@/pages/admin/QLearningPage'));
+const AdminQuiz = lazy(() => import('@/pages/admin/QuizPage'));
+const AdminIrt = lazy(() => import('@/pages/admin/IrtPage'));
+// The study's own pages: a participant joins and signs in by username.
+const StudyHome = lazy(() => import('@/pages/study/StudyHomePage'));
+const StudyJoin = lazy(() => import('@/pages/study/StudyJoinPage'));
+const StudySignIn = lazy(() => import('@/pages/study/StudySignInPage'));
+const StudyConsent = lazy(() => import('@/pages/study/StudyConsentPage'));
+const StudyBackground = lazy(() => import('@/pages/study/StudyBackgroundPage'));
+const StudyDevice = lazy(() => import('@/pages/study/StudyDevicePage'));
+const StudySurvey = lazy(() => import('@/pages/study/StudySurveyPage'));
+const StudyDone = lazy(() => import('@/pages/study/StudyDonePage'));
 
 const ComponentGallery = lazy(() => import('@/dev/pages/ComponentGallery'));
 const ScenarioLab = lazy(() => import('@/dev/pages/ScenarioLab'));
@@ -67,14 +88,43 @@ export const AppRouter = () => (
       <Route path=":levelId/briefing" element={<BriefingPage />} />
       <Route path=":levelId/drive" element={<DrivePage />} />
       <Route path=":levelId/complete" element={<CompletePage />} />
-      {/* The pilot's post-test, opened by the facilitator by URL. */}
-      <Route path="post-test" element={<PostTestPage />} />
     </Route>
     {lazyRoute('/learn/:levelId', <Learn />)}
     {lazyRoute('/play/eksamen', <EksamenMode />)}
     {lazyRoute('/play/daily', <DailyChallenge />)}
     {lazyRoute('/settings', <Settings />)}
-    {lazyRoute('/admin', <Admin />)}
+    {/* The study's pre-test: a participant sits it, an admin previews it. */}
+    {lazyRoute('/play/pre-test', <PreTest />)}
+    {/* The study's two-stage post-test, the same who as the pre-test. */}
+    {lazyRoute('/play/post-test', <StudyPostTest />)}
+    {/* The admin area. Participants keeps its old path, /admin/pilot. */}
+    <Route
+      path="/admin"
+      element={
+        <Suspense fallback={null}>
+          <AdminLayout />
+        </Suspense>
+      }
+    >
+      <Route index element={<AdminOverview />} />
+      <Route path="pilot" element={<Pilot />} />
+      <Route path="test-mode" element={<TestMode />} />
+      <Route path="replay" element={<AdminReplay />} />
+      <Route path="routing" element={<AdminRouting />} />
+      <Route path="q-learning" element={<AdminQLearning />} />
+      <Route path="irt" element={<AdminIrt />} />
+      <Route path="report" element={<AdminReport />} />
+      <Route path="quiz" element={<AdminQuiz />} />
+      <Route path="*" element={<Navigate to="/admin" replace />} />
+    </Route>
+    {lazyRoute('/study', <StudyHome />)}
+    {lazyRoute('/study/join', <StudyJoin />)}
+    {lazyRoute('/study/sign-in', <StudySignIn />)}
+    {lazyRoute('/study/consent', <StudyConsent />)}
+    {lazyRoute('/study/background', <StudyBackground />)}
+    {lazyRoute('/study/device', <StudyDevice />)}
+    {lazyRoute('/study/survey', <StudySurvey />)}
+    {lazyRoute('/study/done', <StudyDone />)}
 
     {/* Firebase email link landing pages */}
     <Route path="/auth/reset-password" element={<ResetPassword />} />

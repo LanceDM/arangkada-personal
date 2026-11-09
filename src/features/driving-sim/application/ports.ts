@@ -13,6 +13,7 @@ import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCo
 import type { DecisionTelemetryDoc } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import type { RoutingTelemetryDoc } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type { GroupInEffect, RoutingCursor, RoutingGroup } from '@/features/driving-sim/domain/adaptive/courseRouting';
+import type { QuizItemDoc, QuizModuleDoc, QuizSittingDoc } from '@/features/driving-sim/domain/scenario/quizBank';
 
 /** One recorded run, whichever source it came from. */
 export interface LearnerAttempt {
@@ -98,4 +99,21 @@ export interface BriefingProgressRepository {
   load(moduleId: string): Partial<BriefingProgress>;
   save(moduleId: string, progress: BriefingProgress): void;
   markLessonsRead(moduleId: string): void;
+}
+
+/** One module's part of the Short Quiz bank. */
+export interface QuizBank {
+  /** Quiz items only: a `test` item is never read here. */
+  items: QuizItemDoc[];
+  settings: QuizModuleDoc | null;
+}
+
+/** `quiz_items` and `quiz_modules`, read by every player, guests included. */
+export interface QuizBankRepository {
+  load(moduleId: string): Promise<QuizBank>;
+}
+
+/** `users/{uid}/quizSittings/{id}`: one finished sitting, append-only. */
+export interface QuizSittingRepository {
+  save(uid: string, sitting: QuizSittingDoc): Promise<void>;
 }

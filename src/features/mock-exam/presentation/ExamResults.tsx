@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, CheckCircle2, Gauge, RotateCcw, XCircle } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, RotateCcw, XCircle } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import type { ExamQuestion } from '../domain/questionBank';
 import { CATEGORY_TO_LEVEL, type WeakArea } from '../domain/grading';
@@ -9,7 +9,6 @@ interface ExamResultsProps {
   score: number;
   passed: boolean;
   weakAreas: WeakArea[];
-  estimatedAbility: number | null;
   onRetake: () => void;
   onPractice: (levelId: number) => void;
   onBack: () => void;
@@ -21,7 +20,6 @@ export const ExamResults = ({
   score,
   passed,
   weakAreas,
-  estimatedAbility,
   onRetake,
   onPractice,
   onBack,
@@ -44,22 +42,6 @@ export const ExamResults = ({
           {score}/{questions.length}
         </div>
       </div>
-
-      {estimatedAbility !== null && (
-        <div className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3">
-          <Gauge className="w-5 h-5 text-primary shrink-0" />
-          <div>
-            <p className="text-sm font-medium">
-              Estimated Ability:{' '}
-              <span className="font-display">{estimatedAbility.toFixed(2)}</span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Provisional — calibrated on simulated data, weighs harder questions more than easy
-              ones. Pass/fail above is unaffected.
-            </p>
-          </div>
-        </div>
-      )}
 
       {weakAreas.length > 0 && (
         <div className="bg-card border border-border rounded-2xl p-6 space-y-4">

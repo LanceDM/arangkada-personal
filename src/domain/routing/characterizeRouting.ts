@@ -10,11 +10,11 @@
 //   `probes`     - four synthetic content contexts, chosen so that together
 //                  they exercise every guard and make every label legal
 //                  somewhere. They describe no real level: what today's
-//                  content makes legal is for the binding to report.
+//                  content makes legal is for the binding to report (R4).
 //   `core`       - for every state x verdict x probe, the legal moves and
 //                  where each leads.
 //   `scenarios`  - scripted courses through the class, with their logs.
-//   `structure`  - the machine's definition of done: every state reachable,
+//   `structure`  - the properties the machine must satisfy: every state reachable,
 //                  no dead state, no trap, one target per (state, label), and
 //                  `step` accepting exactly what `legalTransitions` lists.
 //
@@ -306,7 +306,7 @@ const buildStructure = (cells: Cell[]): RoutingStructure => {
 };
 
 /**
- * Every way the machine falls short of its definition of done, in
+ * Every way the machine falls short of the machine's definition of done, in
  * words; empty when it meets it. `npm run routing:check` fails on any, and
  * refuses to write a golden that has one.
  */

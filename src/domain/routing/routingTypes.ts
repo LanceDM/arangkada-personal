@@ -1,7 +1,7 @@
 // The routing FSM's vocabulary: the course it routes through, its states, its
 // transitions, the context it is handed and the log it keeps.
 //
-// "Routing" is the thesis's term (ρ): which level a learner plays
+// "Routing" is the thesis's term (ρ, the routing design): which level a learner plays
 // next and what is added to it. It has nothing to do with URL routing, which
 // lives in `app/router`.
 //
@@ -57,7 +57,7 @@ export type FrontierState = DriveState | FinalState;
 /**
  * Replaying passed level `level` once, before going back to `frontier`.
  *
- * The routing design names this state REVIEW(L′). It carries its return point because
+ * The design names this state REVIEW(L′). It carries its return point because
  * `return` has to know where to go and nothing else in the machine does; so
  * each (L′, frontier) pair is its own state, 66 of them.
  */
@@ -108,8 +108,8 @@ export const ROUTING_STATES: readonly RoutingState[] = [
 // --- transitions ---------------------------------------------------------------
 
 /**
- * One labelled transition. `retry` and `advance` carry the practice add-on,
- * `+ practice(c)`, as `practice`: null is the plain move.
+ * One labelled transition. `retry` and `advance` carry the practice add-on of
+ * the design, `+ practice(c)`, as `practice`: null is the plain move.
  */
 export type RoutingTransition =
   | { readonly kind: 'retry'; readonly practice: DrivingCompetency | null }
@@ -222,7 +222,7 @@ export const stateId = (state: RoutingState): string => {
   }
 };
 
-/** The control state the routing design names, without a review's return point: `REVIEW(6)`. */
+/** The control state the design names, without a review's return point: `REVIEW(6)`. */
 export const controlStateId = (state: RoutingState): string =>
   state.kind === 'REVIEW' ? `REVIEW(${state.level})` : stateId(state);
 

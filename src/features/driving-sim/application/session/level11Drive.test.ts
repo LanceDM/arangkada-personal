@@ -16,6 +16,13 @@ import { evaluateWeightedRule } from '@/features/driving-sim/domain/evaluation/r
 import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
 import { laneCentreX, roadXAt, type LaneIndex } from '@/features/driving-sim/domain/world/vehiclePhysics';
+import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
+
+/**
+ * The plans below are in km/h on the dial Level 11 was spaced at. Its pace
+ * drives that same road at its legal limit, k times the figure (`spacedPace`), so each planned speed is put on the dial the level now reads.
+ */
+const dial = (speed: number): number => speed * paceOf(LEVELS.find(level => level.id === 11)!).speedChangeScale;
 
 const level11 = LEVELS.find(level => level.id === 11)!;
 
@@ -148,8 +155,8 @@ const drive = (plan: Plan, frames = 40_000): DriveResult => {
       const x = car?.x ?? 0;
       const input: InputState = {
         ...NO_INPUT,
-        throttle: snapshot.targetSpeed < want.speed - 1 && !previous.throttle,
-        brake: snapshot.speed > want.speed + 0.5,
+        throttle: snapshot.targetSpeed < dial(want.speed) - dial(1) && !previous.throttle,
+        brake: snapshot.speed > dial(want.speed) + dial(0.5),
         left: target !== null && x > target + LANE_TOLERANCE,
         right: target !== null && x < target - LANE_TOLERANCE,
       };
@@ -316,8 +323,8 @@ describe('each Level 11 scenario can be failed by not giving the space it asks f
 });
 
 /**
- * A following gap is kept to a vehicle the car is behind, in its lane.
- * Measured along the road alone, a rider in the next lane read as 0
+ * A following gap is kept to a vehicle the car is behind, in its lane (grading
+ * key C3). Measured along the road alone, a rider in the next lane read as 0
  * seconds once the car drew level with it, so passing one failed.
  */
 describe('a following gap on Level 11 is the gap to the vehicle in your lane', () => {

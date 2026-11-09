@@ -7,9 +7,11 @@
 import { provideAuthDependencies } from './application/dependencies';
 import { firebaseAuthGateway } from './infrastructure/FirebaseAuthRepository';
 import { firebaseUserProfileRepository } from './infrastructure/FirebaseUserRepository';
+import { localDeviceLanguageRepository } from './infrastructure/LocalDeviceLanguageRepository';
 
 export const composeAuth = () =>
   provideAuthDependencies({
     auth: firebaseAuthGateway,
     userProfiles: firebaseUserProfileRepository,
+    deviceLanguage: localDeviceLanguageRepository,
   });

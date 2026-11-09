@@ -7,7 +7,7 @@
 //   npm run routing:update-golden   accepts the current machine as the
 //                                   baseline - refused while it has a defect.
 //
-// A defect is anything the machine's definition of done rules out: a state unreachable from
+// A defect is anything the machine must satisfy: a state unreachable from
 // the tutorial, a state other than CERTIFIED with no way out, a state from
 // which CERTIFIED cannot be reached, a transition with two targets, or `step`
 // accepting what `legalTransitions` did not list.

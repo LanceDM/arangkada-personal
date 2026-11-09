@@ -66,6 +66,7 @@ export const ALL_ENVIRONMENT_TRIGGERS = [
   'road_marking', 'overtaking_zone', 'emergency_vehicle',
   'level_end', 'scenario_trigger', 'feedback_displayed',
   'recovery_complete', 'crash', 'vehicle_stopped', 'briefing_dismissed',
+  'time_up',
 ] as const satisfies readonly EnvironmentTrigger[];
 
 export const ALL_EVALUATION_OUTCOMES = [
@@ -335,6 +336,18 @@ const SCENARIOS: Array<{ name: string; steps: AnyTrigger[] }> = [
     steps: ['start', 'crash'],
   },
   {
+    name: 'time up ends the run from DRIVING',
+    steps: ['start', 'time_up'],
+  },
+  {
+    name: 'time up ends the run from a car at rest mid-run',
+    steps: ['start', 'vehicle_stopped', 'time_up'],
+  },
+  {
+    name: 'time up ends the run inside a graded event',
+    steps: ['start', 'red_light', 'scenario_trigger', 'red_light', 'time_up'],
+  },
+  {
     name: 'level completed',
     steps: ['start', 'level_end'],
   },
@@ -453,6 +466,8 @@ const buildStructure = (shortestPaths: Map<FSMState, string[]>): StructureReport
 /** Transitions that must stay ungated whatever theta says: ending a run. */
 const SAFETY_CRITICAL: Array<{ from: FSMState; trigger: string }> = [
   { from: 'DRIVING', trigger: 'crash' },
+  { from: 'DRIVING', trigger: 'time_up' },
+  { from: 'IDLE', trigger: 'time_up' },
   { from: 'DRIVING', trigger: 'level_end' },
   { from: 'DRIVING', trigger: 'vehicle_stopped' },
   { from: 'REACTION_WINDOW', trigger: 'answer_incorrect' },

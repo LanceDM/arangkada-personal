@@ -14,9 +14,8 @@
  * carrying the finished level means the route the item was chosen against and
  * the route the player drives cannot be two different routes.
  *
- * `options` are the adaptive layer's repairs; the game plays `GAME_OPTIONS`,
- * and a test can pass `LEGACY_OPTIONS` to see the entry as the game-level
- * simulation played it.
+ * `options` are the adaptive layer's repairs; the game plays `GAME_OPTIONS`, and a
+ * test can pass `LEGACY_OPTIONS` to see the entry as the fourth experiment played it.
  */
 import type { ActionLog } from '@/domain/learner/attempt';
 import { buildBKTLearnerProfile } from '@/domain/learner/mastery/buildBKTProfile';

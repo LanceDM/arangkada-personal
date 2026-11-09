@@ -1,9 +1,11 @@
 import { useProgressStore } from '@/features/progression';
-import { LEVELS } from '@/features/driving-sim';
+import { LEVELS, playableLevelName } from '@/features/driving-sim';
 import { Star, Lock, Trophy, ArrowLeft, Flag, Car, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { Button } from '@/shared/ui/button';
+import { useLanguage, useText } from '@/shared/i18n/useText';
+import { mapMessages as m } from './messages';
 
 /**
  * The course in a New group: the routing FSM decides the next course
@@ -16,6 +18,13 @@ export interface LevelMapCourse {
   certified: boolean;
   /** Every level free to play: developers and admins, for testing. */
   openAll: boolean;
+  /**
+   * A passed level may be replayed outside the course. False for a study
+   * participant, who plays the course and nothing else.
+   */
+  replays: boolean;
+  /** Where Back goes; the mode menu when absent. */
+  backTo?: string;
   loading: boolean;
   onContinue: () => void;
 }
@@ -31,13 +40,15 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
   const { levelResults, totalScore } = useProgressStore();
 
   const navigate = useNavigate();
+  const t = useText();
+  const { language } = useLanguage();
 
   return (
     <div className="min-h-screen pt-10 pb-12 px-6 flex flex-col items-center">
       {/* Back Button */}
       <div className="mb-6 flex w-full max-w-2xl justify-start">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/play')}>
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        <Button variant="ghost" size="sm" onClick={() => navigate(course?.backTo ?? '/play')}>
+          <ArrowLeft className="w-4 h-4 mr-1" /> {t(m.back)}
         </Button>
       </div>
       {/* Header */}
@@ -46,18 +57,18 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
           ARANGKADA
         </h1>
         <p className="text-muted-foreground mt-2 text-sm tracking-widest uppercase">
-          Driving Simulation System
+          {t(m.subtitle)}
         </p>
         <div className="flex items-center justify-center gap-2 mt-4 bg-card rounded-xl px-6 py-3 border border-border">
           <Trophy className="w-5 h-5 text-primary" />
           <span className="font-display text-lg text-primary">{totalScore}</span>
-          <span className="text-muted-foreground text-sm">Total Points</span>
+          <span className="text-muted-foreground text-sm">{t(m.totalPoints)}</span>
         </div>
         {course && (
           <div className="mt-4 flex justify-center">
             {course.certified ? (
               <span className="rounded-xl border border-accent/40 bg-accent/10 px-6 py-3 font-display text-sm tracking-wider text-accent">
-                COURSE COMPLETE
+                {t(m.courseComplete)}
               </span>
             ) : (
               <button
@@ -65,7 +76,7 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
                 disabled={course.loading || course.frontierLevelId === null}
                 className="rounded-xl bg-primary px-8 py-3 font-display text-sm tracking-wider text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
               >
-                {course.loading ? 'LOADING YOUR COURSE…' : 'CONTINUE COURSE →'}
+                {t(course.loading ? m.loadingCourse : m.continueCourse)}
               </button>
             )}
           </div>
@@ -86,7 +97,7 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
             <div className="w-14 h-14 rounded-full bg-card border-2 border-primary flex items-center justify-center glow-yellow">
               <Flag className="h-6 w-6 text-primary" />
             </div>
-            <span className="font-display text-xs text-primary mt-1">FINISH</span>
+            <span className="font-display text-xs text-primary mt-1">{t(m.finish)}</span>
           </div>
 
           {[...LEVELS].reverse().map((level, idx) => {
@@ -96,9 +107,10 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
             // is above it waits.
             const isFrontier = course ? level.id === course.frontierLevelId : false;
             const isUnlocked = course
-              ? course.certified ||
-                course.openAll ||
-                (course.frontierLevelId !== null && level.id <= course.frontierLevelId)
+              ? course.openAll ||
+                (course.replays
+                  ? course.certified || (course.frontierLevelId !== null && level.id <= course.frontierLevelId)
+                  : level.id === course.frontierLevelId)
               : true; // For testing purposes, all levels are unlocked
             const select = () => (isFrontier ? course!.onContinue() : onSelectLevel(level.id));
             const result = levelResults[level.id];
@@ -112,8 +124,8 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
               >
                 {/* Info card */}
                 <div className={`flex-1 ${isLeft ? 'text-right' : 'text-left'}`}>
-                  <p className="font-display text-xs text-muted-foreground">LEVEL {level.id}</p>
-                  <p className="font-body text-sm font-semibold text-foreground">{level.name}</p>
+                  <p className="font-display text-xs text-muted-foreground">{t(m.level(level.id))}</p>
+                  <p className="font-body text-sm font-semibold text-foreground">{playableLevelName(level, language)}</p>
                   <div className="flex gap-0.5 mt-1" style={{ justifyContent: isLeft ? 'flex-end' : 'flex-start' }}>
                     {[1, 2, 3].map(s => (
                       <Star
@@ -141,7 +153,7 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
                   )}
                   {isFrontier && (
                     <span className="absolute -bottom-2 rounded-full bg-primary px-2 font-display text-[9px] font-black text-primary-foreground">
-                      NEXT
+                      {t(m.next)}
                     </span>
                   )}
                   {result?.completed && (
@@ -159,7 +171,7 @@ const LevelMap = ({ onSelectLevel, course, aside }: LevelMapProps) => {
             <div className="w-14 h-14 rounded-full bg-card border-2 border-accent flex items-center justify-center glow-green">
               <Car className="h-6 w-6 text-accent" />
             </div>
-            <span className="font-display text-xs text-accent mt-1">START</span>
+            <span className="font-display text-xs text-accent mt-1">{t(m.start)}</span>
           </div>
         </div>
       </div>

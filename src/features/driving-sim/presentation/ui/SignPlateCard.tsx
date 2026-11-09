@@ -1,5 +1,6 @@
 import type { RoadsideSignArt, SignPlate, SignalAspect } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion';
+import { publicAsset } from '@/shared/lib/publicAsset';
 
 /**
  * The sign on the road is drawn at the scale a sign really is on a narrow
@@ -161,7 +162,7 @@ const SignPlateCard = ({ sign, compact = false }: { sign: SignPlate; compact?: b
     >
       {sign.image ? (
         <img
-          src={`/${sign.image}`}
+          src={publicAsset(sign.image)}
           alt={sign.name}
           className="max-h-full max-w-full object-contain"
         />

@@ -17,6 +17,7 @@ import { DrivingFSM } from '@/features/driving-sim/domain/fsm/DrivingFSM';
 import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { evaluateWeightedRule } from '@/features/driving-sim/domain/evaluation/ruleEngine';
 import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
+import { tapsTo } from './driveSamples';
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
 import type { SceneNode } from '@/features/driving-sim/domain/scene/SceneNode';
 import { isOnAuxiliaryLane, segmentAt } from '@/features/driving-sim/domain/world/routeGeometry';
@@ -307,9 +308,9 @@ describe('Level 7 opens quiet', () => {
     let opened = -1;
     try {
       for (let frame = 0; frame < 1200 && opened < 0; frame++) {
-        // A driver finding the controls: three taps up to the cruise, then
-        // nothing, which is the least eventful start anybody could make.
-        session.update({ ...NO_INPUT, throttle: frame < 12 && frame % 4 === 0 });
+        // A driver finding the controls: taps up to the limit, then nothing,
+        // which is the least eventful start anybody could make.
+        session.update({ ...NO_INPUT, throttle: frame < tapsTo(level7.speedLimit) * 4 && frame % 4 === 0 });
         if (session.getSnapshot().briefingEvent) opened = frame;
       }
     } finally {

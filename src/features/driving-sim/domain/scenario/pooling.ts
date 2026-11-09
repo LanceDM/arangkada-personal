@@ -84,7 +84,7 @@ export const rerollUpcomingEvents = (
   rng: () => number = Math.random
 ): ScenarioEvent[] =>
   currentEvents.map((event, index) => {
-    // Never reroll an adaptively injected event (the selector's remediation, see
+    // Never reroll an adaptively injected event (remediation, see
     // `withRemediation` in levelCatalog) - it was already chosen
     // deliberately, for a reason that has nothing to do with this level's own
     // pool, and it does not correspond to any slot/distance here. Checked by

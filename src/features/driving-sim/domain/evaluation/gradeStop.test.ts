@@ -10,7 +10,7 @@
  *
  * And only a stop where the rule reaches: within `noStandingWithin` meters of
  * the place, before it or past it, or alongside it where nothing says how far.
- * Until the first play-test the whole approach counted, which failed a stop eleven
+ * Until a play-test the whole approach counted, which failed a stop eleven
  * meters short of a hydrant and passed a car standing level with it.
  */
 import { describe, expect, it } from 'vitest';

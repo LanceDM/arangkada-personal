@@ -5,6 +5,7 @@ import type { ActionLog, SignOutcome } from '@/domain/learner/attempt';
 import { evaluatePlayerAction } from '@/features/driving-sim/domain/evaluation/evaluatePlayerAction';
 import type { DrivingCompetency, SupportLevel } from '@/domain/learner/competency';
 import { recordSignOutcome } from '@/features/driving-sim/application/signCoverage';
+import { plateKey } from '@/features/driving-sim/domain/scenario/scenarioTexts';
 import type { FSMState } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import { reactionClockMs } from '@/features/driving-sim/domain/fsm/fsmMetrics';
 import { answeredWithTheCar, observeReaction, type DecisionSettlement } from '@/features/driving-sim/domain/evaluation/reactionTiming';
@@ -13,6 +14,7 @@ import type { DecisionKind, DecisionTrace } from '@/features/driving-sim/domain/
 import { scoreDecision, type PracticeItemScoring } from '@/features/driving-sim/domain/scoring/scoreDecision';
 import { GAME_OPTIONS } from '@/features/driving-sim/domain/adaptive/adaptiveOptions';
 import type { useFSM } from './useFSM';
+import { englishText, type TextOf } from '@/shared/lib/localized';
 
 /**
  * One verdict, as the screen shows it back.
@@ -60,6 +62,8 @@ interface UseScenarioEvaluationOptions {
    * full support, as omitted transition parameters mean its baseline theta.
    */
   support?: SupportLevel;
+  /** The language this decision's own words are written in. */
+  say?: TextOf;
   /** Whether an appended practice item counts toward the pass mark. Omitted means the game's rule. */
   practiceItemScoring?: PracticeItemScoring;
 }
@@ -72,6 +76,7 @@ const isFsmState = (state: FSMState, states: readonly FSMState[]) =>
 export const useScenarioEvaluation = ({
   fsm,
   support = 'full',
+  say = englishText,
   practiceItemScoring = GAME_OPTIONS.practiceItemScoring,
 }: UseScenarioEvaluationOptions) => {
   const [score, setScore] = useState(0);
@@ -140,7 +145,8 @@ export const useScenarioEvaluation = ({
       playerAction,
       isStandingPenalty ? 0 : violationStreakRef.current,
       reaction,
-      presented ? support : undefined
+      presented ? support : undefined,
+      say
     );
 
     // The level's requiredScore/stars thresholds were calibrated against its
@@ -159,7 +165,13 @@ export const useScenarioEvaluation = ({
     const scoreDelta = scored.delta;
     scoreRef.current = scored.score;
     setScore(scoreRef.current);
-    logsRef.current.push(result.log);
+    logsRef.current.push(
+      isStandingPenalty
+        ? { ...result.log, standing: true }
+        : settlement === 'unanswered'
+          ? { ...result.log, unanswered: true }
+          : result.log
+    );
     tracesRef.current.push({
       scenarioId: event.id,
       kind,
@@ -181,7 +193,7 @@ export const useScenarioEvaluation = ({
         // Built from the event alone, never from `support`, so a correction is
         // the same at every level.
         ...(presented && !result.isCorrect
-          ? { move: scenarioInstruction(event), realWorldNote: event.realWorldNote }
+          ? { move: scenarioInstruction(event, say), realWorldNote: event.realWorldNote }
           : {}),
       });
     }
@@ -214,7 +226,7 @@ export const useScenarioEvaluation = ({
     // skipped.
     const plate = event.sign ?? event.marking;
     if (plate) {
-      recordSignOutcome(plate.name, result.isCorrect);
+      recordSignOutcome(plateKey(plate), result.isCorrect);
       // Kept for this run only, so the review afterwards can show what was met
       // here rather than the cumulative record across every attempt.
       signOutcomesRef.current.push({
@@ -276,7 +288,7 @@ export const useScenarioEvaluation = ({
     // driver has finished it. The index is where this decision sits in the
     // run's logs, which is how a re-roll it causes is recorded against it.
     return { isCorrect: result.isCorrect, logIndex };
-  }, [fsm, practiceItemScoring, support, triggerScreenShake]);
+  }, [fsm, practiceItemScoring, say, support, triggerScreenShake]);
 
   return {
     score,

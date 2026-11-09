@@ -156,10 +156,15 @@ export const createDriveController = ({
           case 'crashed':
             // The impact itself is the run's final violation.
             host.finish(
-              buildLevelResult(level, readTotals(1), event.reason),
+              buildLevelResult(level, readTotals(1), { kind: 'crash', reason: event.reason }),
               telemetry(),
               CRASH_HOLD_MS
             );
+            break;
+          case 'timed_out':
+            // Nothing was hit and nothing was done wrong, so no violation is
+            // added and the last frame is not held.
+            host.finish(buildLevelResult(level, readTotals(), { kind: 'time_up' }), telemetry(), 0);
             break;
           case 'finished':
             host.finish(buildLevelResult(level, readTotals()), telemetry(), 0);

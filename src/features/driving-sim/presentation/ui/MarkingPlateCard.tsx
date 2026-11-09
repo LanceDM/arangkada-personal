@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { MarkingPlate, RoadMarkingArt } from '@/features/driving-sim/domain/scenario/scenarioScene';
+import { publicAsset } from '@/shared/lib/publicAsset';
 
 /**
  * The marking equivalent of SignPlateCard.
@@ -378,7 +379,7 @@ const MarkingPlateCard = ({
     >
       {marking.image ? (
         <img
-          src={`/${marking.image}`}
+          src={publicAsset(marking.image)}
           alt={marking.name}
           className="max-h-full max-w-full object-contain"
         />

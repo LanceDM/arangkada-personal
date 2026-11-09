@@ -270,8 +270,10 @@ export interface DrivingWorld {
   settledZoneEnd: number;
   crawl: StandingPenaltyState;
   wrongSide: StandingPenaltyState;
+  overLimit: StandingPenaltyState;
   crawlWarning: boolean;
   wrongSideWarning: boolean;
+  overLimitWarning: boolean;
 
   // ── Holds and effects ────────────────────────────────────────────────────
   /** While this is in the future the road stands still so a correction can be read. */
@@ -280,6 +282,8 @@ export interface DrivingWorld {
   joltAt: number;
   /** Last frame's throttle/brake, for telling a tap from a hold. */
   prevInput: { up: boolean; down: boolean };
+  /** How many consecutive steps Up has been held, for its repeat; 0 when released. */
+  upHeldSteps: number;
   /**
    * The steering keys as they were last frame, so a manoeuvre can ask for a
    * fresh press rather than a held one.
@@ -313,6 +317,27 @@ export interface DrivingWorld {
   // ── How the run ends ─────────────────────────────────────────────────────
   crashed: boolean;
   crashAt: number;
+  /**
+   * Steps of driving spent so far: the world steps that drove the car, at rest
+   * or moving. A step the world spends held (a panel being read, a correction,
+   * a scripted manoeuvre, a crash) is not one. The level's time limit is
+   * counted in these, so it is the same on every device.
+   */
+  drivenSteps: number;
+  /** True once the run ended because its driving time ran out. */
+  timedOut: boolean;
+  /**
+   * Steps the drive has been held for the panel or panels open now, back to 0
+   * when the hold ends. A hold that reaches `PANEL_STEPS` is closed by the
+   * world: no panel holds the drive for longer.
+   */
+  heldSteps: number;
+  /**
+   * The answer a right-of-way or parking call is being played out with, from
+   * the moment it is chosen until it is committed. A hold that runs out while
+   * it plays commits this answer, not "unanswered".
+   */
+  pendingAnswer: string | null;
   /** True once the run is over; the session stops advancing. */
   finished: boolean;
 
@@ -411,12 +436,15 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
     settledZoneEnd: 0,
     crawl: createStandingPenaltyState(),
     wrongSide: createStandingPenaltyState(),
+    overLimit: createStandingPenaltyState(),
     crawlWarning: false,
     wrongSideWarning: false,
+    overLimitWarning: false,
 
     correctionHoldUntil: 0,
     joltAt: 0,
     prevInput: { up: false, down: false },
+    upHeldSteps: 0,
     prevSteer: { left: false, right: false },
 
     chaseLane: null,
@@ -425,6 +453,10 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
 
     crashed: false,
     crashAt: 0,
+    drivenSteps: 0,
+    timedOut: false,
+    heldSteps: 0,
+    pendingAnswer: null,
     finished: false,
 
     lastWeakCompetency: null,

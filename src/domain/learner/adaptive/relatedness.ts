@@ -47,7 +47,7 @@ interface RelatednessEdge {
   a: DrivingCompetency;
   b: DrivingCompetency;
   tier: RelatednessTier;
-  /** The curriculum's Traceability Matrix row this edge comes from. */
+  /** The curriculum Traceability Matrix row this edge comes from. */
   source: string;
 }
 

@@ -34,7 +34,7 @@ const gatewayReporting = (user: AuthUser | null): AuthGateway =>
   }) as AuthGateway;
 
 const observe = async (gateway: AuthGateway, get: (uid: string) => Promise<UserProfile | null>) => {
-  provideAuthDependencies({ auth: gateway, userProfiles: { get } });
+  provideAuthDependencies({ auth: gateway, userProfiles: { get, saveLanguage: async () => {} }, deviceLanguage: { load: () => null, save: () => {} } });
   const seen: { session: AuthSession | null } = { session: null };
   const Probe = () => {
     const session = useObservedAuthSession();

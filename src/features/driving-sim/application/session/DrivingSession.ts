@@ -19,10 +19,16 @@
  * It has no lifecycle of its own. It subscribes to nothing and schedules
  * nothing, so a drive stops simply by not being updated again — the host owns
  * the animation frame and is the only thing that can end one. There is
- * deliberately no `dispose()`.
+ * deliberately no `dispose()`: 
  */
 import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { getRerollableSlots } from '@/features/driving-sim/domain/scenario/levelCatalog';
+import {
+  DRIVING_STEPS_PER_SECOND,
+  PANEL_STEPS,
+  timeLimitStepsFor,
+  UNANSWERED,
+} from '@/features/driving-sim/domain/scenario/levelTimeLimits';
 import { rerollUpcomingEvents } from '@/features/driving-sim/domain/scenario/pooling';
 import type { DrivingCompetency, SupportLevel } from '@/domain/learner/competency';
 import type { DrivingFSM } from '@/features/driving-sim/domain/fsm/DrivingFSM';
@@ -50,7 +56,9 @@ import { parkPose, rampPose, rightOfWayPose, roundaboutPose, turnPose, } from '@
 import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
 import { NO_INPUT, type InputState } from '@/features/driving-sim/domain/world/InputState';
 import type { DecisionSettlement } from '@/features/driving-sim/domain/evaluation/reactionTiming';
+import { limitInForce } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import { snapshotChanged, type DrivingSnapshot } from './DrivingSnapshot';
+import { textIn, type Language, type Localized, type TextOf } from '@/shared/lib/localized';
 
 export { snapshotChanged };
 export type { DrivingSnapshot };
@@ -92,13 +100,20 @@ export interface DrivingSessionOptions {
    * the machine. Omitted means `full`, the baseline machine.
    */
   support?: SupportLevel;
+  /**
+   * How many world steps of driving the run may spend before it ends with
+   * "time's up". Omitted means the level's measured limit
+   * (`timeLimitStepsFor`); the reference driver that measures it passes
+   * infinity, so the limit never cuts short the drive it is measured from.
+   */
+  timeLimitSteps?: number;
 }
 
 /**
  * Never re-roll an event closer than this. Derived from the renderer's own
  * visibility filter (the cutoff is 1300 distance-units ahead) plus a buffer, so
  * a re-roll can never swap a sign's appearance while it is already on screen.
- * Exported for the offline simulation, which re-rolls as a drive does.
+ * Exported for the fourth experiment's environment, which re-rolls as a drive does.
  */
 export const REROLL_SAFETY_MARGIN = 1400;
 
@@ -164,7 +179,68 @@ export const WRONG_SIDE_PENALTY_EVENT: ScenarioEvent = {
   severity: 'major',
 };
 
-const isFsmState = (state: FSMState, states: readonly FSMState[]) => states.includes(state);
+/**
+ * Charged while the car is over the road's limit on clear road.
+ *
+ * RA 4136 §35 is the rule, and it binds on the whole road, not only beside a
+ * sign. Scored like the crawl penalty — points only, a standing offence, never
+ * BKT evidence (`bktEvidence`) — and at the crawl's weight, which is
+ * an assumption until step 7 gives the weights a basis.
+ */
+export const OVER_LIMIT_PENALTY_EVENT: ScenarioEvent = {
+  id: 'engine.over-limit-penalty',
+  triggerAtDistance: -3,
+  type: 'speed_limit',
+  description: 'Driving over the road limit',
+  correctAction: 'brake',
+  points: 10,
+  penaltyMessage:
+    "You are over this road's limit. RA 4136 Section 35 sets a road's limit everywhere on it, not only beside a sign.",
+  rewardMessage: '',
+  duration: 0,
+  competency: 'speed_control',
+  severity: 'minor',
+};
+
+/** What the three standing penalties say, in the language a level was laid over with. */
+const PENALTY_TEXTS: Readonly<Record<string, { description: Localized; penaltyMessage: Localized }>> = {
+  [CRAWL_PENALTY_EVENT.id]: {
+    description: { en: CRAWL_PENALTY_EVENT.description },
+    penaltyMessage: { en: CRAWL_PENALTY_EVENT.penaltyMessage },
+  },
+  [WRONG_SIDE_PENALTY_EVENT.id]: {
+    description: { en: WRONG_SIDE_PENALTY_EVENT.description },
+    penaltyMessage: { en: WRONG_SIDE_PENALTY_EVENT.penaltyMessage },
+  },
+  [OVER_LIMIT_PENALTY_EVENT.id]: {
+    description: { en: OVER_LIMIT_PENALTY_EVENT.description },
+    penaltyMessage: { en: OVER_LIMIT_PENALTY_EVENT.penaltyMessage },
+  },
+};
+
+const penaltyIn = (event: ScenarioEvent, say: TextOf): ScenarioEvent => ({
+  ...event,
+  description: say(PENALTY_TEXTS[event.id].description),
+  penaltyMessage: say(PENALTY_TEXTS[event.id].penaltyMessage),
+});
+
+const FILIPINO_PENALTIES = {
+  crawlPenaltyEvent: penaltyIn(CRAWL_PENALTY_EVENT, textIn('fil')),
+  wrongSidePenaltyEvent: penaltyIn(WRONG_SIDE_PENALTY_EVENT, textIn('fil')),
+  overLimitPenaltyEvent: penaltyIn(OVER_LIMIT_PENALTY_EVENT, textIn('fil')),
+};
+
+const ENGLISH_PENALTIES = {
+  crawlPenaltyEvent: CRAWL_PENALTY_EVENT,
+  wrongSidePenaltyEvent: WRONG_SIDE_PENALTY_EVENT,
+  overLimitPenaltyEvent: OVER_LIMIT_PENALTY_EVENT,
+};
+
+/** One object per language, so a frame builds nothing. */
+const standingPenaltiesIn = (language: Language | undefined) =>
+  language === 'fil' ? FILIPINO_PENALTIES : ENGLISH_PENALTIES;
+
+const isFsmState =(state: FSMState, states: readonly FSMState[]) => states.includes(state);
 
 /**
  * How much of the road ahead is still visible at this point of the route.
@@ -192,6 +268,8 @@ export class DrivingSession {
   private readonly initialDistance: number;
   /** What the road may mark of a response; read by the frame's composition only. */
   private readonly support: SupportLevel;
+  /** World steps of driving the run may spend. */
+  private readonly timeLimitSteps: number;
   private signCoverage: SignCoverage;
 
   private world: DrivingWorld;
@@ -202,6 +280,7 @@ export class DrivingSession {
     this.level = options.level;
     this.fsm = options.fsm;
     this.support = options.support ?? 'full';
+    this.timeLimitSteps = options.timeLimitSteps ?? timeLimitStepsFor(options.level.id);
     this.curves = curvesForLevel(options.level);
     this.speedProfile = speedProfileFor(options.level.speedLimit);
     this.isTutorialLevel = isTutorial(options.level);
@@ -225,7 +304,7 @@ export class DrivingSession {
     this.fsm.reset();
     this.world = createDrivingWorld(options.level, this.initialDistance);
     this.world.envObjects = generateEnvObjects(options.level.roadLength, Math.random, options.level.route);
-    this.snapshot = project(this.world, options.level, this.curves);
+    this.snapshot = project(this.world, options.level, this.curves, this.timeLimitSteps);
   }
 
   /** Starts the drive over, on the same level. */
@@ -234,12 +313,12 @@ export class DrivingSession {
     this.world = createDrivingWorld(this.level, this.initialDistance);
     this.world.envObjects = generateEnvObjects(this.level.roadLength, Math.random, this.level.route);
     this.frame = null;
-    this.snapshot = project(this.world, this.level, this.curves);
+    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps);
   }
 
   /** What the screen should show. A fresh object each frame; compare with `snapshotChanged`. */
   getSnapshot(): DrivingSnapshot {
-    this.snapshot = project(this.world, this.level, this.curves);
+    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps);
     return this.snapshot;
   }
 
@@ -251,6 +330,46 @@ export class DrivingSession {
   /** The FSM this drive is advancing, for telemetry at the end of the run. */
   getFsm(): DrivingFSM {
     return this.fsm;
+  }
+
+  /** World steps of driving spent so far: what the time limit counts. */
+  getDrivenSteps(): number {
+    return this.world.drivenSteps;
+  }
+
+  /**
+   * Real time the host could not run the world for: the page was hidden, the
+   * app was switched away from, the device was held upright. Nothing moved,
+   * but the time was the player's, so it is spent as the world would have
+   * spent it: against the panel holding the drive if one is open, else as
+   * driving time. The next `update` closes the panel or ends the run if that
+   * used up what was left. Without this, leaving the page was a way
+   * to stay in a level for ever.
+   */
+  spendAway(ms: number): void {
+    const { world } = this;
+    if (world.finished || world.crashed || !(ms > 0)) return;
+    const steps = Math.floor((ms * DRIVING_STEPS_PER_SECOND) / 1000);
+    if (world.paused) world.heldSteps += steps;
+    else world.drivenSteps += steps;
+  }
+
+  /**
+   * Closes every panel holding the drive once the hold's time has run out: a
+   * briefing or a notice as if acknowledged, a question as unanswered, and a
+   * right-of-way or parking call already being played out with the answer
+   * chosen for it.
+   */
+  private closeHold(): GameEvent[] {
+    const { world } = this;
+    const events: GameEvent[] = [];
+    if (world.inspectionEvent) events.push(...this.settleInspection(UNANSWERED, 'unanswered'));
+    if (world.cutsceneEvent) {
+      const chosen = world.pendingAnswer;
+      events.push(...this.settleCutscene(chosen ?? UNANSWERED, chosen ? 'question' : 'unanswered'));
+    }
+    events.push(...this.dismissAdaptationNotice(), ...this.dismissBriefing());
+    return events;
   }
 
   /**
@@ -334,6 +453,8 @@ export class DrivingSession {
         world.adaptationNotice ||
         world.briefingEvent
     );
+    // Each hold is timed from its own start.
+    if (!world.paused) world.heldSteps = 0;
   }
 
   /**
@@ -368,6 +489,10 @@ export class DrivingSession {
 
   /** Player picked a Go / No-Go answer at a checkpoint. */
   answerInspection(action: string): GameEvent[] {
+    return this.settleInspection(action, 'question');
+  }
+
+  private settleInspection(action: string, settlement: DecisionSettlement): GameEvent[] {
     const { world } = this;
     const event = world.inspectionEvent;
     if (!event) return [];
@@ -375,12 +500,16 @@ export class DrivingSession {
     world.inspectionEvent = null;
     this.syncPaused();
     const events: GameEvent[] = [];
-    this.decide(events, event, action, 'question');
+    this.decide(events, event, action, settlement);
     return events;
   }
 
   /** Player answered a right-of-way, parking or emergency call. */
   answerCutscene(action: string): GameEvent[] {
+    return this.settleCutscene(action, 'question');
+  }
+
+  private settleCutscene(action: string, settlement: DecisionSettlement): GameEvent[] {
     const { world } = this;
     const event = world.cutsceneEvent;
     if (!event) return [];
@@ -390,9 +519,10 @@ export class DrivingSession {
     world.parkingPlayed = false;
     world.rightOfWayPlayed = false;
     world.rightOfWay = null;
+    world.pendingAnswer = null;
 
     const events: GameEvent[] = [];
-    this.decide(events, event, action, 'question');
+    this.decide(events, event, action, settlement);
 
     // A roundabout cannot be *driven* on this straight corridor (the island is
     // dead ahead), so once the decision is answered the player is driven round
@@ -435,6 +565,7 @@ export class DrivingSession {
     const { world } = this;
     const event = world.cutsceneEvent;
     if (!event) return;
+    world.pendingAnswer = action;
     world.rightOfWay = {
       youYield: event.correctAction === 'brake' || event.correctAction === 'stop',
       good: action === event.correctAction,
@@ -457,6 +588,7 @@ export class DrivingSession {
     if (!event?.bay) return;
 
     const car = world.car;
+    world.pendingAnswer = action;
     world.park = {
       good: action === event.correctAction,
       side: event.bay.side,
@@ -734,8 +866,15 @@ export class DrivingSession {
           veil: 1 - (visibilityAt(world.events, car.distance) ?? 1),
         }
       );
+      // No panel holds the drive for longer than `PANEL_STEPS`.
+      world.heldSteps += 1;
+      if (world.heldSteps >= PANEL_STEPS) events.push(...this.closeHold());
       return events;
     }
+
+    // A step of driving, at rest or moving: every branch above that holds the
+    // world has returned, so the time limit counts only this.
+    world.drivenSteps += 1;
 
     const driven = driveVehicle(input, {
       world,
@@ -746,8 +885,7 @@ export class DrivingSession {
       roadX,
       isTutorialLevel,
       speedProfile,
-      crawlPenaltyEvent: CRAWL_PENALTY_EVENT,
-      wrongSidePenaltyEvent: WRONG_SIDE_PENALTY_EVENT,
+      ...standingPenaltiesIn(level.language),
     });
     events.push(...driven.events);
 
@@ -820,10 +958,11 @@ export class DrivingSession {
       car.speed = 0;
       fsm.transition('crash');
 
-      const crashReason =
+      const crashReason = textIn(level.language)(
         impact.kind === 'pedestrian'
-          ? `You drove into ${impact.label}. A pedestrian already crossing has the right of way, and striking one ends the run whatever your score.`
-          : `You drove into ${impact.label}. Traffic already on the road has priority; you must wait for the gap before entering.`;
+          ? { en: `You drove into ${impact.label}. A pedestrian already crossing has the right of way, and striking one ends the run whatever your score.` }
+          : { en: `You drove into ${impact.label}. Traffic already on the road has priority; you must wait for the gap before entering.` }
+      );
 
       events.push({ kind: 'crashed', reason: crashReason });
       return events;
@@ -836,6 +975,16 @@ export class DrivingSession {
       return events;
     }
 
+    // Checked last, so a run that reaches its end or its impact on the step
+    // its time runs out is that, not a timeout. Whatever event is open stays
+    // ungraded, as it does on a crash.
+    if (world.drivenSteps >= this.timeLimitSteps) {
+      fsm.transition('time_up');
+      world.timedOut = true;
+      world.finished = true;
+      events.push({ kind: 'timed_out' });
+    }
+
     return events;
   }
 }
@@ -844,10 +993,18 @@ export class DrivingSession {
 const project = (
   world: DrivingWorld,
   level: LevelConfig,
-  curves: CurveSpan[] = []
+  curves: CurveSpan[],
+  timeLimitSteps: number
 ): DrivingSnapshot => ({
+  panelSecondsLeft: world.paused
+    ? Math.max(0, Math.ceil((PANEL_STEPS - world.heldSteps) / DRIVING_STEPS_PER_SECOND))
+    : null,
+  drivingSecondsLeft: Number.isFinite(timeLimitSteps)
+    ? Math.max(0, Math.ceil((timeLimitSteps - world.drivenSteps) / DRIVING_STEPS_PER_SECOND))
+    : null,
   speed: world.car.speed,
   targetSpeed: world.targetSpeed,
+  speedLimit: limitInForce(world.measuredEvent ?? world.activeEvent, level),
   progress: world.car.distance / level.roadLength,
   lane: world.car.lane,
   requiredLanes: world.requiredLanes,
@@ -876,6 +1033,7 @@ const project = (
   holdingForCorrection: performance.now() < world.correctionHoldUntil,
   crawlWarning: world.crawlWarning,
   wrongSideWarning: world.wrongSideWarning,
+  overLimitWarning: world.overLimitWarning,
   weakCompetency: world.weakCompetency,
 });
 

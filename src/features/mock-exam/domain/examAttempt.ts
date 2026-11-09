@@ -6,9 +6,8 @@ export interface ExamAttempt {
   passed: boolean;
   wrongIds: number[];
   /**
-   * The ids actually presented, in order, so a future real-data IRT
-   * calibration can reconstruct the response matrix even though the bank
-   * varies between attempts.
+   * The ids actually presented, in order, so the sitting's response matrix
+   * can be reconstructed even though the bank varies between attempts.
    */
   questionIds: number[];
   timestamp: number;

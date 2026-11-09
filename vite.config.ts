@@ -37,6 +37,9 @@ const stripDevPages = (): Plugin => ({
 
 // https://vite.dev/config/
 export default defineConfig({
+  // GitHub Pages serves the app under `/<repo>/`; its workflow sets BASE_PATH.
+  // Everything else (dev, tests, a root-hosted build) stays at `/`.
+  base: process.env.BASE_PATH ?? '/',
   plugins: [react(), tailwindcss(), stripDevPages()],
   cacheDir: '.vite-cache',
     resolve: {

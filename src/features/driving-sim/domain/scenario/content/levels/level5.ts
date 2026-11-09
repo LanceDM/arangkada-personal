@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, filterByWeakCompetency, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { DrivingCompetency } from '@/domain/learner/competency';
@@ -61,7 +62,7 @@ const levelModule = getLevelModule(5);
  * ## What is deliberately not here
  *
  * Following distance, overtaking judgment and unexpected hazards were all
- * considered for this level and left out. The curriculum's traceability matrix
+ * considered for this level and left out. `the curriculum`'s traceability matrix
  * assigns them to Levels 7, 6/7 and 8/9 respectively, and all of those levels
  * exist with content in them. A learner who is weak on those competencies will
  * still meet them here — `remediationPool.ts` pulls portable variants from any
@@ -282,8 +283,8 @@ const uncontrolledCrossroadsSlot: SlotVariant[] = [
  * exactly what the telemetry grader measures best.
  *
  * Module section 3. Every variant here is the same crossing element with a
- * different cast: scenes are composed from declared parts rather than owned
- * by a level.
+ * different cast — scenes
+ * are composed rather than owned by a level.
  * ---------------------------------------------------------------------- */
 const crossingYieldSlot: SlotVariant[] = [
   {
@@ -1160,7 +1161,7 @@ export const SLOTS: SlotVariant[][] = [
  *   this level's siblings. The adaptive layer is the better instrument for
  *   this, and it is already pointed at it.
  *
- * Re-measure it if the pools change.
+ * Re-measure with `npx tsx a developers' script` if the pools change.
  */
 const level5Base = {
   id: 5,
@@ -1170,11 +1171,12 @@ const level5Base = {
   // Eight junctions 700 apart, plus a runway after the last one long enough for
   // its measurement window to close before the road ends.
   roadLength: 8030,
-  // A city route through intersections. Well below Level 4's 50: every hazard
-  // in this level is something that can appear from the side, and the speeds
-  // the grader judges "slowed" against should be the ones a junction actually
-  // deserves.
-  speedLimit: 40,
+  // A city route through intersections: RA 4136 §35(b)'s city or municipal
+  // street. Spaced and measured at 40 on the dial; driven at 30 as it was at
+  // 40.
+  roadClass: 'city_street',
+  speedLimit: 30,
+  pace: spacedPace(30, 40),
   requiredScore: 124,
   stars2: 149,
   stars3: 171,

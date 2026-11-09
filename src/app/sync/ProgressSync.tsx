@@ -67,7 +67,7 @@ const toLevelResults = (
   );
 
 export const ProgressSync = () => {
-  const { user, loading } = useAuthSession();
+  const { user, loading, studyAccount } = useAuthSession();
   const { unlockedLevels, levelResults, totalScore, hydrateProgress } = useProgressStore();
   const hydratedUidRef = useRef<string | null>(null);
   const previousUidRef = useRef<string | null>(null);
@@ -96,7 +96,11 @@ export const ProgressSync = () => {
       }
 
       try {
-        const isFirstLoginFromGuest = previousUidRef.current === null;
+        // A study participant never takes a guest's progress: the
+        // study's records start at their enrolment, and whatever was played
+        // on the device before is not theirs to carry in. It starts as a
+        // returning account with no summary.
+        const isFirstLoginFromGuest = previousUidRef.current === null && !studyAccount;
         if (isFirstLoginFromGuest) await migrateGuestDailyProgress(user.uid);
 
         const summary = await getProgressSummary(user.uid);
@@ -133,7 +137,7 @@ export const ProgressSync = () => {
     return () => {
       cancelled = true;
     };
-  }, [user, loading, hydrateProgress]);
+  }, [user, loading, studyAccount, hydrateProgress]);
 
   useEffect(() => {
     if (!user || loading) return;

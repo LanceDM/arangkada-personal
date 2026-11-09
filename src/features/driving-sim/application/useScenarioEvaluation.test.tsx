@@ -108,6 +108,18 @@ describe('the support level recorded with a decision', () => {
   });
 });
 
+describe('a standing penalty in the log', () => {
+  it('is marked standing, so BKT evidence can leave it out', () => {
+    expect(decide('full', 'crawl', undefined, 'penalty').log.standing).toBe(true);
+  });
+
+  it('is the only entry marked: a road decision, a question and a tutorial step are not', () => {
+    for (const settlement of ['response', 'question', 'guided'] as const) {
+      expect('standing' in decide('full', jam.correctAction, settlement).log, settlement).toBe(false);
+    }
+  });
+});
+
 describe('the trace kept beside each logged decision', () => {
   it('is one per log entry, in the same order, carrying what the entry does not', () => {
     const approach = approachTrace(

@@ -16,7 +16,7 @@ import { level10 } from './level10';
 import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { scenarioInstruction, scenarioLabel } from '@/features/driving-sim/domain/scenario/scenarioCopy';
 import { composeWorldFrame } from '@/features/driving-sim/domain/world/composeWorldFrame';
-import { paceOf, unitsForSeconds } from '@/features/driving-sim/domain/world/DrivingPace';
+import { paceOf, spacedPace, unitsForSeconds } from '@/features/driving-sim/domain/world/DrivingPace';
 import type { RoadTraffic } from '@/features/driving-sim/domain/systems/roadTraffic';
 import { computeWarningDistances } from '@/features/driving-sim/domain/systems/eventScheduler';
 import {
@@ -354,14 +354,14 @@ const BEATS: Array<{
     id: 'level10.bus-on-the-grade',
     law: 'RA 10916',
     beat: 'a vehicle with no limiter is not a speed to match',
-    answer: 'hold the posted forty',
+    answer: 'hold the posted twenty',
     measured: event =>
       event.type === 'speed_limit' &&
-      event.postedSpeed === 40 &&
+      event.postedSpeed === 20 &&
       event.npc?.vehicleKind === 'bus' &&
       // Running away from you, which is what a missing limiter looks like.
       (event.npc.speed?.cruise ?? 1) > 1 &&
-      // On a downgrade, so holding forty is an act rather than an absence.
+      // On a downgrade, so holding twenty is an act rather than an absence.
       (event.effect?.gradient ?? 0) > 0,
   },
   {
@@ -376,7 +376,7 @@ const BEATS: Array<{
       // The one thing on this route the player is told to use the phone for,
       // and it has no key — so it is a real-world note, never an instruction.
       // 911, which EO 56 s. 2018 put in place of the PNP 117 RO101 prints, and
-      // the Red Cross on 143. 117 is nowhere in the scenario.
+      // the Red Cross on 143 (pack K7). 117 is nowhere in the scenario.
       /\b911\b/.test(event.realWorldNote ?? '') &&
       /\b143\b/.test(event.realWorldNote ?? '') &&
       !/\b117\b/.test(JSON.stringify(event)),
@@ -544,12 +544,13 @@ describe('Level 10 copy fits on the screen it is shown on', () => {
 });
 
 describe('the Level 10 road', () => {
-  it('is an ordinary two-way national road, with a side that is not yours', () => {
+  it("is an ordinary two-way street at RA 4136's city limit, with a side that is not yours", () => {
     expect(level10.paint?.oncomingLanes).toBe(2);
-    expect(level10.speedLimit).toBe(60);
-    // On the shared arithmetic: a gap authored in seconds only means the same
-    // thing on both scales if the level does not move one of them.
-    expect(level10.pace).toBeUndefined();
+    expect(level10.roadClass).toBe('city_street');
+    expect(level10.speedLimit).toBe(30);
+    // Its road was spaced at 60 on the dial and is driven at 30 as it was then:
+    // a gap authored in seconds is the same road either way.
+    expect(level10.pace).toEqual(spacedPace(30, 60));
   });
 
   it('paints a solid line over the whole stretch the crossing is graded on', () => {

@@ -50,7 +50,7 @@ export interface CursorRecord {
 export interface RoutedEntryRecord {
   kind: RoutedEntryKind;
   levelId: number;
-  /** Graded decisions in this attempt, standing penalties excluded: what it spends of the learned policy's budget. */
+  /** Graded decisions in this attempt, standing penalties excluded: what it spends of C's budget. */
   gradedDecisions: number;
   /** The verdict the routing FSM was handed: the level's pass mark, a crash counting as a fail. */
   outcome: RoutingCursor['outcome'];
@@ -71,6 +71,30 @@ export interface RoutedEntryRecord {
   /** The group the move was decided in, which a resumed entry keeps. */
   decidedIn: RoutingGroup | null;
   observation: CourseObservation | null;
+}
+
+/**
+ * How the attempt was played: on what controls and how well the device kept
+ * up. A reaction is timed in milliseconds, so a device that falls behind real
+ * time hands its driver more of them; this is what lets that be seen.
+ */
+export interface PlayConditions {
+  /** The controls the car was driven with. */
+  input: 'keyboard' | 'touch' | 'both' | 'none';
+  /** Whether the on-screen touch controls were shown. */
+  touchControls: boolean;
+  /** The window when the drive ended, in CSS pixels. */
+  viewport: { width: number; height: number };
+  /** The display's median frame rate over the drive; null where it never painted twice. */
+  frameRate: number | null;
+  /** Simulation steps run, 60 for every second the world advanced. */
+  steps: number;
+  /** Frames that had to run more than one step to keep the world at real time. */
+  slowFrames: number;
+  /** Milliseconds of real time the world did not advance because the device could not catch up. */
+  lostMs: number;
+  /** Gaps of more than a quarter second - a hidden tab, an app switch - that the world was held through. */
+  pauses: number;
 }
 
 /** `users/{uid}/attempts/{id}/telemetry/routing`. */
@@ -95,6 +119,8 @@ export interface RoutingTelemetryDoc {
   };
   /** Null for a Legacy attempt, which the routing FSM did not move. */
   entry: RoutedEntryRecord | null;
+  /** Null where the drive did not report it: a scripted drive, or a record saved before it was kept. */
+  play: PlayConditions | null;
   log: RoutingLogRecord[];
   /** The log was cut to fit one Firestore document; `totalCount` is how long it was. */
   truncated: boolean;

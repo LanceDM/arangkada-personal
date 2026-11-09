@@ -136,3 +136,22 @@ export const WRONG_SIDE_PENALTY: StandingPenaltyConfig = {
   maxCharges: 4,
   warnAfterMs: 700,
 };
+
+/**
+ * Over the road's limit on clear road.
+ *
+ * RA 4136 §35 binds on every highway, not only at a sign, so the limit is
+ * charged everywhere a scenario is not already measuring the driving. The
+ * offence is any speed above the limit: the law gives no tolerance, and a
+ * tolerance exists to absorb measurement error, which the game does not have —
+ * it reads the speed exactly, and the setting lands on the limit. The only
+ * allowance is time, the crawl penalty's grace, warning and cap: a car that
+ * runs on past the limit while its setting is coming down is warned before it
+ * is charged. Those timings are assumptions, the same as the crawl's.
+ */
+export const OVER_LIMIT_PENALTY: StandingPenaltyConfig = {
+  graceMs: 3000,
+  everyMs: 5000,
+  maxCharges: 4,
+  warnAfterMs: 1500,
+};

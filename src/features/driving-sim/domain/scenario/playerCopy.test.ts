@@ -98,11 +98,6 @@ const playerCopy = (): Copy[] => {
         if (block.type === 'image') push(`${at} alt`, block.alt);
       });
     });
-    module.quiz.forEach((item, i) => {
-      push(`${module.id} q${i}`, item.question);
-      push(`${module.id} q${i} why`, item.explanation);
-      item.options.forEach((option, j) => push(`${module.id} q${i}o${j}`, option));
-    });
   }
 
   return all;

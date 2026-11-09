@@ -9,6 +9,7 @@
  * play reads.
  */
 import type { ActionLog } from '@/domain/learner/attempt';
+import { TUTORIAL_LEVEL_ID } from '@/features/driving-sim/domain/systems/tutorial';
 import type { LearnerHistory } from './ports';
 import { drivingSimDeps } from './dependencies';
 
@@ -29,3 +30,20 @@ export const loadLearnerHistory = (uid: string | null): Promise<LearnerHistory> 
  */
 export const historyLogs = (history: LearnerHistory): ActionLog[] =>
   history.attempts.flatMap(attempt => attempt.logs).sort((a, b) => a.timestamp - b.timestamp);
+
+/**
+ * What the redesigned BKT may read: `historyLogs` without the
+ * tutorial's attempts, without standing penalties and without questions left
+ * unanswered when their panel's time ran out, which say nothing about
+ * what the player knows. The tutorial teaches the
+ * controls, and its steps are tagged with a competency only by their scenario
+ * type; a standing penalty is a charge for driving on clear road, not a
+ * decision about a rule. Practice items stay: they are scenarios.
+ *
+ * Filtered per attempt because a log does not record its level. Penalties saved
+ * before evidence was marked carry no `standing` mark and stay in. Not yet read by the game:
+ * its current policies are held to the simulations, which read every decision.
+ */
+export const bktEvidence = (history: LearnerHistory): ActionLog[] =>
+  historyLogs({ ...history, attempts: history.attempts.filter(attempt => attempt.levelId !== TUTORIAL_LEVEL_ID) })
+    .filter(log => !log.standing && !log.unanswered);

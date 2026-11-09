@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
@@ -54,9 +55,9 @@ const levelModule = getLevelModule(11);
  *
  * ## Where every claim comes from
  *
- * Each scenario rests on quoted LTO material, by file and heading, and what
- * the sources do not settle is left ungraded. A verdict or a correct answer
- * says nothing the sources do not. Where
+ * The team's source notes quotes the LTO material each scenario
+ * rests on, by file and heading, and lists what the sources do not settle
+ *. A verdict or a correct answer says nothing the pack does not. Where
  * the move comes from a general chapter rather than this module's files (the
  * two-or-three-second rule, room for a long vehicle, the yellow box's own
  * rule), the citation still names the module's law as the other vehicle's.
@@ -508,9 +509,13 @@ export const level11: LevelConfig = {
   roadLength: 7840,
   // A national road through a town, where motorcycles, tricycles, jeepneys and
   // cyclists share a road with through traffic, and a jeepney stop and a
-  // crossing share a curb. Posted at 60, which is not over the 60 km/h line of
-  // RA 10666 — the one fact about this road scenario 5's citation depends on.
-  speedLimit: 60,
+  // crossing share a curb: RA 4136 §35(b)'s city or municipal street, at 30,
+  // which is not over the 60 km/h line of RA 10666 — the one fact about this
+  // road scenario 5's citation depends on. Spaced and measured at 60 on the
+  // dial; driven at 30 as it was at 60.
+  roadClass: 'city_street',
+  speedLimit: 30,
+  pace: spacedPace(30, 60),
   requiredScore: 158,
   stars2: 187,
   stars3: 214,

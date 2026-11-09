@@ -40,7 +40,7 @@ describe('desirable difficulty', () => {
   });
 });
 
-describe('what the screen shows (an assumption about this game)', () => {
+describe('what the screen shows (assumption A1)', () => {
   it('raises the observed chance of a correct answer with more support, and none adds nothing', () => {
     const unaided = 0.3;
     expect(observedSuccess(unaided, 'none')).toBe(unaided);
@@ -172,12 +172,11 @@ describe('the reward measures overall readiness, not the chosen competency', () 
 });
 
 /**
- * The second study's repair: the policy is judged on weakest-competency
- * readiness, so it is trained on the weakest competency. Only the aggregator
- * changes - both terms, both scales and the whole-syllabus scope are the
- * mean reward's.
+ * The second experiment's repair: the policy is judged on weakest-competency readiness,
+ * so it is trained on the weakest competency. Only the aggregator changes -
+ * both terms, both scales and the whole-syllabus scope are the first experiment's.
  */
-describe('the weakest-link reward', () => {
+describe('the weakest-link reward (the second experiment)', () => {
   const profileWith = (scores: Partial<Record<DrivingCompetency, number>>) => {
     const profile = createLearnerProfile();
     for (const competency of COMPETENCIES) profile[competency].score = scores[competency] ?? 60;
@@ -194,40 +193,40 @@ describe('the weakest-link reward', () => {
   });
 
   it('is the mean reward with one term swapped, and nothing else', () => {
-    const mean = REWARD_MODELS['mean-readiness'];
-    const weakest = REWARD_MODELS['weakest-link'];
+    const meanModel = REWARD_MODELS['mean-readiness'];
+    const weakestModel = REWARD_MODELS['weakest-link'];
     const flat = flatSkill(0.5);
     // Where every competency is level, the floor and the mean are the same
     // number, so the two rewards can only differ through the aggregator.
-    expect(weakest.trueSkill(flat)).toBeCloseTo(mean.trueSkill(flat), 10);
-    expect(weakest.believed(profileWith({}))).toBe(mean.believed(profileWith({})));
+    expect(weakestModel.trueSkill(flat)).toBeCloseTo(meanModel.trueSkill(flat), 10);
+    expect(weakestModel.believed(profileWith({}))).toBe(meanModel.believed(profileWith({})));
   });
 
   it('ignores a gain that leaves the floor where it was, which the mean reward pays for', () => {
     const before = flatSkill(0.5);
     before[floor] = 0.1;
     const after = { ...before, [other]: 0.9 };
-    const mean = REWARD_MODELS['mean-readiness'];
-    const weakest = REWARD_MODELS['weakest-link'];
+    const meanModel = REWARD_MODELS['mean-readiness'];
+    const weakestModel = REWARD_MODELS['weakest-link'];
 
-    expect(mean.trueSkill(after) - mean.trueSkill(before)).toBeGreaterThan(0);
-    expect(weakest.trueSkill(after) - weakest.trueSkill(before)).toBe(0);
+    expect(meanModel.trueSkill(after) - meanModel.trueSkill(before)).toBeGreaterThan(0);
+    expect(weakestModel.trueSkill(after) - weakestModel.trueSkill(before)).toBe(0);
   });
 
   it('pays for raising the floor, and for stopping it from falling', () => {
     const before = flatSkill(0.5);
     before[floor] = 0.1;
-    const weakest = REWARD_MODELS['weakest-link'];
+    const weakestModel = REWARD_MODELS['weakest-link'];
 
     const raised = { ...before, [floor]: 0.2 };
-    expect(weakest.trueSkill(raised) - weakest.trueSkill(before)).toBeCloseTo(10, 6);
+    expect(weakestModel.trueSkill(raised) - weakestModel.trueSkill(before)).toBeCloseTo(10, 6);
 
     // Decay elsewhere is invisible until it reaches the floor - which is the
-    // limitation the experiment records, not a defect of the arithmetic.
+    // limitation the protocol records, not a defect of the arithmetic.
     const decayed = { ...before, [other]: 0.5 * (1 - RETENTION_DECAY) };
-    expect(weakest.trueSkill(decayed) - weakest.trueSkill(before)).toBe(0);
+    expect(weakestModel.trueSkill(decayed) - weakestModel.trueSkill(before)).toBe(0);
     const decayedFloor = { ...before, [floor]: 0.1 * (1 - RETENTION_DECAY) };
-    expect(weakest.trueSkill(decayedFloor) - weakest.trueSkill(before)).toBeLessThan(0);
+    expect(weakestModel.trueSkill(decayedFloor) - weakestModel.trueSkill(before)).toBeLessThan(0);
   });
 });
 

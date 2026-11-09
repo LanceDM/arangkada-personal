@@ -11,32 +11,28 @@
  * `/play/story`, its briefing, its drive and its results, which is what lets
  * one attempt span four URLs.
  */
+import { Say } from '@/shared/i18n/language';
+import { storyMessages as m } from './messages';
 import { useEffect, useState } from 'react';
 import { useAuthSession } from '@/features/auth';
 import {
+  adminTestModeAllowed,
   loadRoutingOverride,
   resolveRoutingGroup,
   routingGroupNow,
-  saveRoutingOverride,
   type RoutingGroupResolution,
-  type RoutingOverride,
 } from '@/features/driving-sim';
 import LegacyStoryRun from './LegacyStoryRun';
 import RoutedStoryRun from './RoutedStoryRun';
 import type { StoryRouting } from './storyRunContext';
 
 const StoryModeLayout = () => {
-  const { user, isLoggedIn, isAdmin, loading } = useAuthSession();
+  const { user, isLoggedIn, isAdmin, loading, studyAccount } = useAuthSession();
   const uid = isLoggedIn && user ? user.uid : null;
-  // Developers and admins may choose the group they play, for testing.
-  const canOverride = import.meta.env.DEV || isAdmin;
-
-  const [override, setOverrideState] = useState<RoutingOverride>(() => loadRoutingOverride(canOverride));
-  const [overrideAllowed, setOverrideAllowed] = useState(canOverride);
-  if (overrideAllowed !== canOverride) {
-    setOverrideAllowed(canOverride);
-    setOverrideState(loadRoutingOverride(canOverride));
-  }
+  // Admin test mode, set on /admin/test-mode: an admin's own account only,
+  // never a study participant's.
+  const canOverride = adminTestModeAllowed({ isAdmin, studyAccount });
+  const override = loadRoutingOverride(canOverride);
 
   const immediate = routingGroupNow({ uid, canOverride, authLoading: loading });
   const key = `${uid ?? 'guest'}:${canOverride}:${override}`;
@@ -67,7 +63,7 @@ const StoryModeLayout = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <p className="font-display text-sm uppercase tracking-widest text-muted-foreground">
-          {failed === key ? 'Your course could not be loaded. Check your connection and reload.' : 'Loading your course...'}
+          <Say {...(failed === key ? m.courseNotLoaded : m.loadingCourse)} />
         </p>
       </div>
     );
@@ -75,12 +71,9 @@ const StoryModeLayout = () => {
 
   const routing: StoryRouting = {
     resolution,
-    canOverride,
-    override,
-    setOverride: next => {
-      saveRoutingOverride(next);
-      setOverrideState(next);
-    },
+    // Developers and admins may open any level; a study participant never.
+    openAll: (import.meta.env.DEV || isAdmin) && !studyAccount,
+    participant: studyAccount,
   };
 
   return resolution.groupInEffect === 'legacy' ? (

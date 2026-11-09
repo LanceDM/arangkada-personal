@@ -30,5 +30,7 @@ export type GameEvent =
   | { kind: 'rerolled'; competency: DrivingCompetency }
   /** The run ended in a collision. */
   | { kind: 'crashed'; reason: string }
+  /** The level's driving time ran out before the route was driven. */
+  | { kind: 'timed_out' }
   /** The route was driven to its end. */
   | { kind: 'finished' };

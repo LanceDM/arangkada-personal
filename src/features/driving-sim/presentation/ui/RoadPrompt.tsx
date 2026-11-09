@@ -4,6 +4,8 @@ import type { MarkingPlate, SignPlate } from '@/features/driving-sim/domain/scen
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion';
 import SignPlateCard from './SignPlateCard';
 import MarkingPlateCard from './MarkingPlateCard';
+import { useText } from '@/shared/i18n/useText';
+import { promptMessages as m } from './messages';
 
 export const Keycap = ({ children, active = false }: { children: string; active?: boolean }) => (
   <span
@@ -28,28 +30,28 @@ const promptTones = {
     frame: 'border-primary/70',
     header: 'border-border bg-primary/10',
     accent: 'text-primary',
-    word: 'Practice',
+    word: m.practice,
     Icon: CircleDot,
   },
   approach: {
     frame: 'border-primary/60',
     header: 'border-border bg-primary/10',
     accent: 'text-primary',
-    word: 'Coming up',
+    word: m.comingUp,
     Icon: Eye,
   },
   react: {
     frame: 'border-road-yellow/70',
     header: 'border-road-yellow/25 bg-road-yellow/10',
     accent: 'text-road-yellow',
-    word: 'Act now',
+    word: m.actNow,
     Icon: ArrowDown,
   },
   checkpoint: {
     frame: 'border-destructive/60',
     header: 'border-destructive/25 bg-destructive/10',
     accent: 'text-destructive',
-    word: 'Full stop',
+    word: m.fullStop,
     Icon: ShieldAlert,
   },
 } as const;
@@ -146,6 +148,7 @@ const RoadPrompt = ({
   urgent?: boolean;
   children?: ReactNode;
 }) => {
+  const say = useText();
   const styles = promptTones[tone];
   const reducedMotion = useReducedMotion();
   const { Icon } = styles;
@@ -169,7 +172,7 @@ const RoadPrompt = ({
             </p>
           </div>
           <p className="shrink-0 font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">
-            {styles.word}
+            {say(styles.word)}
           </p>
         </div>
 
@@ -198,10 +201,10 @@ const RoadPrompt = ({
             <div>
               <div className="mb-1 flex items-center justify-between">
                 <span className="font-display text-[12px] uppercase tracking-wider text-muted-foreground">
-                  Distance
+                  {say(m.distance)}
                 </span>
                 <span className={`font-display text-[12px] uppercase tracking-wider ${styles.accent}`}>
-                  {approach > 0.02 ? 'Closing' : 'Here'}
+                  {say(approach > 0.02 ? m.closing : m.here)}
                 </span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-muted">

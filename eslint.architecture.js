@@ -1,7 +1,7 @@
 /**
  * The architecture's import rules, as lint.
  *
- * The architecture is described in prose elsewhere; this is the copy that is
+ * The architecture notes state these in prose; this is the copy that is
  * actually checked, so the prose cannot quietly drift from the code. Each rule
  * is a set of forbidden import patterns matched against the import source
  * string — which is why a relative `../infrastructure/X` is caught alongside an
@@ -32,6 +32,8 @@ export const FEATURES = [
   'driving-sim',
   'daily-challenge',
   'mock-exam',
+  'assessment',
+  'study',
   'admin',
 ];
 

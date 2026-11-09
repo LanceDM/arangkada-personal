@@ -2,13 +2,13 @@ import type { LevelModule } from '@/features/driving-sim/domain/scenario/lessonM
 
 export const level12Module = {
   id: 'lto_level_12',
-  title: 'Enforcement And Final Road Exam',
+  title: 'Final Mission',
   sourceLevel: 12,
-  desc: 'Learn how traffic enforcement actually works, know your rights and duties when apprehended, understand the demerit point system, and bring together everything from every previous level for the final road exam.',
+  desc: 'Learn how traffic enforcement actually works, know your rights and duties when apprehended, understand the demerit point system, and bring together everything from every previous level for the Final Mission.',
   lessons: [
     {
       id: 'level-12-mission-briefing',
-      title: 'Mission Briefing: Enforcement And Final Road Exam',
+      title: 'Mission Briefing: Enforcement And The Final Mission',
       text: "Everything up to this point has been about driving correctly. This level is about what happens around that: how enforcement works, what your rights and duties are, and whether you can pull every previous level together under pressure.",
       blocks: [
         {
@@ -376,5 +376,4 @@ export const level12Module = {
       ],
     },
   ],
-  quiz: [],
 } satisfies LevelModule;

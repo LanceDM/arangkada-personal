@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, BookOpen, CheckCircle, ChevronDown, X } from 'lucide-react';
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion';
 import { actionLabel, expectedLabel } from '../actionCopy';
+import { useText } from '@/shared/i18n/useText';
+import { decisionMessages as m } from '../messages';
 
 /** What was decided at one scenario, as the screen shows it back. */
 export interface ScenarioResult {
@@ -49,6 +51,7 @@ const ResultCard = ({
   result: ScenarioResult;
   onDismiss: () => void;
 }) => {
+  const say = useText();
   const [visible, setVisible] = useState(false);
   // Folded away again for each new verdict, by reading the state against the
   // verdict it was opened for rather than by clearing it from an effect. The
@@ -118,7 +121,7 @@ const ResultCard = ({
             </span>
             <button
               onClick={handleDismiss}
-              aria-label="Dismiss"
+              aria-label={say(m.dismiss)}
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               <X className="h-4 w-4" />
@@ -131,17 +134,17 @@ const ResultCard = ({
 
           {!result.correct && result.action && result.expectedAction && (
             <div className="flex flex-wrap items-baseline gap-x-1.5 text-[13px] leading-5">
-              <span className="text-muted-foreground">You</span>
-              <span className="font-semibold text-destructive">{actionLabel(result.action)}</span>
-              <span className="text-muted-foreground">— this one wanted</span>
-              <span className="font-semibold text-accent">{expectedLabel(result.expectedAction)}</span>
+              <span className="text-muted-foreground">{say(m.you)}</span>
+              <span className="font-semibold text-destructive">{actionLabel(result.action, say)}</span>
+              <span className="text-muted-foreground">{say(m.wanted)}</span>
+              <span className="font-semibold text-accent">{expectedLabel(result.expectedAction, say)}</span>
             </div>
           )}
 
           {!result.correct && result.move && (
             <p className="text-[13px] leading-5 text-foreground" data-testid="result-move">
               <span className="font-display text-[12px] font-black uppercase tracking-[0.12em] text-accent">
-                Do this{' '}
+                {say(m.doThis)}{' '}
               </span>
               {result.move}
             </p>
@@ -157,7 +160,7 @@ const ResultCard = ({
               >
                 <BookOpen className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
                 <span className="font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Why this matters
+                  {say(m.whyMatters)}
                 </span>
                 <ChevronDown
                   className={`ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform ${
@@ -171,7 +174,7 @@ const ResultCard = ({
                   {result.citation && <p>{result.citation}</p>}
                   {!result.correct && result.realWorldNote && (
                     <p>
-                      <span className="font-semibold text-foreground">In a real vehicle: </span>
+                      <span className="font-semibold text-foreground">{say(m.inRealVehicle)}</span>
                       {result.realWorldNote}
                     </p>
                   )}

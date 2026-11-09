@@ -21,7 +21,7 @@ export type FSMState =
  *
  * Deliberately only these two. A `LearningPhase` alongside them would carry no
  * information the transition log does not already hold, because its value at
- * any moment is a function of the trigger that has just fired.
+ * any moment is a function of the trigger that has just fired. 
  *
  * `competency` stays because it is genuinely independent: it comes from the
  * scenario content being exercised, not from the trigger, so it cannot be
@@ -63,10 +63,18 @@ export type EnvironmentTrigger =
    * entry it writes — and that entry is the whole point. The reaction clock
    * starts at the most recent one (`reactionClockMs`), so without it the time
    * spent reading sits inside the number the practice policy conditions on, and
-   * a careful reader is recorded as a slow responder.
+   * a careful reader is recorded as a slow responder. 
    */
   | 'briefing_dismissed'
   | "recovery_complete" | 'crash'
+  /**
+   * The level's driving time has run out. Shaped like `crash`: an unguarded
+   * edge to GAME_OVER from every state a run is live in, IDLE included, since
+   * a car at rest in the middle of a run sits there. The clock counts only the
+   * world steps that drive the car, so a paused panel never spends it, and
+   * the limit is measured per level (`levelTimeLimits`). 
+   */
+  | 'time_up'
   /**
    * The vehicle came to rest. Distinct from the `stop` user action on purpose:
    * `stop` self-loops at INTERSECTION/HAZARD (holding position inside an event

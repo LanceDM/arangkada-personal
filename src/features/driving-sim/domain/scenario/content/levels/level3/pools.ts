@@ -515,8 +515,8 @@ const routeRestrictionSlot: SlotVariant[] = [
   // Road Closed To All Vehicles is taught in the module's sign table and not
   // driven. The sign means the road ahead is closed to all vehicle traffic
   // (FDM Vol. 1), and a corridor with no detour can stage that only as a
-  // closed lane the car drives past, which grades the opposite of the sign.
-  // The work-zone variants below stage that closed
+  // closed lane the car drives past, which grades the opposite of the sign
+  //. The work-zone variants below stage that closed
   // lane under signs that warn of it.
   {
     id: 'level3.route-restriction.roadwork-ahead',
@@ -611,32 +611,37 @@ const routeRestrictionSlot: SlotVariant[] = [
  * Two of these punish braking rather than reward it. A posted minimum is as
  * binding as a posted maximum, and it is the clearest answer in the whole level
  * to a player who has learned that holding the brake is always safe.
+ *
+ * Every figure is the speed-limits pack's: the road is a 40 km/h
+ * through street, a crowded street is §35(b)'s 20, and the minimum and the
+ * advisory are labelled postings under the road's limit.
  */
 const speedSlot: SlotVariant[] = [
   {
-    id: 'level3.speed.max-60',
+    id: 'level3.speed.max-20',
     type: 'speed_limit',
     scene: 'open_road',
     speedRule: 'maximum',
-    // Posted below the speed the vehicle cruises at, so obeying it takes a
-    // deliberate act rather than simply carrying on.
-    postedSpeed: 60,
-    description: '60 km/h speed zone: a MAXIMUM SPEED RESTRICTION sign marks the crowded street ahead.',
+    // RA 4136 §35(b) row 4, "through crowded streets": below the road's 40, so
+    // obeying it takes a deliberate act rather than simply carrying on.
+    postedSpeed: 20,
+    description: '20 km/h speed zone: a MAXIMUM SPEED RESTRICTION sign marks the crowded street ahead.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'A posted maximum speed is a limit, not a suggestion. Reduce speed before the crowded area.',
-    rewardMessage: 'Correct. You kept within the posted 60 km/h limit.',
+    rewardMessage: 'Correct. You kept within the posted 20 km/h limit.',
     duration: 200,
     lawCitation: 'Vehicles must not exceed the speed posted by a Maximum Speed Restriction sign.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
-      image: IMG + 'maximum-speed-restriction.png',
+      // No image: the PNG prints the old figure. The plate is drawn from the
+      // glyph, the figure this scenario posts (speed-limits pack, §5).
       name: 'Maximum Speed Restriction',
       category: 'A. Regulatory Sign — Speed',
       meaning: 'Vehicles must not exceed the posted speed.',
       art: 'circle_limit',
-      glyph: '60',
+      glyph: '20',
     },
   },
   {
@@ -644,7 +649,8 @@ const speedSlot: SlotVariant[] = [
     type: 'speed_limit',
     scene: 'open_road',
     speedRule: 'minimum',
-    // The sign's own artwork reads "40 min.", so that is what it posts.
+    // The sign's own artwork reads "40 min.", so that is what it posts: the
+    // road's own limit, so keeping up to it means driving at the limit.
     postedSpeed: 40,
     description: 'Minimum speed zone: a 40 km/h MINIMUM SPEED RESTRICTION sign marks the open road ahead.',
     correctAction: 'accelerate',
@@ -679,21 +685,22 @@ const speedSlot: SlotVariant[] = [
     competency: 'speed_control',
     severity: 'major',
     sign: {
-      image: IMG + 'end-of-speed-restriction.png',
+      // No image: the PNG prints the old figure. The plate is drawn from the
+      // glyph, the figure this scenario posts (speed-limits pack, §5).
       name: 'End Of Speed Restriction',
       category: 'A. Regulatory Sign — Speed',
       meaning: 'The posted speed limit no longer applies past this point.',
       art: 'rect_instruction',
-      glyph: 'END 60',
+      glyph: 'END 20',
     },
   },
   {
-    id: 'level3.speed.preferred-max-55',
+    id: 'level3.speed.preferred-max-30',
     type: 'speed_limit',
     scene: 'open_road',
     speedRule: 'maximum',
-    postedSpeed: 55,
-    description: 'Advisory speed: a PREFERRED MAXIMUM SPEED sign suggests 55 km/h for the conditions ahead.',
+    postedSpeed: 30,
+    description: 'Advisory speed: a PREFERRED MAXIMUM SPEED sign suggests 30 km/h for the conditions ahead.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'The advisory speed is what the road can safely take. Ignoring it leaves you with no margin.',
@@ -703,12 +710,13 @@ const speedSlot: SlotVariant[] = [
     competency: 'road_signs',
     severity: 'major',
     sign: {
-      image: IMG + 'preferred-maximum-speed-normal-weather.png',
+      // No image: the PNG prints the old figure. The plate is drawn from the
+      // glyph, the figure this scenario posts (speed-limits pack, §5).
       name: 'Preferred Maximum Speed (Normal Weather)',
       category: 'B. Warning Sign — Supplementary',
       meaning: 'Suggests a safe speed for normal weather and traffic conditions.',
       art: 'diamond',
-      glyph: '55',
+      glyph: '30',
     },
   },
   {
@@ -716,7 +724,9 @@ const speedSlot: SlotVariant[] = [
     type: 'speed_limit',
     scene: 'open_road',
     speedRule: 'maximum',
-    postedSpeed: 40,
+    // The sign names no number. Graded against §35(b) row 4's 20 for the
+    // crowded street it stands before (speed-limits pack, labelled).
+    postedSpeed: 20,
     description: 'Speed instruction: a DRIVER MUST SLOW DOWN sign stands before the crowded street ahead.',
     correctAction: 'brake',
     points: 20,
@@ -1204,7 +1214,7 @@ const SURFACE_AND_WIDTH_WARNINGS: SlotVariant[] = [
     category: 'B. Warning Sign — Road Obstacle',
     meaning: 'A speed hump is ahead; slow down.',
     scene: 'hump', glyph: 'HUMP',
-    effect: { jarringAbove: 16, span: 46 },
+    effect: { jarringAbove: 11, span: 46 },
     description: 'Speed hump: a HUMP AHEAD warning marks the raised band across the carriageway.',
     law: 'A Hump Ahead sign warns that a speed hump is ahead and the driver should slow down.',
     penalty: 'You took the hump too fast and it threw the car off line.',
@@ -1216,7 +1226,7 @@ const SURFACE_AND_WIDTH_WARNINGS: SlotVariant[] = [
     category: 'B. Warning Sign — Road Obstacle',
     meaning: 'The road surface ahead is rough or damaged.',
     scene: 'uneven', glyph: 'ROUGH',
-    effect: { jarringAbove: 20, grip: 0.85, span: 70 },
+    effect: { jarringAbove: 13, grip: 0.85, span: 70 },
     description: 'Broken surface: an UNEVEN ROAD AHEAD warning marks the damaged carriageway.',
     law: 'An Uneven Road Ahead sign warns that the road surface ahead is rough or damaged.',
     penalty: 'Broken surface taken at speed throws the car about and costs you control.',

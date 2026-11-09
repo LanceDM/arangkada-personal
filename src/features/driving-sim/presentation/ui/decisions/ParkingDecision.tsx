@@ -14,6 +14,8 @@
 import { SquareParking } from 'lucide-react';
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import DockedDecision, { type DockedDecisionCopy } from './DockedDecision';
+import { useText } from '@/shared/i18n/useText';
+import { decisionMessages as m } from '../messages';
 
 interface ParkingDecisionProps {
   event: ScenarioEvent;
@@ -30,21 +32,23 @@ interface ParkingDecisionProps {
    * attempt, so the correct answer does not sit in the same place every run.
    */
   choiceSeed: number;
+  /** Over the board, or beside it on a touch screen. */
+  placement?: 'board' | 'side';
 }
 
 const COPY: DockedDecisionCopy = {
-  eyebrow: 'Parking',
+  eyebrow: m.parking,
   Icon: SquareParking,
-  resolving: 'Watch the car…',
-  verdictOk: 'Parked correctly',
-  verdictBad: 'Badly parked',
-  continueLabel: 'Pull out and drive on',
+  resolving: m.watchCar,
+  verdictOk: m.parkedOk,
+  verdictBad: m.parkedBad,
+  continueLabel: m.pullOut,
 };
 
-const ParkingDecision = ({ event, onPlay, played, onAnswer, hintText, choiceSeed }: ParkingDecisionProps) => (
+const ParkingDecision = ({ event, onPlay, played, onAnswer, hintText, choiceSeed, placement }: ParkingDecisionProps) => (
   <DockedDecision
     event={event}
-    title="Parking technique"
+    title={useText()(m.parkingTechnique)}
     copy={COPY}
     onPlay={onPlay}
     played={played}
@@ -52,6 +56,7 @@ const ParkingDecision = ({ event, onPlay, played, onAnswer, hintText, choiceSeed
     hintText={hintText}
     choiceSeed={choiceSeed}
     testId="parking-decision"
+    placement={placement}
   />
 );
 

@@ -6,8 +6,11 @@
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { FsmMetrics, ReactionLatency } from '@/features/driving-sim/domain/fsm/fsmMetrics';
 import type { TransitionLogEntry } from '@/features/driving-sim/domain/fsm/fsmTypes';
+import type { Language } from '@/shared/lib/localized';
 
 export interface LevelAttempt {
+  /** The language the player had chosen when the attempt began; absent on older attempts. */
+  language?: Language;
   levelId: number;
   timestamp: number;
   finalScore: number;
@@ -24,6 +27,12 @@ export interface LevelAttempt {
    */
   fsmMetrics?: FsmMetrics;
   reactionLatencies?: ReactionLatency[];
+  /**
+   * Written, as true, only when the run ended because the level's driving time
+   * ran out. The `time_up` entry in the raw log says the same; this
+   * keeps it readable from the bulk-read attempt alone, as the pass rule needs.
+   */
+  timedOut?: true;
 }
 
 /**

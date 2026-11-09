@@ -18,9 +18,12 @@
  * rather than competing for room beside the road.
  */
 import { useEffect, useRef } from 'react';
+import { answerHint, useInputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { Car, FileText, Route, ShieldAlert } from 'lucide-react';
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { useChoiceOrder } from './useChoiceOrder';
+import { useText } from '@/shared/i18n/useText';
+import { decisionMessages as m, promptMessages as p } from '../messages';
 
 interface CheckpointInspectionProps {
   event: ScenarioEvent;
@@ -35,6 +38,8 @@ interface CheckpointInspectionProps {
 }
 
 const CheckpointInspection = ({ event, onAnswer, hintText, choiceSeed }: CheckpointInspectionProps) => {
+  const say = useText();
+  const inputMode = useInputMode();
   // The displayed order, which is what the number keys have to follow: a
   // shortcut keyed off the authored array would submit a different answer from
   // the one under the player's finger.
@@ -100,11 +105,11 @@ const CheckpointInspection = ({ event, onAnswer, hintText, choiceSeed }: Checkpo
               id="checkpoint-title"
               className="truncate font-display text-[13px] font-black uppercase tracking-[0.12em] text-primary"
             >
-              {inspection.pullOver ? 'Traffic stop' : 'LTO checkpoint'}
+              {say(inspection.pullOver ? p.trafficStop : p.ltoCheckpoint)}
             </p>
           </div>
           <p className="shrink-0 font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">
-            Stopped
+            {say(m.stopped)}
           </p>
         </header>
 
@@ -146,7 +151,7 @@ const CheckpointInspection = ({ event, onAnswer, hintText, choiceSeed }: Checkpo
               <div className="flex items-start gap-2">
                 <Car className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Vehicle</p>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{say(m.vehicle)}</p>
                   <p className="text-[13px] font-semibold leading-5 text-foreground">
                     {inspection.vehicle}
                   </p>
@@ -156,7 +161,7 @@ const CheckpointInspection = ({ event, onAnswer, hintText, choiceSeed }: Checkpo
                 <Route className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 <div>
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                    Trip purpose
+                    {say(m.tripPurpose)}
                   </p>
                   <p className="text-[13px] font-semibold leading-5 text-foreground">
                     {inspection.tripPurpose}
@@ -182,7 +187,7 @@ const CheckpointInspection = ({ event, onAnswer, hintText, choiceSeed }: Checkpo
             {hintText && (
               <div className="rounded-md border border-primary/40 bg-primary/10 px-3 py-2">
                 <p className="font-display text-[12px] font-black uppercase tracking-[0.12em] text-primary">
-                  Extra guidance
+                  {say(m.extraGuidance)}
                 </p>
                 <p className="mt-1 text-[13px] leading-5 text-foreground">{hintText}</p>
               </div>
@@ -207,7 +212,7 @@ const CheckpointInspection = ({ event, onAnswer, hintText, choiceSeed }: Checkpo
             </div>
 
             <p className="text-center text-[12px] text-muted-foreground">
-              Click an answer, or press its number key
+              {answerHint(inputMode)}
             </p>
           </div>
         </div>

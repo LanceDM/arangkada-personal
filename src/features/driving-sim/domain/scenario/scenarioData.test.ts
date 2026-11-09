@@ -36,6 +36,7 @@ const ENVIRONMENT_TRIGGERS: Record<EnvironmentTrigger, true> = {
   feedback_displayed: true,
   recovery_complete: true,
   crash: true,
+  time_up: true,
   vehicle_stopped: true,
 };
 
@@ -221,8 +222,8 @@ describe('scenario roster (LEVELS)', () => {
   it('gives every scenario answered at a prompt answers to choose from, one of them right', () => {
     // A checkpoint, a frozen prompt and a parking decision stop the drive and
     // wait for an answer, so one with no `choices` is a dead end: Level 6's bay
-    // opened a panel with nothing to click until the first play-test,
-    // because every drive harness answers a missing choice with
+    // opened a panel with nothing to click from 291e456 until the F0
+    // play-test, because every drive harness answers a missing choice with
     // 'stop'. Over every authored variant, for the reason the check above is.
     const unanswerable = [...allEvents.map(({ event }) => event), ...POOLED_VARIANTS.flat()]
       .filter(event => event.inspection || event.cutscene || event.parkingCutscene)

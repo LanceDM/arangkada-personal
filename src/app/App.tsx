@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
 import { AppProviders } from './providers/AppProviders';
 import { AuthModalController } from './providers/AuthModalController';
+import { StudyGate } from './layout/StudyGate';
 import { AppRouter } from './router/AppRouter';
 import { ProgressSync } from './sync/ProgressSync';
 
@@ -9,13 +10,16 @@ import { ProgressSync } from './sync/ProgressSync';
  * that decides, fetches, maps or persists lives in one of the four pieces.
  *
  * `AuthModalController` is mounted exactly once, inside the router: two mounts
- * render two overlapping dialogs off the same store.
+ * render two overlapping dialogs off the same store. `StudyGate` keeps a study
+ * participant to their stage of the study's order.
  */
 const App = () => (
   <AppProviders>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <ProgressSync />
-      <AppRouter />
+      <StudyGate>
+        <AppRouter />
+      </StudyGate>
       <AuthModalController />
     </BrowserRouter>
   </AppProviders>

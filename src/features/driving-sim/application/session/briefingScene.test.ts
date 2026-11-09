@@ -4,7 +4,7 @@
  * A scenario answered with the car is frozen once, the moment it becomes
  * active, and its situation is read with the world held still. So a
  * vehicle the situation describes has to be there, where it says, on that
- * frame - at every theta, since theta moves the frame. The first play-test found
+ * frame - at every theta, since theta moves the frame. a play-test found
  * two in Level 8 that were not.
  *
  * Each scenario is driven alone on a level's own road, from well before it,
