@@ -44,7 +44,19 @@ git config --global core.longpaths true
 
    Their dashboard is at http://127.0.0.1:4000.
 
-3. Start the app in a second terminal, and open the address it prints:
+3. In a second terminal, add the placeholder quizzes. Without them every
+   level's Short Quiz is blocked and **Drive stays locked**. The emulators
+   forget everything when they stop, so run this after each start:
+
+   ```bash
+   npm run seed
+   ```
+
+   The quiz questions are placeholders, not real exam content: pick
+   "Keyed answer". To use the admin pages, sign up in the app, run
+   `npm run seed -- --admin you@example.com`, then sign out and back in.
+
+4. Start the app, and open the address it prints:
 
    ```bash
    npm run dev
