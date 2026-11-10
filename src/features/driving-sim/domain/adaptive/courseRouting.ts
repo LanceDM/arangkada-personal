@@ -3,21 +3,22 @@
 // is built, and how its verdict moves the machine.
 //
 // The machine (src/domain/routing), the policies (domain/learner/adaptive) and
-// the binding to Story's content (routingContent.ts) are the ones the
-// simulation played. This module calls them in the simulation's order - the
-// destination rolled first, then what the machine is told, then the group's
-// move, then the add-on - and changes none of them.
+// the binding to Story's content (routingContent.ts) are the ones the fifth experiment
+// played. This module calls them in the order a developers' script
+// does - the destination rolled first, then what the machine is told, then the
+// group's move, then the add-on - and changes none of them.
 //
-// Two groups play it. Conventional is the plain move every time. Optimized is
-// the learned policy, read from the designated table (seed 11, `553a49a0`).
+// Two groups play it. Conventional is the plain policy, the plain move every time.
+// Optimized is the learned policy, read from the fifth experiment's designated table (seed 11, `553a49a0`).
 // Both play the plain FSM's driving settings: h = levelSupport(L, null),
 // theta 1, no weak-area roll and no live re-roll. The old practice policy
-// runs in neither; it is Legacy's alone.
+// (`b30a1716`) runs in neither; it is Legacy's alone.
 //
 // `RoutingFSM` starts only at a frontier, so a review's `return` and the final
 // exam's `certify` are taken at the end of the attempt by the instance that
 // took the move into it. What persists between attempts is therefore always a
 // frontier (or CERTIFIED) and the verdict on it: the cursor.
+import type { CourseProgress } from '@/domain/study/studyStage';
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { DrivingCompetency, SupportLevel } from '@/domain/learner/competency';
 import { buildBKTLearnerProfile } from '@/domain/learner/mastery/buildBKTProfile';
@@ -64,7 +65,7 @@ import type { SignCoverage } from './signCoverage';
 
 // --- groups ----------------------------------------------------------------------
 
-/** The two pilot groups: the plain routing FSM and the learned one. */
+/** The two pilot groups of the pilot: the plain routing FSM and the learned one. */
 export type RoutingGroup = 'conventional' | 'optimized';
 export const ROUTING_GROUPS: readonly RoutingGroup[] = ['conventional', 'optimized'];
 
@@ -72,16 +73,16 @@ export const ROUTING_GROUPS: readonly RoutingGroup[] = ['conventional', 'optimiz
 export type GroupInEffect = 'legacy' | RoutingGroup;
 
 /**
- * The learned policy as the simulation recorded it: the designated table and
- * the budget it was trained at, in graded decisions. Read from its table file,
- * never retrained.
+ * The learned policy as the fifth experiment recorded it: the designated table and the budget it was
+ * trained at, in graded decisions. Read from the fifth experiment's results file, never retrained
+ *.
  */
 export interface OptimizedRouting {
   table: RoutingTable;
   tableId: string;
   /** The training seed the table came from. */
   seed: number;
-  /** The size of the budget the learned policy was trained under: what "budget left" is read against. */
+  /** The size of the budget C was trained under: what "budget left" is read against. */
   budgetSize: number;
 }
 
@@ -99,12 +100,12 @@ export interface CourseObservation {
   /** BKT's weakest competency over the full history, ties to the least observed; null with no history. */
   weakest: DrivingCompetency | null;
   weakestScore: number | null;
-  /** Graded decisions of course entries so far: the learned policy's budget input. */
+  /** Graded decisions of course entries so far: C's budget input. */
   spent: number;
-  /** The budget it is read against: the trained size for Optimized, none for Conventional. */
+  /** The budget it is read against: the fifth experiment's size for Optimized, none for Conventional. */
   size: number | null;
   budgetLeft: BudgetLeft | null;
-  /** Whether the learned policy chose here: at least two of its actions were legal. */
+  /** Whether C chose here: at least two of its actions were legal. */
   asked: boolean;
   qState: RoutingQState | null;
   /** The table's row for `qState`, best first. */
@@ -159,9 +160,27 @@ export const startingCursor = (passedLevels: ReadonlySet<number>): RoutingCursor
   return { state, outcome: null, seq: 0, decisionsSpent: 0, pending: null };
 };
 
-/** The level a Continue would play at the cursor's frontier, or null once certified. */
-export const cursorFrontierLevel = (cursor: RoutingCursor): number | null =>
-  cursor.state.kind === 'CERTIFIED' ? null : frontierLevel(cursor.state);
+/**
+ * The level the next Continue goes to, or null once certified. The cursor keeps
+ * a passed level's frontier until Continue takes the move, so after a pass this
+ * is the pass guard's destination, not the level just passed: the map would
+ * otherwise turn a replay of that level into Continue.
+ */
+export const cursorFrontierLevel = (cursor: RoutingCursor): number | null => {
+  if (cursor.state.kind === 'CERTIFIED') return null;
+  return cursor.outcome === null ? frontierLevel(cursor.state) : destinationOf(cursor.state, cursor.outcome);
+};
+
+/**
+ * The course as the study's order reads it: whether
+ * Continue has been pressed, the level it enters next, and why the course
+ * ended. All the study learns of the routing FSM; nothing about how it chose.
+ */
+export const courseProgressOf = (cursor: RoutingCursor): CourseProgress => ({
+  started: cursor.pending !== null || cursor.outcome !== null || cursor.seq > 0,
+  frontierLevel: cursorFrontierLevel(cursor),
+  endReason: cursor.state.kind === 'CERTIFIED' ? 'certified' : null,
+});
 
 // --- deciding ---------------------------------------------------------------------
 
@@ -185,7 +204,7 @@ const plainObservation = (spent: number, weakest: DrivingCompetency | null, weak
   tableId: null,
 });
 
-/** BKT's weakest competency over the history, as the learned policy reads it: ties to the least observed. */
+/** BKT's weakest competency over the history, as the threshold and learned policies read it: ties to the least observed. */
 const weakestOf = (history: readonly ActionLog[]) => {
   if (history.length === 0) return null;
   const profile = buildBKTLearnerProfile([...history]);
@@ -195,7 +214,7 @@ const weakestOf = (history: readonly ActionLog[]) => {
 
 /**
  * The group's move at a choice, and what it read. Conventional takes the plain
- * move. Optimized asks the learned policy where it has a choice, as the simulation does,
+ * move. Optimized asks C where it has a choice, as the simulation's the learned policy does,
  * and takes the plain move everywhere else.
  */
 const chooseMove = (
@@ -208,7 +227,7 @@ const chooseMove = (
   const observed = plainObservation(spent, weakest?.competency ?? null, weakest?.score ?? null);
   if (group === 'conventional') return { move: plainPolicy(choice, null), observation: observed };
 
-  if (!optimized) throw new Error('the Optimized group needs the designated routing table');
+  if (!optimized) throw new Error('the Optimized group needs the designated table');
   const budget = { spent, size: optimized.budgetSize };
   const read = { ...observed, size: budget.size, budgetLeft: budgetLeft(budget), tableId: optimized.tableId };
   if (!weakest || !isRoutingChoice(choice.legal, weakest.competency)) {
@@ -357,7 +376,7 @@ export const enterCourseEntry = (pending: PendingEntry): CourseEntry => {
  * whatever it scored, and that frontier is played next as it stands; a passed
  * final exam certifies. Otherwise the verdict waits on the cursor for the next
  * Continue to decide from. `gradedDecisions` is the entry's own count, standing
- * penalties excluded, and is spent from the learned policy's budget whichever group played it.
+ * penalties excluded, and is spent from C's budget whichever group played it.
  * The log is every transition this entry added, numbered on from the cursor's.
  */
 export const settleCourseEntry = (
@@ -441,7 +460,7 @@ export const readStoredCursor = (raw: unknown): RoutingCursor | null => {
 /**
  * A passed level played again from the map, outside the machine: rolled from
  * its own seed, on the plain FSM's driving settings, with nothing added. Its
- * verdict moves nothing, and its decisions are not spent from the learned policy's budget.
+ * verdict moves nothing, and its decisions are not spent from C's budget.
  */
 export const freeReplayLevel = (levelId: number, attemptSeed: number, coverage: SignCoverage) => {
   const rolled = rollLevel(levelId, coverage, attemptSeed);

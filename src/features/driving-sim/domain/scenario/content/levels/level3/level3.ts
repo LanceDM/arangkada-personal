@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { pickForCoverage, type SignCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
 import { buildEvents, filterByWeakCompetency } from '@/features/driving-sim/domain/scenario/pooling';
@@ -50,7 +51,10 @@ const level3Base = {
   // Slots sit 550 apart so two full crossroads never overlap on screen, with a
   // short run-out after the last one.
   roadLength: 6440,
-  speedLimit: 60,
+  roadClass: 'through_street',
+  speedLimit: 40,
+  // Spaced and measured at 60 on the dial; driven at 40 as it was at 60.
+  pace: spacedPace(40, 60),
   requiredScore: 110,
   stars2: 130,
   stars3: 160,

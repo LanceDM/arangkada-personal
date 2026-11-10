@@ -258,7 +258,7 @@ const LearnerProfileLab = () => {
                       <td className={cell}>L{playedInLevel}</td>
                       <td className={cell}>{log.sourceLevelId !== undefined ? `L${log.sourceLevelId}` : '—'}</td>
                       <td className={cell}>{log.competency ?? '—'}</td>
-                      {/* The support level h since support levels were added; before it, the timing
+                      {/* The support level h on newer attempts; before it, the timing
                           mode, which is not a support level - every briefing then
                           showed the move. */}
                       <td className={cell}>

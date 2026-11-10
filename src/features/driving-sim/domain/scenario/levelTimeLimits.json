@@ -1,0 +1,219 @@
+{
+  "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level and every practice item the level can take, on its longest roll.",
+  "measuredOn": "2026-11-07",
+  "commit": "5438885+dirty",
+  "factor": 2,
+  "roundingSeconds": 30,
+  "rollSeeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "levels": [
+    {
+      "levelId": 0,
+      "limitSeconds": 150,
+      "limitSteps": 9000,
+      "longestSteps": 4301,
+      "longestRoll": null,
+      "longestItem": null,
+      "drives": 1,
+      "fingerprint": "bd39e2d4",
+      "unpassed": []
+    },
+    {
+      "levelId": 1,
+      "limitSeconds": 270,
+      "limitSteps": 16200,
+      "longestSteps": 7618,
+      "longestRoll": 1,
+      "longestItem": "level1.clutch-code.at-only-manual-van",
+      "drives": 35,
+      "fingerprint": "a0b4efd1",
+      "unpassed": []
+    },
+    {
+      "levelId": 2,
+      "limitSeconds": 240,
+      "limitSteps": 14400,
+      "longestSteps": 6696,
+      "longestRoll": 1,
+      "longestItem": "level2.settle.parked-cars",
+      "drives": 49,
+      "fingerprint": "04470875",
+      "unpassed": []
+    },
+    {
+      "levelId": 3,
+      "limitSeconds": 240,
+      "limitSteps": 14400,
+      "longestSteps": 6983,
+      "longestRoll": 6,
+      "longestItem": "level3.bend-warning.falling-rocks",
+      "drives": 96,
+      "fingerprint": "e46e54e5",
+      "unpassed": []
+    },
+    {
+      "levelId": 4,
+      "limitSeconds": 240,
+      "limitSteps": 14400,
+      "longestSteps": 7016,
+      "longestRoll": 9,
+      "longestItem": "level3.bend-warning.falling-rocks",
+      "drives": 122,
+      "fingerprint": "a0e7a864",
+      "unpassed": []
+    },
+    {
+      "levelId": 5,
+      "limitSeconds": 450,
+      "limitSteps": 27000,
+      "longestSteps": 13130,
+      "longestRoll": 3,
+      "longestItem": "level3.bend-warning.animal-crossing",
+      "drives": 148,
+      "fingerprint": "006a0a49",
+      "unpassed": []
+    },
+    {
+      "levelId": 6,
+      "limitSeconds": 360,
+      "limitSteps": 21600,
+      "longestSteps": 10429,
+      "longestRoll": null,
+      "longestItem": "level3.bend-warning.falling-rocks",
+      "drives": 136,
+      "fingerprint": "675c35cd",
+      "unpassed": []
+    },
+    {
+      "levelId": 7,
+      "limitSeconds": 630,
+      "limitSteps": 37800,
+      "longestSteps": 18459,
+      "longestRoll": null,
+      "longestItem": "level5.driveway-join.jeepney-loading",
+      "drives": 140,
+      "fingerprint": "af28c646",
+      "unpassed": [
+        {
+          "item": "level3.speed.max-20",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "level3.speed.preferred-max-30",
+          "why": "2 standing penalties"
+        },
+        {
+          "item": "level3.speed.driver-must-slow-down",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "level5.emergency-yield.ambulance-behind",
+          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens"
+        },
+        {
+          "item": "level5.emergency-yield.not-in-the-junction",
+          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens"
+        },
+        {
+          "item": "level2.drive-out.neighbour",
+          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
+        },
+        {
+          "item": "level2.drive-out.schoolchildren",
+          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
+        },
+        {
+          "item": "level2.drive-out.elderly",
+          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
+        },
+        {
+          "item": "level2.drive-out.dog-walker",
+          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
+        },
+        {
+          "item": "level2.settle.school-zone",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "level4.traverse.painted-speed-limit",
+          "why": "3 standing penalties"
+        }
+      ]
+    },
+    {
+      "levelId": 8,
+      "limitSeconds": 360,
+      "limitSteps": 21600,
+      "longestSteps": 10498,
+      "longestRoll": null,
+      "longestItem": "level3.bend-warning.falling-rocks",
+      "drives": 141,
+      "fingerprint": "a36a01db",
+      "unpassed": []
+    },
+    {
+      "levelId": 9,
+      "limitSeconds": 270,
+      "limitSteps": 16200,
+      "longestSteps": 7450,
+      "longestRoll": null,
+      "longestItem": "level3.bend-warning.falling-rocks",
+      "drives": 147,
+      "fingerprint": "4bce7a71",
+      "unpassed": []
+    },
+    {
+      "levelId": 10,
+      "limitSeconds": 270,
+      "limitSteps": 16200,
+      "longestSteps": 7577,
+      "longestRoll": null,
+      "longestItem": "level3.bend-warning.animal-crossing",
+      "drives": 151,
+      "fingerprint": "53a3b199",
+      "unpassed": []
+    },
+    {
+      "levelId": 11,
+      "limitSeconds": 300,
+      "limitSteps": 18000,
+      "longestSteps": 8801,
+      "longestRoll": null,
+      "longestItem": "level9.crash-at-the-bottom",
+      "drives": 156,
+      "fingerprint": "e9e71188",
+      "unpassed": []
+    },
+    {
+      "levelId": 12,
+      "limitSeconds": 240,
+      "limitSteps": 14400,
+      "longestSteps": 6449,
+      "longestRoll": 16,
+      "longestItem": null,
+      "drives": 20,
+      "fingerprint": "371b6e1f",
+      "unpassed": []
+    }
+  ]
+}

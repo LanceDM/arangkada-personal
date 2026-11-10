@@ -30,7 +30,7 @@ export type ViolationSeverity = 'minor' | 'major' | 'critical';
  * `full` shows the situation and the move to make, `cue` the situation and
  * where to look, `none` the situation alone. It changes what is shown, never
  * what is graded, and it is chosen once per level entry alongside theta, by the
- * Q-learning policy in `adaptive/qLearningPolicy.ts`.
+ * Q-learning policy in `adaptive/qLearningPolicy.ts`. 
  */
 export type SupportLevel = 'full' | 'cue' | 'none';
 

@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '@/app/layout/AppLayout';
 import { LevelMap } from '@/features/progression';
-import { RoutingGroupOverride } from '@/features/driving-sim';
+import { Say } from '@/shared/i18n/language';
 import { useStoryRun } from './storyRunContext';
 
 /**
@@ -32,24 +32,13 @@ const LevelMapPage = () => {
             frontierLevelId: course.frontierLevelId,
             certified: course.certified,
             openAll: course.openAll,
+            replays: !routing.participant,
+            backTo: routing.participant ? '/study' : undefined,
             loading: course.loading,
             onContinue: course.continueCourse,
           }
         }
-        aside={
-          (routing.canOverride || course?.error) && (
-            <div className="flex w-full max-w-md flex-col items-center gap-3">
-              {course?.error && <p className="text-sm text-destructive">{course.error}</p>}
-              {routing.canOverride && (
-                <RoutingGroupOverride
-                  resolution={routing.resolution}
-                  value={routing.override}
-                  onChange={routing.setOverride}
-                />
-              )}
-            </div>
-          )
-        }
+        aside={course?.error && <p className="text-sm text-destructive"><Say {...course.error} /></p>}
       />
     </AppLayout>
   );

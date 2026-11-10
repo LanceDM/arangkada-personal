@@ -1,4 +1,4 @@
-// The pilot's common post-test.
+// The pilot's common post-test .
 //
 // Conventional and Optimized play different content by design: the Optimized
 // group's routing adds practice items and reviews. So the groups are compared
@@ -25,9 +25,9 @@ export const POST_TEST_SEED = 20261017;
 
 /** The briefing's note on the post-test. Like every course note, it never names the group. */
 export const postTestNote = (): CourseNote => ({
-  heading: 'Post-test: the final exam',
+  heading: { en: 'Post-test: the final exam' },
   lines: [
-    'Every participant drives this same final exam once, at the end of the session, with no hints.',
-    'It does not change your course, and nothing is added to it. When it ends, tell the facilitator.',
+    { en: 'Every participant drives this same final exam once, at the end of the session, with no hints.' },
+    { en: 'It does not change your course, and nothing is added to it. When it ends, tell the facilitator.' },
   ],
 });

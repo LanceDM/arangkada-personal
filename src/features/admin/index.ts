@@ -1,4 +1,22 @@
-/** Admin's public API: one screen plus the data it runs on. */
-export { AdminDashboard } from './presentation/AdminDashboard';
-export { useAdminData } from './application/useAdminData';
-export { useAdminDashboard } from './application/useAdminDashboard';
+/** Admin's public API: the admin area's frame and its sections, each with the data it runs on. */
+export { AdminShell } from './presentation/AdminShell';
+export { Panel, SectionHeader } from './presentation/adminUi';
+export { OverviewSection } from './presentation/OverviewSection';
+export { useAdminOverview } from './application/useAdminOverview';
+export { ReplaySection } from './presentation/ReplaySection';
+export { useAttemptReplay } from './application/useAttemptReplay';
+export type { ReplaySelection } from './application/useAttemptReplay';
+export { RoutingFlowSection } from './presentation/RoutingFlowSection';
+export { useRoutingFlow } from './application/useRoutingFlow';
+export type { RoutingFlowSelection } from './application/useRoutingFlow';
+export { QMappingSection } from './presentation/QMappingSection';
+export { useQMapping } from './application/useQMapping';
+export type { QMappingSelection } from './application/useQMapping';
+export { IrtSection, type IrtView } from './presentation/IrtSection';
+export { useIrtPanel } from './application/useIrtPanel';
+export { PlayerReport } from './presentation/PlayerReport';
+export { usePlayerReport } from './application/usePlayerReport';
+export { PilotDashboard } from './presentation/PilotDashboard';
+export { QuizEditorSection } from './presentation/QuizEditorSection';
+export { usePilotSessions } from './application/usePilotSessions';
+export { useStudyInvites } from './application/useStudyInvites';

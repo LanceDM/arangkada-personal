@@ -8,6 +8,7 @@ const level: LevelConfig = {
   name: 'Test level',
   description: '',
   roadLength: 1000,
+  roadClass: 'city_street',
   speedLimit: 40,
   events: [],
   requiredScore: 45,
@@ -53,15 +54,24 @@ describe('buildLevelResult', () => {
     const r = buildLevelResult(
       level,
       { score: 999, violations: 3, correctActions: 9, logs: noLogs },
-      'You drove into a pedestrian.'
+      { kind: 'crash', reason: 'You drove into a pedestrian.' }
     );
     expect(r.stars).toBe(0);
     expect(r.completed).toBe(false);
     expect(r.crashReason).toBe('You drove into a pedestrian.');
   });
 
+  it('forces stars 0 and not-completed on a timeout, and marks it, with no crash reason', () => {
+    const r = buildLevelResult(level, { score: 999, violations: 0, correctActions: 9, logs: noLogs }, { kind: 'time_up' });
+    expect(r.stars).toBe(0);
+    expect(r.completed).toBe(false);
+    expect(r.timedOut).toBe(true);
+    expect('crashReason' in r).toBe(false);
+    expect('timedOut' in buildLevelResult(level, { score: 999, violations: 0, correctActions: 9, logs: noLogs })).toBe(false);
+  });
+
   it('passes violations through unchanged (the crash +1 is the caller’s job, not this helper’s)', () => {
-    const r = buildLevelResult(level, { score: 10, violations: 7, correctActions: 0, logs: noLogs }, 'x');
+    const r = buildLevelResult(level, { score: 10, violations: 7, correctActions: 0, logs: noLogs }, { kind: 'crash', reason: 'x' });
     expect(r.violations).toBe(7);
   });
 

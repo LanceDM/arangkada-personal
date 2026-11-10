@@ -21,9 +21,11 @@
  */
 import type { SupportLevel } from '@/domain/learner/competency';
 import { assertNever } from '@/shared/lib/assertNever';
-import type { ScenarioEvent } from './scenarioDefinition';
+import type { LevelConfig, ScenarioEvent } from './scenarioDefinition';
+import { speedTarget, speedTargetText } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import type { NpcVehicleSpec, RoadActorKind, PedestrianKind, RoadScene, ScenePrefab, SignPlate, MarkingPlate } from './scenarioScene';
 import { scenarioInstruction } from './scenarioCopy';
+import { englishText, type Localized, type TextOf } from '@/shared/lib/localized';
 
 export interface ScenarioSupport {
   support: SupportLevel;
@@ -64,14 +66,23 @@ export interface ScenarioSupport {
  */
 export const showsResponseAt = (support: SupportLevel): boolean => support === 'full';
 
-export const scenarioSupport = (event: ScenarioEvent, support: SupportLevel): ScenarioSupport => {
+/**
+ * `level` lets the instruction name the speed the scenario is graded on
+ * (`speedTarget`). It is part of the response, so full alone shows it.
+ */
+export const scenarioSupport = (
+  event: ScenarioEvent,
+  support: SupportLevel,
+  level?: LevelConfig,
+  say: TextOf = englishText
+): ScenarioSupport => {
   const full = support === 'full';
   return {
     support,
     situation: event.description,
     sign: event.sign,
-    instruction: full ? scenarioInstruction(event) : null,
-    cue: support === 'cue' ? supportCue(event) : null,
+    instruction: full ? withSpeedTarget(scenarioInstruction(event, say), event, level, say) : null,
+    cue: support === 'cue' ? supportCue(event, say) : null,
     realWorldNote: full ? event.realWorldNote ?? null : null,
     lawCitation: full ? event.lawCitation ?? null : null,
     showsResponse: showsResponseAt(support),
@@ -91,197 +102,197 @@ export const scenarioSupport = (event: ScenarioEvent, support: SupportLevel): Sc
 /** `B. Warning Sign — Road Obstacle` → `Warning Sign — Road Obstacle`. */
 const categoryName = (plate: SignPlate | MarkingPlate): string => plate.category.replace(/^[A-Z]\.\s*/, '');
 
-const VEHICLE: Record<NpcVehicleSpec['vehicleKind'], string> = {
-  car: 'the car',
-  ambulance: 'the ambulance',
-  jeepney: 'the jeepney',
-  motorcycle: 'the motorcycle',
-  truck: 'the truck',
-  van: 'the van',
-  bus: 'the bus',
-  bicycle: 'the cyclist',
+const VEHICLE: Record<NpcVehicleSpec['vehicleKind'], Localized> = {
+  car: { en: 'the car' },
+  ambulance: { en: 'the ambulance' },
+  jeepney: { en: 'the jeepney' },
+  motorcycle: { en: 'the motorcycle' },
+  truck: { en: 'the truck' },
+  van: { en: 'the van' },
+  bus: { en: 'the bus' },
+  bicycle: { en: 'the cyclist' },
 };
 
-const npcPlace = (path: NpcVehicleSpec['path']): string => {
+const npcPlace = (path: NpcVehicleSpec['path'], say: TextOf): string => {
   switch (path) {
     case 'crossing_from_left':
-      return 'coming from your left';
+      return say({ en: 'coming from your left' });
     case 'crossing_from_right':
-      return 'coming from your right';
+      return say({ en: 'coming from your right' });
     case 'oncoming_through':
     case 'oncoming_turning_left':
-      return 'coming the other way';
+      return say({ en: 'coming the other way' });
     case 'closing_from_behind':
-      return 'behind you';
+      return say({ en: 'behind you' });
     case 'roundabout_circulating':
-      return 'on the roundabout';
+      return say({ en: 'on the roundabout' });
     case 'travelling_ahead':
-      return 'ahead of you';
+      return say({ en: 'ahead of you' });
     case 'merging_from_ramp':
-      return 'joining from the ramp';
+      return say({ en: 'joining from the ramp' });
     case 'filtering_past':
-      return 'coming up beside you';
+      return say({ en: 'coming up beside you' });
     default:
       return assertNever(path, 'npcPlace');
   }
 };
 
-const ACTOR: Record<RoadActorKind, string> = {
-  jeepney: 'the jeepney',
-  van: 'the van',
-  tricycle: 'the tricycle',
-  motorcycle: 'the motorcycle',
-  bicycle: 'the cyclist',
-  truck: 'the truck',
-  bus: 'the bus',
-  smoke_belcher: 'the smoking vehicle',
-  ambulance: 'the ambulance',
-  broken_down: 'the stopped vehicle',
-  crashed_car: 'the crash',
+const ACTOR: Record<RoadActorKind, Localized> = {
+  jeepney: { en: 'the jeepney' },
+  van: { en: 'the van' },
+  tricycle: { en: 'the tricycle' },
+  motorcycle: { en: 'the motorcycle' },
+  bicycle: { en: 'the cyclist' },
+  truck: { en: 'the truck' },
+  bus: { en: 'the bus' },
+  smoke_belcher: { en: 'the smoking vehicle' },
+  ambulance: { en: 'the ambulance' },
+  broken_down: { en: 'the stopped vehicle' },
+  crashed_car: { en: 'the crash' },
 };
 
-const PEDESTRIAN: Record<PedestrianKind, string> = {
-  adult: 'the person on foot',
-  child: 'the child',
-  elderly: 'the elderly pedestrian',
-  pwd: 'the wheelchair user',
+const PEDESTRIAN: Record<PedestrianKind, Localized> = {
+  adult: { en: 'the person on foot' },
+  child: { en: 'the child' },
+  elderly: { en: 'the elderly pedestrian' },
+  pwd: { en: 'the wheelchair user' },
 };
 
-const prefabPlace = (prefab: ScenePrefab): string => {
+const prefabPlace = (prefab: ScenePrefab, say: TextOf): string => {
   switch (prefab.kind) {
     case 'driveway_crossing':
-      return 'the footpath across the driveway';
+      return say({ en: 'the footpath across the driveway' });
     case 'bend_warning':
-      return 'the bend ahead';
+      return say({ en: 'the bend ahead' });
     case 'unknown_hazard':
-      return 'the road ahead';
+      return say({ en: 'the road ahead' });
     case 'lane_paint':
     case 'merge_arrows':
     case 'lane_arrow':
-      return 'the markings on the lanes';
+      return say({ en: 'the markings on the lanes' });
     case 'overtaking_oncoming':
     case 'oncoming_left_turn':
-      return 'the traffic coming the other way';
+      return say({ en: 'the traffic coming the other way' });
     case 'give_way_junction':
     case 'cross_street':
     case 'main_road_junction':
-      return 'the junction ahead';
+      return say({ en: 'the junction ahead' });
     case 'no_entry_junction':
-      return 'the side street';
+      return say({ en: 'the side street' });
     case 'roundabout':
-      return 'the roundabout';
+      return say({ en: 'the roundabout' });
     case 'compliance':
-      return 'your vehicle';
+      return say({ en: 'your vehicle' });
     case 'checkpoint_officer':
-      return 'the officer';
+      return say({ en: 'the officer' });
     case 'road_crash':
-      return 'the crash ahead';
+      return say({ en: 'the crash ahead' });
     case 'fire_hydrant':
-      return 'the fire hydrant';
+      return say({ en: 'the fire hydrant' });
     default:
       return assertNever(prefab, 'prefabPlace');
   }
 };
 
-const scenePlace = (scene: RoadScene): string => {
+const scenePlace = (scene: RoadScene, say: TextOf): string => {
   switch (scene) {
     case 'intersection':
     case 'side_road':
     case 'junction_t':
     case 'signal':
-      return 'the junction ahead';
+      return say({ en: 'the junction ahead' });
     case 'merge':
-      return 'the merging lanes';
+      return say({ en: 'the merging lanes' });
     case 'toll':
-      return 'the toll plaza';
+      return say({ en: 'the toll plaza' });
     case 'roundabout':
-      return 'the roundabout';
+      return say({ en: 'the roundabout' });
     case 'bend':
-      return 'the bend ahead';
+      return say({ en: 'the bend ahead' });
     case 'narrows':
-      return 'where the road narrows';
+      return say({ en: 'where the road narrows' });
     case 'divided_start':
     case 'divided_end':
-      return 'the median';
+      return say({ en: 'the median' });
     case 'bridge':
-      return 'the bridge';
+      return say({ en: 'the bridge' });
     case 'two_way':
-      return 'the lane coming the other way';
+      return say({ en: 'the lane coming the other way' });
     case 'hump':
-      return 'the hump';
+      return say({ en: 'the hump' });
     case 'uneven':
     case 'wet':
-      return 'the road surface';
+      return say({ en: 'the road surface' });
     case 'flood':
-      return 'the water on the road';
+      return say({ en: 'the water on the road' });
     case 'gradient_up':
     case 'gradient_down':
-      return 'the slope';
+      return say({ en: 'the slope' });
     case 'crosswalk':
-      return 'the crossing';
+      return say({ en: 'the crossing' });
     case 'animal':
-      return 'the animal on the road';
+      return say({ en: 'the animal on the road' });
     case 'rockfall':
-      return 'the rocks on the road';
+      return say({ en: 'the rocks on the road' });
     case 'roadwork':
-      return 'the work zone';
+      return say({ en: 'the work zone' });
     case 'railway':
-      return 'the tracks';
+      return say({ en: 'the tracks' });
     case 'lay_by':
-      return 'the lay-by';
+      return say({ en: 'the lay-by' });
     case 'open_road':
     case 'route':
-      return 'the road ahead';
+      return say({ en: 'the road ahead' });
     default:
       return assertNever(scene, 'scenePlace');
   }
 };
 
-const effectPlace = (effect: NonNullable<ScenarioEvent['effect']>): string => {
-  if (effect.visibility !== undefined) return 'how far ahead you can see';
-  if (effect.grip !== undefined || effect.jarringAbove !== undefined) return 'the road surface';
-  if (effect.gradient !== undefined) return 'the slope';
-  if (effect.curve !== undefined) return 'the bend ahead';
-  if (effect.narrowsTo !== undefined) return 'where the road narrows';
-  return 'the road ahead';
+const effectPlace = (effect: NonNullable<ScenarioEvent['effect']>, say: TextOf): string => {
+  if (effect.visibility !== undefined) return say({ en: 'how far ahead you can see' });
+  if (effect.grip !== undefined || effect.jarringAbove !== undefined) return say({ en: 'the road surface' });
+  if (effect.gradient !== undefined) return say({ en: 'the slope' });
+  if (effect.curve !== undefined) return say({ en: 'the bend ahead' });
+  if (effect.narrowsTo !== undefined) return say({ en: 'where the road narrows' });
+  return say({ en: 'the road ahead' });
 };
 
 /** The one thing on the road the scenario is about, most specific declaration first. */
-const watchTarget = (event: ScenarioEvent): string | null => {
-  if (event.inspection) return event.inspection.pullOver ? 'the enforcer ahead' : 'the checkpoint ahead';
+const watchTarget = (event: ScenarioEvent, say: TextOf): string | null => {
+  if (event.inspection) return say(event.inspection.pullOver ? { en: 'the enforcer ahead' } : { en: 'the checkpoint ahead' });
   if (event.sign) {
-    return event.sign.art === 'signal_head' ? 'the traffic light' : `the sign (${categoryName(event.sign)})`;
+    return say(event.sign.art === 'signal_head' ? { en: 'the traffic light' } : { en: `the sign (${categoryName(event.sign)})` });
   }
   if (event.marking) {
     const where = event.marking.side ? `the marking on the ${event.marking.side}` : 'the marking on the road';
-    return `${where} (${categoryName(event.marking)})`;
+    return say({ en: `${where} (${categoryName(event.marking)})` });
   }
   if (event.pedestrians?.length) {
     const kinds = new Set(event.pedestrians.map(person => person.kind));
-    return kinds.size === 1 ? PEDESTRIAN[event.pedestrians[0].kind] : 'the people on foot';
+    return say(kinds.size === 1 ? PEDESTRIAN[event.pedestrians[0].kind] : { en: 'the people on foot' });
   }
-  if (event.actor) return ACTOR[event.actor.kind];
-  if (event.npc) return `${VEHICLE[event.npc.vehicleKind]} ${npcPlace(event.npc.path)}`;
-  if (event.scenePrefab) return prefabPlace(event.scenePrefab);
-  if (event.scene) return scenePlace(event.scene);
-  if (event.effect) return effectPlace(event.effect);
+  if (event.actor) return say(ACTOR[event.actor.kind]);
+  if (event.npc) return say({ en: `${say(VEHICLE[event.npc.vehicleKind])} ${npcPlace(event.npc.path, say)}` });
+  if (event.scenePrefab) return prefabPlace(event.scenePrefab, say);
+  if (event.scene) return scenePlace(event.scene, say);
+  if (event.effect) return effectPlace(event.effect, say);
   return null;
 };
 
 /** What the graded requirement turns on, without saying what it requires. */
-const checks = (event: ScenarioEvent): string[] => {
+const checks = (event: ScenarioEvent, say: TextOf): string[] => {
   const found: string[] = [];
-  if (event.merge) found.push('the gap in the lane you are joining');
-  else if (event.following) found.push('the gap to the vehicle ahead');
-  if (event.overtake) found.push('the lane beside you');
-  if (event.maneuver || event.requiredLane) found.push('which lane you are in');
-  if (event.lineHold) found.push('your position in the lane');
+  if (event.merge) found.push(say({ en: 'the gap in the lane you are joining' }));
+  else if (event.following) found.push(say({ en: 'the gap to the vehicle ahead' }));
+  if (event.overtake) found.push(say({ en: 'the lane beside you' }));
+  if (event.maneuver || event.requiredLane) found.push(say({ en: 'which lane you are in' }));
+  if (event.lineHold) found.push(say({ en: 'your position in the lane' }));
   if (event.postedSpeed !== undefined || event.speedRule || event.coast || event.effect?.stuckThrottle) {
-    found.push('your speed');
+    found.push(say({ en: 'your speed' }));
   }
   // A marking already names the curb it is painted on.
-  if (event.bay && !event.marking) found.push(`the curb on the ${event.bay.side}`);
-  if (event.rear) found.push(`${VEHICLE[event.rear.vehicleKind]} behind you`);
+  if (event.bay && !event.marking) found.push(say({ en: `the curb on the ${event.bay.side}` }));
+  if (event.rear) found.push(say({ en: `${say(VEHICLE[event.rear.vehicleKind])} behind you` }));
   return found;
 };
 
@@ -289,11 +300,19 @@ const checks = (event: ScenarioEvent): string[] => {
  * Where to look, in one or two short sentences, or null when the scenario
  * declares nothing to point at.
  */
-export const supportCue = (event: ScenarioEvent): string | null => {
-  const target = watchTarget(event);
-  const also = checks(event);
+export const supportCue = (event: ScenarioEvent, say: TextOf = englishText): string | null => {
+  const target = watchTarget(event, say);
+  const also = checks(event, say);
   if (!target && also.length === 0) return null;
-  return [target && `Watch ${target}.`, also.length > 0 && `Check ${also.join(', and ')}.`]
+  return [target && say({ en: `Watch ${target}.` }), also.length > 0 && say({ en: `Check ${also.join(', and ')}.` })]
     .filter(Boolean)
     .join(' ');
+};
+
+/** The instruction with the speed it is graded on, where speed decides it. */
+const withSpeedTarget = (instruction: string, event: ScenarioEvent, level: LevelConfig | undefined, say: TextOf): string => {
+  const target = level ? speedTarget(event, level) : null;
+  if (!target) return instruction;
+  const sentence = /[.!?]$/.test(instruction.trim()) ? instruction.trim() : `${instruction.trim()}.`;
+  return say({ en: `${sentence} Target: ${speedTargetText(target, say)}.` });
 };

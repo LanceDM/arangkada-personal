@@ -17,8 +17,18 @@ const level7 = LEVELS.find(level => level.id === 7)!;
 
 describe('a level that declares no pace', () => {
   it('gets the arithmetic every level has always used', () => {
-    for (const level of LEVELS.filter(entry => entry.id !== 7)) {
+    for (const level of LEVELS.filter(entry => !entry.pace)) {
       expect(paceOf(level), `level ${level.id} moved off the shared pace`).toEqual(DEFAULT_PACE);
+    }
+  });
+});
+
+describe('a level spaced at another dial', () => {
+  it('moves only distance per km/h and the speed changes, never the wheel or the throttle', () => {
+    for (const level of LEVELS.filter(entry => entry.pace && entry.id !== 7)) {
+      const pace = paceOf(level);
+      expect(pace.steerPerFrame, `Level ${level.id}`).toBe(DEFAULT_PACE.steerPerFrame);
+      expect(pace.accelerationScale, `Level ${level.id}`).toBe(DEFAULT_PACE.accelerationScale);
     }
   });
 });
@@ -38,7 +48,7 @@ describe("Level 7's pace", () => {
     // Faster than the 50 km/h level, but nowhere near the two-and-a-half times
     // it was: the road has to be readable at the speed the lesson is about.
     const seven = unitsPerSecond(level7.speedLimit, pace.distancePerSpeed);
-    const six = unitsPerSecond(level6.speedLimit, DEFAULT_PACE.distancePerSpeed);
+    const six = unitsPerSecond(level6.speedLimit, paceOf(level6).distancePerSpeed);
     expect(seven).toBeGreaterThan(six);
     expect(seven).toBeLessThan(six * 1.6);
   });

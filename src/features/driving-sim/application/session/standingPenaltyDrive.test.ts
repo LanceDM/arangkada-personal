@@ -10,11 +10,13 @@
  * for doing exactly what it asks.
  *
  * The road is now clear only once the car has left the scenario's zone. Crawling
- * after that is still charged, after its warning.
+ * after that is still charged, after its warning - except on the tutorial,
+ * which charges no standing penalty at all.
  */
 import { describe, expect, it } from 'vitest';
 import { DrivingFSM } from '@/features/driving-sim/domain/fsm/DrivingFSM';
 import { evaluateWeightedRule } from '@/features/driving-sim/domain/evaluation/ruleEngine';
+import { level0, SLOTS as LEVEL0_SLOTS } from '@/features/driving-sim/domain/scenario/content/levels/level0';
 import { level8, SLOTS as LEVEL8_SLOTS } from '@/features/driving-sim/domain/scenario/content/levels/level8';
 import { level11, SLOTS as LEVEL11_SLOTS } from '@/features/driving-sim/domain/scenario/content/levels/level11';
 import { level12, SLOTS as LEVEL12_SLOTS } from '@/features/driving-sim/domain/scenario/content/levels/level12';
@@ -150,5 +152,30 @@ describe.each([
     expect(first.distance).toBeGreaterThan(AT + 200);
     expect(run.firstCrawlWarning).not.toBeNull();
     expect(first.frame - run.firstCrawlWarning!).toBeGreaterThanOrEqual(80);
+  });
+});
+
+/**
+ * The tutorial charges no standing penalty. Its slow zone is passed at 10 km/h,
+ * which is the crawl line on its 40 km/h limit, and braking drags the set speed
+ * down with the car, so a learner who did what it asked left the zone crawling
+ * and was charged for speed control.
+ */
+describe('Level 0, the tutorial', () => {
+  const road = alone(level0, variant(LEVEL0_SLOTS, 'level0.slow-zone'));
+  const crawl = level0.speedLimit * CRAWL_SPEED_SHARE;
+  const standPastTheZone = { approach: crawl + 8, waitFrames: 30, after: level0.speedLimit * 0.75, standAt: AT + 300, frames: 60 * 40 };
+
+  it('charges nothing, and warns of nothing, for standing on the road past its slow zone', () => {
+    const run = drive(road, standPastTheZone);
+    expect(run.end).toBeGreaterThan(AT + 200);
+    expect(run.penalties).toEqual([]);
+    expect(run.firstCrawlWarning).toBeNull();
+  });
+
+  it('is exempt because it is the tutorial: the same road under another id is charged', () => {
+    const run = drive({ ...road, id: 1 }, standPastTheZone);
+    expect(run.penalties.length).toBeGreaterThan(0);
+    expect(run.firstCrawlWarning).not.toBeNull();
   });
 });

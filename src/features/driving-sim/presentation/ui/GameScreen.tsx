@@ -23,21 +23,39 @@ import ScenarioBriefing from './ScenarioBriefing';
 import { roadPositionCue } from './roadPositionLabel';
 import { resolveLaneRole } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { useKeyboard } from '@/features/driving-sim/presentation/input/useKeyboard';
+import { TouchInput } from '@/features/driving-sim/presentation/input/touchInput';
+import { usePortrait, useTouchDevice } from '@/features/driving-sim/presentation/input/useTouchDevice';
+import { InputModeContext, type InputMode } from '@/features/driving-sim/presentation/input/inputMode';
+import { PedalPad, SteeringPad } from './TouchControls';
+import RotateDevicePrompt from './RotateDevicePrompt';
+
+/** The last stretch of a panel's time, when its countdown turns amber. */
+const PANEL_WARNING_SECONDS = 15;
+
+/** What a panel's countdown says: a question is answered, anything else is read and the drive resumes. */
+const panelClock = (seconds: number, asking: boolean) =>
+  asking ? m.secondsToAnswer(seconds) : m.resumesIn(seconds);
+import FrameMeter from '@/features/driving-sim/presentation/drive/FrameMeter';
+import { frameMeterRequested } from '@/features/driving-sim/presentation/drive/frameSteps';
+import type { PlayConditions } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import { useFSM } from '@/features/driving-sim/application/useFSM';
 import { registerActiveFSM } from '@/features/driving-sim/domain/fsm/devRegistry';
 import { DEFAULT_TRANSITION_PARAMS, type TransitionParams } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import { useScenarioEvaluation } from '@/features/driving-sim/application/useScenarioEvaluation';
-import { useDrivingSimulation } from '@/features/driving-sim/presentation/drive/useDrivingSimulation';
+import { useDrivingSimulation, type DriveComplete } from '@/features/driving-sim/presentation/drive/useDrivingSimulation';
 import { useStageScale } from './useStageScale';
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion';
 import { CANVAS_WIDTH, CANVAS_HEIGHT } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { garageHotspotToEvent } from '@/features/driving-sim/domain/evaluation/evaluatePlayerAction';
 import { buildLevelResult } from '@/features/driving-sim/domain/scoring/buildLevelResult';
 import { buildLevelFsmTelemetry, type LevelFsmTelemetry } from '@/features/driving-sim/domain/fsm/fsmMetrics';
+import { useText } from '@/shared/i18n/useText';
+import { driveMessages as m } from './messages';
 
 interface GameScreenProps {
   level: LevelConfig;
-  onComplete: (result: LevelResult, telemetry: LevelFsmTelemetry) => void;
+  /** The finished run, its FSM telemetry, and how it was played. */
+  onComplete: DriveComplete;
   onExit: () => void;
   /** Dev-only: starts the drive at this road distance instead of 0. */
   initialDistance?: number;
@@ -70,13 +88,46 @@ interface GameScreenProps {
   /**
    * Whether the drive re-rolls its route toward a weak competency, with the
    * adaptation notice and the "Extra guidance" panel that come with it.
-   * Omitted means true, Legacy's game; the routing FSM's groups pass false.
+   * Omitted means true, Legacy's game; the routing FSM's groups pass false
+   *.
    */
   liveReroll?: boolean;
 }
 
 /** The lane strip's markers where the support level withholds the response. */
 const NO_LANES: number[] = [];
+
+/**
+ * The drive on a touch screen, kept clear of the notch, the rounded corners
+ * and the home indicator, with a gutter besides: an iOS swipe that starts at
+ * the very edge of the screen is the system's, not the game's.
+ */
+const TOUCH_SAFE_AREA = {
+  paddingTop: 'max(env(safe-area-inset-top), 10px)',
+  paddingBottom: 'max(env(safe-area-inset-bottom), 16px)',
+  paddingLeft: 'max(env(safe-area-inset-left), 20px)',
+  paddingRight: 'max(env(safe-area-inset-right), 20px)',
+};
+
+/**
+ * Keeps the page itself still while a touch drive is on screen: no
+ * pull-to-refresh, which would reload the page and lose the drive, and no
+ * rubber-band bounce. Restored by the same effect's cleanup, and put back by
+ * its next setup, so Strict Mode's replay leaves it as it found it.
+ */
+const useStillPage = (active: boolean) => {
+  useEffect(() => {
+    if (!active) return;
+    const targets = [document.documentElement, document.body];
+    const previous = targets.map(target => target.style.overscrollBehavior);
+    for (const target of targets) target.style.overscrollBehavior = 'none';
+    return () => {
+      targets.forEach((target, index) => {
+        target.style.overscrollBehavior = previous[index];
+      });
+    };
+  }, [active]);
+};
 
 const GameScreen = ({
   level,
@@ -89,6 +140,7 @@ const GameScreen = ({
   priorLogs,
   liveReroll,
 }: GameScreenProps) => {
+  const say = useText();
   // Levels carrying a garage stage start there; the road only opens once every
   // readiness point has been judged. A level carrying an `aftermath` stage adds
   // one at the far end, played once the route has been driven.
@@ -104,8 +156,16 @@ const GameScreen = ({
    * end the mission before the last four decisions had been made, so it waits
    * here and is re-totalled in `finishAftermath`.
    */
-  const pendingRef = useRef<{ result: LevelResult; telemetry: LevelFsmTelemetry } | null>(null);
+  const pendingRef = useRef<{ result: LevelResult; telemetry: LevelFsmTelemetry; play: PlayConditions } | null>(null);
   const keysRef = useRef<Set<string>>(new Set());
+  // The on-screen controls, shown by what the device is rather than by how
+  // wide it is. One instance per mounted drive, as the key set is.
+  const touch = useTouchDevice();
+  const [touchInput] = useState(() => new TouchInput());
+  const inputMode: InputMode = touch ? 'touch' : 'keys';
+  const portrait = usePortrait();
+  const [showFrameMeter] = useState(frameMeterRequested);
+  useStillPage(touch);
   /**
    * Seeds the order every question on this attempt shows its answers in.
    *
@@ -163,7 +223,7 @@ const GameScreen = ({
     violationsRef,
     correctRef,
     evaluateAction,
-  } = useScenarioEvaluation({ fsm, support });
+  } = useScenarioEvaluation({ fsm, support, say });
 
   /**
    * The route is finished. On a level with an aftermath stage the mission is
@@ -172,18 +232,23 @@ const GameScreen = ({
    * A run that ended in an impact skips it: the driver never arrived at the
    * scene under their own control, and asking them to work through a crash
    * response they did not reach would be inventing a stop that never happened.
+   * So does one whose time ran out, which never arrived at all.
    */
   const handleSimComplete = useCallback(
-    (result: LevelResult, telemetry: LevelFsmTelemetry) => {
-      if (level.aftermath && !result.crashReason) {
-        pendingRef.current = { result, telemetry };
+    (result: LevelResult, telemetry: LevelFsmTelemetry, play: PlayConditions) => {
+      if (level.aftermath && !result.crashReason && !result.timedOut) {
+        pendingRef.current = { result, telemetry, play };
         setStage('aftermath');
         return;
       }
-      onComplete(result, telemetry);
+      onComplete(result, telemetry, play);
     },
     [level.aftermath, onComplete]
   );
+
+  // The road is laid out for a device on its side. Held upright, the drive
+  // waits: the host stops advancing it, as it does for a hidden tab.
+  const mustRotate = touch && portrait && stage === 'driving';
 
   const {
     canvasRef,
@@ -195,12 +260,15 @@ const GameScreen = ({
     playRightOfWay,
     dismissAdaptationNotice,
     dismissBriefing,
+    frameStats,
   } = useDrivingSimulation({
     level,
     onComplete: handleSimComplete,
     fsm,
     keysRef,
     releaseHeldKeys,
+    touch: touchInput,
+    touchControls: touch,
     scoreRef,
     logsRef,
     tracesRef,
@@ -208,7 +276,7 @@ const GameScreen = ({
     violationsRef,
     correctRef,
     evaluateAction,
-    enabled: stage === 'driving',
+    enabled: stage === 'driving' && !mustRotate,
     initialDistance,
     priorLogs,
     support,
@@ -239,8 +307,11 @@ const GameScreen = ({
     parkingPlayed,
     rightOfWayPlayed,
     crashed,
+    drivingSecondsLeft,
+    panelSecondsLeft,
     crawlWarning,
     wrongSideWarning,
+    overLimitWarning,
     holdingForCorrection,
     weakCompetency,
   } = drive;
@@ -267,9 +338,14 @@ const GameScreen = ({
             minSpeed: merge.minSpeed,
             speed,
           }
-        : null
+        : null,
+      say
     );
-  }, [activeEvent, level.paint?.oncomingLanes, roadPosition, showsResponse, speed]);
+  }, [activeEvent, level.paint?.oncomingLanes, roadPosition, showsResponse, speed, say]);
+
+  // Route progress as precisely as the mission panel can show it,
+  // so the panel is not re-rendered for every frame of road.
+  const shownProgress = Math.floor(progress * 200) / 200;
 
   // Height-only: the slot is now the board's own width, so folding width into
   // the measurement would make the scale chase itself.
@@ -307,7 +383,8 @@ const GameScreen = ({
         logs: logsRef.current,
         signOutcomes: signOutcomesRef.current,
       }),
-      buildLevelFsmTelemetry(fsm.getTransitionLog(), logsRef.current, tracesRef.current, pending.telemetry.rerolls)
+      buildLevelFsmTelemetry(fsm.getTransitionLog(), logsRef.current, tracesRef.current, pending.telemetry.rerolls),
+      pending.play
     );
   }, [correctRef, fsm, level, logsRef, onComplete, scoreRef, signOutcomesRef, tracesRef, violationsRef]);
 
@@ -317,7 +394,7 @@ const GameScreen = ({
   // driving UI stays in the DOM where it could be selected or read out.
   if (stage === 'garage' && level.garage) {
     return (
-      <>
+      <InputModeContext.Provider value={inputMode}>
         <GarageStage
           garage={level.garage}
           levelName={level.name}
@@ -330,7 +407,7 @@ const GameScreen = ({
         <div className="fixed bottom-3 left-3 z-[60] flex w-[min(340px,calc(100vw-1.5rem))] flex-col gap-3">
           {feedbackCards}
         </div>
-      </>
+      </InputModeContext.Provider>
     );
   }
 
@@ -343,7 +420,7 @@ const GameScreen = ({
   // `CrashResponseStage` for what actually differs and why.
   if (stage === 'aftermath' && level.aftermath) {
     return (
-      <>
+      <InputModeContext.Provider value={inputMode}>
         <CrashResponseStage
           stage={level.aftermath}
           levelName={level.name}
@@ -356,7 +433,7 @@ const GameScreen = ({
         <div className="fixed bottom-3 left-3 z-[60] flex w-[min(340px,calc(100vw-1.5rem))] flex-col gap-3">
           {feedbackCards}
         </div>
-      </>
+      </InputModeContext.Provider>
     );
   }
 
@@ -405,14 +482,67 @@ const GameScreen = ({
     <MissionPanel
       level={level}
       score={score}
-      progress={progress}
+      progress={shownProgress}
       eventsCleared={roadDecisionCount}
       decisions={decisions}
     />
   );
 
+  // The scenario held in front of the player. On a touch screen it docks over
+  // the left column, which is empty while the drive is frozen, rather than
+  // over the road it describes; with a keyboard it docks along the bottom.
+  const scenarioBriefing = briefingEvent && !adaptationNotice && (
+    <ScenarioBriefing
+      event={briefingEvent}
+      level={level}
+      support={support}
+      onContinue={dismissBriefing}
+      placement={touch ? 'side' : 'bottom'}
+    />
+  );
+
+  // A frozen decision about something drawn on the road: a right-of-way call,
+  // or a parking technique.
+  const dockedDecision = roadCutsceneEvent ? (
+    <RoadDecision
+      event={roadCutsceneEvent}
+      onPlay={playRightOfWay}
+      played={rightOfWayPlayed}
+      onAnswer={answerCutscene}
+      choiceSeed={choiceSeed}
+      hintText={roadCutsceneEvent.competency === weakCompetency ? roadCutsceneEvent.lawCitation : undefined}
+      placement={touch ? 'side' : 'board'}
+    />
+  ) : parkingCutsceneEvent ? (
+    <ParkingDecision
+      event={parkingCutsceneEvent}
+      onPlay={playParking}
+      played={parkingPlayed}
+      onAnswer={answerCutscene}
+      choiceSeed={choiceSeed}
+      hintText={parkingCutsceneEvent.competency === weakCompetency ? parkingCutsceneEvent.lawCitation : undefined}
+      placement={touch ? 'side' : 'board'}
+    />
+  ) : null;
+
+  // Two layouts around one board. They differ in their wrappers' classes and
+  // in what is added beside the board, never in where the board sits among
+  // its siblings: a first touch can switch a drive to the touch layout while it
+  // runs, and a board that moved in the tree would remount its canvas under a
+  // frame loop still painting the old one.
   return (
-    <div className="fixed inset-0 overflow-y-auto bg-background lg:overflow-hidden">
+    <InputModeContext.Provider value={inputMode}>
+    <div
+      data-input={inputMode}
+      className={
+        touch
+          ? // Vertical panning only, for the columns that scroll: no pinch, no
+            // double-tap zoom, and nothing selectable under a resting thumb.
+            'fixed inset-0 touch-pan-y select-none overflow-hidden bg-background'
+          : 'fixed inset-0 overflow-y-auto bg-background lg:overflow-hidden'
+      }
+      style={touch ? TOUCH_SAFE_AREA : undefined}
+    >
       <style>{`
         @keyframes shake {
           0%,100%{transform:translateX(0)}
@@ -425,22 +555,53 @@ const GameScreen = ({
           0%,100%{box-shadow:0 0 8px rgba(240,201,41,.3)}
           50%{box-shadow:0 0 20px rgba(240,201,41,.6)}
         }
+        /* A blur over the canvas is re-computed every frame the road moves,
+           which a phone's GPU pays for in dropped frames. */
+        [data-input="touch"] [class*="backdrop-blur"] {
+          -webkit-backdrop-filter: none !important;
+          backdrop-filter: none !important;
+        }
       `}</style>
 
-      <div className="mx-auto flex min-h-full w-full max-w-[1440px] flex-col items-center justify-center gap-4 p-3 lg:h-full lg:flex-row lg:items-start lg:justify-center lg:gap-5 lg:p-4">
+      <div
+        className={
+          touch
+            ? 'mx-auto grid h-full w-full max-w-[1440px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 lg:gap-5'
+            : 'mx-auto flex min-h-full w-full max-w-[1440px] flex-col items-center justify-center gap-4 p-3 lg:h-full lg:flex-row lg:items-start lg:justify-center lg:gap-5 lg:p-4'
+        }
+      >
         {/* Coaching column: reserved at every width so the stage never shifts
             when a card appears. */}
         {/* Left column: the prompt sits at the top with feedback stacked under
             it, so everything the game is telling you is in one place and the
-            column is no longer empty most of the time. */}
-        <div className="order-2 flex w-full flex-col gap-2 lg:static lg:order-none lg:w-[340px] lg:shrink-0 lg:justify-start lg:self-stretch">
+            column is no longer empty most of the time. On a touch screen the
+            steering pad sits under them, at the left thumb. */}
+        <div
+          className={
+            touch
+              ? 'relative flex h-full min-h-0 flex-col justify-between gap-3'
+              : 'order-2 flex w-full flex-col gap-2 lg:static lg:order-none lg:w-[340px] lg:shrink-0 lg:justify-start lg:self-stretch'
+          }
+        >
           {/* Docked to the board at every width. On a phone the column sits
               between the canvas and the touch controls, which is the only place
               a driver can read it without taking their eyes off the road — it
               used to be pinned to the bottom of a scrolling page, several
               hundred pixels below the fold. */}
-          {roadPrompt}
-          {feedbackCards}
+          {touch ? (
+            <div className="flex min-h-0 w-full max-w-[380px] flex-1 flex-col gap-2 self-end overflow-y-auto overscroll-contain">
+              {roadPrompt}
+              {feedbackCards}
+            </div>
+          ) : (
+            <>
+              {roadPrompt}
+              {feedbackCards}
+            </>
+          )}
+          {touch && <SteeringPad input={touchInput} />}
+          {touch && scenarioBriefing}
+          {touch && dockedDecision}
         </div>
 
         {/* Stage slot: sized by the layout, never by its contents, so the scale
@@ -449,7 +610,11 @@ const GameScreen = ({
           ref={frameRef}
           // Pinned to the board's width rather than stretching, so the two side
           // columns sit next to the road instead of being pushed to the edges.
-          className="order-1 flex h-[62vh] w-full max-w-[480px] shrink-0 items-center justify-center lg:order-none lg:h-auto lg:w-[460px] lg:max-w-none lg:items-start lg:self-stretch"
+          className={
+            touch
+              ? 'flex h-full min-h-0 touch-none items-center justify-center'
+              : 'order-1 flex h-[62vh] w-full max-w-[480px] shrink-0 items-center justify-center lg:order-none lg:h-auto lg:w-[460px] lg:max-w-none lg:items-start lg:self-stretch'
+          }
         >
           <div
             className="relative shrink-0"
@@ -484,6 +649,7 @@ const GameScreen = ({
               <GameHUD
                 score={score}
                 speed={speed}
+                speedLimit={drive.speedLimit}
                 levelName={level.name}
                 levelId={level.id}
                 onExit={onExit}
@@ -492,14 +658,15 @@ const GameScreen = ({
                 requiredLanes={showsResponse ? requiredLanes : NO_LANES}
                 oncomingLanes={level.paint?.oncomingLanes ?? 0}
                 targetSpeed={targetSpeed}
+                secondsLeft={drivingSecondsLeft}
               />
 
               {/* Standing-penalty banners: the single on-screen cue for each of
-                  the two continuous infractions, whose deductions are otherwise
-                  silent. Stacked in one column so that crawling in the oncoming
-                  lane shows both without them overlapping. The warning always
-                  arrives before the deduction does. */}
-              {(wrongSideWarning || crawlWarning) && (
+                  the three continuous infractions, whose deductions are
+                  otherwise silent. Stacked in one column so that speeding in
+                  the oncoming lane shows both without them overlapping. The
+                  warning always arrives before the deduction does. */}
+              {(wrongSideWarning || crawlWarning || overLimitWarning) && (
                 <div className="pointer-events-none absolute inset-x-0 top-[86px] z-30 flex flex-col items-center gap-1.5">
                   {wrongSideWarning && (
                     <div
@@ -507,7 +674,7 @@ const GameScreen = ({
                       style={reducedMotion ? undefined : { animation: 'pulseGlow 1.5s ease-in-out infinite' }}
                     >
                       <p className="font-display text-[10px] font-black uppercase tracking-[0.16em] text-destructive">
-                        Wrong side — return to your lane
+                        {say(m.wrongSide)}
                       </p>
                     </div>
                   )}
@@ -517,7 +684,17 @@ const GameScreen = ({
                       style={reducedMotion ? undefined : { animation: 'pulseGlow 1.5s ease-in-out infinite' }}
                     >
                       <p className="font-display text-[10px] font-black uppercase tracking-[0.16em] text-road-yellow">
-                        Move off — you are holding up traffic
+                        {say(m.moveOff)}
+                      </p>
+                    </div>
+                  )}
+                  {overLimitWarning && (
+                    <div
+                      className="rounded-md border border-road-yellow/60 bg-background/90 px-3 py-1.5 backdrop-blur"
+                      style={reducedMotion ? undefined : { animation: 'pulseGlow 1.5s ease-in-out infinite' }}
+                    >
+                      <p className="font-display text-[10px] font-black uppercase tracking-[0.16em] text-road-yellow">
+                        {say(m.overLimit(level.speedLimit))}
                       </p>
                     </div>
                   )}
@@ -540,10 +717,10 @@ const GameScreen = ({
               <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-background/35 backdrop-blur-[1px]">
                 <div className="rounded-lg border border-destructive/50 bg-card/95 px-4 py-2.5 text-center shadow-xl">
                   <p className="font-display text-[13px] font-black uppercase tracking-[0.12em] text-destructive">
-                    Read the correction
+                    {say(m.readCorrection)}
                   </p>
                   <p className="mt-0.5 text-[12px] text-muted-foreground">
-                    Driving resumes in a moment
+                    {say(m.resumesMoment)}
                   </p>
                 </div>
               </div>
@@ -552,89 +729,37 @@ const GameScreen = ({
             {/* Docked over the frozen road rather than replacing it: the
                 junction and the other vehicle, or the car swinging into the
                 bay, are already drawn on this canvas in their real lanes, so
-                the question is about something the player can see. */}
-            {roadCutsceneEvent && (
-              <RoadDecision
-                event={roadCutsceneEvent}
-                onPlay={playRightOfWay}
-                played={rightOfWayPlayed}
-                onAnswer={answerCutscene}
-                choiceSeed={choiceSeed}
-                hintText={
-                  roadCutsceneEvent.competency === weakCompetency
-                    ? roadCutsceneEvent.lawCitation
-                    : undefined
-                }
-              />
-            )}
-
-            {parkingCutsceneEvent && (
-              <ParkingDecision
-                event={parkingCutsceneEvent}
-                onPlay={playParking}
-                played={parkingPlayed}
-                onAnswer={answerCutscene}
-                choiceSeed={choiceSeed}
-                hintText={
-                  parkingCutsceneEvent.competency === weakCompetency
-                    ? parkingCutsceneEvent.lawCitation
-                    : undefined
-                }
-              />
-            )}
+                the question is about something the player can see. On a touch
+                screen it is beside the road instead, in the left column. */}
+            {!touch && dockedDecision}
           </div>
         </div>
 
-        {/* Touch controls, under the board rather than over it.
-            Laid across the road they covered the one thing a merge or an exit
-            is about: the player's own car sits low and to the right, which is
-            exactly where a right-hand thumb pad goes. Below the board there is
-            room on a phone and nothing to hide. */}
-        <div className="order-3 flex w-full max-w-[480px] items-end justify-between gap-3 px-2 md:hidden">
-          <button
-            onTouchStart={() => keysRef.current.add('ArrowLeft')}
-            onTouchEnd={() => keysRef.current.delete('ArrowLeft')}
-            className="flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-card/90 text-xl backdrop-blur"
->
-            ←
-          </button>
-          <div className="flex gap-2">
-            <button
-              onTouchStart={() => keysRef.current.add('ArrowUp')}
-              onTouchEnd={() => keysRef.current.delete('ArrowUp')}
-              className="flex h-14 w-14 items-center justify-center rounded-xl border border-accent/40 bg-accent/20 text-xl backdrop-blur"
->
-              ↑
-            </button>
-            <button
-              onTouchStart={() => keysRef.current.add('ArrowDown')}
-              onTouchEnd={() => keysRef.current.delete('ArrowDown')}
-              className="flex h-14 w-14 items-center justify-center rounded-xl border border-destructive/40 bg-destructive/20 text-xl backdrop-blur"
->
-              ↓
-            </button>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onTouchStart={() => keysRef.current.add('h')}
-              onTouchEnd={() => keysRef.current.delete('h')}
-              className="flex h-14 w-14 items-center justify-center rounded-xl border border-road-yellow/40 bg-road-yellow/15 font-display text-sm font-black backdrop-blur"
->
-              HORN
-            </button>
-            <button
-              onTouchStart={() => keysRef.current.add('ArrowRight')}
-              onTouchEnd={() => keysRef.current.delete('ArrowRight')}
-              className="flex h-14 w-14 items-center justify-center rounded-xl border border-border bg-card/90 text-xl backdrop-blur"
-                  >
-                    →
-            </button>
-          </div>
-        </div>
-
-        {/* Right column is mission status only. */}
-        <aside className="hidden w-[340px] shrink-0 flex-col gap-3 overflow-y-auto lg:flex">
-          {sidePanel}
+        {/* Right column is mission status only. On a touch screen the pedals
+            and the horn sit under it, at the right thumb, and the status gives
+            way to them where the screen is too short for both. The pads live
+            beside the board, never on it: laid across the road they covered
+            the one thing a merge or an exit is about, the player's own car,
+            low and to the right. */}
+        <aside
+          className={
+            touch
+              ? 'flex h-full min-h-0 flex-col items-stretch justify-between gap-3'
+              : 'hidden w-[340px] shrink-0 flex-col gap-3 overflow-y-auto lg:flex'
+          }
+        >
+          {touch ? (
+            <div className="min-h-0 w-full max-w-[340px] flex-1 overflow-y-auto overscroll-contain [@media(max-height:560px)]:hidden">
+              {sidePanel}
+            </div>
+          ) : (
+            sidePanel
+          )}
+          {touch && (
+            <div className="mt-auto self-end">
+              <PedalPad input={touchInput} />
+            </div>
+          )}
         </aside>
 
         {/* Mission status on a phone, last: it is the reference you scroll to
@@ -642,26 +767,28 @@ const GameScreen = ({
             not repeated here — the coaching column above carries it at every
             width, and two copies of one instruction was the defect this
             redesign set out to remove. */}
-        <div className="order-4 flex w-full max-w-[480px] flex-col gap-3 lg:hidden">
-          {isAdmin ? (
-            <FSMDiagram
-              currentState={fsmState}
-              snapshot={snapshot}
-              previousState={prevFsmState}
-              transitionLabel={transitionLabel}
-              compact
-            />
-          ) : (
-            <MissionPanel
-              level={level}
-              score={score}
-              progress={progress}
-              eventsCleared={roadDecisionCount}
-              decisions={decisions}
-              compact
-            />
-          )}
-        </div>
+        {!touch && (
+          <div className="order-4 flex w-full max-w-[480px] flex-col gap-3 lg:hidden">
+            {isAdmin ? (
+              <FSMDiagram
+                currentState={fsmState}
+                snapshot={snapshot}
+                previousState={prevFsmState}
+                transitionLabel={transitionLabel}
+                compact
+              />
+            ) : (
+              <MissionPanel
+                level={level}
+                score={score}
+                progress={shownProgress}
+                eventsCleared={roadDecisionCount}
+                decisions={decisions}
+                compact
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* The adaptation notice freezes the drive and waits for an explicit
@@ -677,10 +804,9 @@ const GameScreen = ({
 
       {/* The scenario, read before it is driven. Below the adaptation notice on
           purpose: a route that has just changed under the player is the more
-          urgent thing to say, and both holds are released separately. */}
-      {briefingEvent && !adaptationNotice && (
-        <ScenarioBriefing event={briefingEvent} support={support} onContinue={dismissBriefing} />
-      )}
+          urgent thing to say, and both holds are released separately. On a
+          touch screen it is in the left column instead. */}
+      {!touch && scenarioBriefing}
 
       {inspectionEvent && (
         <CheckpointInspection
@@ -723,7 +849,28 @@ const GameScreen = ({
           </div>
         );
       })()}
+
+      {/* The time left on whichever panel is holding the drive, above all of
+          them: at 0 a briefing closes itself and a question goes unanswered
+. */}
+      {panelSecondsLeft !== null && (
+        <div className="pointer-events-none fixed inset-x-0 top-2 z-[95] flex justify-center">
+          <div
+            role="timer"
+            aria-label={say(panelClock(panelSecondsLeft, Boolean(inspectionEvent || cutsceneEvent)))}
+            className={`rounded-full border bg-card/95 px-3 py-1 font-display text-[11px] tracking-wider shadow-lg ${
+              panelSecondsLeft <= PANEL_WARNING_SECONDS ? 'border-road-yellow/70 text-road-yellow' : 'border-border text-muted-foreground'
+            }`}
+          >
+            {say(panelClock(panelSecondsLeft, Boolean(inspectionEvent || cutsceneEvent)))}
+          </div>
+        </div>
+      )}
+
+      {mustRotate && <RotateDevicePrompt />}
+      {showFrameMeter && <FrameMeter stats={frameStats} />}
     </div>
+    </InputModeContext.Provider>
   );
 };
 

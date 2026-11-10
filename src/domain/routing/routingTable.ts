@@ -1,7 +1,7 @@
 // The routing FSM's transition relation: a declarative table, and the two pure
 // functions every caller goes through.
 //
-// The table is the routing design's, row for row. Each row names the states it leaves,
+// The table is the design's, row for row. Each row names the states it leaves,
 // the verdict it fires on, the labels it could offer from a state, the guard
 // that decides which of them are legal under a context, and the state each
 // leads to. The target is computed from the state and the label alone, so the
@@ -96,7 +96,7 @@ const REVIEWS = ofKind('review');
 const frontierAfter = (state: DriveState): FrontierState =>
   state.level === LAST_COURSE_LEVEL ? FINAL_STATE : driveState((state.level + 1) as CourseLevel);
 
-/** The transition table. Rows are tried in this order, which is the order legal moves are listed in. */
+/** The design's transition table. Rows are tried in this order, which is the order legal moves are listed in. */
 export const ROUTING_TABLE: readonly RoutingRule[] = [
   rule({
     row: 'retry',

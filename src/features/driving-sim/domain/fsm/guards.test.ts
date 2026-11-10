@@ -186,6 +186,8 @@ describe('theta is bounded and cannot corrupt the machine', () => {
 describe('safety-critical transitions are never gated', () => {
   it.each([
     ['DRIVING', 'crash'],
+    ['DRIVING', 'time_up'],
+    ['IDLE', 'time_up'],
     ['DRIVING', 'level_end'],
     ['DRIVING', 'vehicle_stopped'],
     ['REACTION_WINDOW', 'answer_incorrect'],
@@ -209,6 +211,15 @@ describe('safety-critical transitions are never gated', () => {
     expect(fsm.transition('red_light')).toBe(false); // guard correctly declines
     expect(fsm.transition('crash')).toBe(true);      // safety edge still fires
     expect(fsm.getState()).toBe('GAME_OVER');
+  });
+
+  it('time_up leaves every state crash leaves, and only those', () => {
+    const table = new DrivingFSM().getTransitionTable();
+    const fromStates = (trigger: string) =>
+      table.filter(t => t.trigger === trigger).map(t => `${t.from}->${t.to}`).sort();
+    expect(fromStates('time_up')).toEqual(fromStates('crash'));
+    expect(fromStates('time_up')).toHaveLength(10);
+    expect(table.filter(t => t.trigger === 'time_up').every(t => !t.condition)).toBe(true);
   });
 });
 

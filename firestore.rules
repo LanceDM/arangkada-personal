@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Firestore security rules for Arangkada.
+// Firestore security rules for Arangkada .
 //
 // Schema - the TypeScript types named are the authoritative shapes:
 //   users/{uid}                                    UserProfile (features/auth)
@@ -9,24 +9,47 @@ rules_version = '2';
 //   users/{uid}/attempts/{id}/telemetry/fsm        FsmTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/decisions  DecisionTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/routing    RoutingTelemetryDoc
-//   users/{uid}/routing/assignment                 the pilot group the developers assigned
+//   users/{uid}/routing/assignment                 the pilot group an admin assigned
 //   users/{uid}/routing/cursor                     StoredRoutingCursor
 //   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
 //   users/{uid}/dailyStreak/summary                DailyStreakSummary
 //   users/{uid}/dailyAttempts/{id}                 DailyAttempt, append-only
+//   users/{uid}/quizSittings/{id}                  QuizSittingDoc, append-only
+//   users/{uid}/testStatus/{kind}                  TestStatusDoc, a participant's pre/post test
+//   users/{uid}/testDrafts/{kind}                  the answers in progress, with server times
+//   users/{uid}/testSittings/{kind}                TestSitting, its record, written once
+//   users/{uid}/study/enrolment                    EnrolmentDoc, the account's participant code
+//   users/{uid}/study/consent, background, device, survey
+//                                                  ConsentMarker, BackgroundDoc, DeviceCheckDoc, SurveyDoc
+//   consents/{uid}                                 ConsentDoc: name, typed signature, age; admin-read only
 //   exam_questions/{id}                            RemoteExamQuestion, shared content
+//   quiz_items/{itemId}                            QuizItemDoc, the Short Quiz bank
+//   quiz_modules/{moduleId}                        QuizModuleDoc, a module's sitting and pass mark
+//   test_designs/post                              TwoStageDesign, the post-test's frozen design
+//   irt_reports/current                            IrtReportDoc, the Rasch analysis; admin-read only
+//   item_reviews/{tagging|experts}                 the test items' content-validity ratings
+//   study_invites/{invite}                         StudyInviteDoc, an invite and its cohort
+//   study_counters/{cohort}                        StudyCounterDoc, the cohort's next enrolment
+//   participants/{code}                            ParticipantDoc, the study's registry
 //
 // Who:
 //   - A player reads and writes only their own users/{uid} tree, and can delete
 //     nothing in it. Records are append-only. Their pilot group
 //     (routing/assignment) they read and never write: the developers assign it
-//     with the service account.
+//     with the service account. Their pre/post test record (testSittings)
+//     they write once and never read back.
 //   - An admin is the custom claim `admin: true` on the sign-in token, set by
-//     the developers with the service account. It is never a document field:
+//     the developers with a developers' script It is never a document field:
 //     a `role` on a profile is a legacy label that no rule and no screen
 //     trusts, and no player write can change it.
 //   - An admin reads every player's data (the report's collection-group
-//     queries included) and writes only the exam question bank.
+//     queries included) and writes no player data: only the exam question
+//     bank, the Short Quiz bank, and the study's invites. Only an admin reads
+//     a consent record, the one place a participant's name and age are.
+//   - A study participant is an account whose sign-in identity is
+//     on the study's reserved domain. It enrols itself once, with an open
+//     invite, taking its cohort's next code, which every study record then
+//     names it by.
 //
 // What these rules cannot do: check that a number is true. Every score, streak
 // and attempt is computed in the browser, so the rules decide who may write
@@ -38,8 +61,7 @@ rules_version = '2';
 // key, so an additive payload change - how these shapes have always evolved -
 // never makes a save fail and lose the record.
 //
-// The developers test these rules on the Firestore emulator before a change
-// to a path or a payload ships.
+// Tests: a developers' script, run by `npm run test:rules`.
 //
 // Legacy collections (fsm_sessions, exam_results, daily_results, and the
 // `progress`/`daily` fields still embedded in old users/{uid} docs) are
@@ -69,7 +91,7 @@ service cloud.firestore {
     // ── Shapes ─────────────────────────────────────────────
 
     function profileKeys() {
-      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore'];
+      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore', 'language'];
     }
 
     // Checks only the keys a write sets, so a field an old profile already
@@ -80,7 +102,9 @@ service cloud.firestore {
         && (!keys.hasAny(['createdAt']) || data.createdAt is number)
         && (!keys.hasAny(['totalScore']) || isCount(data.totalScore))
         && (!keys.hasAny(['longestStreak']) || isCount(data.longestStreak))
-        && (!keys.hasAny(['bestExamScore']) || isCount(data.bestExamScore));
+        && (!keys.hasAny(['bestExamScore']) || isCount(data.bestExamScore))
+        // The language the account chose.
+        && (!keys.hasAny(['language']) || data.language in ['en', 'fil']);
     }
 
     function isProgressSummary(data) {
@@ -99,7 +123,11 @@ service cloud.firestore {
         && isCount(data.correctDecisions)
         && data.logs is list
         && (!data.keys().hasAny(['fsmMetrics']) || data.fsmMetrics is map)
-        && (!data.keys().hasAny(['reactionLatencies']) || data.reactionLatencies is list);
+        && (!data.keys().hasAny(['reactionLatencies']) || data.reactionLatencies is list)
+        // Written only when the run's driving time ran out.
+        && (!data.keys().hasAny(['timedOut']) || data.timedOut == true)
+        // The language the player had chosen when the attempt began.
+        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil']);
     }
 
     function isFsmTelemetry(data) {
@@ -176,6 +204,11 @@ service cloud.firestore {
         && data.updatedAt is number;
     }
 
+    // At most a nickname, or none: never a full name or anything longer.
+    function isNickname(value) {
+      return value == null || (value is string && value.size() >= 1 && value.size() <= 40);
+    }
+
     function isDailyAttempt(data) {
       return data.keys().hasAll(['date', 'scenarioId', 'selectedIndex', 'correct', 'timestamp'])
         && data.date is string
@@ -183,6 +216,460 @@ service cloud.firestore {
         && data.selectedIndex is int && data.selectedIndex >= 0
         && data.correct is bool
         && data.timestamp is number;
+    }
+
+    // The Short Quiz bank. An item is checked whole on every write,
+    // because the game plays exactly what is stored and nothing bundled
+    // stands behind it. The limits are the editor's (quizBank.ts).
+    function competencies() {
+      return [
+        'driver_legality', 'document_awareness', 'traffic_signals', 'road_signs',
+        'right_of_way', 'pedestrians', 'speed_control', 'lane_discipline',
+        'hazard_awareness', 'parking', 'general_rules'
+      ];
+    }
+
+    function isText(value, max) {
+      return value is string && value.size() > 0 && value.size() <= max;
+    }
+
+    // An item's Filipino: choices in the English's order, so one answer key.
+    function isQuizItemFilipino(fil, options) {
+      return fil is map
+        && fil.question is string && fil.question.size() <= 450
+        && fil.options is list && fil.options.size() == options.size()
+        && fil.options[0] is string && fil.options[0].size() <= 240
+        && fil.options[1] is string && fil.options[1].size() <= 240
+        && (fil.options.size() < 3 || (fil.options[2] is string && fil.options[2].size() <= 240))
+        && (fil.options.size() < 4 || (fil.options[3] is string && fil.options[3].size() <= 240))
+        && fil.explanation is string && fil.explanation.size() <= 900
+        && fil.status in ['draft', 'reviewed']
+        && fil.sourceText is string;
+    }
+
+    function isQuizOptions(options) {
+      return options is list && options.size() >= 2 && options.size() <= 4
+        && isText(options[0], 160) && isText(options[1], 160)
+        && (options.size() < 3 || isText(options[2], 160))
+        && (options.size() < 4 || isText(options[3], 160))
+        && options.toSet().size() == options.size();
+    }
+
+    // Stamped with the admin who wrote it, whoever that is.
+    function isQuizItem(data, itemId) {
+      return data.keys().hasAll([
+          'schemaVersion', 'id', 'moduleId', 'question', 'options', 'correctIndex',
+          'explanation', 'image', 'competency', 'source', 'use', 'isActive', 'order',
+          'revision', 'createdAt', 'updatedAt', 'updatedBy'
+        ])
+        && data.schemaVersion == 1
+        && data.id == itemId
+        && isText(data.moduleId, 40)
+        && isText(data.question, 300)
+        && isQuizOptions(data.options)
+        && data.correctIndex is int && data.correctIndex >= 0 && data.correctIndex < data.options.size()
+        && data.explanation is string && data.explanation.size() <= 600
+        // A picture is one of the curriculum's own files, never a link elsewhere.
+        && data.image is string && (data.image == '' || data.image.matches('^/arangkada_extracted_images/.+'))
+        && data.competency in competencies()
+        && isText(data.source, 200)
+        && data.use in ['quiz', 'test']
+        && data.isActive is bool
+        && data.order is int && data.order >= 0
+        && (!data.keys().hasAny(['fil']) || isQuizItemFilipino(data.fil, data.options))
+        && data.revision is int
+        && data.createdAt is number
+        && data.updatedAt is number
+        && data.updatedBy == request.auth.uid;
+    }
+
+    function isQuizModule(data, moduleId) {
+      return data.keys().hasAll([
+          'schemaVersion', 'moduleId', 'hasQuiz', 'itemsPerSitting', 'passingScore',
+          'revision', 'updatedAt', 'updatedBy'
+        ])
+        && data.schemaVersion == 1
+        && data.moduleId == moduleId
+        && data.hasQuiz is bool
+        && data.itemsPerSitting is int && data.itemsPerSitting >= 1
+        && data.passingScore is int && data.passingScore >= 1 && data.passingScore <= data.itemsPerSitting
+        && data.revision is int
+        && data.updatedAt is number
+        && data.updatedBy == request.auth.uid;
+    }
+
+    // A review sheet of the test items: raters by label
+    // only (R1, R2 for the tagging; E1-E10 for the experts), never a name, one
+    // row per item, written whole by an admin.
+    function isItemReview(data, kind) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'raters', 'rows', 'revision', 'updatedAt', 'updatedBy'])
+        && data.schemaVersion == 1
+        && data.kind == kind
+        && data.raters is list
+        && ((kind == 'tagging' && data.raters.size() == 2)
+          || (kind == 'experts' && data.raters.size() >= 3 && data.raters.size() <= 10))
+        && data.rows is list && data.rows.size() >= 1 && data.rows.size() <= 100
+        && data.revision is int
+        && data.updatedAt is number
+        && data.updatedBy == request.auth.uid;
+    }
+
+    // A new document starts at revision 1; every edit is exactly the next one,
+    // so a save made over a copy someone else has since changed is refused
+    // instead of overwriting it.
+    function isFirstRevision() {
+      return request.resource.data.revision == 1;
+    }
+
+    function isNextRevision() {
+      return request.resource.data.revision == resource.data.revision + 1;
+    }
+
+    function isQuizSitting(data) {
+      return data.keys().hasAll([
+          'schemaVersion', 'moduleId', 'levelId', 'seed', 'answers', 'score',
+          'itemsPerSitting', 'passingScore', 'passed', 'timedOut', 'startedAt', 'finishedAt'
+        ])
+        && data.schemaVersion == 1
+        && data.moduleId is string
+        && data.levelId is int && data.levelId >= 0
+        && data.seed is number
+        && data.answers is list
+        && isCount(data.score)
+        && isCount(data.itemsPerSitting)
+        && isCount(data.passingScore)
+        && data.passed is bool
+        && data.timedOut is bool
+        && data.startedAt is number
+        && data.finishedAt is number
+        // The language chosen when the sitting began.
+        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil']);
+    }
+
+    // The pre-test and post-test. Only a participant sits
+    // one: an account the study's registry names under this code.
+    // The status is opened before the first item is read, and finished in the
+    // same write that saves the record, once. With no Cloud Functions the
+    // browser scores the answers, so these rules hold the shape and the order
+    // of events, never whether an answer was right.
+    function isOwnParticipantCode(code) {
+      let entry = /databases/$(database)/documents/participants/$(code);
+      return code is string && exists(entry)
+        && get(entry).data.uid == request.auth.uid
+        && get(entry).data.withdrawal == null;
+    }
+
+    // The study's order before the pre-test: consent
+    // given, the background form answered and the device checked.
+    function hasStudyStepsBeforePreTest() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)/study/consent)
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/study/background)
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/study/device);
+    }
+
+    function isOpenTestStatus(data, kind) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'playerCode', 'seed', 'openedAt', 'status', 'finishedAt'])
+        && data.schemaVersion == 1
+        && kind in ['pre', 'post']
+        && data.kind == kind
+        && data.seed is int
+        && data.openedAt is number
+        && data.startedAt == request.time
+        && data.status == 'open'
+        && data.finishedAt == null
+        && (kind == 'pre' || isOpenPostTest(data));
+    }
+
+    // The post-test (amendment 3) opens only once its participant's pre-test
+    // is saved and the frozen design is published, and names that design. It
+    // starts on the routing block.
+    function isOpenPostTest(data) {
+      let pre = /databases/$(database)/documents/users/$(request.auth.uid)/testStatus/pre;
+      let design = /databases/$(database)/documents/test_designs/post;
+      return data.keys().hasAll(['designId', 'stage', 'block', 'stage2At', 'stage2StartedAt'])
+        && exists(pre) && get(pre).data.status == 'finished'
+        && exists(design) && data.designId == get(design).data.designId
+        && data.stage == 'routing'
+        && data.block == null
+        && data.stage2At == null
+        && data.stage2StartedAt == null;
+    }
+
+    // The routing block closes once, when all of it is answered or its clock has
+    // run out: the status names the block the browser routed to, and only then
+    // are that block's items readable. The block is held to the routing score
+    // and the design's cut points when the record is saved (isRoutedAsRecorded).
+    function isStage2Entry(uid, next, now) {
+      let draft = /databases/$(database)/documents/users/$(uid)/testDrafts/post;
+      let design = /databases/$(database)/documents/test_designs/post;
+      return now.kind == 'post'
+        && now.stage == 'routing'
+        && next.diff(now).affectedKeys().hasOnly(['stage', 'block', 'stage2At'])
+        && next.stage == 'stage2'
+        && next.block in ['easy', 'medium', 'hard']
+        && next.stage2At == request.time
+        && (request.time >= now.startedAt + duration.value(900, 's')
+          || (exists(draft) && get(draft).data.answers.keys().hasAll(get(design).data.routing)));
+    }
+
+    // Part 2's clock starts once, when the participant starts it.
+    function isStage2Start(next, now) {
+      return now.kind == 'post'
+        && now.stage == 'stage2'
+        && now.stage2StartedAt == null
+        && next.diff(now).affectedKeys().hasOnly(['stage2StartedAt'])
+        && next.stage2StartedAt == request.time;
+    }
+
+    // The answers in progress (amendment 5). They hold the choice picked and the
+    // server time it arrived, never whether it was right. The draft is created
+    // beside the status it belongs to, with that status's seed.
+    function isNewTestDraft(uid, data, kind) {
+      let status = getAfter(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data;
+      return data.keys().hasAll(['schemaVersion', 'kind', 'seed', 'answers', 'lastItem', 'syncAt'])
+        && data.schemaVersion == 1
+        && kind in ['pre', 'post']
+        && data.kind == kind
+        && data.answers == {}
+        && data.lastItem == null
+        && data.syncAt == request.time
+        && status.status == 'open'
+        && status.seed == data.seed;
+    }
+
+    // Forward only, by the server's clock: one new answer, stamped by the server,
+    // with every earlier one left as it was, to an item of the part on screen,
+    // inside that part's limit. The limit is the deadline plus a few seconds for
+    // a save already on its way (ANSWER_GRACE_SECONDS, sittingClock.ts).
+    function isNextAnswer(uid, next, now, kind) {
+      let status = get(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data;
+      let added = next.answers.diff(now.answers);
+      let answer = next.answers[next.lastItem];
+      return next.diff(now).affectedKeys().hasOnly(['answers', 'lastItem'])
+        && next.lastItem is string
+        && added.affectedKeys() == [next.lastItem].toSet()
+        && added.addedKeys() == [next.lastItem].toSet()
+        && answer.keys().hasOnly(['chosen', 'at'])
+        && answer.chosen is int && answer.chosen >= 0
+        && answer.at == request.time
+        && status.status == 'open'
+        && ((kind == 'pre' && request.time <= status.startedAt + duration.value(3610, 's'))
+          || (kind == 'post' && isInOpenPart(next.lastItem, status)));
+    }
+
+    function isInOpenPart(itemId, status) {
+      let design = get(/databases/$(database)/documents/test_designs/post).data;
+      return (status.stage == 'routing'
+          && itemId in design.routing
+          && request.time <= status.startedAt + duration.value(910, 's'))
+        || (status.stage == 'stage2'
+          && status.stage2StartedAt != null
+          && itemId in design[status.block]
+          && request.time <= status.stage2StartedAt + duration.value(910, 's'));
+    }
+
+    // A post-test record names its status's design and block, the design's cut
+    // points, and the block those cut points give its routing score. Whether
+    // the score is the routing block's number correct the browser decides,
+    // and the export checks (testSittingProblems).
+    function isRoutedAsRecorded(uid, data) {
+      let status = get(/databases/$(database)/documents/users/$(uid)/testStatus/post).data;
+      let cuts = get(/databases/$(database)/documents/test_designs/post).data.cuts;
+      let r = data.routing;
+      return status.stage == 'stage2'
+        && data.designId == status.designId
+        && r.keys().hasAll(['score', 'cuts', 'block'])
+        && r.score is int
+        && r.cuts == cuts
+        && r.block == status.block
+        && ((r.score < cuts[0] && r.block == 'easy')
+          || (r.score >= cuts[0] && r.score < cuts[1] && r.block == 'medium')
+          || (r.score >= cuts[1] && r.block == 'hard'));
+    }
+
+    function isTestSitting(data, kind) {
+      return data.keys().hasAll([
+          'schemaVersion', 'sittingId', 'playerCode', 'kind', 'seed', 'startedAt', 'finishedAt',
+          'designId', 'routing', 'responses'
+        ])
+        && data.schemaVersion == 1
+        && data.kind == kind
+        && data.sittingId is string
+        && data.seed is int
+        && data.startedAt is number
+        && data.finishedAt is number && data.finishedAt >= data.startedAt
+        && data.responses is list && data.responses.size() > 0
+        && ((kind == 'pre' && data.designId == null && data.routing == null)
+          || (kind == 'post' && data.designId is string && data.routing is map));
+    }
+
+    // While their pre-test is open, and only then, a participant reads the
+    // test items: not before it, and never again once it is finished.
+    function hasOpenPreTest() {
+      let pre = /databases/$(database)/documents/users/$(request.auth.uid)/testStatus/pre;
+      return isSignedIn() && exists(pre) && get(pre).data.status == 'open';
+    }
+
+    // While their post-test is open, a participant reads one item at a time:
+    // the routing block's, then only the routed block's, once the routing
+    // block has closed. A list is never proved, so it is refused.
+    function canReadPostTestItem(itemId) {
+      let status = /databases/$(database)/documents/users/$(request.auth.uid)/testStatus/post;
+      let design = /databases/$(database)/documents/test_designs/post;
+      return isSignedIn() && exists(status) && get(status).data.status == 'open' && exists(design)
+        && (itemId in get(design).data.routing
+          || (get(status).data.stage == 'stage2' && itemId in get(design).data[get(status).data.block]));
+    }
+
+    // ── The study's registry ─────────────────────
+    // A study account signs in as <username>@study.arangkada.invalid
+    // (features/auth/domain/studyIdentity.ts): only such an account enrols.
+    function isStudyAccount() {
+      return isSignedIn()
+        && request.auth.token.get('email', '') is string
+        && request.auth.token.get('email', '').matches('^[a-z][a-z0-9_]{3,19}@study[.]arangkada[.]invalid$');
+    }
+
+    function isCohort(value) {
+      return value in ['study', 'dryrun', 'test'];
+    }
+
+    // The code a cohort's n-th enrolment takes: its letter and n padded to
+    // four digits (src/domain/study/participantCode.ts).
+    function participantCodeOf(cohort, n) {
+      let letter = cohort == 'study' ? 'P' : (cohort == 'dryrun' ? 'D' : 'T');
+      let pad = n < 10 ? '000' : (n < 100 ? '00' : (n < 1000 ? '0' : ''));
+      return letter + '-' + pad + string(n);
+    }
+
+    function counterPath(cohort) {
+      return /databases/$(database)/documents/study_counters/$(cohort);
+    }
+
+    // The number the cohort's next enrolment takes, before this write.
+    function nextEnrolment(cohort) {
+      return exists(counterPath(cohort)) ? get(counterPath(cohort)).data.next : 1;
+    }
+
+    function enrolmentPath(uid) {
+      return /databases/$(database)/documents/users/$(uid)/study/enrolment;
+    }
+
+    // One enrolment, checked whole from either of its records: the account is
+    // a study account enrolling itself once, with an open invite of the
+    // cohort; it takes the cohort's next code; the counter moves on by one;
+    // and both records name each other. With no Cloud Functions, these rules
+    // are what keep two players from one code and a script from its choice.
+    function isEnrolment(code, data) {
+      let invite = /databases/$(database)/documents/study_invites/$(data.invite);
+      let n = nextEnrolment(data.cohort);
+      return isStudyAccount()
+        && data.keys().hasOnly(['schemaVersion', 'code', 'uid', 'cohort', 'invite', 'enrolledAt', 'withdrawal'])
+        && data.keys().hasAll(['schemaVersion', 'code', 'uid', 'cohort', 'invite', 'enrolledAt', 'withdrawal'])
+        && data.schemaVersion == 1
+        && data.uid == request.auth.uid
+        && isCohort(data.cohort)
+        && data.invite is string && exists(invite)
+        && get(invite).data.open == true
+        && get(invite).data.cohort == data.cohort
+        && n is int && n >= 1 && n <= 9999
+        && data.code == code
+        && code == participantCodeOf(data.cohort, n)
+        && data.enrolledAt is number
+        && data.withdrawal == null
+        && getAfter(counterPath(data.cohort)).data.next == n + 1
+        && !exists(enrolmentPath(request.auth.uid))
+        && getAfter(enrolmentPath(request.auth.uid)).data.code == code;
+    }
+
+    function isEnrolmentRecord(data) {
+      return data.keys().hasOnly(['schemaVersion', 'code', 'cohort', 'enrolledAt'])
+        && data.keys().hasAll(['schemaVersion', 'code', 'cohort', 'enrolledAt'])
+        && data.schemaVersion == 1
+        && data.code is string
+        && isCohort(data.cohort)
+        && data.enrolledAt is number;
+    }
+
+    // An enrolled participant who has not withdrawn.
+    function isActiveParticipant(uid) {
+      let enrolment = enrolmentPath(uid);
+      return exists(enrolment)
+        && get(/databases/$(database)/documents/participants/$(get(enrolment).data.code)).data.withdrawal == null;
+    }
+
+    // The band of an age, as src/domain/study/consentRecords.ts gives it.
+    function ageBandOf(age) {
+      return age < 25 ? '18-24' : (age < 35 ? '25-34' : (age < 45 ? '35-44' : (age < 55 ? '45-54' : '55+')));
+    }
+
+    function isBackground(data) {
+      return data.keys().hasOnly(['schemaVersion', 'gaming', 'device', 'answeredAt'])
+        && data.keys().hasAll(['schemaVersion', 'gaming', 'device', 'answeredAt'])
+        && data.schemaVersion == 1
+        && data.gaming in ['never', 'less-than-monthly', 'monthly', 'weekly', 'daily']
+        && data.device in ['phone', 'tablet', 'laptop', 'desktop']
+        && data.answeredAt is number;
+    }
+
+    function isConsentMarker(data) {
+      return data.keys().hasOnly(['schemaVersion', 'consentVersion', 'consentLanguage', 'variant', 'ageBand', 'agreedAt'])
+        && data.keys().hasAll(['schemaVersion', 'consentVersion', 'consentLanguage', 'variant', 'ageBand', 'agreedAt'])
+        && data.schemaVersion == 1
+        && data.consentVersion is string && data.consentVersion.size() <= 64
+        // The language the consent text was shown in.
+        && data.consentLanguage in ['en', 'fil']
+        && data.variant == 'adult'
+        && data.agreedAt is number;
+    }
+
+    // An adult's consent: 18 and over until the adviser rules on a guardian's
+    //; the `guardian` variant is refused until then.
+    function isConsentRecord(uid, data) {
+      return data.keys().hasOnly(['schemaVersion', 'consentVersion', 'consentLanguage', 'variant', 'participantCode', 'fullName', 'typedSignature', 'age', 'guardian', 'agreedAt', 'username'])
+        && data.keys().hasAll(['schemaVersion', 'consentVersion', 'consentLanguage', 'variant', 'participantCode', 'fullName', 'typedSignature', 'age', 'guardian', 'agreedAt'])
+        && data.schemaVersion == 1
+        && data.consentVersion is string && data.consentVersion.size() <= 64
+        && data.consentLanguage in ['en', 'fil']
+        && data.variant == 'adult'
+        && data.guardian == null
+        && data.participantCode == get(enrolmentPath(uid)).data.code
+        && data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100
+        && data.typedSignature is string && data.typedSignature.size() >= 2 && data.typedSignature.size() <= 100
+        && data.age is int && data.age >= 18 && data.age <= 100
+        && data.agreedAt is number
+        // The account's own username, for the team to help a participant who
+        // has lost their password: never another account's.
+        && (!('username' in data) || request.auth.token.email == data.username + '@study.arangkada.invalid');
+    }
+
+    function isDeviceCheck(data) {
+      return data.keys().hasAll(['schemaVersion', 'touch', 'landscape', 'viewport', 'medianFps', 'slow', 'controls', 'checkedAt'])
+        && data.schemaVersion == 1
+        && data.touch is bool
+        && data.landscape is bool
+        && data.viewport is map
+        && data.medianFps is number
+        && data.slow is bool
+        && data.controls is map
+        && data.checkedAt is number;
+    }
+
+    function isOpenedSurvey(data) {
+      return data.keys().hasOnly(['schemaVersion', 'openedAt', 'confirmedAt'])
+        && data.keys().hasAll(['schemaVersion', 'openedAt', 'confirmedAt'])
+        && data.schemaVersion == 1
+        && data.openedAt is number
+        && data.confirmedAt == null;
+    }
+
+    function isStudyInvite(data) {
+      return data.keys().hasOnly(['schemaVersion', 'cohort', 'open', 'createdAt', 'closedAt'])
+        && data.keys().hasAll(['schemaVersion', 'cohort', 'open', 'createdAt', 'closedAt'])
+        && data.schemaVersion == 1
+        && isCohort(data.cohort)
+        && data.open is bool
+        && data.createdAt is number;
     }
 
     // ── users/{uid} ────────────────────────────────────────
@@ -232,9 +719,9 @@ service cloud.firestore {
         }
       }
 
-      // The routing FSM in the game. The assignment is written by the
-      // developers alone, with the service account, which these rules do not
-      // govern: no
+      // The routing FSM in the game. The assignment is written by
+      // the developers alone, with the service account
+      // (a developers' script), which these rules do not govern: no
       // client writes it, so no player can choose their own group, and an
       // admin writes no player data. The cursor is the player's place in the
       // course, rewritten as they play.
@@ -246,7 +733,8 @@ service cloud.firestore {
 
       match /examAttempts/{attemptId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isExamAttempt(request.resource.data);
+        // A study participant plays no Mock Exam.
+        allow create: if isOwner(uid) && isExamAttempt(request.resource.data) && !isStudyAccount();
         allow update, delete: if false;
       }
 
@@ -258,8 +746,113 @@ service cloud.firestore {
 
       match /dailyAttempts/{attemptId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isDailyAttempt(request.resource.data);
+        // A study participant plays no Daily Challenge.
+        allow create: if isOwner(uid) && isDailyAttempt(request.resource.data) && !isStudyAccount();
         allow update, delete: if false;
+      }
+
+      // One finished Short Quiz sitting: which items and revisions it showed,
+      // and how each was answered.
+      match /quizSittings/{sittingId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isQuizSitting(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      // Holds no answer, so its participant reads it: the seed their sitting
+      // is drawn from, and whether it is open.
+      match /testStatus/{kind} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid)
+          && isOpenTestStatus(request.resource.data, kind)
+          && isOwnParticipantCode(request.resource.data.playerCode)
+          && hasStudyStepsBeforePreTest();
+        allow update: if isOwner(uid)
+          && resource.data.status == 'open'
+          && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'finishedAt'])
+              && request.resource.data.status == 'finished'
+              && request.resource.data.finishedAt is number
+              && (kind == 'pre' || resource.data.stage == 'stage2')
+              && !exists(/databases/$(database)/documents/users/$(uid)/testSittings/$(kind))
+              && existsAfter(/databases/$(database)/documents/users/$(uid)/testSittings/$(kind)))
+            || isStage2Entry(uid, request.resource.data, resource.data)
+            || isStage2Start(request.resource.data, resource.data));
+        allow delete: if false;
+      }
+
+      // The answers in progress, so they follow their participant to another
+      // device (amendment 5). Readable by them only while the sitting is open,
+      // and they carry no right or wrong. `syncAt` is how a device asks the
+      // server's time. Nothing deletes a draft; the export checks the record
+      // against it.
+      match /testDrafts/{kind} {
+        allow read: if isAdmin() || (isOwner(uid)
+          && exists(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind))
+          && get(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data.status == 'open');
+        allow create: if isOwner(uid) && isNewTestDraft(uid, request.resource.data, kind);
+        allow update: if isOwner(uid)
+          && (isNextAnswer(uid, request.resource.data, resource.data, kind)
+            || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['syncAt'])
+              && request.resource.data.syncAt == request.time));
+        allow delete: if false;
+      }
+
+      // The record, which its participant writes and never reads back: which
+      // items they got wrong stays out of reach between the two sittings.
+      match /testSittings/{kind} {
+        allow read: if isAdmin();
+        allow create: if isOwner(uid)
+          && isTestSitting(request.resource.data, kind)
+          && get(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data.status == 'open'
+          && getAfter(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data.status == 'finished'
+          && getAfter(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data.finishedAt == request.resource.data.finishedAt
+          && request.resource.data.playerCode == get(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data.playerCode
+          && request.resource.data.seed == get(/databases/$(database)/documents/users/$(uid)/testStatus/$(kind)).data.seed
+          && (kind == 'pre' || isRoutedAsRecorded(uid, request.resource.data));
+        allow update, delete: if false;
+      }
+
+      // The account's own pointer to its participant code, written
+      // once, in the write that enrols it, which checks both records.
+      // The participant's steps in the study's order (amendment 1), each
+      // written once and only after the one before it: consent (whose
+      // record, with the name, is the admin-only `consents/{uid}`), the
+      // device check, and the survey once the post-test is finished.
+      match /study/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid)
+          && ((docId == 'enrolment'
+              && isEnrolmentRecord(request.resource.data)
+              && getAfter(/databases/$(database)/documents/participants/$(request.resource.data.code)).data.uid == uid
+              && getAfter(/databases/$(database)/documents/participants/$(request.resource.data.code)).data.cohort == request.resource.data.cohort
+              && !exists(/databases/$(database)/documents/participants/$(request.resource.data.code)))
+            || (docId == 'consent'
+              && isConsentMarker(request.resource.data)
+              && isActiveParticipant(uid)
+              && existsAfter(/databases/$(database)/documents/consents/$(uid))
+              && getAfter(/databases/$(database)/documents/consents/$(uid)).data.agreedAt == request.resource.data.agreedAt
+              && getAfter(/databases/$(database)/documents/consents/$(uid)).data.consentLanguage == request.resource.data.consentLanguage
+              && request.resource.data.ageBand == ageBandOf(getAfter(/databases/$(database)/documents/consents/$(uid)).data.age))
+            || (docId == 'background'
+              && isBackground(request.resource.data)
+              && isActiveParticipant(uid)
+              && exists(/databases/$(database)/documents/users/$(uid)/study/consent))
+            || (docId == 'device'
+              && isDeviceCheck(request.resource.data)
+              && isActiveParticipant(uid)
+              && exists(/databases/$(database)/documents/users/$(uid)/study/background))
+            || (docId == 'survey'
+              && isOpenedSurvey(request.resource.data)
+              && isActiveParticipant(uid)
+              && exists(/databases/$(database)/documents/users/$(uid)/testStatus/post)
+              && get(/databases/$(database)/documents/users/$(uid)/testStatus/post).data.status == 'finished'));
+        // The survey's confirmation, once.
+        allow update: if isOwner(uid)
+          && docId == 'survey'
+          && resource.data.confirmedAt == null
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['confirmedAt'])
+          && request.resource.data.confirmedAt is number;
+        allow delete: if false;
       }
     }
 
@@ -284,6 +877,121 @@ service cloud.firestore {
     match /exam_questions/{id} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // The Short Quiz bank. Everyone reads a quiz item, guests
+    // included, because the briefing plays it. A `test` item belongs to the
+    // pre-test and post-test: an admin reads one, and a participant
+    // only while their sitting is open: the pre-test's by a query naming its
+    // `use`, the post-test's one block at a time (amendment 3). Nothing is ever deleted: an item is
+    // switched off.
+    match /quiz_items/{itemId} {
+      allow read: if isAdmin() || resource.data.use == 'quiz'
+        || (resource.data.use == 'test' && (hasOpenPreTest() || canReadPostTestItem(itemId)));
+      allow create: if isAdmin() && isQuizItem(request.resource.data, itemId) && isFirstRevision();
+      allow update: if isAdmin() && isQuizItem(request.resource.data, itemId) && isNextRevision()
+        && request.resource.data.moduleId == resource.data.moduleId
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if false;
+    }
+
+    // The post-test's frozen design: item ids and cut
+    // points, no item's content. Written once by the developers with the
+    // service account (a developers' script), which these rules do
+    // not govern, so no client, an admin included, can change how anyone is
+    // routed. Any signed-in account reads it.
+    match /test_designs/{kind} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // The Rasch analysis as the admin area's IRT section shows it: item difficulties, fit, and each participant's θ by code.
+    // Written by the developers with the service account
+    // (a developers' script), so no client, an admin included, can
+    // change a result. Only an admin reads it.
+    match /irt_reports/{report} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // The test items' content-validity evidence: the
+    // team's two-member tagging and the experts' relevance ratings. An admin
+    // reads it and writes it whole, each save exactly the next revision;
+    // nothing deletes it.
+    match /item_reviews/{kind} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && kind in ['tagging', 'experts']
+        && isItemReview(request.resource.data, kind) && isFirstRevision();
+      allow update: if isAdmin() && isItemReview(request.resource.data, kind) && isNextRevision();
+      allow delete: if false;
+    }
+
+    match /quiz_modules/{moduleId} {
+      allow read: if true;
+      allow create: if isAdmin() && isQuizModule(request.resource.data, moduleId) && isFirstRevision();
+      allow update: if isAdmin() && isQuizModule(request.resource.data, moduleId) && isNextRevision();
+      allow delete: if false;
+    }
+
+    // ── The study's registry ─────────────────────
+    // An invite is its document's id: anyone who holds one may read it, so
+    // the join page can check it before an account is made, and nobody can
+    // list them. Only an admin creates one, open, or closes one, once.
+    match /study_invites/{invite} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isStudyInvite(request.resource.data) && request.resource.data.open == true
+        && request.resource.data.closedAt == null;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['open', 'closedAt'])
+        && resource.data.open == true
+        && request.resource.data.open == false
+        && request.resource.data.closedAt is number;
+      allow delete: if false;
+    }
+
+    // The cohort's next enrolment. It moves only by one, and only in the
+    // write that enrols the account taking that number.
+    match /study_counters/{cohort} {
+      allow get: if isStudyAccount() || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isStudyAccount()
+        && isCohort(cohort)
+        && request.resource.data.keys().hasOnly(['next'])
+        && request.resource.data.next == nextEnrolment(cohort) + 1
+        && getAfter(/databases/$(database)/documents/participants/$(participantCodeOf(cohort, nextEnrolment(cohort)))).data.uid == request.auth.uid
+        && !exists(/databases/$(database)/documents/participants/$(participantCodeOf(cohort, nextEnrolment(cohort))));
+      allow delete: if false;
+    }
+
+    // One entry per enrolment, keyed by its code. Its participant reads their
+    // own; an admin lists them. The one change is its participant's
+    // withdrawal, once (amendment 1): nothing more is recorded, and what was
+    // given is kept, as the consent page says. No client deletes anything.
+    match /participants/{code} {
+      allow get: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow list: if isAdmin();
+      allow create: if isEnrolment(code, request.resource.data);
+      allow update: if isSignedIn()
+        && resource.data.uid == request.auth.uid
+        && resource.data.withdrawal == null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['withdrawal'])
+        && request.resource.data.withdrawal.keys().hasOnly(['at'])
+        && request.resource.data.withdrawal.at is number;
+      allow delete: if false;
+    }
+
+    // The consent record (amendment 1): the participant's name, typed
+    // signature and age, the only link from a code to a person. Written by
+    // its participant once, in the write that makes its marker; read by an
+    // admin alone, never by the participant, and by no export.
+    match /consents/{uid} {
+      allow get, list: if isAdmin();
+      allow create: if isOwner(uid)
+        && isConsentRecord(uid, request.resource.data)
+        && isActiveParticipant(uid)
+        && getAfter(/databases/$(database)/documents/users/$(uid)/study/consent).data.agreedAt == request.resource.data.agreedAt;
+      allow update, delete: if false;
     }
 
     // ── Legacy collections: frozen, read-only ──────────────

@@ -1,5 +1,6 @@
 import { Navigate, useNavigate } from 'react-router-dom';
 import { LevelComplete, SaveProgressModal } from '@/features/progression';
+import { storyMessages as m } from './messages';
 import { useStoryRun } from './storyRunContext';
 
 /**
@@ -22,6 +23,7 @@ const CompletePage = () => {
     completedLevels,
     restartAttempt,
     course,
+    routing,
   } = useStoryRun();
 
   if (activeLevel === null || !levelConfig || levelResult?.levelId !== activeLevel) {
@@ -43,14 +45,14 @@ const CompletePage = () => {
         level={levelConfig}
         onNext={() => nextLevelId !== null && startFresh(`/play/story/${nextLevelId}/briefing`)}
         onRetry={() => startFresh(`/play/story/${activeLevel}/drive`, true)}
-        onMenu={() => navigate('/play/story')}
+        onMenu={() => navigate(routing.participant ? '/study' : '/play/story')}
+        menuLabel={routing.participant ? m.backToHome : undefined}
         hasNextLevel={nextLevelId !== null}
         recommendation={recommendation}
         course={
           course && {
-            note: course.saving ? 'Saving your result...' : course.resultNote ?? '',
-            // The post-test ends the session, so it offers no further play.
-            onContinue: course.saving || course.certified || course.postTest ? null : course.continueCourse,
+            note: course.saving ? m.savingResult : course.resultNote,
+            onContinue: course.saving || course.certified ? null : course.continueCourse,
           }
         }
         onPracticeRecommended={() => {

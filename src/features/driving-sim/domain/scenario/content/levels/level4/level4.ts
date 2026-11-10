@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { pickForCoverage, plateName, type SignCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
 import { buildEvents, filterByWeakCompetency } from '@/features/driving-sim/domain/scenario/pooling';
@@ -99,7 +100,10 @@ const level4Base = {
   // Five slots at least 800 apart, with a runway after the last one long
   // enough for its marking to fully clear before the road ends.
   roadLength: 4600,
-  speedLimit: 50,
+  roadClass: 'city_street',
+  speedLimit: 30,
+  // Spaced and measured at 50 on the dial; driven at 30 as it was at 50.
+  pace: spacedPace(30, 50),
   requiredScore: 76,
   stars2: 91,
   stars3: 105,

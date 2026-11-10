@@ -215,8 +215,8 @@ export const CAR_LENGTH = 136;
  * its `CAR_LENGTH` is a 4.5-meter car.
  *
  * An assumption, stated once. The game has no metric scale of its own, and its
- * speed implies a different one (about 11 units a meter at 40 km/h). Where a
- * rule says how close a car may stand to something,
+ * speed implies a different one (about 11 units a meter at 40 km/h; Level 6
+ * parking pack, 2a). Where a rule says how close a car may stand to something,
  * the driver judges it by eye against the car on screen, so that is the scale
  * the rule is measured on.
  */

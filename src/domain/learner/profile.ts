@@ -1,5 +1,6 @@
 import type { ActionLog } from './attempt';
 import type { DrivingCompetency, LearnerProfile } from './competency';
+import type { Localized } from '@/shared/lib/localized';
 
 export const COMPETENCIES: DrivingCompetency[] = [
   'driver_legality',
@@ -67,8 +68,8 @@ export const getWeakestCompetency = (profile: LearnerProfile): DrivingCompetency
 /**
  * How a tie for the lowest score is broken.
  *
- * - `list-order`: the first of the tied in `COMPETENCIES`. The rule the earlier
- *   simulation studies ran under, kept so they reproduce as published.
+ * - `list-order`: the first of the tied in `COMPETENCIES`. The rule protocols
+ *   the earlier experiments ran under, kept so their environments reproduce as published.
  * - `least-observed`: the tied competency with the fewest observations, and
  *   only then list order. A tie carries no information about list order, and
  *   list order is why the run-local re-roll kept landing on `driver_legality`,
@@ -102,6 +103,12 @@ export const getLowestScoringCompetency = (
       (tieBreak === 'least-observed' ? profile[a].attempts - profile[b].attempts : 0)
   )[0];
 
+/**
+ * Whether these stay in English is the team's call (the style guide's glossary):
+ * a row here is what they wrote, and a competency with no row shows in English.
+ */
+const COMPETENCY_FILIPINO: Partial<Record<DrivingCompetency, { fil: string }>> = {};
+
 const COMPETENCY_LABELS: Record<DrivingCompetency, string> = {
   driver_legality: 'Driver Legality',
   document_awareness: 'Document Awareness',
@@ -115,6 +122,9 @@ const COMPETENCY_LABELS: Record<DrivingCompetency, string> = {
   parking: 'Parking Compliance',
   general_rules: 'General Rules',
 };
+
+/** A competency's name in the language chosen. The admin area reads the English. */
+export const competencyText = (competency: string | null | undefined): Localized => ({ en: getCompetencyLabel(competency), ...COMPETENCY_FILIPINO[competency as DrivingCompetency] });
 
 export const getCompetencyLabel = (competency: string | null | undefined): string =>
   competency ? COMPETENCY_LABELS[competency as DrivingCompetency] ?? competency.replace(/_/g, ' ') : 'Road decision';

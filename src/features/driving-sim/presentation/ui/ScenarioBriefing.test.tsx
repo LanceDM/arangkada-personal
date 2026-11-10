@@ -205,8 +205,8 @@ describe('the briefing at a narrow viewport', () => {
 });
 
 /**
- * The support level h decides how much of the answer the panel carries.
- * The situation is always there; the move, the note and the rule
+ * The support level h decides how much of the answer the panel carries
+ *. The situation is always there; the move, the note and the rule
  * only at full; where to look only at cue.
  */
 describe('the briefing at each support level', () => {

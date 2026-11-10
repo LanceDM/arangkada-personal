@@ -12,6 +12,7 @@ import SignPlateCard from '@/features/driving-sim/presentation/ui/SignPlateCard'
 import MarkingPlateCard from '@/features/driving-sim/presentation/ui/MarkingPlateCard';
 import GarageStage from '@/features/driving-sim/presentation/ui/GarageStage';
 import MissionQuiz from '@/features/driving-sim/presentation/ui/MissionQuiz';
+import { fixtureLevelQuiz } from '@/features/driving-sim/domain/scenario/quizBank.fixture';
 import MissionBriefing from '@/features/driving-sim/presentation/ui/MissionBriefing';
 import LessonReader from '@/features/driving-sim/presentation/ui/LessonReader';
 import MissionPanel from '@/features/driving-sim/presentation/ui/MissionPanel';
@@ -412,7 +413,14 @@ const ComponentGallery = () => {
               wrapperClassName={GALLERY_STEPPER_CLASS}
             />
             <Stage>
-              <MissionQuiz module={module_.item} onPass={noop} onClose={noop} />
+              <MissionQuiz
+                key={module_.item.id}
+                quiz={fixtureLevelQuiz(10, { moduleId: module_.item.id, passingScore: 6 })}
+                levelId={module_.item.sourceLevel ?? 0}
+                onPass={noop}
+                onClose={noop}
+                newSeed={() => GALLERY_CHOICE_SEED}
+              />
             </Stage>
           </>
         )}

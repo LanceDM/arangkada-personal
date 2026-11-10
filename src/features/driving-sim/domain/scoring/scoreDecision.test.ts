@@ -5,8 +5,8 @@
  * The property, over every level a practice item can join and many rolls of
  * each: play the level's own decisions the same way with and without an
  * appended item, whatever the item's answer, and the pass or fail - indeed the
- * score - is the same under `neutral`. Under `upside-only`, the rule the
- * game-level simulation ran under, there are rolls where it is not: a right answer to the item
+ * score - is the same under `neutral`. Under `upside-only`, the rule protocol
+ * the fourth experiment ran under, there are rolls where it is not: a right answer to the item
  * carries a learner over the bar the level's own decisions left them under.
  */
 import { describe, expect, it } from 'vitest';
@@ -97,7 +97,7 @@ describe('an appended practice item and the pass mark', () => {
     expect(levels.size).toBeGreaterThanOrEqual(10);
   }, 60_000);
 
-  it('can change pass or fail under upside-only, the legacy rule', () => {
+  it('can change pass or fail under upside-only, the rule the fourth experiment ran under', () => {
     let changed = 0;
     let loweredTheBar = 0;
     for (const { rolled, withItem, answer, itemId } of cases()) {

@@ -1,7 +1,7 @@
 /**
  * Theta changes the time a driver is given, never the grade.
  *
- * What the car did at a scenario used to be
+ * What the car did at a scenario was
  * recorded from the frame its approach opened, and theta moves that frame, so
  * the same driving could pass at one theta and fail at another: a car that came
  * to rest 347 units short of Level 4's stop line had stopped *at* it at theta 1

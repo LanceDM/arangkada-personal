@@ -17,10 +17,9 @@ import { destinationOf, legalTransitions, step } from './routingTable';
 import { probeContext } from './characterizeRouting';
 
 /**
- * The routing design's table written a second time, as a specification,
- * without reading `routingTable.ts`: the name of the state `transition` must
- * lead to from `state` under `context`, or null where the design makes it
- * illegal.
+ * The design's table written a second time, as a specification, without reading
+ * `routingTable.ts`: the name of the state `transition` must lead to from
+ * `state` under `context`, or null where the design makes it illegal.
  */
 const r2 = (state: RoutingState, context: RoutingContext, transition: RoutingTransition): string | null => {
   const passed = context.outcome === 'passed';
@@ -98,7 +97,7 @@ describe('the vocabulary', () => {
   });
 });
 
-describe('legalTransitions lists exactly what the routing design allows', () => {
+describe('legalTransitions lists exactly what the design allows', () => {
   it('in every state, over 200 random contexts: the same labels, the same targets, in alphabet order', () => {
     const mismatches: string[] = [];
     for (const context of contexts(20260929, 200)) {

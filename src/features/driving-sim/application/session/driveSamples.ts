@@ -16,8 +16,10 @@
 import type { SupportLevel } from '@/domain/learner/competency';
 import { DrivingFSM } from '@/features/driving-sim/domain/fsm/DrivingFSM';
 import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
+import { timeLimitStepsFor } from '@/features/driving-sim/domain/scenario/levelTimeLimits';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
+import { SPEED_STEP } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import type { FSMState } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
 
@@ -53,7 +55,12 @@ export type DriveStyle =
    * reaches every scenario of a level is what proves the recorded drive is a
    * drive rather than a start.
    */
-  | 'commute';
+  | 'commute'
+  /**
+   * A driver who never touches anything, for as long as the level allows: the
+   * run that ends with `time_up` from a car at rest.
+   */
+  | 'standstill';
 
 export interface DriveSample {
   levelId: number;
@@ -88,8 +95,8 @@ const targetedEvents = (level: LevelConfig) =>
  * Three wandering seeds rather than one because a pooled level rolls fresh
  * content per attempt, and a single seed would only ever pin one roll.
  */
-export const driveSamples = (): DriveSample[] =>
-  LEVELS.flatMap(level => [
+export const driveSamples = (): DriveSample[] => [
+  ...LEVELS.flatMap(level => [
     { levelId: level.id, seed: 1, frames: 1200, style: 'wander' as const },
     { levelId: level.id, seed: 2, frames: 1200, style: 'wander' as const },
     { levelId: level.id, seed: 3, frames: 1200, style: 'wander' as const },
@@ -101,7 +108,7 @@ export const driveSamples = (): DriveSample[] =>
     { levelId: level.id, seed: 5, frames: 1000, style: 'hold-right' as const },
     // One drive per level that is long enough to reach the end of it. Sized
     // for the slowest road in the game: Level 7 declares a pace of 0.03, so a
-    // two-tap 66 km/h covers two units of route a frame, and its 12,980 need
+    // 65 km/h cruise covers two units of route a frame, and its 12,980 need
     // six and a half thousand of them before the holds each scenario takes to
     // be read are counted.
     { levelId: level.id, seed: 6, frames: 8000, style: 'commute' as const },
@@ -112,10 +119,14 @@ export const driveSamples = (): DriveSample[] =>
       style: (event.maneuver?.direction === 'left' ? 'turn-left' : 'turn-right') as DriveStyle,
       initialDistance: Math.max(0, event.triggerAtDistance - APPROACH_RUNWAY),
     })),
-  ]);
+  ]),
+  // The tutorial, the shortest limit, sat in at the start line until it runs
+  // out, and a second beyond, so the end of the run is recorded too.
+  { levelId: 0, seed: 7, frames: timeLimitStepsFor(0) + 60, style: 'standstill' },
+];
 
 /** xorshift32: small, deterministic, and identical on every platform. */
-const rng = (seed: number) => {
+export const rng = (seed: number) => {
   let state = seed | 0 || 1;
   return () => {
     state ^= state << 13;
@@ -134,14 +145,28 @@ const rng = (seed: number) => {
  * a turning lane. A driver who only ever did one thing at a time never reached
  * either branch.
  */
+/**
+ * How many taps of the throttle set `speed`, to the nearest step. The scripted
+ * drives were written when a tap was a third of the limit; they now tap to the
+ * speed those taps gave, so each still drives what it was written to drive.
+ */
+export const tapsTo = (speed: number) => Math.round(speed / SPEED_STEP);
+
 const inputSequence = (sample: DriveSample): InputState[] => {
   const { seed, frames, style } = sample;
   const next = rng(seed);
   const inputs: InputState[] = [];
 
+  if (style === 'standstill') return Array.from({ length: frames }, () => NO_INPUT);
+
   if (style === 'commute') {
+    // Taps up to two-thirds of the limit, to the nearest step, a press every
+    // fourth frame: the cruise the two taps of a third of the limit each gave
+    // before the step became a fixed 5 km/h.
+    const { speedLimit } = LEVELS.find(entry => entry.id === sample.levelId)!;
+    const taps = tapsTo((speedLimit * 2) / 3);
     for (let frame = 0; frame < frames; frame++) {
-      // Two taps of the throttle and then nothing: the setting holds, so the
+      // Taps of the throttle and then nothing: the setting holds, so the
       // car drives the whole level at a steady, unremarkable speed and never
       // leaves the lane it started in.
       //
@@ -149,7 +174,7 @@ const inputSequence = (sample: DriveSample): InputState[] => {
       // crashes into the first thing the level puts in front of it, and what
       // this sample is for is reaching the *end* — every scenario offered, every
       // verdict recorded, whatever it makes of them.
-      inputs.push({ ...NO_INPUT, throttle: frame === 0 || frame === 4 } as InputState);
+      inputs.push({ ...NO_INPUT, throttle: frame % 4 === 0 && frame < taps * 4 } as InputState);
     }
     return inputs;
   }
@@ -222,6 +247,8 @@ const describeEvent = (event: GameEvent): string => {
       return `rerolled ${event.competency}`;
     case 'crashed':
       return 'crashed';
+    case 'timed_out':
+      return 'timed out';
     case 'finished':
       return 'finished';
     case 'jolt':
@@ -236,8 +263,13 @@ const describeEvent = (event: GameEvent): string => {
  * so every timed branch — correction holds, penalty intervals, manoeuvre
  * progress, the crash hold — lands on the same frame every time.
  */
-export const runDrive = (sample: DriveSample, support: SupportLevel = 'full'): DriveTrace => {
-  const level = LEVELS.find(entry => entry.id === sample.levelId)!;
+export const runDrive = (
+  sample: DriveSample,
+  support: SupportLevel = 'full',
+  /** Lays something over the level first: what `localizeLevel.drive.test.ts` holds to the golden. */
+  overlay: (level: LevelConfig) => LevelConfig = level => level
+): DriveTrace => {
+  const level = overlay(LEVELS.find(entry => entry.id === sample.levelId)!);
   const inputs = inputSequence(sample);
   const lines: string[] = [];
 
@@ -346,6 +378,7 @@ export const runDrive = (sample: DriveSample, support: SupportLevel = 'full'): D
           snapshot.holdingForCorrection ? 'held' : '-',
           snapshot.crawlWarning ? 'crawl' : '-',
           snapshot.wrongSideWarning ? 'wrong-side' : '-',
+          snapshot.overLimitWarning ? 'over-limit' : '-',
           frameState ? frameState.scene.nodes.length : -1,
           frameState ? frameState.scene.colliders.length : -1,
           frameState ? round(frameState.flash) : -1,

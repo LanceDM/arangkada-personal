@@ -23,6 +23,13 @@ import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
 import { scenarioInstruction } from '@/features/driving-sim/domain/scenario/scenarioCopy';
+import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
+
+/**
+ * The plans below are in km/h on the dial Level 9 was spaced at. Its pace drives
+ * that same road at its legal limit, k times the figure (`spacedPace`).
+ */
+const dial = (speed: number): number => speed * paceOf(LEVELS.find(level => level.id === 9)!).speedChangeScale;
 
 const level9 = LEVELS.find(level => level.id === 9)!;
 const jam = level9.events.find(event => event.id === 'level9.throttle-sticks-open')!;
@@ -100,15 +107,15 @@ const drive = (reactionSeconds: number, { holdForever = false } = {}): Run => {
 
       // A competent driver everywhere else on the route, so the run reaches the
       // jam in the state a real one would.
-      const cruise = distance < 820 ? 22 : distance < 1150 ? 48 : distance < 1700 ? 20 : 48;
+      const cruise = dial(distance < 820 ? 22 : distance < 1150 ? 48 : distance < 1700 ? 20 : 48);
       const reacting = readAt >= 0 && frame - readAt >= reactionFrames;
       const freed = cue?.phase === 'freed';
       const braking = reacting && (holdForever || !freed);
 
       const input: InputState = {
         ...NO_INPUT,
-        throttle: !braking && snapshot.targetSpeed < cruise - 1 && !previous.throttle,
-        brake: braking ? true : snapshot.speed > cruise + 0.5,
+        throttle: !braking && snapshot.targetSpeed < cruise - dial(1) && !previous.throttle,
+        brake: braking ? true : snapshot.speed > cruise + dial(0.5),
       };
       previous = input;
 
@@ -261,11 +268,11 @@ describe('the failure and the explanation are the same moment', () => {
         const distance = session.getFrame()?.scene?.car?.distance ?? 0;
         if (snapshot.throttleCue && firstCueFrame < 0) firstCueFrame = frame;
 
-        const cruise = distance < 820 ? 22 : distance < 1150 ? 48 : distance < 1700 ? 20 : 48;
+        const cruise = dial(distance < 820 ? 22 : distance < 1150 ? 48 : distance < 1700 ? 20 : 48);
         const input: InputState = {
           ...NO_INPUT,
-          throttle: snapshot.targetSpeed < cruise - 1 && !previous.throttle,
-          brake: snapshot.speed > cruise + 0.5,
+          throttle: snapshot.targetSpeed < cruise - dial(1) && !previous.throttle,
+          brake: snapshot.speed > cruise + dial(0.5),
         };
         previous = input;
         for (const event of session.update(input) as GameEvent[]) {

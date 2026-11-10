@@ -24,6 +24,13 @@ import {
   roadXAt,
   type LaneIndex,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
+import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
+
+/**
+ * The plans below are in km/h on the dial Level 8 was spaced at. Its pace
+ * drives that same road at its legal limit, k times the figure (`spacedPace`), so each planned speed is put on the dial the level now reads.
+ */
+const dial = (speed: number): number => speed * paceOf(LEVELS.find(level => level.id === 8)!).speedChangeScale;
 
 const level8 = LEVELS.find(level => level.id === 8)!;
 
@@ -172,8 +179,8 @@ const drive = (plan: Plan, frames = 40_000): DriveResult => {
         ...NO_INPUT,
         // Two controls, as a driver uses them: the throttle is a setting raised
         // in steps, the brake a pedal held until the speed is right.
-        throttle: snapshot.targetSpeed < want.speed - 1 && !previous.throttle,
-        brake: snapshot.speed > want.speed + 0.5,
+        throttle: snapshot.targetSpeed < dial(want.speed) - dial(1) && !previous.throttle,
+        brake: snapshot.speed > dial(want.speed) + dial(0.5),
         ...steer,
         horn: Boolean(want.horn),
       };

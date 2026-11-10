@@ -25,7 +25,7 @@ import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/l
 import { composeWorldFrame } from '@/features/driving-sim/domain/world/composeWorldFrame';
 import { curvesForLevel } from '@/features/driving-sim/domain/world/roadCurves';
 import { computeWarningDistances } from '@/features/driving-sim/domain/systems/eventScheduler';
-import { SLOWED_SHARE } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
+import { slowTarget } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import { evaluateWeightedRule } from '@/features/driving-sim/domain/evaluation/ruleEngine';
 import { scenarioInstruction, scenarioLabel } from '@/features/driving-sim/domain/scenario/scenarioCopy';
 import {
@@ -271,7 +271,8 @@ describe('Level 9 is written in American English', () => {
 
 describe('Level 9 gives the emergency number in force', () => {
   // RO101 prints PNP 117. Executive Order No. 56, s. 2018 made Emergency 911 the
-  // national emergency hotline in its place; the Red Cross stays on 143.
+  // national emergency hotline in its place; the Red Cross stays on 143 (Level
+  // 10 pack, K7).
   const strings = (value: unknown): string[] =>
     typeof value === 'string'
       ? [value]
@@ -376,7 +377,7 @@ describe('the Level 9 road says what the scenarios say', () => {
     // the car sideways. It must sit above the speed the level already calls
     // slowed, so every driver the road throws is a driver the grading was
     // going to fail anyway — never the other way round.
-    const slowed = level9.speedLimit * SLOWED_SHARE;
+    const slowed = Math.max(...events.map(event => slowTarget(event, level9)));
     for (const event of events) {
       const jarring = event.effect?.jarringAbove;
       if (jarring === undefined) continue;
@@ -391,11 +392,11 @@ describe('every Level 9 scenario is measurable by the controls it has', () => {
     const coast = blowout.coast!;
     // The brake becomes free to hold at the speed the game already calls
     // slowed, so the two definitions cannot drift apart.
-    expect(coast.brakeBelow).toBe(level9.speedLimit * SLOWED_SHARE);
+    expect(coast.brakeBelow).toBe(slowTarget(blowout, level9));
     // And the allowance is a real allowance: comfortably longer than a firm tap
     // of the key, and comfortably shorter than dragging the car down from the
     // limit in one application at the grip this scenario declares.
-    const perFrame = BRAKE_FORCE * blowout.effect!.grip!;
+    const perFrame = BRAKE_FORCE * blowout.effect!.grip! * paceOf(level9).brakingScale;
     const framesToSlam = (level9.speedLimit - coast.brakeBelow) / perFrame;
     expect(coast.maxHeldFrames).toBeGreaterThan(10);
     expect(coast.maxHeldFrames).toBeLessThan(framesToSlam / 2);

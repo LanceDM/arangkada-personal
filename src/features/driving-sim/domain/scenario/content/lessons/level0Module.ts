@@ -108,7 +108,7 @@ export const level0Module = {
     {
       "id": "lto_level_0-lesson-5",
       "title": "4. How To Answer the Short Quiz",
-      "text": "The short quiz checks if you understood the lesson. Each question has choices. Read the question first, then read all choices before selecting your answer.\n\nDo not guess too quickly. Some choices may look similar. Choose the answer that best matches the module.\n\nIf you make a mistake, that is okay. Mistakes are part of learning. Review the module again and try the quiz again.",
+      "text": "The short quiz checks if you understood the lesson. Each question has choices. Read the question first, then read all choices before selecting your answer.\n\nDo not guess too quickly. Some choices may look similar. Choose the answer that best matches the module.\n\nThe quiz is timed, like the LTO written exam: you have one minute for each question, and the time left is shown at the top. When the time runs out, any question you have not answered counts as wrong.\n\nIf you make a mistake, that is okay. Mistakes are part of learning. Review the module again and try the quiz again.",
       "blocks": [
         {
           "type": "paragraph",
@@ -120,6 +120,10 @@ export const level0Module = {
         },
         {
           "type": "paragraph",
+          "text": "The quiz is timed, like the LTO written exam: you have one minute for each question, and the time left is shown at the top. When the time runs out, any question you have not answered counts as wrong."
+        },
+        {
+          "type": "paragraph",
           "text": "If you make a mistake, that is okay. Mistakes are part of learning. Review the module again and try the quiz again."
         }
       ]
@@ -127,56 +131,60 @@ export const level0Module = {
     {
       "id": "lto_level_0-lesson-6",
       "title": "5. Basic Game Buttons",
-      "text": "Different screens may show different buttons. These are the common ones:\n\nButton or Label Meaning Start Begin the level or activity Next Move to the next part of the lesson Back Return to the previous screen Continue Proceed after reading or completing a step Submit Send your quiz answer Retry Try the quiz or simulation again Pause Temporarily stop the simulation Resume Continue after pausing Exit Leave the current activity\n\nIf you are not sure what to press, read the button label slowly. Most buttons describe what they will do.",
+      "text": "Different screens show different buttons. These are the ones you will use:\n\nButton Meaning Open Opens the learning module for the level Start Starts the short quiz, once you have read the module Drive Starts the driving simulation, once you have passed the quiz Continue driving Closes a scenario's briefing during the drive so the road moves again (Enter or Space does the same) Back to Briefing Leaves the quiz at any question, after you confirm; your answers so far are not kept Previous Goes back one question in the quiz so you can change that answer Retry Checkpoint Takes the quiz again Continue Goes on to the next step of your course, including driving a level again Back to Map Leaves the level and returns to the map\n\nIn the quiz, tapping or clicking a choice answers it at once; there is no Submit button. The drive has no Pause button: it waits on its own while a scenario's briefing is open, until you continue.\n\nIf you are not sure what to press, read the button label slowly. Most buttons describe what they will do.",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Different screens may show different buttons. These are the common ones:"
+          "text": "Different screens show different buttons. These are the ones you will use:"
         },
         {
           "type": "table",
           "headers": [
-            "Button or Label",
+            "Button",
             "Meaning"
           ],
           "rows": [
             [
+              "Open",
+              "Opens the learning module for the level"
+            ],
+            [
               "Start",
-              "Begin the level or activity"
+              "Starts the short quiz, once you have read the module"
             ],
             [
-              "Next",
-              "Move to the next part of the lesson"
+              "Drive",
+              "Starts the driving simulation, once you have passed the quiz"
             ],
             [
-              "Back",
-              "Return to the previous screen"
+              "Continue driving",
+              "Closes a scenario's briefing during the drive so the road moves again (Enter or Space does the same)"
+            ],
+            [
+              "Back to Briefing",
+              "Leaves the quiz at any question, after you confirm; your answers so far are not kept"
+            ],
+            [
+              "Previous",
+              "Goes back one question in the quiz so you can change that answer"
+            ],
+            [
+              "Retry Checkpoint",
+              "Takes the quiz again"
             ],
             [
               "Continue",
-              "Proceed after reading or completing a step"
+              "Goes on to the next step of your course, including driving a level again"
             ],
             [
-              "Submit",
-              "Send your quiz answer"
-            ],
-            [
-              "Retry",
-              "Try the quiz or simulation again"
-            ],
-            [
-              "Pause",
-              "Temporarily stop the simulation"
-            ],
-            [
-              "Resume",
-              "Continue after pausing"
-            ],
-            [
-              "Exit",
-              "Leave the current activity"
+              "Back to Map",
+              "Leaves the level and returns to the map"
             ]
           ]
+        },
+        {
+          "type": "paragraph",
+          "text": "In the quiz, tapping or clicking a choice answers it at once; there is no Submit button. The drive has no Pause button: it waits on its own while a scenario's briefing is open, until you continue."
         },
         {
           "type": "paragraph",
@@ -187,39 +195,54 @@ export const level0Module = {
     {
       "id": "lto_level_0-lesson-7",
       "title": "6. Basic Simulation Controls",
-      "text": "The driving simulation uses keyboard controls on PC. Keep one hand near W, A, S, and D or use the arrow keys.\n\nControl PC Keys What It Does Accelerate W or Arrow Up Makes the vehicle move forward or go faster Brake / Slow Down S, Arrow Down, or Space Slows down the vehicle; hold it until the car fully stops when a full stop is required Steer Left A or Arrow Left Moves the vehicle left within the road Steer Right D or Arrow Right Moves the vehicle right within the road\n\nBeginner reminder: Driving is not only about moving fast. Safe driving means knowing when to slow down, stop, steer carefully, and react before you pass the action zone.",
+      "text": "On a tablet or phone, the controls are buttons beside the road: Left and Right on one side, and Faster and Brake on the other. On a computer, use the keys. The horn has no button: it is the H key, on a keyboard only.\n\nThe car keeps the speed you set. Each tap of Faster raises your speed setting by 5 km/h, and holding it keeps raising it. Each tap of Brake lowers the setting by 5 km/h, and holding it brakes.\n\nControl Touch Button Keys What It Does Faster Faster (up arrow) W or Arrow Up Raises your speed setting by 5 km/h a tap; hold it to keep raising it Brake / Slow Down Brake (down arrow) S, Arrow Down, or Space A tap lowers your speed setting by 5 km/h; hold it to brake, until the car fully stops when a full stop is required Steer Left Left A or Arrow Left Moves the vehicle left within the road Steer Right Right D or Arrow Right Moves the vehicle right within the road Horn No button (keyboard only) H Sounds the horn\n\nBeginner reminder: Driving is not only about moving fast. Safe driving means knowing when to slow down, stop, steer carefully, and react before you pass the action zone.",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The driving simulation uses keyboard controls on PC. Keep one hand near W, A, S, and D or use the arrow keys."
+          "text": "On a tablet or phone, the controls are buttons beside the road: Left and Right on one side, and Faster and Brake on the other. On a computer, use the keys. The horn has no button: it is the H key, on a keyboard only."
+        },
+        {
+          "type": "paragraph",
+          "text": "The car keeps the speed you set. Each tap of Faster raises your speed setting by 5 km/h, and holding it keeps raising it. Each tap of Brake lowers the setting by 5 km/h, and holding it brakes."
         },
         {
           "type": "table",
           "headers": [
             "Control",
-            "PC Keys",
+            "Touch Button",
+            "Keys",
             "What It Does"
           ],
           "rows": [
             [
-              "Accelerate",
+              "Faster",
+              "Faster (up arrow)",
               "W or Arrow Up",
-              "Makes the vehicle move forward or go faster"
+              "Raises your speed setting by 5 km/h a tap; hold it to keep raising it"
             ],
             [
               "Brake / Slow Down",
+              "Brake (down arrow)",
               "S, Arrow Down, or Space",
-              "Slows down the vehicle; hold it until the car fully stops when a full stop is required"
+              "A tap lowers your speed setting by 5 km/h; hold it to brake, until the car fully stops when a full stop is required"
             ],
             [
               "Steer Left",
+              "Left",
               "A or Arrow Left",
               "Moves the vehicle left within the road"
             ],
             [
               "Steer Right",
+              "Right",
               "D or Arrow Right",
               "Moves the vehicle right within the road"
+            ],
+            [
+              "Horn",
+              "No button (keyboard only)",
+              "H",
+              "Sounds the horn"
             ]
           ]
         },
@@ -346,52 +369,6 @@ export const level0Module = {
           "text": "Take your time. Learn step by step. Arangkada is here to help you practice safely before facing real road responsibilities."
         }
       ]
-    }
-  ],
-  "quiz": [
-    {
-      "question": "What is the correct level flow?",
-      "options": [
-        "Read module, answer quiz, pass quiz, start simulation, complete level",
-        "Drive first, read never",
-        "Exit, guess, skip, finish",
-        "Press random buttons only"
-      ],
-      "correct": 0,
-      "explanation": "Correct answer: Read module, answer quiz, pass quiz, start simulation, complete level"
-    },
-    {
-      "question": "Which PC keys can make the vehicle accelerate?",
-      "options": [
-        "W or Arrow Up",
-        "S or Arrow Down",
-        "A or Arrow Left",
-        "D or Arrow Right"
-      ],
-      "correct": 0,
-      "explanation": "Correct answer: W or Arrow Up"
-    },
-    {
-      "question": "What does the Brake control do?",
-      "options": [
-        "Slows down or stops the vehicle",
-        "Makes the vehicle faster",
-        "Turns on music",
-        "Opens the license table"
-      ],
-      "correct": 0,
-      "explanation": "Correct answer: Slows down or stops the vehicle"
-    },
-    {
-      "question": "What should you focus on during simulation?",
-      "options": [
-        "Safety and correct driving actions",
-        "Speed only",
-        "Ignoring road signs",
-        "Hitting obstacles"
-      ],
-      "correct": 0,
-      "explanation": "Correct answer: Safety and correct driving actions"
     }
   ]
 } satisfies LevelModule;

@@ -1,6 +1,6 @@
 /**
- * What the briefing and the results screen say about the routing FSM's move:
- * the transition and the reason, in the
+ * What the briefing and the results screen say about the routing FSM's move
+ * : the transition and the reason, in the
  * player's terms, and never which group or policy chose it.
  */
 import { describe, expect, it } from 'vitest';
@@ -10,7 +10,7 @@ import { COMPETENCIES } from '@/domain/learner/profile';
 import { ROUTING_Q_STATES, type RoutingAction, type RoutingTable } from '@/domain/learner/adaptive/routingQPolicy';
 import { FINAL_STATE, driveState, type FrontierState, type Outcome } from '@/domain/routing/routingTypes';
 import { enterCourseEntry, nextCourseEntry, type PendingEntry, type RoutingGroup } from './courseRouting';
-import { courseNote, courseResultNote } from './routingBriefing';
+import { courseNote, courseResultNote, freeReplayNote } from './routingBriefing';
 
 const weakAt = (weak: DrivingCompetency): ActionLog[] => [
   ...COMPETENCIES.flatMap((c, i) => [
@@ -38,25 +38,30 @@ const entryFor = (state: FrontierState, outcome: Outcome | null, group: RoutingG
 
 const text = (entry: ReturnType<typeof entryFor>) => {
   const note = courseNote(entry);
-  return [note.heading, ...note.lines].join(' ');
+  return [note.heading, ...note.lines].map(text => text.en).join(' ');
 };
 
 describe('the briefing names the move', () => {
   it('for an entry played as it stands', () => {
     const note = courseNote(entryFor(driveState(3), null, 'conventional'));
-    expect(note.heading).toMatch(/^Your course: Level 3: \S/);
-    expect(note.lines).toEqual(['Pass this level to move on to Level 4.']);
-    expect(text(entryFor(driveState(11), null, 'conventional'))).toContain('move on to the final exam');
-    expect(text(entryFor(FINAL_STATE, null, 'conventional'))).toContain('the same test for every learner');
+    expect(note.heading.en).toMatch(/^Your course: Level 3: \S/);
+    expect(note.lines).toEqual([{ en: 'Pass this level to move on to Level 4.' }]);
+    expect(text(entryFor(driveState(11), null, 'conventional'))).toContain('move on to the Final Mission');
+    // The final exam is rolled per attempt: the same rules for everyone, not the same questions.
+    expect(text(entryFor(FINAL_STATE, null, 'conventional'))).toContain('Every learner drives the Final Mission under the same rules');
+    expect(text(entryFor(FINAL_STATE, null, 'conventional'))).not.toContain('same test');
+    expect(courseNote(entryFor(driveState(3), null, 'conventional')).practiceOnly).toBeUndefined();
   });
 
   it('for a retry, an advance and the move to the final exam', () => {
-    expect(courseNote(entryFor(driveState(4), 'failed', 'conventional')).heading).toMatch(/^Again: Level 4/);
-    expect(text(entryFor(driveState(4), 'failed', 'conventional'))).toContain('did not reach the pass mark on Level 4');
-    expect(courseNote(entryFor(driveState(4), 'passed', 'conventional')).heading).toMatch(/^Next: Level 5/);
+    expect(courseNote(entryFor(driveState(4), 'failed', 'conventional')).heading.en).toMatch(/^Again: Level 4/);
+    // A crash fails whatever it scored, so the line never blames the pass mark.
+    expect(text(entryFor(driveState(4), 'failed', 'conventional'))).toContain('You did not pass Level 4 last time');
+    expect(text(entryFor(driveState(4), 'failed', 'conventional'))).not.toContain('pass mark');
+    expect(courseNote(entryFor(driveState(4), 'passed', 'conventional')).heading.en).toMatch(/^Next: Level 5/);
     expect(text(entryFor(driveState(4), 'passed', 'conventional'))).toContain('You passed Level 4.');
-    expect(text(entryFor(driveState(11), 'passed', 'conventional'))).toContain('You passed Level 11. The final exam');
-    expect(text(entryFor(FINAL_STATE, 'failed', 'conventional'))).toContain('sitting it again');
+    expect(text(entryFor(driveState(11), 'passed', 'conventional'))).toContain('You passed Level 11. Every learner drives the Final Mission');
+    expect(text(entryFor(FINAL_STATE, 'failed', 'conventional'))).toContain('driving it again');
   });
 
   it('for practice: what was added, that it does not count, and why', () => {
@@ -85,10 +90,18 @@ describe('the briefing names the move', () => {
     };
     const entry = enterCourseEntry(pending);
     const note = courseNote(entry);
-    expect(note.heading).toMatch(/^Review: Level 2/);
-    expect(note.lines[0]).toContain('You passed Level 3. Before Level 4, you will drive Level 2 once more, because General Rules is your weakest area right now');
-    expect(note.lines[1]).toContain('does not hold you back');
-    expect(courseResultNote(entry, 'failed')).toBe('Review done. Continue goes on to Level 4.');
+    expect(note.heading.en).toMatch(/^Review: Level 2/);
+    expect(note.lines[0].en).toContain('You passed Level 3. Before Level 4, you will drive Level 2 once more, because General Rules is your weakest area right now');
+    expect(note.lines[1].en).toContain('does not hold you back');
+    expect(note.practiceOnly).toBe(true);
+    expect(courseResultNote(entry, 'failed').en).toBe('Review done. Continue goes on to Level 4.');
+  });
+
+  it('for a free replay: outside the course, so its pass score is for practice', () => {
+    const note = freeReplayNote(3);
+    expect(note.heading.en).toMatch(/^Free replay: Level 3: \S/);
+    expect(note.lines.map(line => line.en).join(' ')).toContain('does not change your course');
+    expect(note.practiceOnly).toBe(true);
   });
 
   it('never names the group, the policy or the table', () => {
@@ -103,8 +116,8 @@ describe('the briefing names the move', () => {
 
 describe('the results screen says where Continue goes', () => {
   it('after the final exam, a pass and a fail', () => {
-    expect(courseResultNote(entryFor(FINAL_STATE, null, 'conventional'), 'passed')).toContain('Your course is complete');
-    expect(courseResultNote(entryFor(driveState(4), null, 'conventional'), 'failed')).toBe('Continue to drive Level 4 again.');
-    expect(courseResultNote(entryFor(driveState(4), null, 'conventional'), 'passed')).toBe('Continue to the next step of your course.');
+    expect(courseResultNote(entryFor(FINAL_STATE, null, 'conventional'), 'passed').en).toContain('Your course is complete');
+    expect(courseResultNote(entryFor(driveState(4), null, 'conventional'), 'failed').en).toBe('Continue to drive Level 4 again.');
+    expect(courseResultNote(entryFor(driveState(4), null, 'conventional'), 'passed').en).toBe('Continue to the next step of your course.');
   });
 });

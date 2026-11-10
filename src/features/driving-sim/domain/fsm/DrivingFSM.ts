@@ -93,6 +93,20 @@ export class DrivingFSM {
       'VIOLATION',
     ];
 
+    /** Every state a run is live in: all but COMPLETED and GAME_OVER. */
+    const liveStates: FSMState[] = [
+      'IDLE',
+      'DRIVING',
+      'APPROACHING_EVENT',
+      'REACTION_WINDOW',
+      'INTERSECTION',
+      'HAZARD',
+      'DECISION',
+      'VIOLATION',
+      'FEEDBACK_DISPLAYED',
+      'RECOVERY',
+    ];
+
     this.transitions = [
       // IDLE
       { from: 'IDLE', trigger: 'start', to: 'DRIVING' },
@@ -186,20 +200,12 @@ export class DrivingFSM {
       ),
       // A collision ends the run from wherever it happens, and is logged like
       // any other transition so the crash shows up in the run data.
-      ...([
-        'IDLE',
-        'DRIVING',
-        'APPROACHING_EVENT',
-        'REACTION_WINDOW',
-        'INTERSECTION',
-        'HAZARD',
-        'DECISION',
-        'VIOLATION',
-        'FEEDBACK_DISPLAYED',
-        'RECOVERY',
-      ] as const satisfies readonly FSMState[]).map(
-        (from): FSMTransition => ({ from, trigger: 'crash', to: 'GAME_OVER' })
-      ),
+      ...liveStates.map((from): FSMTransition => ({ from, trigger: 'crash', to: 'GAME_OVER' })),
+      // So does running out of driving time, from the same states: one list,
+      // so the two run-ending edges can never cover different states. IDLE is
+      // in it because a car at rest mid-run sits there, and waiting at rest is
+      // exactly what the limit bounds.
+      ...liveStates.map((from): FSMTransition => ({ from, trigger: 'time_up', to: 'GAME_OVER' })),
     ];
   }
 

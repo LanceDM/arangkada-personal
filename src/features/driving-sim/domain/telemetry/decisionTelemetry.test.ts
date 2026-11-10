@@ -62,7 +62,8 @@ const LEVEL_ID = 8;
 
 /**
  * The level entry, decided the way `buildAdaptivePlan` decides it: the route
- * is rolled first, and the practice item is picked against what it rolled.
+ * is rolled first, and the practice item is picked against what it rolled
+ *.
  */
 const enter = () => {
   const decision = decidePractice(history);

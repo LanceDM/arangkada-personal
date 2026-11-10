@@ -100,7 +100,7 @@ describe('the plain policy', () => {
 describe('the threshold rule', () => {
   const rule = thresholdRule(85);
 
-  /** The routing design's rule written a second time, over the listed labels alone. */
+  /** The design's rule written a second time, over the listed labels alone. */
   const expected = (legal: readonly RoutingMove[], weakest: WeakestReading | null): string => {
     const listed = ids(legal);
     const plain = transitionId(plainMove(legal).transition);
@@ -113,7 +113,7 @@ describe('the threshold rule', () => {
     return reviews.at(-1) ?? plain;
   };
 
-  it('returns a listed move in every cell, for every reading, as the routing design orders the chain', () => {
+  it('returns a listed move in every cell, for every reading, as the design orders the chain', () => {
     const rng = createRng(5);
     let practised = 0;
     let related = 0;

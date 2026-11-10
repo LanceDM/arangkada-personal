@@ -1,3 +1,5 @@
+import type { Language } from '@/shared/lib/localized';
+
 /**
  * Who is signed in, and the account record behind them.
  *
@@ -10,8 +12,8 @@ export interface AuthUser {
   emailVerified: boolean;
   /**
    * The `admin` custom claim on the sign-in token: the only source of admin,
-   * and the one `firestore.rules` checks. The developers set it with their
-   * service account, and it reaches the app on the next sign-in.
+   * and the one `firestore.rules` checks. The developers set it with
+   * a developers' script, and it reaches the app on the next sign-in.
    */
   isAdmin: boolean;
 }
@@ -37,4 +39,6 @@ export interface UserProfile {
   totalScore: number;
   longestStreak: number;
   bestExamScore: number;
+  /** The language the account chose; absent until it chooses one. */
+  language?: Language;
 }

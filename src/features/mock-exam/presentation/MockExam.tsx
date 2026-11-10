@@ -32,7 +32,6 @@ export const MockExam = ({ onBack, onPractice }: MockExamProps) => {
         score={exam.score}
         passed={exam.passed}
         weakAreas={exam.weakAreas}
-        estimatedAbility={exam.estimatedAbility}
         onRetake={exam.restart}
         onPractice={onPractice}
         onBack={onBack}

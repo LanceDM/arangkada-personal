@@ -1,11 +1,12 @@
 import { X } from 'lucide-react';
 import AuthForm from './AuthForm';
+import type { AuthView } from '@/features/auth/domain/credentials';
 
 interface AuthModalProps {
   isOpen: boolean;
   onSuccess: () => void;
   onClose: () => void;
-  defaultView?: 'login' | 'register';
+  defaultView?: AuthView;
   reason?: string;        // "Save your progress" / "Sign in to continue"
 }
 

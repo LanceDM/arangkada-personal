@@ -87,7 +87,7 @@ describe('the weakest competency the decision reads', () => {
     graded('road_signs', 'violation'),
   ];
 
-  it('goes to the first in COMPETENCIES on a tie by default, as the earlier studies read it', () => {
+  it('goes to the first in COMPETENCIES on a tie by default, as the earlier experiments read it', () => {
     const decision = decidePractice(tied)!;
     expect(decision.weakestScore).toBe(15);
     expect(decision.weakest).toBe('driver_legality');

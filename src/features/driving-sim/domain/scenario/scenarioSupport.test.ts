@@ -195,7 +195,7 @@ describe('the cue', () => {
  * road are the situation; the lane, the speed, the timing and the act are the
  * move.
  */
-describe('the items rewritten to set up the situation', () => {
+describe('the rewritten items', () => {
   const SITUATIONS = [
     'level3.priority-yield.left-turner-give-way',
     'level3.priority-yield.approach-intersection',
@@ -218,8 +218,8 @@ describe('the items rewritten to set up the situation', () => {
     // driver is going, never the move.
     'level6.hydrant-at-the-curb',
     'level6.tow-away-zone',
-    // Only its label was on the rewrite list; its description named the curb
-    // lane it grades until the first play-test.
+    // Only its label was on 3e's list; its description named the curb lane it
+    // grades until a play-test.
     'level6.lane-change-slow-bus',
   ];
   const NAMES = [
@@ -295,7 +295,7 @@ describe('the items rewritten to set up the situation', () => {
     // it over; but its situation is on the road prompt while the car is still
     // driving, and the stop alongside the space is the first step of the
     // technique it asks about. It said "Pull up alongside the space and bring
-    // the vehicle to a complete stop" until the first play-test.
+    // the vehicle to a complete stop" until a play-test.
     const bay = LEVEL_SLOTS.flat(2).find(variant => variant.id === 'level6.parallel-parking-bay')!;
     const shown = withoutPlates(scenarioSupport({ ...bay, triggerAtDistance: 0 } as ScenarioEvent, 'none').situation);
     expect(shown).not.toMatch(TELLS);

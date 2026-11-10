@@ -27,11 +27,35 @@ const doc = buildRoutingTelemetry({
   options: GAME_OPTIONS,
   driving: { support: entry.support, approachScale: 1, weakAreaRoll: false, liveReroll: false, practicePolicy: null },
   entry: recordCourseEntry({ entry, before: { ...cursor, pending }, after: settled.cursor, outcome: 'failed', gradedDecisions: 9 }),
+  play: {
+    input: 'touch',
+    touchControls: true,
+    viewport: { width: 1180, height: 820 },
+    frameRate: 60,
+    steps: 5400,
+    slowFrames: 12,
+    lostMs: 0,
+    pauses: 0,
+  },
   log: settled.log,
   at: 1_000,
 });
 
 describe('the routing record', () => {
+  it('keeps how the attempt was played, as the drive reported it', () => {
+    expect(doc.play).toEqual({
+      input: 'touch',
+      touchControls: true,
+      viewport: { width: 1180, height: 820 },
+      frameRate: 60,
+      steps: 5400,
+      slowFrames: 12,
+      lostMs: 0,
+      pauses: 0,
+    });
+    expect(JSON.parse(JSON.stringify(doc))).toEqual(doc);
+  });
+
   it('holds the move, what was legal, and the cursor either side', () => {
     expect(doc.entry).toMatchObject({
       kind: 'course',

@@ -25,7 +25,8 @@ import type { LevelFsmTelemetry } from '@/features/driving-sim/domain/fsm/fsmMet
 import { recordingCanvasContext } from '@/features/driving-sim/presentation/canvas/rendering/recordingCanvas';
 import { provideDrivingSimDependencies } from '@/features/driving-sim/application/dependencies';
 import { useScenarioEvaluation } from '@/features/driving-sim/application/useScenarioEvaluation';
-import { useDrivingSimulation } from './useDrivingSimulation';
+import { TouchInput } from '@/features/driving-sim/presentation/input/touchInput';
+import { useDrivingSimulation, type DrivingSimulation } from './useDrivingSimulation';
 
 /** Stands in for `app/dependencies`, which a mounted drive expects to have run. */
 provideDrivingSimDependencies({
@@ -38,6 +39,8 @@ provideDrivingSimDependencies({
   },
   signCoverage: { load: () => ({}), record: () => {} },
   briefingProgress: { load: () => ({}), save: () => {}, markLessonsRead: () => {} },
+  quizBank: { load: async () => ({ items: [], settings: null }) },
+  quizSittings: { save: async () => {} },
   routingMode: 'legacy',
   routing: { loadAssignment: async () => null, loadCursor: async () => null, saveCursor: async () => {} },
   routingOverride: { load: () => 'assigned', save: () => {} },
@@ -100,12 +103,12 @@ const frameClock = () => {
     get scheduled() {
       return pending.size;
     },
-    /** Runs everything currently scheduled, once. */
-    tick(frames = 1) {
+    /** Runs everything currently scheduled, once per frame, `interval` ms apart. */
+    tick(frames = 1, interval = 16) {
       for (let i = 0; i < frames; i++) {
         const due = pending;
         pending = new Map();
-        time += 16;
+        time += interval;
         for (const callback of due.values()) callback(time);
       }
     },
@@ -122,11 +125,15 @@ const Harness = ({
   onComplete,
   drivenLevel = level,
   report,
+  touch,
+  expose,
 }: {
   keys: Set<string>;
   onComplete: (result: LevelResult, telemetry: LevelFsmTelemetry) => void;
   drivenLevel?: LevelConfig;
   report?: (snapshot: DrivingSnapshot) => void;
+  touch?: TouchInput;
+  expose?: (simulation: DrivingSimulation) => void;
 }) => {
   const fsmRef = useRef<DrivingFSM | null>(null);
   fsmRef.current ??= new DrivingFSM();
@@ -134,11 +141,12 @@ const Harness = ({
   const keysRef = useRef(keys);
 
   const evaluation = useScenarioEvaluation({ fsm });
-  const { canvasRef, snapshot } = useDrivingSimulation({
+  const simulation = useDrivingSimulation({
     level: drivenLevel,
     onComplete,
     fsm,
     keysRef,
+    touch,
     // The test owns the key set, so the drive must not take it away when it
     // releases a frozen panel. The real host hands `useKeyboard`'s own
     // suppression in here; what it does is that hook's business, not this
@@ -154,8 +162,9 @@ const Harness = ({
     support: 'full',
   });
 
-  report?.(snapshot);
-  return <canvas ref={canvasRef} width={460} height={700} />;
+  report?.(simulation.snapshot);
+  expose?.(simulation);
+  return <canvas ref={simulation.canvasRef} width={460} height={700} />;
 };
 
 describe('the drive, mounted under Strict Mode', () => {
@@ -192,13 +201,17 @@ describe('the drive, mounted under Strict Mode', () => {
 
   /** The latest snapshot the drive projected, so a test can watch the car. */
   let latest: DrivingSnapshot | null = null;
+  /** The hook's latest return, for a test that acts as the screen does. */
+  let drive: DrivingSimulation | null = null;
 
   const mount = (
     keys = new Set<string>(),
     onComplete = vi.fn(),
-    drivenLevel: LevelConfig = level
+    drivenLevel: LevelConfig = level,
+    touch?: TouchInput
   ) => {
     latest = null;
+    drive = null;
     act(() => {
       root.render(
         <StrictMode>
@@ -206,8 +219,12 @@ describe('the drive, mounted under Strict Mode', () => {
             keys={keys}
             onComplete={onComplete}
             drivenLevel={drivenLevel}
+            touch={touch}
             report={snapshot => {
               latest = snapshot;
+            }}
+            expose={simulation => {
+              drive = simulation;
             }}
           />
         </StrictMode>
@@ -260,6 +277,116 @@ describe('the drive, mounted under Strict Mode', () => {
     expect(latest!.speed).toBeGreaterThan(start.speed);
     expect(latest!.progress).toBeGreaterThan(start.progress);
     expect(clock.scheduled).toBeGreaterThan(0);
+  });
+
+  describe('by touch', () => {
+    it('acts on a press in the very next frame, as a key does', () => {
+      const touch = new TouchInput();
+      mount(new Set(), vi.fn(), level, touch);
+      act(() => clock.tick());
+      const before = latest!.targetSpeed;
+
+      touch.press(1, 'throttle');
+      act(() => clock.tick());
+
+      expect(latest!.targetSpeed).toBeGreaterThan(before);
+    });
+
+    it('acts on a tap that lifted before the frame came', () => {
+      const touch = new TouchInput();
+      mount(new Set(), vi.fn(), level, touch);
+      act(() => clock.tick());
+      const before = latest!.targetSpeed;
+
+      touch.press(1, 'throttle');
+      touch.lift(1);
+      act(() => clock.tick());
+
+      expect(latest!.targetSpeed).toBeGreaterThan(before);
+    });
+
+    it('releases the drive from a briefing with every finger then down ignored until lifted', () => {
+      const touch = new TouchInput();
+      const keys = new Set<string>();
+      // Level 3 opens with a stop sign, which is read before it is driven.
+      mount(keys, vi.fn(), LEVELS.find(entry => entry.id === 3)!, touch);
+      // The throttle is a setting raised a tap at a time: tap it up to speed.
+      for (let tap = 0; tap < 8; tap++) {
+        keys.add('ArrowUp');
+        act(() => clock.tick());
+        keys.delete('ArrowUp');
+        act(() => clock.tick());
+      }
+      const frame = driveUntil(() => latest?.briefingEvent != null, 3000);
+      expect(frame, 'the drive never reached a briefing').toBeGreaterThan(0);
+
+      // A thumb resting on the brake while the scenario is read.
+      touch.press(1, 'brake');
+      act(() => drive!.dismissBriefing());
+      act(() => clock.tick());
+      const released = latest!.speed;
+      act(() => clock.tick(10));
+      expect(latest!.speed).toBeGreaterThanOrEqual(released);
+
+      // A fresh press brakes.
+      touch.lift(1);
+      touch.press(2, 'brake');
+      act(() => clock.tick(10));
+      expect(latest!.speed).toBeLessThan(released);
+    });
+
+    it('records the drive as played by touch', () => {
+      const touch = new TouchInput();
+      const onComplete = vi.fn();
+      mount(new Set(), onComplete, crashLevel, touch);
+      touch.press(1, 'throttle');
+      touch.press(2, 'right');
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      try {
+        const frame = driveUntil(() => Boolean(latest?.crashed));
+        expect(frame, 'the drive never hit the road closure').toBeGreaterThan(0);
+        act(() => vi.advanceTimersByTime(CRASH_HOLD_MS + 50));
+      } finally {
+        vi.useRealTimers();
+      }
+      expect(onComplete).toHaveBeenCalledTimes(1);
+      const play = onComplete.mock.calls[0][2];
+      expect(play).toMatchObject({ input: 'touch', touchControls: false, lostMs: 0, pauses: 0 });
+      expect(play.steps).toBeGreaterThan(0);
+    });
+  });
+
+  describe('the world runs at real time on every display', () => {
+    const progressAfter = (frames: number, interval: number) => {
+      mount(new Set(['ArrowUp']));
+      act(() => clock.tick(frames, interval));
+      return latest!.progress;
+    };
+
+    it('drives exactly as it always has at 60 Hz: one step per frame', () => {
+      const keys = new Set(['ArrowUp']);
+      mount(keys);
+      act(() => clock.tick(30));
+      const afterThirty = latest!.progress;
+      act(() => root.unmount());
+      root = createRoot(container);
+      mount(keys);
+      for (let frame = 0; frame < 30; frame++) act(() => clock.tick(1, 1000 / 60));
+      expect(latest!.progress).toBe(afterThirty);
+    });
+
+    it('covers the same road in the same time at 120 Hz and at 30 fps', () => {
+      const sixty = progressAfter(120, 1000 / 60);
+      act(() => root.unmount());
+      root = createRoot(container);
+      const oneTwenty = progressAfter(240, 1000 / 120);
+      act(() => root.unmount());
+      root = createRoot(container);
+      const thirty = progressAfter(60, 1000 / 30);
+
+      expect(oneTwenty).toBeCloseTo(sixty, 2);
+      expect(thirty).toBeCloseTo(sixty, 2);
+    });
   });
 
   it('stops scheduling work once unmounted', () => {

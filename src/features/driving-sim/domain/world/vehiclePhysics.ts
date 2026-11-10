@@ -43,17 +43,38 @@ export const FRICTION = 0.15;
  * speed in steps and the car drives to it and holds it, so keeping a steady
  * speed costs no input at all — you are still choosing the speed, but you are
  * not holding or tapping a key to maintain one.
+ *
+ * One tap is 5 km/h on every level: the largest step that lands
+ * exactly on every posted figure in the game (20, 30, 40, 60, 100) and on the
+ * tutorial's 10 km/h slow zone. A third of the limit, as it was, jumped 13 on a
+ * 40 km/h road, so tapping down from 39 went 26, 13, 0 and the slow zone's
+ * "10 km/h or lower" could not be reached by tapping at all.
  */
-export const speedStepFor = (speedLimit: number) => Math.max(5, Math.round(speedLimit / 3));
+export const SPEED_STEP = 5;
 
-/** Eases the car toward its setting: accelerate up to it, drift down to it. */
+/**
+ * Holding the key up repeats the tap, so a 100 km/h road is not twenty presses
+ * away: after `SPEED_REPEAT_DELAY` steps held, one more step every
+ * `SPEED_REPEAT_EVERY`. Counted in world steps (60 a second), so it is
+ * the same seconds on every device: 0.25 s, then every 0.1 s. Both are
+ * assumptions, chosen for a key that answers a hold without running away from a
+ * tap. Down needs no repeat: holding it is the brake.
+ */
+export const SPEED_REPEAT_DELAY = 15;
+export const SPEED_REPEAT_EVERY = 6;
+
+/**
+ * Eases the car toward its setting: accelerate up to it, drift down to it.
+ * `drift` scales the friction to the level's pace (`speedChangeScale`).
+ */
 export const approachTarget = (
   speed: number,
   target: number,
-  acceleration: number
+  acceleration: number,
+  drift = 1
 ): number => {
   if (speed < target) return Math.min(target, speed + acceleration);
-  if (speed > target) return Math.max(target, speed - FRICTION);
+  if (speed > target) return Math.max(target, speed - FRICTION * drift);
   return speed;
 };
 

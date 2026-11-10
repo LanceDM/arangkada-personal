@@ -8,7 +8,7 @@
  * below are about the exam as an instrument: what it is made of, that nothing
  * but the attempt's seed decides which variant a learner meets, that a pass
  * means the same thing whatever was rolled, and that its own half asks only
- * what the quoted LTO sources say.
+ * what the team's source notes quotes.
  */
 import { describe, expect, it } from 'vitest';
 import { COMPETENCIES } from '@/domain/learner/profile';
@@ -121,7 +121,7 @@ describe('the final exam, as it is made', () => {
     }
   });
 
-  it('grades the competencies each slot is tagged with', () => {
+  it('grades the competencies recorded for it', () => {
     const tags = SLOTS.map(slot => [...new Set(slot.map(variant => variant.competency))]);
     expect(tags).toEqual([
       ['document_awareness'],
@@ -202,16 +202,16 @@ describe('the enforcement half, and the emergency', () => {
     }
   });
 
-  it('claims nothing the LTO sources leave open', () => {
+  it('claims nothing the source notes leave open', () => {
     // What a scenario states as true: its citation, its verdict on a right
     // answer, and the right answer itself. A penalty may name the misconception
     // it corrects, so it is held only to the rules no scenario may state at all.
     const OPEN: Array<[RegExp, string, 'anywhere' | 'as true']> = [
-      [/overrid|precedence/i, 'no file says an officer overrides a signal', 'anywhere'],
-      [/rolling stop/i, 'RA 4136’s through-highway proviso conflicts', 'anywhere'],
-      [/\b(?:light|less grave|grave) violation/i, 'no file lists which violation is which category', 'anywhere'],
+      [/overrid|precedence/i, 'no file says an officer overrides a signal (G3)', 'anywhere'],
+      [/rolling stop/i, 'RA 4136’s through-highway proviso conflicts (K1)', 'anywhere'],
+      [/\b(?:light|less grave|grave) violation/i, 'no file lists which violation is which category (G4)', 'anywhere'],
       [/\b911\b|\b117\b/, 'no hotline is sourced for this level', 'anywhere'],
-      [/until the case is settled/i, 'the TOP is 72 hours only', 'as true'],
+      [/until the case is settled/i, 'the TOP is 72 hours only (T1, T2)', 'as true'],
     ];
     const claimed = own.flatMap(variant => {
       const right = variant.choices?.find(choice => choice.action === variant.correctAction)?.label ?? '';
@@ -223,7 +223,7 @@ describe('the enforcement half, and the emergency', () => {
     expect(claimed).toEqual([]);
   });
 
-  it('asks nothing that turns on stepping out when told to', () => {
+  it('asks nothing that turns on stepping out when told to (K2)', () => {
     const asked = own.filter(variant =>
       variant.choices?.some(
         choice => choice.action === variant.correctAction && /step (?:out|down)|get out/i.test(choice.label)

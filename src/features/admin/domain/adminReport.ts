@@ -13,13 +13,12 @@ import type { ScenarioEvent } from '@/features/driving-sim';
  * A per-level result as it appears inside the **legacy embedded**
  * `users/{uid}.progress` object.
  *
- * KNOWN GAP, deliberately preserved: nothing has written this field since
- * progress moved to `users/{uid}/progress/summary` and per-attempt records
- * moved to `users/{uid}/attempts`. Accounts created after that migration carry
- * no `progress`, so the panels below that read it (completed-level counts, weak
- * competencies, the per-user result table) are populated only for legacy
- * accounts. Changing the source would change what the report means, so it is
- * recorded here rather than quietly rewired.
+ * Nothing has written this field since progress moved to
+ * `users/{uid}/progress/summary` and per-attempt records moved to
+ * `users/{uid}/attempts`, so only accounts from before that migration carry
+ * it. The player report counts nothing from it: its figures come from the
+ * attempts and the other modes' records, and a player's detail shows this,
+ * labelled, where it exists.
  */
 export interface LegacyLevelResult {
   levelId: number;

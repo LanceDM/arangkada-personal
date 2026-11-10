@@ -19,6 +19,13 @@ import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSessio
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
 import { laneCentreX, roadXAt, type LaneIndex } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import type { ThrottleCue } from '@/features/driving-sim/domain/world/GameWorld';
+import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
+
+/**
+ * The plans below are in km/h on the dial Level 9 was spaced at. Its pace
+ * drives that same road at its legal limit, k times the figure (`spacedPace`), so each planned speed is put on the dial the level now reads.
+ */
+const dial = (speed: number): number => speed * paceOf(LEVELS.find(level => level.id === 9)!).speedChangeScale;
 
 const level9 = LEVELS.find(level => level.id === 9)!;
 
@@ -210,14 +217,14 @@ const drive = (plan: Plan, frames = 40_000): DriveResult => {
           : { left: view.x > target + LANE_TOLERANCE, right: view.x < target - LANE_TOLERANCE };
 
       // Easing off is a rhythm of separate presses; slamming is one long one.
-      const tooFast = snapshot.speed > want.speed + 0.5;
+      const tooFast = snapshot.speed > dial(want.speed) + dial(0.5);
       const braking = want.ease
         ? tooFast && frame % (TAP_FRAMES + TAP_GAP) < TAP_FRAMES
         : tooFast;
 
       const input: InputState = {
         ...NO_INPUT,
-        throttle: snapshot.targetSpeed < want.speed - 1 && !previous.throttle,
+        throttle: snapshot.targetSpeed < dial(want.speed) - dial(1) && !previous.throttle,
         brake: braking,
         ...steer,
         horn: Boolean(want.horn),

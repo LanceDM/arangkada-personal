@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
@@ -238,7 +239,7 @@ const redCurbNoParkingSlot: SlotVariant[] = [
   },
 ];
 
-// 6. A fire hydrant — from the LTO parking sources. Nothing is posted:
+// 6. A fire hydrant — the parking pack's P1e, P2e and P3. Nothing is posted:
 // the place is the rule, and the rule says how far it reaches. Driven, and
 // graded on one thing, whether the car came to rest within four meters of the
 // hydrant, short of it or past it. A stop further back is one the rule allows,
@@ -254,7 +255,7 @@ const hydrantAtTheCurbSlot: SlotVariant[] = [
     description: 'A fire hydrant stands at the curb on your right. You are looking for a place to park.',
     correctAction: 'accelerate',
     avoid: ['stop'],
-    // The sources' own distance, measured from the car to the hydrant on
+    // P1e, P2e and P3's own distance, measured from the car to the hydrant on
     // the scale the car is drawn at (`UNITS_PER_METER`).
     noStandingWithin: 4,
     recommendedMove: 'Do not stop within four meters of the hydrant.',
@@ -271,10 +272,10 @@ const hydrantAtTheCurbSlot: SlotVariant[] = [
   },
 ];
 
-// 7. A posted tow-away zone — from the LTO parking sources. The same
+// 7. A posted tow-away zone — the pack's P1h, P2h, S3 and S4. The same
 // measurement as the hydrant, on a sign rather than a place: a car may not be
 // parked or left standing where official signs prohibit parking. The sources'
-// text gives the sign no extent (its arrows are image-only), so the
+// text gives the sign no extent (its arrows are image-only, pack 2b), so the
 // stop that fails is the one with the car alongside it.
 const towAwayZoneSlot: SlotVariant[] = [
   {
@@ -310,7 +311,7 @@ const towAwayZoneSlot: SlotVariant[] = [
 // 8. Parking technique — module section 5. The one decision in this level that
 // cannot be driven, so it is answered and then performed: see the file header,
 // and `parkingCutscene` in types.ts. The answer is FDM Vol. 1's PARALLEL
-// PARKING. Both wrong answers enter nose first, which is the
+// PARKING (parking pack B1). Both wrong answers enter nose first, which is the
 // manoeuvre the car performs for any wrong answer, so what the driver watches
 // is what they chose.
 const parallelParkingBaySlot: SlotVariant[] = [
@@ -398,10 +399,12 @@ export const level6: LevelConfig = {
   // Last event at 6210 plus its checkpoint-sized window, and then a runway long
   // enough for the car to pull back out of the bay and drive clear of it.
   roadLength: 6910,
-  // A city route through junctions and parked traffic, matching Level 5. Every
-  // manoeuvre here is made across somebody else's lane, and the speeds the
-  // grader judges "slowed" against should be the ones that deserves.
-  speedLimit: 40,
+  // A city route through junctions and parked traffic, matching Level 5: RA
+  // 4136 §35(b)'s city or municipal street. Spaced and measured at 40 on the
+  // dial; driven at 30 as it was at 40.
+  roadClass: 'city_street',
+  speedLimit: 30,
+  pace: spacedPace(30, 40),
   requiredScore: 121,
   stars2: 145,
   stars3: 166,

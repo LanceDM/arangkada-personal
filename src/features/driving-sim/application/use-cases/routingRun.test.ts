@@ -1,6 +1,5 @@
 /**
- * Story Mode's application layer under the Legacy / New switch: which group a
- * player is in, how a course entry is entered and
+ * Story Mode's application layer under the Legacy / New switch: which group a player is in, how a course entry is entered and
  * saved, and that Legacy still saves and suggests exactly what it did, with
  * its group recorded beside it.
  */
@@ -23,7 +22,13 @@ import type { LearnerAttempt, RoutingAssignment, RoutingOverride } from '../port
 import { buildAdaptivePlan } from './buildAdaptivePlan';
 import { POST_TEST_SEED } from '@/features/driving-sim/domain/adaptive/pilotPostTest';
 import { completeCourseAttempt, completeFreeReplay, completeMission, completePostTest } from './completeMission';
-import { resolveRoutingGroup, routingGroupNow, type RoutingGroupResolution } from './resolveRoutingGroup';
+import {
+  adminTestModeAllowed,
+  loadRoutingOverride,
+  resolveRoutingGroup,
+  routingGroupNow,
+  type RoutingGroupResolution,
+} from './resolveRoutingGroup';
 import { loadCourseCursor, startCourseEntry, startFreeReplay, startPostTest } from './startCourseEntry';
 
 const graded = (competency: DrivingCompetency, result: ActionLog['result'], timestamp: number): ActionLog => ({
@@ -70,6 +75,8 @@ const provide = () =>
     },
     signCoverage: { load: () => ({}), record: () => undefined },
     briefingProgress: { load: () => ({}), save: () => undefined, markLessonsRead: () => undefined },
+    quizBank: { load: async () => ({ items: [], settings: null }) },
+    quizSittings: { save: async () => {} },
     routingMode: world.mode,
     routing: {
       loadAssignment: async () => world.assignment,
@@ -134,6 +141,26 @@ describe('which game a player runs', () => {
     });
     world.override = 'legacy';
     expect(await resolveRoutingGroup({ uid: 'u1', canOverride: true })).toMatchObject({ groupInEffect: 'legacy' });
+  });
+
+  it('is admin test mode: an admin account only, and never a study participant, whatever this browser holds', async () => {
+    expect(adminTestModeAllowed({ isAdmin: true, studyAccount: false })).toBe(true);
+    expect(adminTestModeAllowed({ isAdmin: false, studyAccount: false })).toBe(false);
+    {
+      // Even with the admin claim, which no study account is given.
+      expect(adminTestModeAllowed({ isAdmin: true, studyAccount: true })).toBe(false);
+      expect(adminTestModeAllowed({ isAdmin: false, studyAccount: true })).toBe(false);
+    }
+
+    world.assignment = { group: 'conventional', assignedAt: 1 };
+    for (const stored of ['optimized', 'legacy', 'conventional'] as const) {
+      world.override = stored;
+      const canOverride = adminTestModeAllowed({ isAdmin: true, studyAccount: true });
+      expect(loadRoutingOverride(canOverride)).toBe('assigned');
+      expect(await resolveRoutingGroup({ uid: 'u1', canOverride })).toEqual({
+        mode: 'new', assignedGroup: 'conventional', groupInEffect: 'conventional', override: false,
+      });
+    }
   });
 });
 
@@ -214,12 +241,14 @@ describe('completing an attempt', () => {
     const telemetry = buildLevelFsmTelemetry([], logs, traces(['road', 'penalty', 'garage']), []);
     const settled = await completeCourseAttempt({
       uid: 'u1', result: result(4, false, logs), telemetry, group: conventional,
-      start: { attemptSeed: run.attemptSeed, plan: run.plan, level: run.plan.level! },
+      start: { attemptSeed: run.attemptSeed, plan: run.plan, level: run.plan.level!, language: 'fil' },
       course: { cursor: run.cursor, entry: run.entry },
     });
 
     expect(settled.cursor).toEqual({ state: driveState(4), outcome: 'failed', seq: 8, decisionsSpent: 62, pending: null });
-    expect(settled.note).toBe('Continue to drive Level 4 again.');
+    expect(settled.note).toEqual({ en: 'Continue to drive Level 4 again.' });
+    // The language the attempt began in.
+    expect(world.saved.attempt).toMatchObject({ language: 'fil' });
     expect(world.calls.at(0)).toBe('attempt');
     expect(world.calls.at(-1)).toBe('cursor');
     expect(new Set(world.calls)).toEqual(new Set(['attempt', 'fsm', 'decisions', 'routing', 'cursor']));

@@ -24,7 +24,7 @@ describe('the weakest competency, and how a tie for it is broken', () => {
     expect(getLowestScoringCompetency(profile, 'least-observed')).toBe('parking');
   });
 
-  it('goes to the first in COMPETENCIES under list order, as the earlier studies ran', () => {
+  it('goes to the first in COMPETENCIES under list order, as the earlier experiments ran', () => {
     const profile = profileOf({ driver_legality: { score: 30, attempts: 6 }, road_signs: { score: 30, attempts: 0 } }, 69, 3);
     expect(getLowestScoringCompetency(profile)).toBe('driver_legality');
     expect(getLowestScoringCompetency(profile, 'list-order')).toBe('driver_legality');

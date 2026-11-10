@@ -131,6 +131,8 @@ export type SignalAspect =
  * player can actually read what they are being asked about.
  */
 export interface SignPlate {
+  /** The English name, on a translated plate: what sign coverage files it under. */
+  key?: string;
   /**
    * File under `public/arangkada_extracted_images/level3/`, used for the
    * enlarged plate. Omitted for traffic signals, which have no sign image and
@@ -338,12 +340,14 @@ export type ScenePrefab =
    * A fire hydrant standing at the right curb, with no sign beside it.
    *
    * The place is the rule: a car may not stand within four meters of one
-   * whether or not anything is posted. On the verge
+   * whether or not anything is posted (Level 6 parking pack, P1). On the verge
    * and nothing solid, so it is passed or stood beside, never hit.
    */
   | { kind: 'fire_hydrant' };
 
 export interface MarkingPlate {
+  /** The English name, on a translated plate: what sign coverage files it under. */
+  key?: string;
   /**
    * File under `public/arangkada_extracted_images/level4/`, used for the
    * enlarged plate. Optional: until the module's marking images are wired in,
@@ -636,7 +640,7 @@ export interface NpcVehicleSpec {
    *
    * Decoration rather than a pose: it carries no state and collides with
    * nothing, so the renderer draws it from this flag without the world settling
-   * anything per frame: decorative animation lives in the renderer.
+   * anything per frame. Decorative animation lives in the renderer.
    */
   smoking?: boolean;
   /**

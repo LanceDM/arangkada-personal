@@ -103,7 +103,7 @@ const NOTHING_TO_PLACE = Object.fromEntries(COMPETENCIES.map(c => [c, 'none'])) 
 /**
  * What the routing FSM is told after an entry: the entry's verdict, and the
  * content at the level the pass guard sends the learner to, measured against
- * the route rolled there (`destinationOf`; the roll comes first). `destination` is
+ * the route rolled there (`destinationOf`). `destination` is
  * null where the course is over and nothing is measured.
  */
 export const routingContext = (

@@ -24,6 +24,9 @@ import {
   drawGarage,
   type HotspotStatus,
 } from '@/features/driving-sim/presentation/canvas/rendering/renderers/garageRenderer';
+import { useText } from '@/shared/i18n/useText';
+import type { Localized } from '@/shared/lib/localized';
+import { stageMessages as m } from '../messages';
 
 interface CrashResponseStageProps {
   stage: GarageStageData;
@@ -72,13 +75,13 @@ interface CrashResponseStageProps {
  */
 
 /** What each kind of point looks like, and what a reader is told it is. */
-const MARKERS: Record<StageMarkerKind, { Icon: typeof Flame; sr: string }> = {
-  fire: { Icon: Flame, sr: 'Fire risk' },
-  water: { Icon: Droplets, sr: 'Vehicle in water' },
-  casualty: { Icon: HeartPulse, sr: 'Injured person' },
-  report: { Icon: FileText, sr: 'Reporting duty' },
-  vehicle: { Icon: MapPin, sr: 'Vehicle' },
-  inspect: { Icon: Search, sr: 'Inspection point' },
+const MARKERS: Record<StageMarkerKind, { Icon: typeof Flame; sr: Localized }> = {
+  fire: { Icon: Flame, sr: m.fire },
+  water: { Icon: Droplets, sr: m.water },
+  casualty: { Icon: HeartPulse, sr: m.casualty },
+  report: { Icon: FileText, sr: m.report },
+  vehicle: { Icon: MapPin, sr: m.vehicle },
+  inspect: { Icon: Search, sr: m.inspect },
 };
 
 const markerOf = (hotspot: GarageHotspot) => MARKERS[hotspot.marker ?? 'vehicle'];
@@ -103,6 +106,7 @@ const SceneMarker = ({
   reducedMotion: boolean;
   onOpen: () => void;
 }) => {
+  const say = useText();
   const { Icon, sr } = markerOf(hotspot);
   const resolved = Boolean(status);
   const tone = !status
@@ -118,8 +122,8 @@ const SceneMarker = ({
       type="button"
       disabled={resolved}
       onClick={onOpen}
-      aria-label={`${sr}: ${hotspot.label}${
-        resolved ? ` — ${status === 'correct' ? 'handled correctly' : 'handled wrongly'}` : isNext ? ' — deal with this next' : ''
+      aria-label={`${say(sr)}: ${hotspot.label}${
+        resolved ? ` — ${say(status === 'correct' ? m.handledRight : m.handledWrong)}` : isNext ? ` — ${say(m.dealNext)}` : ''
       }`}
       style={{ left: `${hotspot.x * 100}%`, top: `${hotspot.y * 100}%` }}
       className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-2 shadow-lg transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${tone} ${
@@ -151,6 +155,7 @@ const CrashResponseStage = ({
   onComplete,
   onExit,
 }: CrashResponseStageProps) => {
+  const say = useText();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [statuses, setStatuses] = useState<Record<string, HotspotStatus>>({});
   const [openHotspot, setOpenHotspot] = useState<GarageHotspot | null>(null);
@@ -202,7 +207,7 @@ const CrashResponseStage = ({
         <div className="flex min-w-0 items-center gap-2">
           <TriangleAlert className="h-5 w-5 shrink-0 text-destructive" aria-hidden />
           <p className="truncate font-display text-[13px] font-black uppercase tracking-[0.18em] text-destructive">
-            Crash response
+            {say(m.crashTitle)}
           </p>
           <p className="hidden truncate text-[13px] text-muted-foreground sm:block">{levelName}</p>
         </div>
@@ -210,7 +215,7 @@ const CrashResponseStage = ({
           onClick={onExit}
           className="shrink-0 rounded-lg border border-border bg-card px-3 py-1.5 font-display text-[12px] font-black uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          Exit
+          {say(m.exit)}
         </button>
       </div>
 
@@ -229,11 +234,11 @@ const CrashResponseStage = ({
                 allResolved ? 'text-accent' : 'text-road-yellow'
               }`}
             >
-              {allResolved ? 'Scene handled' : 'Do this now'}
+              {say(allResolved ? m.sceneHandled : m.doNow)}
             </p>
             <p className="mt-1 text-[17px] font-bold leading-6 text-foreground">
               {allResolved
-                ? 'Everything the law asks of you here is done.'
+                ? say(m.allDone)
                 : (next?.objective ?? next?.label ?? '')}
             </p>
           </div>
@@ -279,7 +284,7 @@ const CrashResponseStage = ({
               objective: it is there to be glanced at, not worked down. */}
           <div className="flex flex-col rounded-lg border border-border bg-card p-3 lg:min-h-0 lg:flex-1">
             <p className="mb-2 font-display text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-              Response steps
+              {say(m.responseSteps)}
             </p>
             <ul className="grid content-start gap-1.5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
               {stage.hotspots.map(hotspot => {
@@ -305,14 +310,14 @@ const CrashResponseStage = ({
                           {hotspot.label}
                         </span>
                         <span className="block truncate text-[11px] uppercase tracking-wider text-muted-foreground">
-                          {sr}
+                          {say(sr)}
                         </span>
                       </span>
                       {status === 'correct' && (
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" aria-label="Handled correctly" />
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" aria-label={say(m.handledCorrectly)} />
                       )}
                       {status === 'wrong' && (
-                        <XCircle className="h-4 w-4 shrink-0 text-destructive" aria-label="Handled wrongly" />
+                        <XCircle className="h-4 w-4 shrink-0 text-destructive" aria-label={say(m.handledWrongly)} />
                       )}
                     </button>
                   </li>
@@ -326,7 +331,7 @@ const CrashResponseStage = ({
           <div className="flex shrink-0 items-center gap-3 rounded-lg border border-border bg-card p-3">
             <div className="shrink-0">
               <p className="font-display text-[10px] uppercase tracking-wider text-muted-foreground">
-                Score
+                {say(m.score)}
               </p>
               <p className="font-display text-lg font-black leading-none text-foreground">{score}</p>
             </div>
@@ -339,7 +344,7 @@ const CrashResponseStage = ({
                   : 'cursor-not-allowed bg-muted text-muted-foreground'
               }`}
             >
-              {allResolved ? 'Leave the scene →' : `${resolved.length} of ${stage.hotspots.length} done`}
+              {say(allResolved ? m.leaveScene : m.doneOf(resolved.length, stage.hotspots.length))}
             </button>
           </div>
         </aside>

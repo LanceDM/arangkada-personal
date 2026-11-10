@@ -6,9 +6,11 @@
  *   player. A signed-in player with no assignment, and every guest, plays the
  *   Conventional group and is recorded as unassigned: not a pilot participant.
  *
- * A developer or admin may choose a group for their own testing. The choice
- * lives in this browser, is recorded on every attempt as an override, and
- * never touches the stored assignment.
+ * Admin test mode, set in the admin area: an admin may
+ * choose a group for their own account's testing. The choice lives in this
+ * browser, is recorded on every attempt as an override, never touches the
+ * stored assignment, and is never read for a study participant, in
+ * any build.
  */
 import type { GroupInEffect, RoutingGroup } from '@/features/driving-sim/domain/adaptive/courseRouting';
 import type { RoutingMode } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
@@ -33,6 +35,14 @@ const resolve = (mode: RoutingMode, assignment: RoutingAssignment | null, overri
     override: override !== 'assigned',
   };
 };
+
+/**
+ * Whether admin test mode applies to this account: an admin's own, never a
+ * study participant's, even one that somehow carried the admin claim. A
+ * developer build grants nothing by itself.
+ */
+export const adminTestModeAllowed = ({ isAdmin, studyAccount }: { isAdmin: boolean; studyAccount: boolean }): boolean =>
+  isAdmin && !studyAccount;
 
 export const loadRoutingOverride = (canOverride: boolean): RoutingOverride =>
   canOverride ? drivingSimDeps().routingOverride.load() : 'assigned';

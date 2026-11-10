@@ -27,7 +27,9 @@ import {
   laneOf,
   roadHeadingAt,
   CAR_WIDTH,
-  speedStepFor,
+  SPEED_REPEAT_DELAY,
+  SPEED_REPEAT_EVERY,
+  SPEED_STEP,
   type CurveSpan,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { drivableBounds } from '@/features/driving-sim/domain/world/routeGeometry';
@@ -36,12 +38,10 @@ import {
   CRAWL_PENALTY,
   CRAWL_SPEED_SHARE,
   WRONG_SIDE_PENALTY,
+  OVER_LIMIT_PENALTY,
   stepStandingPenalty,
 } from '@/features/driving-sim/domain/systems/standingPenalties';
-import {
-  TUTORIAL_ACCELERATION,
-  TUTORIAL_MAX_SPEED,
-} from '@/features/driving-sim/domain/systems/tutorial';
+import { TUTORIAL_ACCELERATION } from '@/features/driving-sim/domain/systems/tutorial';
 
 /**
  * How hard a closing curb may shove the car back onto the road each frame.
@@ -55,7 +55,7 @@ const CURB_PUSH_PER_FRAME = 3.5;
  * Ranged a little wider than its own approach span so the lane is fixed just
  * before it becomes visible, never during its run.
  */
-const CHASE_LOCK_RANGE = 340;
+export const CHASE_LOCK_RANGE = 340;
 
 /**
  * The road effect the car is standing in, if any.
@@ -76,13 +76,14 @@ export interface DriveVehicleContext {
   roadX: number;
   isTutorialLevel: boolean;
   speedProfile: { maxSpeed: number; acceleration: number };
-  /** The two standing-penalty events, which the host scores like any other. */
+  /** The three standing-penalty events, which the host scores like any other. */
   crawlPenaltyEvent: ScenarioEvent;
   wrongSidePenaltyEvent: ScenarioEvent;
+  overLimitPenaltyEvent: ScenarioEvent;
 }
 
 export interface DrivenFrame {
-  /** Anything the screen must react to. Only the jolt and the two penalties. */
+  /** Anything the screen must react to. Only the jolt and the three penalties. */
   events: GameEvent[];
   /**
    * The road effect the car was standing in when the frame began.
@@ -107,6 +108,7 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
     speedProfile,
     crawlPenaltyEvent: CRAWL_PENALTY_EVENT,
     wrongSidePenaltyEvent: WRONG_SIDE_PENALTY_EVENT,
+    overLimitPenaltyEvent: OVER_LIMIT_PENALTY_EVENT,
   } = context;
   const car = world.car;
 
@@ -118,30 +120,38 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
 
   // Taps, not holds. The key set stays true for as long as a key is down,
   // so a rising edge is the only way to tell one press from a held one —
-  // otherwise auto-repeat would ramp the setting to the top instantly.
+  // otherwise the setting would ramp to the top in a few frames. A held Up
+  // repeats on its own clock instead: counted here in steps, never read off
+  // the keyboard's auto-repeat, which differs by device and by setting.
   const tappedUp = throttle && !world.prevInput.up;
   const tappedDown = braking && !world.prevInput.down;
   world.prevInput = { up: throttle, down: braking };
+  world.upHeldSteps = throttle ? world.upHeldSteps + 1 : 0;
+  const sincePress = world.upHeldSteps - 1;
+  const repeatedUp =
+    sincePress >= SPEED_REPEAT_DELAY && (sincePress - SPEED_REPEAT_DELAY) % SPEED_REPEAT_EVERY === 0;
 
   // How much road this level's speeds are worth, and how quickly the car and
   // the wheel answer. The dial is unchanged by it — only the world it moves
   // through. See `DrivingPace`.
   const pace = paceOf(level);
-  const maxSpeed = isTutorialLevel ? TUTORIAL_MAX_SPEED : speedProfile.maxSpeed;
+  // The tutorial's top speed is its limit: it charges no speeding,
+  // so a dial that could pass the limit there would only show a learner the
+  // car breaking the number it was just told.
+  const maxSpeed = isTutorialLevel ? level.speedLimit : speedProfile.maxSpeed;
   const acceleration = isTutorialLevel
-    ? TUTORIAL_ACCELERATION
+    ? TUTORIAL_ACCELERATION * pace.speedChangeScale
     : speedProfile.acceleration * pace.accelerationScale;
-  const step = speedStepFor(level.speedLimit);
 
-  if (tappedUp) {
-    world.targetSpeed = Math.min(maxSpeed, world.targetSpeed + step);
+  if (tappedUp || repeatedUp) {
+    world.targetSpeed = Math.min(maxSpeed, world.targetSpeed + SPEED_STEP);
     if (!world.started) {
       world.started = true;
       fsm.transition('start');
     }
   }
   if (tappedDown) {
-    world.targetSpeed = Math.max(0, world.targetSpeed - step);
+    world.targetSpeed = Math.max(0, world.targetSpeed - SPEED_STEP);
   }
 
   // The stretch of road the car is currently on. A wet or flooded surface
@@ -206,13 +216,13 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
     world.targetSpeed = Math.min(world.targetSpeed, car.speed);
     if (world.started) fsm.transition('brake');
   } else {
-    car.speed = approachTarget(car.speed, world.targetSpeed, acceleration);
+    car.speed = approachTarget(car.speed, world.targetSpeed, acceleration, pace.speedChangeScale);
   }
 
   if (surface?.gradient) {
     // A climb bleeds speed off and a descent runs away with it, both of
     // them working against whatever the driver has set.
-    car.speed = Math.max(0, car.speed + surface.gradient);
+    car.speed = Math.max(0, car.speed + surface.gradient * pace.speedChangeScale);
   }
 
   // Taken too fast, rough ground throws the car sideways and costs speed.
@@ -329,9 +339,14 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
   // still a car the correction has just halted.
   const onClearRoad =
     world.started && !world.activeEvent && !world.measuredEvent && car.distance >= world.settledZoneEnd;
+  // The tutorial charges neither, and so warns of neither. Its brake step asks
+  // for the crawl line itself (TUTORIAL_SLOW_SPEED is 25% of its limit), braking
+  // drags the set speed down with the car, and its full stop leaves the car at
+  // rest: a learner doing exactly what it asked was charged for speed control.
+  const standingApplies = onClearRoad && !isTutorialLevel;
 
   const crawl = stepStandingPenalty(world.crawl, CRAWL_PENALTY, {
-    violating: onClearRoad && car.speed < level.speedLimit * CRAWL_SPEED_SHARE,
+    violating: standingApplies && car.speed < level.speedLimit * CRAWL_SPEED_SHARE,
     now,
   });
   // Quiet: scored and logged, but silent on screen. The amber
@@ -345,13 +360,23 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
   // wrong about.
   const oncomingLanes = level.paint?.oncomingLanes ?? 0;
   const wrongSide = stepStandingPenalty(world.wrongSide, WRONG_SIDE_PENALTY, {
-    violating: onClearRoad && oncomingLanes > 0 && car.lane < oncomingLanes,
+    violating: standingApplies && oncomingLanes > 0 && car.lane < oncomingLanes,
     now,
   });
   // Quiet, exactly like the crawl penalty above: scored and logged, but the
   // always-on banner below is the single on-screen cue, not a toast/card.
   if (wrongSide.charge) events.push({ kind: 'penalty', event: WRONG_SIDE_PENALTY_EVENT, action: 'accelerate' });
   world.wrongSideWarning = wrongSide.warning;
+
+  // Over the road's limit. The road's own limit, not a scenario's
+  // posting: a posting is read inside its zone, and clear road is outside
+  // every zone. Quiet like the other two, with the banner as its cue.
+  const overLimit = stepStandingPenalty(world.overLimit, OVER_LIMIT_PENALTY, {
+    violating: standingApplies && car.speed > level.speedLimit,
+    now,
+  });
+  if (overLimit.charge) events.push({ kind: 'penalty', event: OVER_LIMIT_PENALTY_EVENT, action: 'accelerate' });
+  world.overLimitWarning = overLimit.warning;
 
   return { events, surface };
 };

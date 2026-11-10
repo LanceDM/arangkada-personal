@@ -11,8 +11,6 @@
  *   pending before the briefing shows, so leaving and coming back enters the
  *   same entry again.
  * - **A passed level on the map** is a free replay, outside the machine.
- * - **The pilot's post-test** (`/play/story/post-test`) is the final
- *   exam on its one fixed roll, outside the machine like a free replay.
  *
  * A briefing URL loaded cold has no plan behind it and returns to the map, as
  * drive and results already do. The finished attempt is kept beside the next
@@ -22,21 +20,23 @@
  * Everything decided here is route state or a call into Driving Sim's public
  * API; nothing about the routing FSM, the simulation or persistence lives here.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Navigate, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { useLanguage } from '@/shared/i18n/useText';
+import type { Language, Localized } from '@/shared/lib/localized';
+import { storyMessages as m } from './messages';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useProgressStore } from '@/features/progression';
 import {
   completeCourseAttempt,
   completeFreeReplay,
-  completePostTest,
   cursorFrontierLevel,
+  freeReplayNote,
   LEVELS,
+  playableLevel,
   loadCourseCursor,
   nextAttemptSeed,
-  postTestNote,
   startCourseEntry,
   startFreeReplay,
-  startPostTest,
   type AdaptivePlan,
   type CourseRun,
   type FreeReplayRun,
@@ -44,22 +44,23 @@ import {
   type RoutingCursor,
 } from '@/features/driving-sim';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
-import type { LevelFsmTelemetry } from '@/features/driving-sim';
+import type { LevelFsmTelemetry, PlayConditions } from '@/features/driving-sim';
 import type { StoryRouting, StoryRunContext } from './storyRunContext';
 
 const SAVE_PROMPT_KEY = 'arangkada_save_prompted';
 const NO_PRIOR_LOGS: readonly ActionLog[] = [];
 
-/** One planned attempt: a course entry, a free replay, or the pilot's post-test. */
+/** One planned attempt: a course entry or a free replay. */
 interface PlannedRun {
+  /** The language chosen when the entry began, which its attempt records. */
+  language: Language;
   attempt: number;
   levelId: number;
   seed: number;
   plan: AdaptivePlan;
   course: CourseRun | null;
-  /** A free replay's or the post-test's run, outside the machine. */
+  /** A free replay's run, outside the machine. */
   free: FreeReplayRun | null;
-  postTest: boolean;
 }
 
 interface RoutedStoryRunProps {
@@ -71,6 +72,7 @@ interface RoutedStoryRunProps {
 const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
   const { levelId: levelIdParam } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const requestedLevelId = levelIdParam === undefined ? null : Number(levelIdParam);
   const isValidLevel =
     requestedLevelId !== null &&
@@ -80,13 +82,14 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
 
   const { saveLevelResult, unlockLevel, totalScore, levelResults } = useProgressStore();
 
+  const { language } = useLanguage();
   const [cursor, setCursor] = useState<RoutingCursor | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Localized | null>(null);
   const [run, setRun] = useState<PlannedRun | null>(null);
   // The attempt the results screen shows, kept until the next one finishes.
   const [finished, setFinished] = useState<{ levelId: number; level: LevelConfig } | null>(null);
   const [levelResult, setLevelResult] = useState<LevelResult | null>(null);
-  const [resultNote, setResultNote] = useState<string | null>(null);
+  const [resultNote, setResultNote] = useState<Localized | null>(null);
   const [saving, setSaving] = useState(false);
   const [startedRun, setStartedRun] = useState<number | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
@@ -102,7 +105,7 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
       .then(loaded => !cancelled && setCursor(loaded))
       .catch(failure => {
         console.error('Failed to load the course:', failure);
-        if (!cancelled) setError('Your course could not be loaded. Check your connection and reload.');
+        if (!cancelled) setError(m.courseNotLoaded);
       });
     return () => {
       cancelled = true;
@@ -136,7 +139,7 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
         navigate(`/play/story/${next.levelId}/briefing`);
       } catch (failure) {
         console.error('Failed to enter the course:', failure);
-        setError('That level could not be prepared. Check your connection and try again.');
+        setError(m.levelNotPrepared);
       } finally {
         starting.current = false;
       }
@@ -144,27 +147,35 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
     [navigate]
   );
 
-  const continueCourse = () =>
-    void enter(async () => {
-      const current = cursor ?? (await loadCourseCursor(uid));
-      const course = await startCourseEntry({ uid, group, cursor: current, attemptSeed: nextAttemptSeed() });
-      setCursor(course.cursor);
-      return { levelId: course.entry.levelId, seed: course.attemptSeed, plan: course.plan, course, free: null, postTest: false };
-    });
+  const continueCourse = useCallback(
+    () =>
+      void enter(async () => {
+        const current = cursor ?? (await loadCourseCursor(uid));
+        const course = await startCourseEntry({ uid, group, cursor: current, attemptSeed: nextAttemptSeed() });
+        setCursor(course.cursor);
+        return { language, levelId: course.entry.levelId, seed: course.attemptSeed, plan: course.plan, course, free: null };
+      }),
+    [enter, cursor, uid, group, language]
+  );
+
+  // The study's home asks for the next entry on arrival,
+  // as the map's Continue would; the request is taken once, then cleared.
+  const continueOnArrival = Boolean((location.state as { continueCourse?: boolean } | null)?.continueCourse);
+  const arrivalTaken = useRef(false);
+  useEffect(() => {
+    if (!continueOnArrival || cursor === null || activeLevel !== null || arrivalTaken.current) return;
+    arrivalTaken.current = true;
+    navigate(location.pathname, { replace: true, state: null });
+    continueCourse();
+  }, [continueOnArrival, cursor, activeLevel, continueCourse, navigate, location.pathname]);
 
   const playFreeReplay = (levelId: number) =>
     void enter(async () => {
       const free = await startFreeReplay({ uid, levelId, attemptSeed: nextAttemptSeed() });
-      return { levelId, seed: free.attemptSeed, plan: free.plan, course: null, free, postTest: false };
+      return { language, levelId, seed: free.attemptSeed, plan: free.plan, course: null, free };
     });
 
-  const playPostTest = () =>
-    void enter(async () => {
-      const free = await startPostTest({ uid });
-      return { levelId: free.levelId, seed: free.attemptSeed, plan: free.plan, course: null, free, postTest: true };
-    });
-
-  const completeRun = (result: LevelResult, telemetry?: LevelFsmTelemetry) => {
+  const completeRun = (result: LevelResult, telemetry?: LevelFsmTelemetry, play?: PlayConditions) => {
     setLevelResult(result);
     saveLevelResult(result);
     const index = LEVELS.findIndex(level => level.id === result.levelId);
@@ -173,31 +184,23 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
     if (!run || !run.plan.level) return;
 
     setFinished({ levelId: run.levelId, level: run.plan.level });
-    const start = { attemptSeed: run.seed, plan: run.plan, level: run.plan.level };
+    const start = { attemptSeed: run.seed, plan: run.plan, level: run.plan.level, language: run.language };
     const resolution = routing.resolution;
     setSaving(true);
     setResultNote(null);
     completion.current = (
       run.course
-        ? completeCourseAttempt({ uid, result, telemetry, start, group: resolution, course: run.course }).then(settled => {
+        ? completeCourseAttempt({ uid, result, telemetry, start, group: resolution, play, course: run.course }).then(settled => {
             setCursor(settled.cursor);
             setResultNote(settled.note);
           })
-        : run.postTest
-          ? completePostTest({ uid, result, telemetry, start, group: resolution, route: run.free!.route }).then(() =>
-              setResultNote('Your post-test is saved. Tell the facilitator you are done.')
-            )
-          : completeFreeReplay({ uid, result, telemetry, start, group: resolution, route: run.free!.route }).then(() =>
-              setResultNote('A replay outside your course: Continue picks your course up where you left it.')
-            )
+        : completeFreeReplay({ uid, result, telemetry, start, group: resolution, play, route: run.free!.route }).then(() =>
+            setResultNote(m.replayOutside)
+          )
     )
       .catch(async failure => {
         console.error('Failed to save the attempt:', failure);
-        setResultNote(
-          run.postTest
-            ? 'Your post-test could not be saved. Tell the facilitator before doing anything else.'
-            : 'Your result could not be saved. Continue will give you this step of your course again.'
-        );
+        setResultNote(m.resultNotSaved);
         // The stored cursor still has the entry pending, so it is entered again.
         setCursor(await loadCourseCursor(uid).catch(() => null));
       })
@@ -209,12 +212,19 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
     }
   };
 
+  const current = run && run.levelId === activeLevel ? run : null;
+  const rolledLevel = current?.plan.level ?? (finished && finished.levelId === activeLevel ? finished.level : null);
+  // The screens read this; the records keep the plan's English level.
+  const shownLanguage = current?.language ?? language;
+  const levelConfig = useMemo(
+    () => (rolledLevel ? playableLevel(rolledLevel, shownLanguage) : null),
+    [rolledLevel, shownLanguage]
+  );
+
   if (levelIdParam !== undefined && !isValidLevel) {
     return <Navigate to="/play/story" replace />;
   }
 
-  const current = run && run.levelId === activeLevel ? run : null;
-  const levelConfig = current?.plan.level ?? (finished && finished.levelId === activeLevel ? finished.level : null);
   const frontierLevelId = cursor ? cursorFrontierLevel(cursor) : null;
 
   const context: StoryRunContext = {
@@ -243,15 +253,13 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
       frontierLevelId,
       certified: cursor?.state.kind === 'CERTIFIED',
       loading: cursor === null,
-      openAll: routing.canOverride,
-      note: current?.course?.note ?? (current?.postTest ? postTestNote() : null),
-      postTest: current?.postTest ?? false,
+      openAll: routing.openAll,
+      note: current?.course?.note ?? (current?.free ? freeReplayNote(current.levelId) : null),
       resultNote,
       saving,
       error,
       continueCourse,
       playFreeReplay,
-      playPostTest: uid ? playPostTest : null,
     },
     liveReroll: false,
   };

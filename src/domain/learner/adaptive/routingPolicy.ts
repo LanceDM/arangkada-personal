@@ -1,5 +1,5 @@
 // The routing policies' vocabulary: what a policy is shown, what it returns,
-// and the threshold rule.
+// and the threshold rule the threshold policies play.
 //
 // A routing policy chooses one of the moves the routing FSM lists as legal
 // (`legalTransitions`, src/domain/routing) and nothing else. It is pure: what
@@ -78,7 +78,7 @@ export const aimsOf = (legal: readonly RoutingMove[], addOn: Exclude<AddOn, 'non
   ...new Set(legal.filter(move => addOnOf(move.transition) === addOn).map(move => aimOf(move.transition)!)),
 ];
 
-/** The plain FSM, the Conventional group's: the pass guard's move and nothing added, every time. */
+/** The plain policy, the plain FSM: the pass guard's move and nothing added, every time. */
 export const plainPolicy: RoutingPolicy<unknown> = ({ legal }) => plainMove(legal);
 
 /** What an observer says about the learner's weakest competency. Null where it has nothing to say yet. */
@@ -89,14 +89,14 @@ export interface WeakestReading {
 }
 
 /**
- * The routing design's threshold rule. While the weakest competency reads below
+ * The design's threshold rule. While the weakest competency reads below
  * `threshold`: practise it if that is legal, else its first curriculum
  * relative that can legally be practised (`relatedCompetencies`, confirmed
  * edges first), else review it; otherwise, and whenever the reading is null
  * or at the threshold, the plain move. Of several legal reviews it takes the
  * highest level: the most recent one passed that teaches the competency.
  *
- * It can read BKT or, in simulation, the true skill. Only the
+ * The BKT threshold rule reads it off BKT, the oracle rule off the true skill. Only the
  * weakest competency is ever reviewed, never a relative.
  */
 export const thresholdRule =

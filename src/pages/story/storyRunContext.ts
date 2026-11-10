@@ -5,6 +5,7 @@
  * Its own file rather than beside the layout component because a module that
  * exports both a component and a hook trips `react-refresh/only-export-components`.
  */
+import type { Localized } from '@/shared/lib/localized';
 import { useOutletContext } from 'react-router-dom';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import type { SupportLevel, WeakArea } from '@/domain/learner/competency';
@@ -12,19 +13,25 @@ import type {
   CourseNote,
   LevelConfig,
   LevelFsmTelemetry,
+  PlayConditions,
   LevelRecommendation,
   PracticeChoice,
   RoutingGroupResolution,
-  RoutingOverride,
 } from '@/features/driving-sim';
 
-/** Which game this Story Mode runs as, and the developers' and admins' override. */
+/**
+ * Which game this Story Mode runs as. Admin test mode, which may change it,
+ * is set in the admin area.
+ */
 export interface StoryRouting {
   resolution: RoutingGroupResolution;
-  /** A developer build or an admin: may choose the group for their own testing. */
-  canOverride: boolean;
-  override: RoutingOverride;
-  setOverride: (override: RoutingOverride) => void;
+  /** Every level open as a free replay: a developer build or an admin, never a study participant. */
+  openAll: boolean;
+  /**
+   * A study participant: the course and nothing else, no
+   * free replay, and the study's home in place of the map's menu.
+   */
+  participant: boolean;
 }
 
 /** A New group's course: the routing FSM decides each course entry. */
@@ -37,18 +44,14 @@ export interface StoryCourse {
   openAll: boolean;
   /** Why the entry being briefed is the one it is; null for a free replay. */
   note: CourseNote | null;
-  /** The attempt being briefed, driven or shown is the pilot's post-test. */
-  postTest: boolean;
   /** What Continue leads to, once the finished attempt is saved. */
-  resultNote: string | null;
+  resultNote: Localized | null;
   /** The finished attempt is still being saved; Continue waits for it. */
   saving: boolean;
   /** Something went wrong loading or entering the course. */
-  error: string | null;
+  error: Localized | null;
   continueCourse: () => void;
   playFreeReplay: (levelId: number) => void;
-  /** Starts the pilot's post-test; null for a guest, whose attempt would not be saved. */
-  playPostTest: (() => void) | null;
 }
 
 export interface StoryRunContext {
@@ -95,7 +98,7 @@ export interface StoryRunContext {
    * rather than a field on the result: the raw transition log is large and must
    * reach persistence without passing through React state or the progress store.
    */
-  completeRun: (result: LevelResult, telemetry?: LevelFsmTelemetry) => void;
+  completeRun: (result: LevelResult, telemetry?: LevelFsmTelemetry, play?: PlayConditions) => void;
   /**
    * Discards the finished attempt so a fresh one can be rolled. Retry, Next and
    * the practice suggestion all mean "that attempt is over, plan another one".

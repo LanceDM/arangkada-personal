@@ -4,6 +4,8 @@ import type { GarageHotspot, GarageStage as GarageStageData } from '@/features/d
 import { useStageScale } from './useStageScale';
 import { StageDecision } from './stage/StageDecision';
 import { GARAGE_HEIGHT, GARAGE_WIDTH, drawGarage, hitTestHotspot, type HotspotMarker, type HotspotStatus, } from '@/features/driving-sim/presentation/canvas/rendering/renderers/garageRenderer';
+import { useText } from '@/shared/i18n/useText';
+import { stageMessages as m } from './messages';
 interface GarageStageProps {
   garage: GarageStageData;
   levelName: string;
@@ -28,16 +30,16 @@ interface GarageStageProps {
  */
 const SCENE_COPY = {
   garage: {
-    eyebrow: 'Pre-Drive Inspection',
-    checklist: 'Readiness Checklist',
-    done: 'Start Engine →',
-    pending: (n: number) => `Inspect all ${n}`,
+    eyebrow: m.preDrive,
+    checklist: m.checklist,
+    done: m.startEngine,
+    pending: m.inspectAll,
   },
   crash_scene: {
-    eyebrow: 'At The Scene',
-    checklist: 'Crash Response',
-    done: 'Finish mission →',
-    pending: (n: number) => `Resolve all ${n}`,
+    eyebrow: m.atScene,
+    checklist: m.crashResponse,
+    done: m.finishMission,
+    pending: m.resolveAll,
   },
 } as const;
 
@@ -47,6 +49,7 @@ const SCENE_COPY = {
  * stage fits the viewport without scrolling.
  */
 const GarageStage = ({ garage, levelName, score, choiceSeed, onAnswer, onComplete, onExit }: GarageStageProps) => {
+  const say = useText();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [statuses, setStatuses] = useState<Record<string, HotspotStatus>>({});
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -135,7 +138,7 @@ const GarageStage = ({ garage, levelName, score, choiceSeed, onAnswer, onComplet
           <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="font-display text-[10px] font-black uppercase tracking-[0.22em] text-primary">
-                {copy.eyebrow}
+                {say(copy.eyebrow)}
               </p>
               <h1 className="truncate text-lg font-black uppercase leading-tight text-foreground">
                 {levelName}
@@ -145,7 +148,7 @@ const GarageStage = ({ garage, levelName, score, choiceSeed, onAnswer, onComplet
               onClick={onExit}
               className="shrink-0 rounded-lg border border-border bg-card px-3 py-1.5 font-display text-[10px] font-black uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
             >
-              Exit
+              {say(m.exit)}
             </button>
           </div>
 
@@ -178,7 +181,7 @@ const GarageStage = ({ garage, levelName, score, choiceSeed, onAnswer, onComplet
           <div className="flex flex-col rounded-lg border border-border bg-card p-4 lg:min-h-0 lg:flex-1">
             <div className="mb-3 flex shrink-0 items-center justify-between">
               <p className="font-display text-[10px] font-black uppercase tracking-[0.2em] text-primary">
-                {copy.checklist}
+                {say(copy.checklist)}
               </p>
               <p className="font-display text-xs font-black text-foreground">
                 {resolvedCount} / {garage.hotspots.length}
@@ -230,7 +233,7 @@ const GarageStage = ({ garage, levelName, score, choiceSeed, onAnswer, onComplet
 
           <div className="flex shrink-0 items-center gap-4 rounded-lg border border-border bg-card p-4">
             <div className="shrink-0">
-              <p className="font-display text-[9px] uppercase tracking-wider text-muted-foreground">Score</p>
+              <p className="font-display text-[9px] uppercase tracking-wider text-muted-foreground">{say(m.score)}</p>
               <p className="font-display text-xl font-black leading-none text-foreground">{score}</p>
             </div>
             <button
@@ -242,7 +245,7 @@ const GarageStage = ({ garage, levelName, score, choiceSeed, onAnswer, onComplet
                   : 'cursor-not-allowed bg-muted text-muted-foreground'
               }`}
             >
-              {allResolved ? copy.done : copy.pending(garage.hotspots.length)}
+              {say(allResolved ? copy.done : copy.pending(garage.hotspots.length))}
             </button>
           </div>
         </aside>

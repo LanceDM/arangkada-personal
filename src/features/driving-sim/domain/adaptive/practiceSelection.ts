@@ -34,13 +34,13 @@ import { DEFAULT_TRANSITION_PARAMS, type TransitionParams } from '@/features/dri
  * on adapting a level at all, the line `review` counts as mastered, the
  * pre-level weak-area hint and the live re-roll.
  *
- * 85, by the pre-registered rule of the latest tau sweep, which is the same
- * rule that earlier moved it from the hand-picked 70 to 50. Read what this
- * result means before moving it again.
+ * 85, by the pre-registered rule of the (the second experiment) tau sweep, which
+ * is the same rule that moved it from the hand-picked 70 to 50 in the first experiment
+ *. Read what this result means before moving it again.
  *
- * Under the retrained policy the gate never closes: no simulated learner
- * reached tau at any value in 50-90, so tau no longer decides how much of a
- * learner's history is adapted, as it once did. What the sweep measured is which policy the
+ * Under the second experiment's policy the gate never closes: no simulated learner reached tau at
+ * any value in 50-90, so tau no longer decides how much of a learner's history
+ * is adapted, as it did in v1. What the sweep measured is which policy the
  * training happened to land on at each tau - 85 and 75 found a policy that
  * spreads practice across the syllabus, and the other seven found one that
  * concentrates it. 85 won by that accident, not by being a better threshold.
@@ -121,8 +121,8 @@ export interface PracticeDecision {
  * mastery bucket, the learner's recent form on it, and their response latency
  * over `logs`, the chronological history `profile` was built from.
  *
- * Exported for the offline simulation, which folds BKT rather than replaying
- * it and reads the state through this
+ * Exported for the fourth experiment's environment (a developers' script),
+ * which folds BKT rather than replaying it and reads the state through this
  * for any tie-break but the one its folded observer applies.
  */
 export const practiceState = (
@@ -136,7 +136,7 @@ export const practiceState = (
 
 /**
  * `tieBreak` decides the weakest competency among tied scores. Omitted, it is
- * `list-order`, the rule the earlier studies ran under; the game passes
+ * `list-order`, the rule the earlier experiments ran under; the game passes
  * `GAME_OPTIONS.weakestTieBreak` (adaptiveOptions.ts).
  */
 export const decidePractice = (
@@ -240,7 +240,7 @@ export const practiceFor = (
   // Always fall through to the weakest competency and its curriculum
   // relatives so a learner still gets *something* even when the policy's
   // preferred target has no portable content at this level - the same
-  // reliability guarantee the first selector made.
+  // reliability guarantee the earlier selector made.
   const chain = [primary, weakest, ...relatedCompetencies(weakest)].filter(
     (competency, index, all) => all.indexOf(competency) === index
   );
@@ -297,8 +297,8 @@ export const levelSupport = (levelId: number, choice: PracticeChoice | null): Su
  * post-level "practice this" suggestion at a level that genuinely teaches the
  * target competency, rather than guessing from a level's name or prose.
  *
- * Exported for the offline simulation, whose test holds the competencies it
- * plays to this resolution.
+ * Exported for the fourth experiment's environment (a developers' script),
+ * whose test holds the competencies it plays to this resolution.
  */
 export const levelCompetencies =(level: LevelConfig): Set<DrivingCompetency> => {
   const competencies = new Set<DrivingCompetency>();

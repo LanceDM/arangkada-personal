@@ -35,6 +35,15 @@ export interface DrivingPace {
   accelerationScale: number;
   /** Multiplies the brake force. Below 1 is a longer, smoother stop. */
   brakingScale: number;
+  /**
+   * Multiplies every change of speed the world makes on its own, in km/h per
+   * frame: the car drifting down to a lower setting, a gradient's pull, a
+   * scenario vehicle speeding up or slowing, and the tutorial's fixed
+   * acceleration. Each is written as a fixed km/h a frame, so on a level whose
+   * dial is scaled against its road they would otherwise act faster or slower
+   * than the road was measured with.
+   */
+  speedChangeScale: number;
 }
 
 /**
@@ -46,6 +55,31 @@ export const DEFAULT_PACE: DrivingPace = {
   steerPerFrame: 2.5,
   accelerationScale: 1,
   brakingScale: 1,
+  speedChangeScale: 1,
+};
+
+/**
+ * The pace that drives a road at its legal `limit` exactly as the shared pace
+ * drove it at `spacedFor`.
+ *
+ * A level's road — where its scenarios stand, how many seconds a warning gives,
+ * how far a stop takes, how long the drive lasts — was spaced and measured at
+ * the dial it had before its limit was set to RA 4136 §35. Changing only the
+ * dial would rescale all of it. With k = limit / spacedFor, a km/h is worth 1/k
+ * the road, and every change of speed (the brake, coasting, a gradient, the
+ * traffic) is k times the km/h, so in road units per second the car, its
+ * stopping distance and its coasting are what they were at `spacedFor`.
+ *
+ * Acceleration and top speed need nothing: both are derived as a share of the
+ * limit (`speedProfileFor`), so they scale with it already.
+ */
+export const spacedPace = (limit: number, spacedFor: number): Partial<DrivingPace> => {
+  const k = limit / spacedFor;
+  return {
+    distancePerSpeed: DEFAULT_PACE.distancePerSpeed / k,
+    brakingScale: k,
+    speedChangeScale: k,
+  };
 };
 
 /** The pace a level runs at. */

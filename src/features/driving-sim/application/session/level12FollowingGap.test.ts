@@ -4,7 +4,7 @@
  * Slot 5 is a traffic stop: the car is graded on pulling over to the curb lane
  * and stopping. Slot 6 rolls a hazard from Levels 7 to
  * 11, and seven of its twelve variants grade the gap kept to a vehicle "ahead
- * of you in your lane". Until that was fixed, six of those vehicles
+ * of you in your lane". Until this was fixed, six of those vehicles
  * were fixed to the inner lane and the seventh, Level 8's truck, joined
  * whichever lane the car was in while it was still pulling over. So a driver
  * who had just done what slot 5 asked drove on in the curb lane beside the
@@ -25,6 +25,14 @@ import type { SceneNode } from '@/features/driving-sim/domain/scene/SceneNode';
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
 import { laneCentreX, laneOf, roadXAt, type LaneIndex } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
+import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
+import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
+
+/**
+ * The plans below are in km/h on the dial Level 12 was spaced at. Its pace
+ * drives that same road at its legal limit, k times the figure (`spacedPace`), so each planned speed is put on the dial the level now reads.
+ */
+const dial = (speed: number): number => speed * paceOf(LEVELS.find(level => level.id === 12)!).speedChangeScale;
 
 const INNER = 2 as LaneIndex;
 const CURB = 3 as LaneIndex;
@@ -155,8 +163,8 @@ const drive = (level: LevelConfig, event: ScenarioEvent, plan: Plan): Run => {
       const x = car?.x ?? target;
       const input: InputState = {
         ...NO_INPUT,
-        throttle: snapshot.targetSpeed < want.speed - 1 && !previous.throttle,
-        brake: snapshot.speed > want.speed + 0.5,
+        throttle: snapshot.targetSpeed < dial(want.speed) - dial(1) && !previous.throttle,
+        brake: snapshot.speed > dial(want.speed) + dial(0.5),
         left: x > target + 4,
         right: x < target - 4,
       };

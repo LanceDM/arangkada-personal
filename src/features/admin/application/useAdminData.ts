@@ -61,7 +61,7 @@ const loadAdminData = async (): Promise<AdminData> => {
 };
 
 export const useAdminData = (enabled: boolean) => {
-  const { data = EMPTY, isFetching, refetch } = useQuery({
+  const { data = EMPTY, isFetching, refetch, dataUpdatedAt } = useQuery({
     queryKey: ['admin-report'],
     queryFn: loadAdminData,
     enabled,
@@ -80,6 +80,8 @@ export const useAdminData = (enabled: boolean) => {
     examResults: data.examResults,
     dailyResults: data.dailyResults,
     isLoading: isFetching,
+    /** When the report was last read; null before the first read. */
+    loadedAt: dataUpdatedAt > 0 ? dataUpdatedAt : null,
     loadError: failed
       ? 'Some Firebase collections could not be loaded. Check the collection messages below.'
       : null,

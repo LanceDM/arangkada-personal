@@ -54,6 +54,7 @@ import { SLOTS as level10Slots, SLOT_DISTANCES as level10At } from '@/features/d
 import { SLOTS as level11Slots, SLOT_DISTANCES as level11At } from '@/features/driving-sim/domain/scenario/content/levels/level11';
 import { SLOTS as level12Slots, SLOT_DISTANCES as level12At } from '@/features/driving-sim/domain/scenario/content/levels/level12';
 import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
+import { tapsTo } from './driveSamples';
 
 /** Every theta the machine accepts at its bounds, and the three the policy chooses between. */
 export const THETAS = [0.5, 0.75, 1, 1.5, 2] as const;
@@ -210,7 +211,7 @@ export type Driver = (at: {
   speed: number;
 }) => Partial<InputState>;
 
-/** Holds the speed two throttle taps give, and does nothing else. */
+/** Holds two-thirds of the limit, and does nothing else. */
 export const cruise: Driver = () => ({});
 
 /**
@@ -288,8 +289,8 @@ const seeded = (seed: number) => {
  * Drives one scenario at `theta`, from rest just past the previous one's zone,
  * until it is decided.
  *
- * Throttle is two taps, and two more after any stop the driver did not ask to
- * hold; every hold the drive opens is answered the frame it opens, checkpoints
+ * Throttle is taps to two-thirds of the limit, and the same again after any
+ * stop the driver did not ask to hold; every hold the drive opens is answered the frame it opens, checkpoints
  * and cutscenes with their first choice; and every verdict is settled as the
  * host settles one, so the machine is always somewhere an approach can open.
  */
@@ -384,6 +385,7 @@ const driveFrom = (
     let frame = 0;
     let heldFor = 0;
     let taps = 0;
+    const cruiseTaps = tapsTo((level.speedLimit * 2) / 3);
     let wasMoving = false;
 
     const distanceNow = () => session.getFrame()?.scene.car.distance ?? startDistance;
@@ -430,7 +432,7 @@ const driveFrom = (
         wasMoving = false;
         taps = 0;
       }
-      const throttle = taps < 2 && !asked.brake && frame % 4 === 0;
+      const throttle = taps < cruiseTaps && !asked.brake && frame % 4 === 0;
       if (throttle) taps += 1;
 
       settle(session.update({ ...NO_INPUT, ...asked, throttle }));

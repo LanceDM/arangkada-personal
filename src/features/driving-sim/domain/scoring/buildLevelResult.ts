@@ -30,33 +30,42 @@ export interface RunTotals {
 }
 
 /**
+ * How a run ended early, if it did: in a collision, with its reason, or by
+ * running out of driving time. A run driven to its end has none.
+ */
+export type RunEnding = { kind: 'crash'; reason: string } | { kind: 'time_up' };
+
+/**
  * Build the finished result for a drive.
  *
- * A crash forces `stars: 0` and `completed: false` whatever the score, and
- * carries the reason; every non-crash ending grades by the level's own star
- * thresholds. The competency projection is replayed from the run's logs the
- * same way in every case. The `violations` passed in is authoritative - the
- * crash caller adds its own +1 before calling, so that count stays visible at
- * the call site rather than hidden in here.
+ * A crash or a timeout forces `stars: 0` and `completed: false` whatever the
+ * score, and carries what ended it; a run driven to its end grades by the
+ * level's own star thresholds. The competency projection is replayed from the
+ * run's logs the same way in every case. The `violations` passed in is
+ * authoritative - the crash caller adds its own +1 before calling, so that
+ * count stays visible at the call site rather than hidden in here. A timeout
+ * adds none: running out of time is not a driving violation, and it is not
+ * evidence about any competency either.
  */
 export const buildLevelResult = (
   level: LevelConfig,
   totals: RunTotals,
-  crashReason?: string
+  ending?: RunEnding
 ): LevelResult => {
   const profile = buildBKTLearnerProfile(totals.logs);
-  const crashed = crashReason !== undefined;
+  const endedEarly = ending !== undefined;
   return {
     levelId: level.id,
     score: totals.score,
-    stars: crashed ? 0 : starsFor(level, totals.score),
-    completed: crashed ? false : totals.score >= level.requiredScore,
+    stars: endedEarly ? 0 : starsFor(level, totals.score),
+    completed: endedEarly ? false : totals.score >= level.requiredScore,
     violations: totals.violations,
     correctActions: totals.correctActions,
     logs: totals.logs,
     ...(totals.signOutcomes !== undefined ? { signOutcomes: totals.signOutcomes } : {}),
     competencyScores: getCompetencyScores(profile),
     weakestCompetency: getWeakestCompetency(profile),
-    ...(crashed ? { crashReason } : {}),
+    ...(ending?.kind === 'crash' ? { crashReason: ending.reason } : {}),
+    ...(ending?.kind === 'time_up' ? { timedOut: true as const } : {}),
   };
 };

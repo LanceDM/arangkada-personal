@@ -12,6 +12,8 @@
  * is how the two would come to disagree about what `slow` is called.
  */
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
+import type { TextOf } from '@/shared/i18n/useText';
+import type { Localized } from '@/shared/lib/localized';
 
 /**
  * Every graded action, as the past tense of what the driver did.
@@ -21,32 +23,32 @@ import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scena
  * turned "too_slow" into the sentence "You too slow". A verdict a player cannot
  * read is a verdict that teaches nothing.
  */
-const HAPPENED: Record<string, string> = {
-  brake: 'slowed down',
-  stop: 'came to a full stop',
-  accelerate: 'kept going',
-  turn_left: 'steered left',
-  turn_right: 'steered right',
-  honk: 'used the horn',
+const HAPPENED: Record<string, Localized> = {
+  brake: { en: 'slowed down' },
+  stop: { en: 'came to a full stop' },
+  accelerate: { en: 'kept going' },
+  turn_left: { en: 'steered left' },
+  turn_right: { en: 'steered right' },
+  honk: { en: 'used the horn' },
   // What the telemetry grader names a driver who came off the power without
   // touching the brake — a real, separate action from braking.
-  slow: 'eased off',
+  slow: { en: 'eased off' },
   // Merging.
-  never_merged: 'stayed on the acceleration lane',
-  too_slow: 'joined below the minimum speed',
-  unsafe_gap: 'joined without a safe gap',
+  never_merged: { en: 'stayed on the acceleration lane' },
+  too_slow: { en: 'joined below the minimum speed' },
+  unsafe_gap: { en: 'joined without a safe gap' },
   // Overtaking.
-  undertake: 'passed on the wrong side',
-  no_overtake: 'never passed',
-  cut_in: 'cut back in too soon',
-  incomplete_overtake: 'pulled out without completing the pass',
-  held_passing_lane: 'held the passing lane',
+  undertake: { en: 'passed on the wrong side' },
+  no_overtake: { en: 'never passed' },
+  cut_in: { en: 'cut back in too soon' },
+  incomplete_overtake: { en: 'pulled out without completing the pass' },
+  held_passing_lane: { en: 'held the passing lane' },
   // Following, steadiness, speed and lane.
-  too_close: 'followed too closely',
-  drifted: 'wandered across the lane',
-  braked_hard: 'stood on the brake',
-  too_fast: 'carried too much speed',
-  wrong_lane: 'was in the wrong lane',
+  too_close: { en: 'followed too closely' },
+  drifted: { en: 'wandered across the lane' },
+  braked_hard: { en: 'stood on the brake' },
+  too_fast: { en: 'carried too much speed' },
+  wrong_lane: { en: 'was in the wrong lane' },
 };
 
 /**
@@ -56,19 +58,23 @@ const HAPPENED: Record<string, string> = {
  * `correctAction` — the derived failure verbs above are things a driver can do,
  * never things a scenario can ask for.
  */
-const WANTED: Record<ScenarioEvent['correctAction'], string> = {
-  brake: 'you to slow down',
-  stop: 'a full stop',
-  accelerate: 'you to carry on',
-  turn_left: 'a left turn',
-  turn_right: 'a right turn',
-  honk: 'the horn',
+const WANTED: Record<ScenarioEvent['correctAction'], Localized> = {
+  brake: { en: 'you to slow down' },
+  stop: { en: 'a full stop' },
+  accelerate: { en: 'you to carry on' },
+  turn_left: { en: 'a left turn' },
+  turn_right: { en: 'a right turn' },
+  honk: { en: 'the horn' },
 };
 
 /** What the car did, in the past tense, for "You …". */
-export const actionLabel = (action: string): string =>
-  HAPPENED[action] ?? action.replace(/_/g, ' ');
+export const actionLabel = (action: string, say: TextOf): string => {
+  const happened = HAPPENED[action];
+  return happened ? say(happened) : action.replace(/_/g, ' ');
+};
 
 /** What the scenario asked for, for "this one wanted …". */
-export const expectedLabel = (action: string): string =>
-  WANTED[action as ScenarioEvent['correctAction']] ?? actionLabel(action);
+export const expectedLabel = (action: string, say: TextOf): string => {
+  const wanted = WANTED[action as ScenarioEvent['correctAction']];
+  return wanted ? say(wanted) : actionLabel(action, say);
+};

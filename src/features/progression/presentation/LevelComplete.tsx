@@ -1,10 +1,14 @@
 import { Star, ArrowLeft, RotateCcw, BarChart3, ClipboardList, Target, AlertTriangle, Sparkles } from 'lucide-react';
 import { LevelResult } from '@/domain/learner/attempt';
-import { LevelConfig } from '@/features/driving-sim';
+import { isTutorial, LevelConfig } from '@/features/driving-sim';
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { LevelRecommendation } from '@/features/driving-sim';
-import { getCompetencyLabel } from '@/domain/learner/profile';
+import { competencyText } from '@/domain/learner/profile';
 import { useAuthSession } from '@/features/auth';
+import { publicAsset } from '@/shared/lib/publicAsset';
+import { useText, type TextOf } from '@/shared/i18n/useText';
+import type { Localized } from '@/shared/lib/localized';
+import { resultMessages as m } from './messages';
 
 interface LevelCompleteProps {
   result: LevelResult;
@@ -12,6 +16,8 @@ interface LevelCompleteProps {
   onNext: () => void;
   onRetry: () => void;
   onMenu: () => void;
+  /** The menu button's words: the map, or a study participant's home. */
+  menuLabel?: Localized;
   hasNextLevel: boolean;
   /** Q-learning-driven suggestion - a highlight only, never a forced redirect. */
   recommendation?: LevelRecommendation | null;
@@ -26,12 +32,12 @@ interface LevelCompleteProps {
 
 export interface LevelCompleteCourse {
   /** What Continue leads to, in a sentence. */
-  note: string;
+  note: Localized | null;
   /** Null once the course is complete, or while the attempt is still being saved. */
   onContinue: (() => void) | null;
 }
 
-const formatCompetency = getCompetencyLabel;
+const formatCompetency = (competency: string | null | undefined, t: TextOf) => t(competencyText(competency));
 
 /**
  * Competencies are seeded at 100 and only move when the run touches them, so a
@@ -51,13 +57,13 @@ const getPracticedCompetencies = (logs: ActionLog[], scores: Record<string, numb
     .sort((a, b) => a[1] - b[1]);
 };
 
-const formatValue = (value: string | null | undefined) =>
-  value ? value.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()) : 'Not recorded';
+const formatValue = (value: string | null | undefined, t: TextOf) =>
+  value ? value.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()) : t(m.notRecorded);
 
 const getMasteryState = (score: number) => {
   if (score >= 85) {
     return {
-      label: 'Mastered',
+      label: m.mastered,
       phase: 'Level Complete',
       className: 'text-accent',
       barClassName: 'bg-accent',
@@ -66,7 +72,7 @@ const getMasteryState = (score: number) => {
 
   if (score >= 70) {
     return {
-      label: 'Improving',
+      label: m.improving,
       phase: 'Mastery Check',
       className: 'text-primary',
       barClassName: 'bg-primary',
@@ -75,7 +81,7 @@ const getMasteryState = (score: number) => {
 
   if (score >= 50) {
     return {
-      label: 'Needs Practice',
+      label: m.needsPractice,
       phase: 'Remediation',
       className: 'text-signal-amber',
       barClassName: 'bg-signal-amber',
@@ -83,7 +89,7 @@ const getMasteryState = (score: number) => {
   }
 
   return {
-    label: 'Critical',
+    label: m.critical,
     phase: 'Remediation',
     className: 'text-destructive',
     barClassName: 'bg-destructive',
@@ -92,9 +98,9 @@ const getMasteryState = (score: number) => {
 
 /**
  * Players get plain driving-school language; the FSM/learning-model vocabulary
- * is kept for admins reviewing a run.
+ * is kept for admins reviewing a run, in English: the admin area is.
  */
-const copyFor = (isAdmin: boolean) => isAdmin
+const copyFor = (isAdmin: boolean, t: TextOf) => isAdmin
   ? {
     focus: 'Layered FSM Learning State',
     strength: 'Layered FSM Learning State',
@@ -104,12 +110,12 @@ const copyFor = (isAdmin: boolean) => isAdmin
     steps: ['Action Captured', 'Rule Evaluation', 'Learning State', 'Recommendation'],
   }
   : {
-    focus: 'Focus Area',
-    strength: 'Strongest Skill',
-    report: 'What Happened',
-    mastery: 'Skill Breakdown',
-    recent: 'Recent Decisions',
-    steps: ['What you did', 'How it was judged', 'What happened next', 'Practice next'],
+    focus: t(m.focus),
+    strength: t(m.strength),
+    report: t(m.report),
+    mastery: t(m.mastery),
+    recent: t(m.recent),
+    steps: [t(m.stepDid), t(m.stepJudged), t(m.stepNext), t(m.stepPractice)],
   };
 
 const buildAfterActionSteps = (
@@ -117,6 +123,7 @@ const buildAfterActionSteps = (
   weakestCompetency: string | null | undefined,
   labels: string[],
   isAdmin: boolean,
+  t: TextOf,
 ) => {
   const evaluated = logs.filter(log => log.result === 'correct' || log.result === 'violation');
   const firstViolation = evaluated.find(log => log.result === 'violation');
@@ -129,29 +136,29 @@ const buildAfterActionSteps = (
   return [
     {
       label: labels[0],
-      value: `You chose ${formatValue(keyLog.action)}.`,
+      value: t(m.youChose(formatValue(keyLog.action, t))),
     },
     {
       label: labels[1],
       value: isViolation
-        ? `${formatValue(keyLog.severity)} ${formatCompetency(keyLog.competency)} violation detected.`
-        : `${formatCompetency(keyLog.competency)} decision was correct.`,
+        ? t(m.violation(formatValue(keyLog.severity, t), formatCompetency(keyLog.competency, t)))
+        : t(m.correctDecision(formatCompetency(keyLog.competency, t))),
     },
     {
       label: labels[2],
       value: isViolation
         ? isAdmin
           ? 'Feedback moved the learner into remediation.'
-          : 'You were shown a correction before driving on.'
+          : t(m.shownCorrection)
         : isAdmin
           ? 'Practice continued toward mastery.'
-          : 'You carried on without a penalty.',
+          : t(m.noPenalty),
     },
     {
       label: labels[3],
       value: weakestCompetency
-        ? `Focus next practice on ${formatCompetency(weakestCompetency)}.`
-        : 'Continue to the next scenario.',
+        ? t(m.focusNext(formatCompetency(weakestCompetency, t)))
+        : t(m.continueNext),
     },
   ];
 };
@@ -162,13 +169,21 @@ const LevelComplete = ({
   onNext,
   onRetry,
   onMenu,
+  menuLabel = m.backToMap,
   hasNextLevel,
   recommendation,
   onPracticeRecommended,
   course,
 }: LevelCompleteProps) => {
+  const t = useText();
   const passed = result.score >= level.requiredScore;
-  const competencyEntries = getPracticedCompetencies(result.logs, result.competencyScores ?? {}).slice(0, 6);
+  // The tutorial teaches the controls. Its steps carry a competency only because
+  // their scenario type implies one, so naming skills after it would report as
+  // knowledge what was a keypress: no breakdown, no focus, no practice.
+  const tutorial = isTutorial(level);
+  const competencyEntries = tutorial
+    ? []
+    : getPracticedCompetencies(result.logs, result.competencyScores ?? {}).slice(0, 6);
   const hasProfile = competencyEntries.length > 0;
 
   // Sorted weakest-first: anything below 100 is what to work on, otherwise the
@@ -180,8 +195,8 @@ const LevelComplete = ({
   const highlightState = getMasteryState(highlight?.[1] ?? 100);
 
   const { isAdmin } = useAuthSession();
-  const copy = copyFor(isAdmin);
-  const afterActionSteps = buildAfterActionSteps(result.logs, weakest?.[0] ?? null, copy.steps, isAdmin);
+  const copy = copyFor(isAdmin, t);
+  const afterActionSteps = buildAfterActionSteps(result.logs, weakest?.[0] ?? null, copy.steps, isAdmin, t);
   const recentEvaluations = result.logs
     .filter(log => log.result === 'correct' || log.result === 'violation')
     .slice(-3)
@@ -213,11 +228,11 @@ const LevelComplete = ({
                 : 'border-destructive/40 bg-destructive/10 text-destructive'
             }`}
           >
-            {result.crashReason ? 'CRASHED' : passed ? 'PASSED' : 'FAILED'}
+            {t(result.crashReason ? m.crashed : result.timedOut ? m.timesUp : passed ? m.passed : m.failed)}
           </span>
 
           <h2 className="mt-1 font-display text-xl text-foreground">
-            {result.crashReason ? 'RUN ENDED' : passed ? 'LEVEL COMPLETE' : 'TRY AGAIN'}
+            {t(result.crashReason || result.timedOut ? m.runEnded : passed ? m.levelComplete : m.tryAgain)}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">{level.name}</p>
 
@@ -226,6 +241,16 @@ const LevelComplete = ({
             <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-left">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
               <p className="text-xs leading-5 text-foreground">{result.crashReason}</p>
+            </div>
+          )}
+
+          {/* So does running out of driving time. */}
+          {result.timedOut && (
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-left">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <p className="text-xs leading-5 text-foreground">
+                {t(m.timesUpNote)}
+              </p>
             </div>
           )}
 
@@ -247,32 +272,32 @@ const LevelComplete = ({
           <div className="mt-5 grid grid-cols-3 gap-2">
             <div className="rounded-xl bg-secondary px-2 py-3">
               <p className="font-display text-xl text-primary">{result.score}</p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Score</p>
+              <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{t(m.score)}</p>
             </div>
             <div className="rounded-xl bg-secondary px-2 py-3">
               <p className="font-display text-xl text-accent">{result.correctActions}</p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Correct</p>
+              <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{t(m.correct)}</p>
             </div>
             <div className="rounded-xl bg-secondary px-2 py-3">
               <p className="font-display text-xl text-destructive">{result.violations}</p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Violations</p>
+              <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">{t(m.violations)}</p>
             </div>
           </div>
 
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Pass mark <span className="font-display text-foreground">{level.requiredScore}</span>
+            {t(m.passMark)} <span className="font-display text-foreground">{level.requiredScore}</span>
           </p>
 
           {/* Buttons */}
           {course ? (
             <div className="mt-6 flex flex-col gap-2">
-              <p className="text-xs leading-5 text-muted-foreground">{course.note}</p>
+              <p className="text-xs leading-5 text-muted-foreground">{course.note && t(course.note)}</p>
               {course.onContinue && (
                 <button
                   onClick={course.onContinue}
                   className="w-full rounded-xl bg-primary py-3 font-display text-sm tracking-wider text-primary-foreground transition-opacity hover:opacity-90"
                 >
-                  CONTINUE →
+                  {t(m.continue)}
                 </button>
               )}
               <button
@@ -280,7 +305,7 @@ const LevelComplete = ({
                 className="flex w-full items-center justify-center gap-1 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ArrowLeft className="h-3 w-3" />
-                Back to Map
+                {t(menuLabel)}
               </button>
             </div>
           ) : (
@@ -290,16 +315,16 @@ const LevelComplete = ({
                 onClick={onNext}
                 className="w-full rounded-xl bg-primary py-3 font-display text-sm tracking-wider text-primary-foreground transition-opacity hover:opacity-90"
               >
-                NEXT LEVEL →
+                {t(m.nextLevel)}
               </button>
             )}
-            {recommendation?.action === 'practice' && recommendation.recommendedLevelId !== null && onPracticeRecommended && (
+            {!tutorial && recommendation?.action === 'practice' && recommendation.recommendedLevelId !== null && onPracticeRecommended && (
               <button
                 onClick={onPracticeRecommended}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-accent/40 bg-accent/10 py-3 font-display text-sm tracking-wider text-accent transition-colors hover:bg-accent/20"
               >
                 <Sparkles className="h-4 w-4" />
-                PRACTICE {formatCompetency(recommendation.competency).toUpperCase()} →
+                {t(m.practice(formatCompetency(recommendation.competency, t).toUpperCase()))}
               </button>
             )}
             <button
@@ -307,14 +332,14 @@ const LevelComplete = ({
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary py-3 font-display text-sm tracking-wider text-foreground transition-colors hover:bg-muted"
             >
               <RotateCcw className="h-4 w-4" />
-              RETRY
+              {t(m.retry)}
             </button>
             <button
               onClick={onMenu}
               className="flex w-full items-center justify-center gap-1 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="h-3 w-3" />
-              Back to Map
+              {t(menuLabel)}
             </button>
           </div>
           )}
@@ -332,10 +357,10 @@ const LevelComplete = ({
                     {isCleanRun ? copy.strength : copy.focus}
                   </p>
                   <p className="mt-1 text-sm font-bold text-foreground">
-                    {formatCompetency(highlight?.[0])}
+                    {formatCompetency(highlight?.[0], t)}
                     {highlight && (
                       <span className={`ml-2 font-display text-xs ${highlightState.className}`}>
-                        {highlight[1]}% - {highlightState.label}
+                        {highlight[1]}% - {t(highlightState.label)}
                       </span>
                     )}
                   </p>
@@ -349,11 +374,11 @@ const LevelComplete = ({
                   ) : (
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                       {isCleanRun
-                        ? 'You handled this best on this run. Nothing dropped below full marks, so the next level moves on to new ground.'
+                        ? t(m.cleanRun)
                         : course
                           // No weak-area roll in a New group: the next run is the routing FSM's.
-                          ? 'This is the skill you lost the most points on.'
-                          : 'This is the skill you lost the most points on. Your next run will put more of it in your way.'}
+                          ? t(m.lostMost)
+                          : t(m.lostMostNextRun)}
                     </p>
                   )}
                 </div>
@@ -400,8 +425,8 @@ const LevelComplete = ({
                   return (
                     <div key={competency} className="space-y-1.5">
                       <div className="flex items-center justify-between gap-3 text-xs">
-                        <span className="font-medium text-foreground">{formatCompetency(competency)}</span>
-                        <span className={`font-display ${state.className}`}>{score}% - {state.label}</span>
+                        <span className="font-medium text-foreground">{formatCompetency(competency, t)}</span>
+                        <span className={`font-display ${state.className}`}>{score}% - {t(state.label)}</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-secondary">
                         <div
@@ -425,10 +450,10 @@ const LevelComplete = ({
                     <div key={`${log.timestamp}-${log.action}`} className="flex items-center justify-between gap-3 rounded-lg bg-secondary/60 px-3 py-2">
                       <div className="min-w-0">
                         <p className="truncate text-xs font-semibold text-foreground">
-                          {formatCompetency(log.competency)}
+                          {formatCompetency(log.competency, t)}
                         </p>
                         <p className="text-[10px] text-muted-foreground">
-                          Expected {formatValue(log.expectedAction)} - chose {formatValue(log.action)}
+                          {t(m.expectedChose(formatValue(log.expectedAction, t), formatValue(log.action, t)))}
                         </p>
                       </div>
                       <span className={`shrink-0 rounded-md px-2 py-1 font-display text-[9px] font-black uppercase ${
@@ -447,11 +472,10 @@ const LevelComplete = ({
             {missedSigns.length > 0 && (
               <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
                 <p className="mb-1 font-display text-[10px] uppercase tracking-[0.2em] text-destructive">
-                  Signs and markings to revise
+                  {t(m.signsToRevise)}
                 </p>
                 <p className="mb-3 text-[11px] leading-4 text-muted-foreground">
-                  These came up on this drive and were answered wrongly. They will be brought
-                  back on your next attempts until you get them right.
+                  {t(m.signsToReviseNote)}
                 </p>
                 <div className="space-y-2">
                   {missedSigns.map((sign, index) => (
@@ -461,7 +485,7 @@ const LevelComplete = ({
                     >
                       {sign.image && (
                         <img
-                          src={`/${sign.image}`}
+                          src={publicAsset(sign.image)}
                           alt={sign.name}
                           className="h-14 w-14 shrink-0 rounded-md border border-border bg-white object-contain p-1"
                           loading="lazy"
@@ -474,7 +498,7 @@ const LevelComplete = ({
                         </p>
                         <p className="mt-1 text-[11px] leading-4 text-foreground">{sign.meaning}</p>
                         <p className="mt-1 text-[10px] leading-4 text-destructive">
-                          Expected {formatValue(sign.expectedAction)} — you {formatValue(sign.action).toLowerCase()}.
+                          {t(m.expectedYou(formatValue(sign.expectedAction, t), formatValue(sign.action, t).toLowerCase()))}
                         </p>
                       </div>
                     </div>

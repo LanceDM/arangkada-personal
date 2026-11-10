@@ -6,7 +6,7 @@
 // since the bug lives entirely in how attempts get flattened, not in where
 // they came from.
 import { describe, it, expect } from 'vitest';
-import { historyLogs, type LearnerHistory } from './learnerHistory';
+import { bktEvidence, historyLogs, type LearnerHistory } from './learnerHistory';
 import { buildBKTLearnerProfile } from '@/domain/learner/mastery/buildBKTProfile';
 import type { ActionLog } from '@/domain/learner/attempt';
 
@@ -70,5 +70,41 @@ describe('historyLogs', () => {
 
     expect(naiveScore).toBeLessThan(50);
     expect(fixedScore).toBeGreaterThan(90);
+  });
+});
+
+describe('bktEvidence', () => {
+  const history: LearnerHistory = {
+    source: 'firestore',
+    attempts: [
+      { levelId: 2, timestamp: 300, logs: [log(300, 'correct'), { ...log(310, 'violation'), standing: true }] },
+      { levelId: 0, timestamp: 100, logs: [log(100, 'correct'), log(110, 'correct')] },
+      { levelId: 1, timestamp: 200, logs: [log(200, 'violation'), { ...log(210, 'correct'), remediation: true, sourceLevelId: 3 }] },
+    ],
+  };
+
+  it("leaves out the tutorial's attempts and every standing penalty", () => {
+    expect(bktEvidence(history).map(l => l.timestamp)).toEqual([200, 210, 300]);
+  });
+
+  it('leaves out a question left unanswered when its time ran out', () => {
+    const timedOut: LearnerHistory = {
+      source: 'firestore',
+      attempts: [{ levelId: 3, timestamp: 400, logs: [log(400, 'correct'), { ...log(410, 'violation'), unanswered: true }] }],
+    };
+    expect(bktEvidence(timedOut).map(l => l.timestamp)).toEqual([400]);
+  });
+
+  it('keeps practice items, which are scenarios', () => {
+    expect(bktEvidence(history).some(l => l.remediation)).toBe(true);
+  });
+
+  it('is historyLogs, in its order, when there is nothing to leave out', () => {
+    const clean: LearnerHistory = { source: 'local', attempts: [history.attempts[2]] };
+    expect(bktEvidence(clean)).toEqual(historyLogs(clean));
+  });
+
+  it('leaves historyLogs itself unchanged', () => {
+    expect(historyLogs(history)).toHaveLength(6);
   });
 });

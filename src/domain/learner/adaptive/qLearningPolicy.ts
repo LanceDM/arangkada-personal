@@ -13,8 +13,8 @@
 // shows - and which way to shift the approach window - when it moves, which
 // reaches the FSM as theta.
 //
-// The table itself (policyTable.json) is trained once, offline, by a
-// training script outside the game and committed - this module only loads and
+// The table itself (policyTable.json) is trained once, offline, by
+// a developers' script and committed - this module only loads and
 // looks it up. Driving Sim's `domain/adaptive/practiceSelection.ts` is what
 // turns a chosen action into an actual scenario, a support level and an FSM
 // theta.
@@ -43,7 +43,7 @@ export type PerformanceBucket = 'struggling' | 'mixed' | 'improving';
  * bucket, `unknown`, for exactly that learner; its rows were barely trained -
  * reached only on a learner's first entry - and most handed the narrowest
  * window to someone who had not yet responded to anything. It went
- * with an earlier retrain.
+ * with the first retrain.
  *
  * Two buckets rather than three, and the reason is worth recording. A `fast`
  * bucket was tried and removed while the window still truncated the
@@ -85,7 +85,7 @@ export interface QAction {
   /**
    * What the level's scenarios show while they are presented: the move, where
    * to look, or the situation alone. The output half of the machine, where
-   * `window` is the transition half.
+   * `window` is the transition half. 
    */
   support: SupportLevel;
   /** Chosen FSM transition-guard timing. See WindowDelta. */
@@ -119,10 +119,10 @@ export const SUPPORT_LEVELS: SupportLevel[] = ['full', 'cue', 'none'];
 export const WINDOWS: WindowDelta[] = [-1, 0, 1];
 
 /**
- * The buckets are fixed at 40 and 70, whatever the mastery threshold tau is.
- * `selectPractice` (Driving Sim's practiceSelection.ts)
+ * The buckets are fixed at 40 and 70, whatever the mastery threshold tau is
+ *. `selectPractice` (Driving Sim's practiceSelection.ts)
  * computes a state only below tau, so tau decides which rows the game can
- * reach. At tau 85, as the tau sweep set it, that is all three: `critical`,
+ * reach. At tau 85, as the sweep set it, that is all three: `critical`,
  * `weak`, and `ok` between 70 and 84. Every row of the table is now live -
  * which was not so at tau 50, where the `ok:*` rows were inert by
  * construction.
@@ -190,8 +190,8 @@ export const DEFAULT_ACTION: QAction = { target: 'weakest', support: 'full', win
  * - `first-action`: the plain argmax, whose ties go to the first action. A row
  *   never visited is all zeros and records `actions[0]`, `weakest:full:-1`
  *   (theta 0.75); a visited row whose tried actions all went negative records
- *   the first action it never tried. Every table the earlier studies trained
- *   was written this way, and keeps it.
+ *   the first action it never tried. Every table the earlier experiments trained was
+ *   written this way, and keeps it.
  * - `documented-default`: the best action training actually took in that
  *   state, and `DEFAULT_ACTION` where it took none. An untried action's value
  *   is its initialisation, not an estimate.

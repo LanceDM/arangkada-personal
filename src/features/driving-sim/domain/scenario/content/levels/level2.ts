@@ -884,15 +884,17 @@ const settleSlot: SlotVariant[] = [
     id: 'level2.settle.school-zone',
     type: 'speed_limit',
     speedRule: 'maximum',
+    // RA 4136 §35(b) row 4: "passing school zones", 20 km/h (speed-limits pack, L6).
+    postedSpeed: 20,
     description: 'Residential street: a school zone stretch begins here.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage:
-      'A school zone stretch still means settling to the posted limit, not exceeding it.',
-    rewardMessage: 'Correct. You settled to the posted limit through the school zone stretch.',
+      'A school zone is driven at 20 km/h or less, whatever the street around it allows.',
+    rewardMessage: 'Correct. You were at 20 km/h or less through the school zone stretch.',
     duration: 200,
     lawCitation:
-      'Move smoothly and obey road rules; observe the posted speed limit for the road you have entered.',
+      'RA 4136 Section 35(b): the rate of speed shall not exceed 20 km per hour passing school zones.',
     competency: 'speed_control',
     severity: 'minor',
   },
@@ -908,6 +910,7 @@ const level2Base = {
   // The bulk of this level is the garage stage; the road section is only the
   // drive out of the driveway.
   roadLength: 2560,
+  roadClass: 'city_street',
   speedLimit: 30,
   // Garage is worth 160 and the drive 80. The pass mark sits above 160 on
   // purpose, so a flawless inspection still has to be driven out properly.

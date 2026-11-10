@@ -47,19 +47,6 @@ const createMissingModule = (sourceLevel: number): LevelModule => ({
       ],
     },
   ],
-  quiz: [
-    {
-      question: 'Where should new learning module content be added?',
-      options: [
-        'domain/scenario/content/lessons',
-        'The browser console',
-        'The score screen only',
-        'The settings page only',
-      ],
-      correct: 0,
-      explanation: 'Correct answer: domain/scenario/content/lessons',
-    },
-  ],
 });
 
 export const LEVEL_MODULES: Record<string, LevelModule> = Object.fromEntries(

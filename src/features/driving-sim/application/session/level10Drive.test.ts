@@ -19,6 +19,13 @@ import { evaluateWeightedRule } from '@/features/driving-sim/domain/evaluation/r
 import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
 import { laneCentreX, roadXAt, type LaneIndex } from '@/features/driving-sim/domain/world/vehiclePhysics';
+import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
+
+/**
+ * The plans below are in km/h on the dial Level 10 was spaced at. Its pace
+ * drives that same road at its legal limit, k times the figure (`spacedPace`), so each planned speed is put on the dial the level now reads.
+ */
+const dial = (speed: number): number => speed * paceOf(LEVELS.find(level => level.id === 10)!).speedChangeScale;
 
 const level10 = LEVELS.find(level => level.id === 10)!;
 
@@ -203,8 +210,8 @@ const drive = (plan: Plan, frames = 40_000): DriveResult => {
 
       const input: InputState = {
         ...NO_INPUT,
-        throttle: snapshot.targetSpeed < want.speed - 1 && !previous.throttle,
-        brake: snapshot.speed > want.speed + 0.5,
+        throttle: snapshot.targetSpeed < dial(want.speed) - dial(1) && !previous.throttle,
+        brake: snapshot.speed > dial(want.speed) + dial(0.5),
         ...steer,
         horn: Boolean(want.horn),
       };

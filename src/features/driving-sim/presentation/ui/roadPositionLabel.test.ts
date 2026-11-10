@@ -9,7 +9,9 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { RoadPosition } from '@/features/driving-sim/domain/world/routeGeometry';
-import { roadPositionCue } from './roadPositionLabel';
+import { roadPositionCue as cueIn, type MergeAsk } from './roadPositionLabel';
+
+const roadPositionCue = (position: RoadPosition, merge: MergeAsk | null = null) => cueIn(position, merge, text => text.en);
 
 const onSlipRoad = (crossingOpen: boolean): RoadPosition => ({
   place: 'acceleration-lane',

@@ -514,6 +514,7 @@ export const level7: LevelConfig = {
   // The expressway maximum, and the first level driven anywhere near it. The
   // speed profile derives acceleration and top speed from this, so the road
   // genuinely gets away from a driver who is not paying attention to it.
+  roadClass: 'expressway',
   speedLimit: 100,
   /**
    * The expressway is driven at a hundred and understood at a walking pace.

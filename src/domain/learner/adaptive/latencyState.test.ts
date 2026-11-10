@@ -18,7 +18,7 @@ describe('latency bucket calculation', () => {
   it('reads a learner with no evidence yet as steady', () => {
     // The neutral default. A separate `unknown` bucket was barely trained, and
     // mostly handed the narrowest window to a learner who had not yet
-    // responded to anything; it went with an earlier retrain.
+    // responded to anything; it went with the retrain.
     expect(latencyBucket([])).toBe('steady');
     expect(latencyBucket([0, -5, Number.NaN])).toBe('steady');
   });
@@ -79,17 +79,17 @@ describe('Q-state construction', () => {
 
 describe('policy behaviour differs by latency condition', () => {
   /*
-   * Two tests were removed here by the latest retrain, not relaxed, and the
+   * Two tests were removed here by the retrain, not relaxed, and the
    * removal is reported with the experiment.
    *
    * They required the table to ask for a different window of a slow responder
    * than of a steady one in `critical:struggling`, and to give slow responders
    * more room than steady ones averaged over the nine mastery x form states.
-   * The retrained table does neither: it asks for theta 1 in both halves of
+   * The second experiment's table does neither: it asks for theta 1 in both halves of
    * `critical:struggling`, and averages 1.06 for slow against 1.14 for steady.
    *
    * They were assertions about what a trained table chose, and what it chooses
-   * is the experiment's result, not this file's specification. The experiment
+   * is the experiment's result, not this file's specification. The second experiment
    * fixed the handling in advance: the table stands and the test goes. Keeping
    * them would have meant retraining until the policy agreed with us, which is
    * the one thing a pre-registered experiment exists to prevent.
@@ -97,7 +97,8 @@ describe('policy behaviour differs by latency condition', () => {
    * What this leaves: the latency dimension is still part of the state (the
    * tests above), and the table still varies its action across it (below). The
    * direction the dimension was justified by - more room for slower responders
-   * - is not something the retrained table delivers, and that is a finding.
+   * - is not something the second experiment's table delivers, and that is a finding, recorded
+   * with that experiment.
    */
   it('varies its action across latency conditions overall', () => {
     const keys = new Set(

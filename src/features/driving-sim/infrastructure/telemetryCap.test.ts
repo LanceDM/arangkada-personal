@@ -124,6 +124,7 @@ describe('capRoutingForFirestore', () => {
     options: GAME_OPTIONS,
     driving: { support: 'full', approachScale: 1, weakAreaRoll: false, liveReroll: false, practicePolicy: null },
     entry: null,
+    play: null,
     log: [logged(0)],
     truncated: false,
     totalCount: 1,

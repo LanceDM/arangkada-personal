@@ -1,11 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { Eye, Settings as SettingsIcon, ArrowLeft, Sun } from 'lucide-react';
+import { Eye, Globe, Settings as SettingsIcon, ArrowLeft, Sun } from 'lucide-react';
 
 import AppLayout from '@/app/layout/AppLayout';
-import { useAuthSession } from '@/features/auth';
+import { StudyPasswordForm, useAuthSession } from '@/features/auth';
 import { signOut } from '@/features/auth';
 import ThemeToggle from '@/app/layout/ThemeToggle';
 import { useState } from 'react';
+import { useLanguage, useText } from '@/shared/i18n/useText';
+import { settingsMessages as m } from './messages';
+import { LANGUAGE_NAMES, LANGUAGES, isLanguage } from '@/shared/lib/localized';
 
 /* =========================
    TOGGLE (VISUALLY FIXED)
@@ -45,8 +48,10 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 ========================= */
 const Settings = () => {
   const navigate = useNavigate();
-  const { profile } = useAuthSession();
+  const { profile, studyAccount } = useAuthSession();
   const [showFSM, setShowFSM] = useState(true);
+  const { language, choose } = useLanguage();
+  const text = useText();
 
   const handleSignOut = async () => {
     await signOut();
@@ -67,7 +72,7 @@ const Settings = () => {
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="text-xs font-black uppercase tracking-widest">
-              Back
+              {text(m.back)}
             </span>
           </button>
 
@@ -75,7 +80,7 @@ const Settings = () => {
           <div className="flex items-center gap-3">
             <SettingsIcon className="w-8 h-8 text-yellow-400" />
             <h2 className="text-4xl font-black italic uppercase text-foreground tracking-tighter">
-              Settings
+              {text(m.title)}
             </h2>
           </div>
 
@@ -85,7 +90,7 @@ const Settings = () => {
 
         {/* ================= EXPERIENCE ================= */}
         <section className="space-y-3">
-          <SectionTitle> Experience</SectionTitle>
+          <SectionTitle>{text(m.experience)}</SectionTitle>
 
           <div className="bg-card border border-border rounded-2xl divide-y divide-border">
 
@@ -114,31 +119,37 @@ const Settings = () => {
               />
             </div> */}
 
-            {/* LANGUAGE */}
-            {/* <div className="flex items-center justify-between p-5">
+            {/* LANGUAGE: kept on the account, and on this device */}
+            <div className="flex items-center justify-between p-5">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-white/5 text-blue-400">
+                <div className="p-3 rounded-2xl bg-secondary text-blue-400">
                   <Globe />
                 </div>
                 <div>
                   <p className="text-foreground font-black uppercase italic text-sm">
-                    System Language
+                    {text(m.language)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Choose interface language
+                    {text(m.languageHint)}
                   </p>
                 </div>
               </div>
 
               <select
+                aria-label={text(m.language)}
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs font-black uppercase text-foreground outline-none cursor-pointer"
+                onChange={e => {
+                  if (isLanguage(e.target.value)) choose(e.target.value);
+                }}
+                className="bg-background border border-border rounded-xl px-3 py-2 text-xs font-black uppercase text-foreground outline-none cursor-pointer"
               >
-                <option value="Tagalog">Tagalog</option>
-                <option value="English">English</option>
+                {LANGUAGES.map(option => (
+                  <option key={option} value={option} lang={option}>
+                    {LANGUAGE_NAMES[option]}
+                  </option>
+                ))}
               </select>
-            </div> */}
+            </div>
 
             {/* FSM */}
             <div className="flex items-center justify-between p-5">
@@ -148,10 +159,10 @@ const Settings = () => {
                 </div>
                 <div>
                   <p className="text-foreground font-black uppercase italic text-sm">
-                    Show FSM Diagram
+                    {text(m.showFsm)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Live state overlay during game
+                    {text(m.showFsmHint)}
                   </p>
                 </div>
               </div>
@@ -172,10 +183,10 @@ const Settings = () => {
                 </div>
                 <div>
                   <p className="text-foreground font-black uppercase italic text-sm">
-                    Theme
+                    {text(m.theme)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Switch light / dark mode
+                    {text(m.themeHint)}
                   </p>
                 </div>
               </div>
@@ -187,7 +198,7 @@ const Settings = () => {
 
         {/* ================= ACCOUNT ================= */}
         <section className="space-y-3">
-          <SectionTitle>Account</SectionTitle>
+          <SectionTitle>{text(m.account)}</SectionTitle>
 
           <div className="bg-card border border-border rounded-2xl divide-y divide-border">
 
@@ -200,21 +211,27 @@ const Settings = () => {
                   <p className="text-foreground font-black uppercase italic truncate">
                     {profile.username}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {profile.email}
-                  </p>
+                  {/* A study participant's account has no email, and shows none. */}
+                  {profile.email && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {profile.email}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
+
+            {/* A study participant has no email to reset a password by. */}
+            {studyAccount && <StudyPasswordForm />}
 
             {/* SIGN OUT */}
             <div className="flex items-center justify-between p-5">
               <div>
                 <p className="text-foreground font-black uppercase italic text-sm">
-                  Sign Out
+                  {text(m.signOutTitle)}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Log out of your account
+                  {text(m.signOutHint)}
                 </p>
               </div>
 
@@ -222,7 +239,7 @@ const Settings = () => {
                 onClick={handleSignOut}
                 className="px-4 py-2 text-xs font-black uppercase bg-secondary border border-border rounded-xl text-muted-foreground hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
               >
-                Sign out
+                {text(m.signOut)}
               </button>
             </div>
           </div>

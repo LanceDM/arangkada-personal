@@ -55,18 +55,18 @@ describe('the drive', () => {
   });
 
   it('is the same drive at h = none, with only the road’s markers of the answer left out', () => {
-    // A frame line has twenty fields, the sixteenth the number of nodes
+    // A frame line has twenty-one fields, the seventeenth the number of nodes
     // composed. Support decides what the road marks and nothing else, so with
     // that one field set aside every frame - pose, speed, lane, active event
     // and phase, penalties, solids - and every reported decision is the same.
-    const SCENE_SIZE = 15;
+    const SCENE_SIZE = 16;
     const sceneSize = (line: string) => {
       const fields = line.split(' ');
-      return fields.length === 20 ? Number(fields[SCENE_SIZE]) : null;
+      return fields.length === 21 ? Number(fields[SCENE_SIZE]) : null;
     };
     const withoutSceneSize = (line: string) => {
       const fields = line.split(' ');
-      if (fields.length === 20) fields.splice(SCENE_SIZE, 1);
+      if (fields.length === 21) fields.splice(SCENE_SIZE, 1);
       return fields.join(' ');
     };
 

@@ -526,5 +526,4 @@ export const level11Module = {
       ],
     },
   ],
-  quiz: [],
 } satisfies LevelModule;

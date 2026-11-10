@@ -11,6 +11,7 @@
  * them they were already in it is telling them the manoeuvre was done.
  */
 import type { RoadPosition } from '@/features/driving-sim/domain/world/routeGeometry';
+import type { TextOf } from '@/shared/i18n/useText';
 
 /** How urgent the cue is, and what colour goes with it. Never colour alone. */
 export type CueTone = 'wait' | 'go' | 'done' | 'neutral';
@@ -35,7 +36,8 @@ export interface MergeAsk {
   speed: number;
 }
 
-const laneName = (lane: number | null) => (lane === null ? 'CARRIAGEWAY' : `LANE ${lane + 1}`);
+const laneName = (lane: number | null, say: TextOf) =>
+  say(lane === null ? { en: 'CARRIAGEWAY' } : { en: `LANE ${lane + 1}` });
 
 /**
  * The cue for a car on an auxiliary lane or in the carriageway.
@@ -46,49 +48,50 @@ const laneName = (lane: number | null) => (lane === null ? 'CARRIAGEWAY' : `LANE
  */
 export const roadPositionCue = (
   position: RoadPosition,
-  merge: MergeAsk | null = null
+  merge: MergeAsk | null,
+  say: TextOf
 ): RoadPositionCue => {
   // The one figure a merge turns on. Always the number, never a bare
   // instruction: "BUILD SPEED" to a driver already doing ninety-nine is the
   // screen telling them to fix something that is not wrong.
   const speedNote = merge
     ? merge.speed < merge.minSpeed
-      ? `UNDER ${merge.minSpeed} km/h`
-      : `${merge.minSpeed} km/h MIN MET`
+      ? say({ en: `UNDER ${merge.minSpeed} km/h` })
+      : say({ en: `${merge.minSpeed} km/h MIN MET` })
     : null;
 
   if (position.place === 'acceleration-lane') {
     return position.crossingOpen
       ? {
-          place: 'ACCELERATION LANE',
-          action: merge ? `MERGE INTO ${laneName(merge.intoLane)}` : 'MERGE NOW',
+          place: say({ en: 'ACCELERATION LANE' }),
+          action: say(merge ? { en: `MERGE INTO ${laneName(merge.intoLane, say)}` } : { en: 'MERGE NOW' }),
           note: speedNote,
           tone: 'go',
         }
       : {
-          place: 'ACCELERATION LANE',
-          action: 'WAIT — LANE DIVIDED',
+          place: say({ en: 'ACCELERATION LANE' }),
+          action: say({ en: 'WAIT — LANE DIVIDED' }),
           note: speedNote,
           tone: 'wait',
         };
   }
 
   if (position.place === 'deceleration-lane') {
-    return { place: 'DECELERATION LANE', action: null, note: null, tone: 'neutral' };
+    return { place: say({ en: 'DECELERATION LANE' }), action: null, note: null, tone: 'neutral' };
   }
 
   if (position.place === 'ramp') {
-    return { place: 'EXIT RAMP', action: null, note: null, tone: 'done' };
+    return { place: say({ en: 'EXIT RAMP' }), action: null, note: null, tone: 'done' };
   }
 
   if (position.place === 'toll-approach') {
-    return { place: 'TOLL APPROACH', action: null, note: null, tone: 'neutral' };
+    return { place: say({ en: 'TOLL APPROACH' }), action: null, note: null, tone: 'neutral' };
   }
 
   // In the carriageway. When a merge was being asked for and the car is now in
   // the lane it was joining, the manoeuvre is over and says so.
   if (merge && position.lane === merge.intoLane) {
-    return { place: laneName(position.lane), action: 'MERGED', note: null, tone: 'done' };
+    return { place: laneName(position.lane, say), action: say({ en: 'MERGED' }), note: null, tone: 'done' };
   }
-  return { place: laneName(position.lane), action: null, note: null, tone: 'neutral' };
+  return { place: laneName(position.lane, say), action: null, note: null, tone: 'neutral' };
 };

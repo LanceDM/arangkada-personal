@@ -5,8 +5,13 @@
  * knows a canvas and an animation frame exist. The session below it is
  * headless, and this is what gives it a screen.
  *
- * It owns four things and no more: the animation frame, the keyboard, painting
- * the frame the session composed, and the timers behind the two brief notices.
+ * It owns four things and no more: the animation frame, the controls (keyboard
+ * and touch), painting the frame the session composed, and the timers behind
+ * the two brief notices.
+ *
+ * The animation frame is not the simulation's clock. The world advances a
+ * fixed number of steps per second of real time (`frameSteps`), so the time a
+ * driver has to answer a scenario is the same on every display.
  * What a frame's reports *mean* - scoring, the mastery estimate, the finished
  * result - belongs to `driveController`, which knows none of the above.
  *
@@ -27,7 +32,10 @@ import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { drawVisibilityVeil } from '@/features/driving-sim/presentation/canvas/rendering/renderers/roadRenderer';
 import { renderFrame } from '@/features/driving-sim/presentation/canvas/rendering/renderFrame';
-import { readInput } from '@/features/driving-sim/presentation/input/keyboardInput';
+import { describeUsage, readHeldInput, unusedInput } from '@/features/driving-sim/presentation/input/heldInput';
+import type { TouchInput } from '@/features/driving-sim/presentation/input/touchInput';
+import type { PlayConditions } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
+import { createFrameStepper, emptyFrameStats, medianFrameRate, type FrameStats } from './frameSteps';
 import { loadSignCoverage } from '@/features/driving-sim/application/signCoverage';
 import {
   createDriveController,
@@ -44,9 +52,12 @@ import type { useScenarioEvaluation } from '@/features/driving-sim/application/u
 /** How long the stage shakes after rough ground throws the car about. */
 const JOLT_MS = 450;
 
+/** Called once the drive is over, with how it was played. */
+export type DriveComplete = (result: LevelResult, telemetry: LevelFsmTelemetry, play: PlayConditions) => void;
+
 interface UseDrivingSimulationOptions {
   level: LevelConfig;
-  onComplete: (result: LevelResult, telemetry: LevelFsmTelemetry) => void;
+  onComplete: DriveComplete;
   fsm: ReturnType<typeof useFSM>['fsm'];
   keysRef: RefObject<Set<string>>;
   scoreRef: ReturnType<typeof useScenarioEvaluation>['scoreRef'];
@@ -63,7 +74,17 @@ interface UseDrivingSimulationOptions {
    * down. See `releaseHeldKeys`.
    */
   releaseHeldKeys: () => void;
-  /** Held false while a pre-drive stage is running, so the drive stays idle. */
+  /**
+   * The on-screen controls, where there are any. Read with the keyboard every
+   * frame, and released with it when a frozen panel lets the drive go.
+   */
+  touch?: TouchInput;
+  /** Whether the on-screen controls are shown, for the attempt's record. */
+  touchControls?: boolean;
+  /**
+   * Held false while a pre-drive stage is running, or while a touch device is
+   * held upright, so the drive stays idle.
+   */
   enabled?: boolean;
   /**
    * The learner's graded history before this attempt, oldest first, which the
@@ -105,6 +126,8 @@ export interface DrivingSimulation {
   dismissAdaptationNotice: () => void;
   /** Player has read the scenario held in front of them. Idempotent. */
   dismissBriefing: () => void;
+  /** The frames so far, for the optional on-screen frame meter. */
+  frameStats: RefObject<FrameStats>;
 }
 
 export const useDrivingSimulation = ({
@@ -120,6 +143,8 @@ export const useDrivingSimulation = ({
   correctRef,
   evaluateAction,
   releaseHeldKeys,
+  touch,
+  touchControls = false,
   enabled = true,
   initialDistance,
   priorLogs,
@@ -199,6 +224,34 @@ export const useDrivingSimulation = ({
     onCompleteRef.current = onComplete;
   }, [onComplete]);
 
+  /**
+   * How the drive is being played, kept across every run of the frame loop:
+   * the loop stops and starts again while a device is held upright, and the
+   * attempt's record is the whole drive's.
+   */
+  const frameStatsRef = useRef<FrameStats>(emptyFrameStats());
+  /** When the frame loop last stopped, so the time until it runs again is spent. Null while it runs. */
+  const stoppedAtRef = useRef<number | null>(null);
+  const usageRef = useRef(unusedInput());
+  const touchControlsRef = useRef(touchControls);
+  useEffect(() => {
+    touchControlsRef.current = touchControls;
+  }, [touchControls]);
+
+  const playConditions = useCallback((): PlayConditions => {
+    const stats = frameStatsRef.current;
+    return {
+      input: describeUsage(usageRef.current),
+      touchControls: touchControlsRef.current,
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+      frameRate: medianFrameRate(stats),
+      steps: stats.steps,
+      slowFrames: stats.slowFrames,
+      lostMs: Math.round(stats.lostMs),
+      pauses: stats.pauses,
+    };
+  }, []);
+
   useEffect(() => {
     controllerRef.current = createDriveController({
       session,
@@ -215,15 +268,15 @@ export const useDrivingSimulation = ({
           schedule(() => setJolted(false), JOLT_MS);
         },
         finish: (result, telemetry, holdMs) => {
-          if (holdMs > 0) schedule(() => onCompleteRef.current(result, telemetry), holdMs);
-          else onCompleteRef.current(result, telemetry);
+          if (holdMs > 0) schedule(() => onCompleteRef.current(result, telemetry, playConditions()), holdMs);
+          else onCompleteRef.current(result, telemetry, playConditions());
         },
       },
     });
     return () => {
       controllerRef.current = null;
     };
-  }, [evaluateAction, history, level, logsRef, rerollsLive, schedule, session, totals, tracesRef]);
+  }, [evaluateAction, history, level, logsRef, playConditions, rerollsLive, schedule, session, totals, tracesRef]);
 
   const handle = useCallback(
     (reported: readonly GameEvent[]) => controllerRef.current?.handle(reported),
@@ -239,25 +292,40 @@ export const useDrivingSimulation = ({
     let animationFrame = 0;
     let running = true;
     let previous = session.getSnapshot();
+    // A fresh stepper per run of the loop, so a drive held while the device was
+    // upright resumes where it stopped rather than running the time it missed.
+    // That time, and every pause the stepper sees, is still spent: it is
+    // charged to the session, which is what stops a level being held open for
+    // ever by leaving the page or turning the device.
+    if (stoppedAtRef.current !== null) session.spendAway(performance.now() - stoppedAtRef.current);
+    stoppedAtRef.current = null;
+    const stepper = createFrameStepper(frameStatsRef.current, ms => session.spendAway(ms));
 
-    const tick = () => {
+    const tick = (now: number) => {
       if (!running) return;
-      handle(session.update(readInput(keysRef.current)));
+      const steps = stepper.stepsFor(now);
+      // A frame with no step has nothing new to paint: the world has not moved.
+      if (steps > 0) {
+        // Read once and handed to every step of the frame: reading the pads
+        // hands over their taps, which must reach the world exactly once.
+        const input = readHeldInput(keysRef.current, touch, usageRef.current);
+        for (let step = 0; step < steps; step++) handle(session.update(input));
 
-      const frame = session.getFrame();
-      if (frame) {
-        renderFrame(ctx, frame.scene);
-        if (frame.flash > 0) {
-          ctx.fillStyle = `rgba(220,38,38,${frame.flash})`;
-          ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        const frame = session.getFrame();
+        if (frame) {
+          renderFrame(ctx, frame.scene);
+          if (frame.flash > 0) {
+            ctx.fillStyle = `rgba(220,38,38,${frame.flash})`;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          }
+          if (frame.veil > 0) drawVisibilityVeil(ctx, frame.veil);
         }
-        if (frame.veil > 0) drawVisibilityVeil(ctx, frame.veil);
-      }
 
-      const next = session.getSnapshot();
-      if (snapshotChanged(previous, next)) {
-        previous = next;
-        setSnapshot(next);
+        const next = session.getSnapshot();
+        if (snapshotChanged(previous, next)) {
+          previous = next;
+          setSnapshot(next);
+        }
       }
 
       animationFrame = requestAnimationFrame(tick);
@@ -269,24 +337,26 @@ export const useDrivingSimulation = ({
     return () => {
       running = false;
       cancelAnimationFrame(animationFrame);
+      stoppedAtRef.current = performance.now();
     };
-  }, [enabled, handle, keysRef, session]);
+  }, [enabled, handle, keysRef, session, touch]);
 
   /**
    * Releases the drive from one of the frozen panels.
    *
-   * The held keys go first, so the frame that resumes the world reads a
-   * keyboard the player has to press again rather than one they were leaning on
-   * while reading. Both session calls are idempotent, so a second
+   * The held keys and fingers go first, so the frame that resumes the world
+   * reads controls the player has to press again rather than ones they were
+   * leaning on while reading. Both session calls are idempotent, so a second
    * acknowledgement — a double click, a key repeat, Strict Mode replaying the
    * panel's own effect — resumes nothing twice.
    */
   const resume = useCallback(
     (release: () => readonly GameEvent[]) => {
       releaseHeldKeys();
+      touch?.releaseHeld();
       handle(release());
     },
-    [handle, releaseHeldKeys]
+    [handle, releaseHeldKeys, touch]
   );
 
   return {
@@ -302,5 +372,6 @@ export const useDrivingSimulation = ({
       [resume, session]
     ),
     dismissBriefing: useCallback(() => resume(() => session.dismissBriefing()), [resume, session]),
+    frameStats: frameStatsRef,
   };
 };

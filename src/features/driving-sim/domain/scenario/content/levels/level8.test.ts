@@ -23,7 +23,7 @@ import { describe, expect, it } from 'vitest';
 import { level8 } from './level8';
 import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { composeWorldFrame } from '@/features/driving-sim/domain/world/composeWorldFrame';
-import { paceOf, unitsForSeconds } from '@/features/driving-sim/domain/world/DrivingPace';
+import { paceOf, spacedPace, unitsForSeconds } from '@/features/driving-sim/domain/world/DrivingPace';
 import type { RoadTraffic } from '@/features/driving-sim/domain/systems/roadTraffic';
 import { computeWarningDistances } from '@/features/driving-sim/domain/systems/eventScheduler';
 import {
@@ -375,10 +375,11 @@ describe('the Level 8 curriculum', () => {
 describe('the Level 8 road', () => {
   it('is an ordinary two-way city street, with a side that is not yours', () => {
     expect(level8.paint?.oncomingLanes).toBe(2);
-    expect(level8.speedLimit).toBe(40);
-    // On the shared arithmetic: nothing about this level needs its own pace, and
-    // a gap authored in seconds only means the same thing on both if it does not.
-    expect(level8.pace).toBeUndefined();
+    expect(level8.roadClass).toBe('city_street');
+    expect(level8.speedLimit).toBe(30);
+    // Its road was spaced at 40 on the dial and is driven at 30 as it was then:
+    // a gap authored in seconds is the same road either way.
+    expect(level8.pace).toEqual(spacedPace(30, 40));
   });
 
   it('puts every lane it names within reach of the wheel', () => {

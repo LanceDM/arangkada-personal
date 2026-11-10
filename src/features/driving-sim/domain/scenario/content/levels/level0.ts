@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
@@ -78,7 +79,10 @@ export const level0: LevelConfig = {
   moduleId: levelModule.id,
   description: levelModule.desc,
   roadLength: 3000,
-  speedLimit: 40,
+  roadClass: 'practice_course',
+  speedLimit: 30,
+  // Spaced and measured at 40 on the dial; driven at 30 as it was at 40.
+  pace: spacedPace(30, 40),
   requiredScore: 55,
   stars2: 70,
   stars3: 85,

@@ -3,9 +3,9 @@
  * answered, how long is left, and what the finished paper is worth.
  *
  * The exam is deliberately not adaptive — items are shuffled uniformly and the
- * IRT ability estimate is computed once, after submission, for display only.
+ * finished paper is worth its raw score.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthSession } from '@/features/auth';
 import { EXAM_QUESTIONS, type ExamQuestion } from '../domain/questionBank';
 import {
@@ -17,8 +17,6 @@ import {
   type WeakArea,
 } from '../domain/grading';
 import { fisherYatesShuffle } from '../domain/shuffle';
-import { estimateAbilityEAP } from '../domain/assessment/irt';
-import { EXAM_ITEM_PARAMS } from '../domain/assessment/examItemParams';
 import { mockExamDeps } from './dependencies';
 
 export type ExamPhase = 'intro' | 'exam' | 'results';
@@ -37,13 +35,6 @@ export interface MockExamState {
   passed: boolean;
   requiredScore: number;
   weakAreas: WeakArea[];
-  /**
-   * Provisional 2PL ability estimate, or null when it cannot be trusted.
-   * `EXAM_ITEM_PARAMS` is calibrated against the local bank only, so a
-   * Firebase-sourced bank of different content gets no estimate rather than a
-   * meaningless number.
-   */
-  estimatedAbility: number | null;
   goTo: (index: number) => void;
   answer: (choiceIndex: number) => void;
   start: () => void;
@@ -114,26 +105,8 @@ export const useMockExam = (): MockExamState => {
   const requiredScore = passingScoreFor(questions.length);
   const passed = score >= requiredScore;
 
-  const paramsById = useMemo(
-    () => new Map(EXAM_QUESTIONS.map((q, i) => [q.id, EXAM_ITEM_PARAMS[i]])),
-    []
-  );
-  const estimatedAbility =
-    bankStatus === 'fallback'
-      ? estimateAbilityEAP(
-          questions.reduce<{ params: (typeof EXAM_ITEM_PARAMS)[number]; correct: boolean }[]>(
-            (acc, q, i) => {
-              const params = paramsById.get(q.id);
-              if (params) acc.push({ params, correct: answers[i] === q.correctIndex });
-              return acc;
-            },
-            []
-          )
-        )
-      : null;
-
-  // Persisted once per sitting, signed-in players only — the foundation for
-  // eventually recalibrating IRT on real responses instead of simulated ones.
+  // Persisted once per sitting, signed-in players only, with the ids presented
+  // in order so each response can be read back against its item.
   const savedRef = useRef(false);
   useEffect(() => {
     if (phase !== 'results') {
@@ -187,7 +160,6 @@ export const useMockExam = (): MockExamState => {
     passed,
     requiredScore,
     weakAreas: getWeakAreas(wrongIds),
-    estimatedAbility,
     goTo: setCurrentIndex,
     answer: choiceIndex =>
       setAnswers(previous => previous.map((a, i) => (i === currentIndex ? choiceIndex : a))),

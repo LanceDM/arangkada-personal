@@ -9,7 +9,7 @@
  * decision of an attempt from storage alone - the Q-state read at the level
  * entry, the action taken and the table it was read from, the support level and
  * the theta asked for, the theta each scenario actually got, and the BKT
- * estimate either side of every graded decision.
+ * estimate either side of every graded decision. 
  *
  * Stored at `users/{uid}/attempts/{id}/telemetry/decisions`, beside the raw
  * log and never inline on the attempt, for signed-in players only. Everything
@@ -77,7 +77,8 @@ export interface RerollTrace {
  * - `final-exam`: the one level the adaptive layer may not act on.
  * - `routing`: the practice policy was not consulted. The entry was built by
  *   the routing FSM in a New group, or played as a free replay, on the plain
- *   FSM's settings; what the machine decided is in `telemetry/routing`.
+ *   FSM's settings; what the machine decided is in `telemetry/routing`
+ *.
  */
 export type PolicySource = 'policy' | 'no-portable-content' | 'mastered' | 'no-history' | 'final-exam' | 'routing';
 
@@ -90,9 +91,9 @@ export interface PolicyDecisionRecord {
   tableKey: string | null;
   /**
    * Which table the decision was read from (`POLICY_TABLE_ID`). `e7fa4813` is
-   * the table that predated h, read through an interim decode until it was
-   * retrained: a decision carrying that id was never a trained choice of
-   * support level.
+   * the table that predated h, read through an interim decode until the first retrain
+   * retrained it: a decision carrying that id was never a trained
+   * choice of support level.
    */
   policyTableId: string;
   masteryThreshold: number;
@@ -240,8 +241,8 @@ export const recordPolicyDecision = ({
 /**
  * The level entry's record where the routing FSM built it, or a free replay:
  * no Q-state and no action, the item the routing move placed if any, and the
- * plain FSM's support at theta 1. The weakest competency is read as the
- * learned policy reads it, ties to the least observed.
+ * plain FSM's support at theta 1. The weakest competency is read as the learned policy
+ * reads it, ties to the least observed.
  */
 export const recordRoutedDecision = ({
   history,

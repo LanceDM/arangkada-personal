@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
@@ -403,10 +404,14 @@ export const level8: LevelConfig = {
   // Six events 800 to 810 apart, plus a runway past the last one long enough
   // for its measurement window to close before the road ends.
   roadLength: ROUTE_END,
-  // A city street, matching Levels 5 and 6. Every hazard here is a person or a
-  // vehicle that can appear with no notice, and "slowed down" should mean what
-  // it means on that kind of road.
-  speedLimit: 40,
+  // A city street, matching Levels 5 and 6: RA 4136 §35(b)'s city or municipal
+  // street. Its first stretch is a barangay street, which a DPWH memorandum
+  // puts at 20; §35 has no such row, and the level is held at 30, which the
+  // penalty charges above under both readings (speed-limits pack, O2). Spaced
+  // and measured at 40 on the dial; driven at 30 as it was at 40.
+  roadClass: 'city_street',
+  speedLimit: 30,
+  pace: spacedPace(30, 40),
   // Seventy per cent of a route worth 170. The ladder underneath it is the
   // calibration: a clean run scores everything, one lapse at a *major*
   // scenario still clears the mark by six, and one at a critical — the rider,

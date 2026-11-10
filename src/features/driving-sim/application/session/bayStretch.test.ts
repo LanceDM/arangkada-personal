@@ -4,8 +4,8 @@
  * A roadside bay opened the curb line 90 either side of its point
  * (`driveVehicle`), but its zone closed 20 past the point, as every plain
  * event's does. A driver who pulled into the far half of Level 10's turnout
- * and stopped there was failed at 1820 while still rolling into it, and a
- * stop in the far half of Level 6's red curb was never seen.
+ * and stopped there was failed at 1820 while still rolling into it (grading
+ * key C12), and a stop in the far half of Level 6's red curb was never seen.
  *
  * It is graded to `BAY_RUN_ON`, 60 past the point: as far as the road is kept
  * clear after its zone, because `thetaGrading.test.ts` holds that no theta

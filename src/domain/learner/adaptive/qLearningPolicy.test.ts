@@ -12,7 +12,7 @@ import policyTable from './policyTable.json';
 /**
  * Every row of the table. The three tests below once ran over a subset, because
  * at a mastery threshold of 50 `selectPractice` could never compute an `ok:`
- * state and those rows were inert. At the current threshold of 85 they are
+ * state and those rows were inert. At the threshold of 85 they are
  * live, so the subset is the whole table - and this module cannot read the
  * threshold to say so, because the shared learner domain imports no feature.
  * Asserting over all 18 is the property that holds whatever tau is.
@@ -62,9 +62,9 @@ describe('the trained table', () => {
    * toward `weakest` by construction, so `related` and `review` could never
    * win. That guard now lives with the reward itself, in
    * practiceLearnerModel.test.ts, which holds the pathways those targets exist
-   * to use. Which targets a table picks is a result of the experiment, and it
-   * has changed with each one - an earlier table picked `weakest` everywhere,
-   * the current one uses all three - so a test requiring either
+   * to use. Which targets a table picks is a result of the experiment
+   *, and it has changed with each one - the first picked
+   * `weakest` everywhere, the second uses all three - so a test requiring either
    * would be dictating the policy rather than checking it.
    */
 
@@ -107,7 +107,7 @@ describe('a table entry for a state training left untrained', () => {
   );
   const zeros = () => new Array<number>(actions.length).fill(0);
 
-  it('records the first action for a row never visited under first-action, as the earlier studies trained', () => {
+  it('records the first action for a row never visited under first-action, as the earlier experiments trained', () => {
     expect(tableEntry(zeros(), zeros(), actions, 'first-action')).toBe('weakest:full:-1');
   });
 

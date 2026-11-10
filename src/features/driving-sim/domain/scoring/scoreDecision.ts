@@ -1,6 +1,6 @@
 // What one graded decision does to a drive's running score and to its
 // consecutive-violation streak. One definition, read by the game's evaluation
-// hook and by the offline simulation, so the
+// hook and by the fourth experiment's environment (a developers' script), so the
 // two cannot disagree about what passes a level.
 //
 // Pure: no React, no refs. The caller keeps the running values between
@@ -13,8 +13,8 @@ import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scena
  *
  * - `upside-only`: a correct answer adds its points and a miss adds nothing.
  *   That lowers the pass mark for the learners who get an item, who then pass
- *   on fewer authored points, sooner, and practise less. The game-level
- *   simulation ran under it, and it is kept so that study reproduces.
+ *   on fewer authored points, sooner, and practise less. The fourth experiment ran under
+ *   it, and it is kept so the fourth experiment reproduces.
  * - `neutral`: the item is graded and logged, and never counts toward the pass
  *   mark: no points either way, and the streak is left as it stood, because
  *   the streak moves the points of whatever is graded next - Level 9's

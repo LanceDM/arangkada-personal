@@ -283,8 +283,8 @@ describe('the prompt on the levels that were not redesigned', () => {
 });
 
 /**
- * The prompt after the read phase withholds exactly what the read phase did.
- * If it showed the move, its keys or live advice the instant the
+ * The prompt after the read phase withholds exactly what the read phase did
+ *. If it showed the move, its keys or live advice the instant the
  * drive resumed, a briefing at `none` would have hidden nothing.
  */
 describe('the prompt at each support level', () => {
@@ -335,7 +335,7 @@ describe('the prompt at each support level', () => {
 
 /**
  * A checkpoint grades the full stop at its line, so the
- * stop is its move. In the first play-test the prompt said "Brake to a full stop
+ * stop is its move. A play-test found: the prompt said "Brake to a full stop
  * at the line" with the brake's keys and a "Full stop" banner, and the road
  * read "LTO CHECKPOINT — FULL STOP", at every support level - Level 12, always
  * at none, included.

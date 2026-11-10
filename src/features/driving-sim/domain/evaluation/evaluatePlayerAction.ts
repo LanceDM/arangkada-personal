@@ -4,6 +4,7 @@ import { ActionLog } from '@/domain/learner/attempt';
 import type { SupportLevel } from '@/domain/learner/competency';
 import { evaluateWeightedRule } from './ruleEngine';
 import { NO_REACTION, type ReactionObservation } from './reactionTiming';
+import { englishText, type Localized, type TextOf } from '@/shared/lib/localized';
 
 /**
  * Garage hotspots are scored through the same pipeline as road events, so they
@@ -27,44 +28,44 @@ export const garageHotspotToEvent = (hotspot: GarageHotspot): ScenarioEvent => (
 });
 
 // Map correctAction to human-readable hint
-export const actionHints: Record<string, string> = {
-  brake: 'BRAKE (↓/S)',
-  slow: 'EASE OFF (↓/S)',
-  stop: 'FULL STOP (↓/S)',
-  accelerate: 'GO (↑/W)',
-  turn_left: 'STEER LEFT (←/A)',
-  turn_right: 'STEER RIGHT (→/D)',
-  turnLeft: 'STEER LEFT (←/A)',
-  turnRight: 'STEER RIGHT (→/D)',
-  honk: 'HORN (H)',
+export const actionHints: Record<string, Localized> = {
+  brake: { en: 'BRAKE (↓/S)' },
+  slow: { en: 'EASE OFF (↓/S)' },
+  stop: { en: 'FULL STOP (↓/S)' },
+  accelerate: { en: 'GO (↑/W)' },
+  turn_left: { en: 'STEER LEFT (←/A)' },
+  turn_right: { en: 'STEER RIGHT (→/D)' },
+  turnLeft: { en: 'STEER LEFT (←/A)' },
+  turnRight: { en: 'STEER RIGHT (→/D)' },
+  honk: { en: 'HORN (H)' },
 };
 
 /** What the tutorial's instructor prompt says for each control it teaches. */
-export const tutorialCopy: Record<string, { label: string; keys: string[]; helper: string }> = {
+export const tutorialCopy: Record<string, { label: Localized; keys: string[]; helper: Localized }> = {
   accelerate: {
-    label: 'Drive forward',
+    label: { en: 'Drive forward' },
     keys: ['↑', 'W'],
-    helper: 'Tap to raise your speed setting. The car holds it — no need to keep pressing.',
+    helper: { en: 'Tap to raise your speed setting. The car holds it — no need to keep pressing.' },
   },
   turn_left: {
-    label: 'Steer left',
+    label: { en: 'Steer left' },
     keys: ['←', 'A'],
-    helper: 'Move the car into the left lane before the marker passes.',
+    helper: { en: 'Move the car into the left lane before the marker passes.' },
   },
   turn_right: {
-    label: 'Steer right',
+    label: { en: 'Steer right' },
     keys: ['→', 'D'],
-    helper: 'Move the car into the right lane before the marker passes.',
+    helper: { en: 'Move the car into the right lane before the marker passes.' },
   },
   brake: {
-    label: 'Slow down',
+    label: { en: 'Slow down' },
     keys: ['↓', 'S', 'Space'],
-    helper: 'Tap down to lower your setting, or hold to brake, until the speed is 10 km/h or lower.',
+    helper: { en: 'Tap down to lower your setting, or hold to brake, until the speed is 10 km/h or lower.' },
   },
   stop: {
-    label: 'Full stop',
+    label: { en: 'Full stop' },
     keys: ['↓', 'S', 'Space'],
-    helper: 'Hold the brake until the speedometer reaches 0.',
+    helper: { en: 'Hold the brake until the speedometer reaches 0.' },
   },
 };
 
@@ -109,10 +110,11 @@ export const evaluatePlayerAction = (
    * decision. Given only for a decision answered with the car; the verdict
    * never reads it.
    */
-  support?: SupportLevel
+  support?: SupportLevel,
+  say: TextOf = englishText
 ): EvaluationResult => {
   const timestamp = Date.now();
-  const result = evaluateWeightedRule(event, playerAction, violationStreak);
+  const result = evaluateWeightedRule(event, playerAction, violationStreak, say);
 
   return {
     isCorrect: result.isCorrect,

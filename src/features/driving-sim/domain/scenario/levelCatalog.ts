@@ -71,6 +71,15 @@ const LEVEL_BUILDERS: Record<
   12: (_coverage, _weakCompetency, rng) => createLevel12(rng),
 };
 
+/**
+ * The levels whose roll leans toward the learner's weak area when it is given
+ * one (Legacy's weak-area roll): the builders above that read
+ * `weakCompetency`. The final exam is handed none.
+ */
+const WEAK_AREA_ROLLS = new Set([1, 2, 3, 4, 5]);
+
+export const rollLeansToWeakArea = (levelId: number): boolean => WEAK_AREA_ROLLS.has(levelId);
+
 /** Which signs each level can show, for reporting coverage of the syllabus. */
 const LEVEL_SIGN_NAMES: Record<number, () => string[]> = {
   3: level3SignNames,

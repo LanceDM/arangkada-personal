@@ -95,8 +95,8 @@ export interface FrameView {
   curves: CurveSpan[];
   /**
    * The support level the level is played at, for the one thing a frame shows
-   * that depends on it: whether the road marks the response being graded.
-   * It reaches no solid, no grade and no part of the machine.
+   * that depends on it: whether the road marks the response being graded
+   *. It reaches no solid, no grade and no part of the machine.
    * Absent means `full`, the baseline machine, as a missing h does everywhere.
    */
   support?: SupportLevel;

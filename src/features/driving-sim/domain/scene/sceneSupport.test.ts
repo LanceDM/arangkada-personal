@@ -2,7 +2,7 @@
  * The road shows no more of the answer than `scenarioSupport` does.
  *
  * The briefing, the road prompt and the lane strip have asked
- * `scenarioSupport(event, h)` since support levels were added, but the road was composed without
+ * `scenarioSupport(event, h)` for some time, but the road was composed without
  * h, so it marked the graded lane at every level: a gantry lit over it, a turn
  * drawn starting from it, the pavement arrow in it painted yellow, and Level
  * 7's board calling it YOUR LANE. At `none` a player could read off the road

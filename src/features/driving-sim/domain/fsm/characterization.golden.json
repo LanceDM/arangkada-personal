@@ -134,6 +134,12 @@
     },
     {
       "from": "APPROACHING_EVENT",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "APPROACHING_EVENT",
       "trigger": "turn_left",
       "accepted": true,
       "to": "APPROACHING_EVENT"
@@ -290,6 +296,12 @@
     },
     {
       "from": "COMPLETED",
+      "trigger": "time_up",
+      "accepted": false,
+      "to": "COMPLETED"
+    },
+    {
+      "from": "COMPLETED",
       "trigger": "turn_left",
       "accepted": false,
       "to": "COMPLETED"
@@ -446,6 +458,12 @@
     },
     {
       "from": "DECISION",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "DECISION",
       "trigger": "turn_left",
       "accepted": false,
       "to": "DECISION"
@@ -602,6 +620,12 @@
     },
     {
       "from": "DRIVING",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "DRIVING",
       "trigger": "turn_left",
       "accepted": true,
       "to": "DRIVING"
@@ -758,6 +782,12 @@
     },
     {
       "from": "FEEDBACK_DISPLAYED",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "FEEDBACK_DISPLAYED",
       "trigger": "turn_left",
       "accepted": false,
       "to": "FEEDBACK_DISPLAYED"
@@ -909,6 +939,12 @@
     {
       "from": "GAME_OVER",
       "trigger": "stop_sign",
+      "accepted": false,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "GAME_OVER",
+      "trigger": "time_up",
       "accepted": false,
       "to": "GAME_OVER"
     },
@@ -1070,6 +1106,12 @@
     },
     {
       "from": "HAZARD",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "HAZARD",
       "trigger": "turn_left",
       "accepted": false,
       "to": "HAZARD"
@@ -1223,6 +1265,12 @@
       "trigger": "stop_sign",
       "accepted": true,
       "to": "APPROACHING_EVENT"
+    },
+    {
+      "from": "IDLE",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
     },
     {
       "from": "IDLE",
@@ -1382,6 +1430,12 @@
     },
     {
       "from": "INTERSECTION",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "INTERSECTION",
       "trigger": "turn_left",
       "accepted": false,
       "to": "INTERSECTION"
@@ -1538,6 +1592,12 @@
     },
     {
       "from": "REACTION_WINDOW",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "REACTION_WINDOW",
       "trigger": "turn_left",
       "accepted": false,
       "to": "REACTION_WINDOW"
@@ -1694,6 +1754,12 @@
     },
     {
       "from": "RECOVERY",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
+    },
+    {
+      "from": "RECOVERY",
       "trigger": "turn_left",
       "accepted": false,
       "to": "RECOVERY"
@@ -1847,6 +1913,12 @@
       "trigger": "stop_sign",
       "accepted": false,
       "to": "VIOLATION"
+    },
+    {
+      "from": "VIOLATION",
+      "trigger": "time_up",
+      "accepted": true,
+      "to": "GAME_OVER"
     },
     {
       "from": "VIOLATION",
@@ -2558,6 +2630,106 @@
       ]
     },
     {
+      "name": "time up ends the run from DRIVING",
+      "steps": [
+        "start",
+        "time_up"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "GAME_OVER"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "GAME_OVER",
+          "trigger": "time_up"
+        }
+      ]
+    },
+    {
+      "name": "time up ends the run from a car at rest mid-run",
+      "steps": [
+        "start",
+        "vehicle_stopped",
+        "time_up"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "IDLE",
+        "GAME_OVER"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "IDLE",
+          "trigger": "vehicle_stopped"
+        },
+        {
+          "from": "IDLE",
+          "to": "GAME_OVER",
+          "trigger": "time_up"
+        }
+      ]
+    },
+    {
+      "name": "time up ends the run inside a graded event",
+      "steps": [
+        "start",
+        "red_light",
+        "scenario_trigger",
+        "red_light",
+        "time_up"
+      ],
+      "states": [
+        "IDLE",
+        "DRIVING",
+        "APPROACHING_EVENT",
+        "REACTION_WINDOW",
+        "INTERSECTION",
+        "GAME_OVER"
+      ],
+      "log": [
+        {
+          "from": "IDLE",
+          "to": "DRIVING",
+          "trigger": "start"
+        },
+        {
+          "from": "DRIVING",
+          "to": "APPROACHING_EVENT",
+          "trigger": "red_light"
+        },
+        {
+          "from": "APPROACHING_EVENT",
+          "to": "REACTION_WINDOW",
+          "trigger": "scenario_trigger"
+        },
+        {
+          "from": "REACTION_WINDOW",
+          "to": "INTERSECTION",
+          "trigger": "red_light"
+        },
+        {
+          "from": "INTERSECTION",
+          "to": "GAME_OVER",
+          "trigger": "time_up"
+        }
+      ]
+    },
+    {
       "name": "level completed",
       "steps": [
         "start",
@@ -2786,7 +2958,7 @@
         "answer_incorrect"
       ]
     },
-    "transitionCount": 99,
+    "transitionCount": 109,
     "shadowedTransitions": [],
     "unreachableTransitions": [],
     "triggersWithNoTransitions": [],
@@ -2904,6 +3076,16 @@
       {
         "from": "DRIVING",
         "trigger": "crash",
+        "to": "GAME_OVER"
+      },
+      {
+        "from": "DRIVING",
+        "trigger": "time_up",
+        "to": "GAME_OVER"
+      },
+      {
+        "from": "IDLE",
+        "trigger": "time_up",
         "to": "GAME_OVER"
       },
       {

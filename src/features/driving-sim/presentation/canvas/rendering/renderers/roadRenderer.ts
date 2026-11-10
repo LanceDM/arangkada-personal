@@ -53,6 +53,17 @@ const strokeAlongRoad = (
   ctx.stroke();
 };
 
+/**
+ * Sets a dash pattern scrolled by the road's offset. Reduced by the pattern's
+ * own length, never a shared one, or a pattern that does not divide it jumps
+ * each time the offset wraps.
+ */
+const setRoadDash = (ctx: CanvasRenderingContext2D, dash: number[], roadOffset: number) => {
+  const period = dash.reduce((sum, length) => sum + length, 0);
+  ctx.setLineDash(dash);
+  ctx.lineDashOffset = -(roadOffset % period);
+};
+
 /* ------------------------------------------------------------------------- *
  * Road paint
  *
@@ -231,8 +242,6 @@ const drawDeclaredPaint = (
 ) => {
   // Dashes scroll with the road so they read as passing under the car rather
   // than crawling; the offset is shared by every dashed line on the surface.
-  const dashOffset = -(roadOffset % 70);
-
   for (const run of paintRuns(rows, paint)) {
     if (!run.art) continue;
     const spec = paintSpecFor(run.art, paint.oncomingLanes);
@@ -245,10 +254,7 @@ const drawDeclaredPaint = (
       ctx.save();
       ctx.strokeStyle = line.color;
       ctx.lineWidth = line.width;
-      if (line.dash) {
-        ctx.setLineDash(line.dash);
-        ctx.lineDashOffset = dashOffset;
-      }
+      if (line.dash) setRoadDash(ctx, line.dash, roadOffset);
       strokeAlongRoad(ctx, run.rows, line.offset);
       ctx.restore();
     }
@@ -338,7 +344,8 @@ const drawLegacyPaint = (
 const drawAuxiliaryLane = (
   ctx: CanvasRenderingContext2D,
   rows: RoadRow[],
-  route: RouteLayout
+  route: RouteLayout,
+  roadOffset: number
 ) => {
   const widths = rows.map(row => auxiliaryAt(row.d, route)?.width ?? 0);
 
@@ -385,7 +392,7 @@ const drawAuxiliaryLane = (
     );
     ctx.stroke();
 
-    ctx.setLineDash([18, 14]);
+    setRoadDash(ctx, [18, 14], roadOffset);
     ctx.strokeStyle = 'rgba(248,250,252,0.85)';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -436,7 +443,7 @@ export const drawRoad = (
   // Then any lane running beside them. Painted after the through lanes so its
   // continuity line reads over the carriageway's own edge, which is what a
   // continuity line does.
-  if (route) drawAuxiliaryLane(ctx, rows, route);
+  if (route) drawAuxiliaryLane(ctx, rows, route, roadOffset);
 
   // Environment objects
   for (const obj of envObjects) {

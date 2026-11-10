@@ -15,6 +15,7 @@
     "fsm:update-golden": "tsx scripts/characterizeFsm.ts --write",
     "routing:check": "tsx scripts/characterizeRoutingFsm.ts",
     "routing:update-golden": "tsx scripts/characterizeRoutingFsm.ts --write",
+    "seed": "tsx scripts/seedTeamEmulator.ts",
     "emulators": "firebase emulators:start --only auth,firestore"
   },
   "dependencies": {

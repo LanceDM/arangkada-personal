@@ -3,8 +3,8 @@
  *
  * The flagged-down and ticket-issued slots are an enforcer at the curb flagging
  * the car down, and the stop they grade is the one the sources give a driver
- * stopped by an enforcer: "safely pull over to the extreme right". Until the
- * first play-test they drew a checkpoint's barrier across the
+ * stopped by an enforcer: "safely pull over to the extreme right" (Level 12
+ * pack R3). Until a play-test they drew a checkpoint's barrier across the
  * road, titled themselves a checkpoint, and opened on a full stop in any lane,
  * while their text said the enforcer had flagged the car over to the side.
  *

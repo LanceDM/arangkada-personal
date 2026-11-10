@@ -11,7 +11,12 @@
  * Imported for its side effect by `src/main.tsx`, before anything renders.
  */
 import { guestAttempts } from '@/features/progression';
+import { createStudyAccount, signInStudyAccount } from '@/features/auth';
+import { loadTestProgress } from '@/features/assessment';
+import { courseProgressOf, loadCourseCursor } from '@/features/driving-sim';
 import { composeAuth } from '@/features/auth/composition';
+import { composeAssessment } from '@/features/assessment/composition';
+import { composeStudy } from '@/features/study/composition';
 import { composeAdmin, loadDesignatedRoutingPolicy } from '@/features/admin/composition';
 import { composeDailyChallenge } from '@/features/daily-challenge/composition';
 import { composeMockExam } from '@/features/mock-exam/composition';
@@ -45,9 +50,22 @@ composeProgression();
 composeAdmin();
 composeDailyChallenge();
 composeMockExam();
+composeAssessment();
+// The study reaches Auth's accounts through its own port, and the
+// course and the tests only through what its order reads of them.
+composeStudy({
+  accounts: {
+    create: async (username, password) => ({ uid: (await createStudyAccount(username, password)).uid }),
+    signIn: async (username, password) => ({ uid: (await signInStudyAccount(username, password)).uid }),
+  },
+  sources: {
+    course: async uid => courseProgressOf(await loadCourseCursor(uid)),
+    tests: loadTestProgress,
+  },
+});
 composeDrivingSim({
   learnerHistory: guestAwareLearnerHistory,
-  // The Optimized group's table is the designated trained one, read from
-  // admin's table file on first use.
+  // The Optimized group's table is the fifth experiment's designated one, read from admin's
+  // results file on first use.
   routing: { mode: routingMode, optimized: loadDesignatedRoutingPolicy },
 });

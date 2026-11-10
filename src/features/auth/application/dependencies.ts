@@ -4,11 +4,12 @@
  * `app/dependencies` calls `provideAuthDependencies` once at startup, through
  * this feature's `composition.ts`. Everything else reads them here.
  */
-import type { AuthGateway, UserProfileRepository } from './ports';
+import type { AuthGateway, DeviceLanguageRepository, UserProfileRepository } from './ports';
 
 export interface AuthDependencies {
   auth: AuthGateway;
   userProfiles: UserProfileRepository;
+  deviceLanguage: DeviceLanguageRepository;
 }
 
 let bound: AuthDependencies | null = null;

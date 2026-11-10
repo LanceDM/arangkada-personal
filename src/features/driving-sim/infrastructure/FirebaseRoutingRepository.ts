@@ -6,8 +6,8 @@ import type { RoutingRepository } from '@/features/driving-sim/application/ports
 /**
  * `users/{uid}/routing/assignment` and `users/{uid}/routing/cursor`.
  *
- * The assignment is written only by the developers' assignment script, with
- * their service account; the rules refuse every client write to it, so
+ * The assignment is written only by a developers' script, with the
+ * developers' service account; the rules refuse every client write to it, so
  * a player cannot choose their own group. The cursor is the player's own place
  * in the routing FSM, rewritten when a course entry is entered and when it
  * ends.

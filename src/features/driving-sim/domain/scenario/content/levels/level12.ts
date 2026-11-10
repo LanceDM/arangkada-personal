@@ -1,3 +1,4 @@
+import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import { remediationCandidates } from '@/features/driving-sim/domain/scenario/remediationPool';
@@ -42,7 +43,7 @@ const levelModule = getLevelModule(12);
  * equal slots, 140 of 200 passes one miss always, three never, and two only
  * when both come before the running score has anything to lose (it cannot go
  * below zero). That is the 70% every level from 2 to 11 already asks; no LTO
- * source sets a pass mark.
+ * source sets a pass mark .
  *
  * ## The enforcement half is asked at a stop
  *
@@ -59,9 +60,9 @@ const levelModule = getLevelModule(12);
  *
  * ## Where every claim comes from
  *
- * Each claim this file makes rests on quoted LTO material, by file and
- * heading, and what the sources leave open is left ungraded. The borrowed half
- * carries its own levels' claims. The emergencies rest on the
+ * The team's source notes quotes each claim this file makes, by
+ * file and heading, and lists what the sources leave open. The
+ * borrowed half carries its own levels' claims. The emergencies rest on the
  * final-readiness row (E1*-E4*).
  */
 
@@ -76,8 +77,8 @@ const MAX_SOURCE_LEVEL = 11;
 
 /**
  * Slots 3 and 5 are traffic stops: an enforcer at the curb flags the car down,
- * and the stop the car is graded on is a pull-over to the extreme right, not
- * a stop at a checkpoint's line. The roadside check (slot 1) is a
+ * and the stop the car is graded on is a pull-over to the extreme right (pack
+ * R3), not a stop at a checkpoint's line. The roadside check (slot 1) is a
  * checkpoint, and declares none of this.
  */
 const TRAFFIC_STOP = {
@@ -100,7 +101,7 @@ const borrowed = (
     .map(variant => ({ ...variant, points: POINTS, severity: SEVERITY }));
 
 // 1. Roadside check - curriculum ingredient "checkpoint", and the module's
-// documents and registration. The card says what was
+// documents and registration . The card says what was
 // presented; the question is what the check comes to, which is the law's
 // consequence and never a move the sources do not give. Amounts stay in the
 // citations: the choices turn on which violation it is, and on the one-month
@@ -254,7 +255,7 @@ const roadsideCheckSlot: SlotVariant[] = [
 // 3. Flagged down - the module's apprehension, as the sources give it to the
 // driver: conduct (FDM Vol. 1's law enforcement officer), rights (FDM Vol. 1,
 // RO101), and no negotiating. The one thing the two rights lists disagree on,
-// stepping down when told to, is asked nowhere.
+// stepping down when told to (K2), is asked nowhere.
 const flaggedDownSlot: SlotVariant[] = [
   {
     id: 'level12.flagged-down.at-the-window',
@@ -363,9 +364,10 @@ const flaggedDownSlot: SlotVariant[] = [
   },
 ];
 
-// 5. Ticket issued - the TOP and the license record. What the TOP lets you do and what an unpaid one costs are FDM Vol. 2's
+// 5. Ticket issued - the TOP and the license record (source notes rows A and
+// D). What the TOP lets you do and what an unpaid one costs are FDM Vol. 2's
 // and RO105's; the renewal is FDM Vol. 1's demerit table, asked by total and
-// never by what a violation's category is.
+// never by what a violation's category is (G4).
 const ticketIssuedSlot: SlotVariant[] = [
   {
     id: 'level12.ticket-issued.top-in-hand',
@@ -567,7 +569,10 @@ const level12Base = {
   description: levelModule.desc,
   // Eight events 700 apart, with 700 of road behind the last.
   roadLength: 6200,
-  speedLimit: 60,
+  roadClass: 'city_street',
+  speedLimit: 30,
+  // Spaced and measured at 60 on the dial; driven at 30 as it was at 60.
+  pace: spacedPace(30, 60),
   // 70%, 83% and 95% of 200: the marks Levels 2-11 set on their own totals.
   requiredScore: 140,
   stars2: 166,
@@ -601,7 +606,8 @@ const level12Base = {
  * double yellow. Each brings its line as a declaration (`declaredLine`), as
  * Level 4's markings do on their own level, and the road carries it over every
  * frame the scenario is graded. A road left broken yellow there showed a
- * driver a line that permits the pass and then failed them for making it.
+ * driver a line that permits the pass and then failed them for making it
+ *.
  *
  * Exported for the dev tools that stage events by hand, so a staged exam is
  * painted the way a roll of it would be.

@@ -11,6 +11,8 @@ import type { RoutingMode } from '@/features/driving-sim/domain/telemetry/routin
 import type {
   BriefingProgressRepository,
   LearnerHistoryRepository,
+  QuizBankRepository,
+  QuizSittingRepository,
   RoutingOverrideRepository,
   RoutingRepository,
   SignCoverageRepository,
@@ -22,6 +24,9 @@ export interface DrivingSimDependencies {
   storyAttempts: StoryAttemptRepository;
   signCoverage: SignCoverageRepository;
   briefingProgress: BriefingProgressRepository;
+  /** The Short Quiz's bank and its sittings. */
+  quizBank: QuizBankRepository;
+  quizSittings: QuizSittingRepository;
   /**
    * The Legacy / New switch: today's game, or the
    * routing FSM with the pilot's two groups.
@@ -29,7 +34,7 @@ export interface DrivingSimDependencies {
   routingMode: RoutingMode;
   routing: RoutingRepository;
   routingOverride: RoutingOverrideRepository;
-  /** The designated routing table, loaded on first use by the Optimized group. */
+  /** The fifth experiment's designated table, loaded on first use by the Optimized group. */
   optimizedRouting: () => Promise<OptimizedRouting>;
 }
 

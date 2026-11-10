@@ -17,6 +17,7 @@
  * public API; nothing about the simulation, the FSM or persistence lives in
  * this file.
  */
+import { useLanguage } from '@/shared/i18n/useText';
 import { useEffect, useMemo, useState } from 'react';
 import { Navigate, Outlet, useParams } from 'react-router-dom';
 import { useAuthSession } from '@/features/auth';
@@ -25,13 +26,14 @@ import {
   buildAdaptivePlan,
   completeMission,
   LEVELS,
+  playableLevel,
   nextAttemptSeed,
   startMission,
   type AdaptivePlan,
   type LevelRecommendation,
 } from '@/features/driving-sim';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
-import type { LevelFsmTelemetry } from '@/features/driving-sim';
+import type { LevelFsmTelemetry, PlayConditions } from '@/features/driving-sim';
 import type { StoryRouting, StoryRunContext } from './storyRunContext';
 
 const SAVE_PROMPT_KEY = 'arangkada_save_prompted';
@@ -48,6 +50,7 @@ interface SettledPlan {
 }
 
 const LegacyStoryRun = ({ routing }: { routing: StoryRouting }) => {
+  const { language } = useLanguage();
   const { levelId: levelIdParam } = useParams();
   // A layout route sees the params of whichever child matched, so this is the
   // level named by the URL on the three run screens and undefined on the map.
@@ -86,9 +89,14 @@ const LegacyStoryRun = ({ routing }: { routing: StoryRouting }) => {
   // provisional roll shown while its plan is still in flight. Retry needs no
   // signal of its own here — a fresh attempt settles a fresh plan, and the
   // roll comes with it.
-  const levelConfig = useMemo(
+  const rolledLevel = useMemo(
     () => (activeLevel !== null ? startMission(activeLevel, plan) : null),
     [activeLevel, plan]
+  );
+  // The screens read this; the records keep the plan's English level.
+  const levelConfig = useMemo(
+    () => (rolledLevel ? playableLevel(rolledLevel, language) : null),
+    [rolledLevel, language]
   );
 
   const completedLevels = Object.values(levelResults).filter(r => r.completed).length;
@@ -140,7 +148,7 @@ const LegacyStoryRun = ({ routing }: { routing: StoryRouting }) => {
     // planned against the history the previous attempt just added.
   }, [activeLevel, isLoggedIn, user, rollNonce]);
 
-  const completeRun = (result: LevelResult, telemetry?: LevelFsmTelemetry) => {
+  const completeRun = (result: LevelResult, telemetry?: LevelFsmTelemetry, play?: PlayConditions) => {
     setLevelResult(result);
     saveLevelResult(result);
 
@@ -152,8 +160,8 @@ const LegacyStoryRun = ({ routing }: { routing: StoryRouting }) => {
     void (async () => {
       const uid = isLoggedIn && user ? user.uid : null;
       const start =
-        plan && levelConfig && attemptSeed !== null ? { attemptSeed, plan, level: levelConfig } : undefined;
-      setRecommendation(await completeMission({ uid, result, telemetry, start, group: routing.resolution }));
+        plan && rolledLevel && attemptSeed !== null ? { attemptSeed, plan, level: rolledLevel, language } : undefined;
+      setRecommendation(await completeMission({ uid, result, telemetry, start, group: routing.resolution, play }));
 
       if (!uid && result.levelId === 1 && result.completed) {
         if (!localStorage.getItem(SAVE_PROMPT_KEY)) {

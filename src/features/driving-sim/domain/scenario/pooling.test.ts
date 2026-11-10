@@ -128,7 +128,7 @@ describe('rerollUpcomingEvents', () => {
   });
 
   /**
-   * The regression this guards: the practice selector's `withRemediation`
+   * The regression this guards: `withRemediation`
    * (domain/scenario/levelCatalog.ts) appends one adaptively-selected event to the end of
    * a level's route, past every slot the level itself declares. Before this
    * test existed, `rerollUpcomingEvents` had no coverage at all and indexed
@@ -157,7 +157,7 @@ describe('rerollUpcomingEvents', () => {
    * index-only guard straight through to `slots[index]` and get rerolled
    * like ordinary level content - silently discarding the deliberate pick
    * and replacing it with an unrelated one from that position's pool. Not
-   * how the selector places content today (always appended past the end), but the
+   * how practice places content today (always appended past the end), but the
    * whole point of checking the marker is to stay correct if that ever
    * changes.
    */

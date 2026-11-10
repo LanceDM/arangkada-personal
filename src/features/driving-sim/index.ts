@@ -11,6 +11,7 @@ export { default as MissionBriefing } from './presentation/ui/MissionBriefing';
 export { default as LessonReader } from './presentation/ui/LessonReader';
 
 export { LEVELS } from './domain/scenario/levelCatalog';
+export { playableLevel, playableLevelName, playableModule } from './application/use-cases/playableLevel';
 export { getLevelModule, LEVEL_MODULES } from './domain/scenario/content/lessons/lessonCatalog';
 export { buildAdaptivePlan } from './application/use-cases/buildAdaptivePlan';
 export { startMission } from './application/use-cases/startMission';
@@ -23,9 +24,34 @@ export {
 export { nextAttemptSeed } from './application/attemptSeed';
 export { markLessonsRead } from './application/briefingProgress';
 
+// The Short Quiz bank: its shape and rules, for the admin editor.
+export {
+  DEFAULT_ITEMS_PER_SITTING,
+  DEFAULT_PASSING_SCORE,
+  QUIZ_IMAGE_PREFIX,
+  QUIZ_ITEM_ID_PATTERN,
+  QUIZ_ITEM_LIMITS,
+  QUIZ_ITEM_USES,
+  quizItemProblems,
+  quizFilipinoProblems,
+  quizFilipinoState,
+  sameFilipino,
+  settleFilipino,
+  quizModuleProblems,
+  readQuizItem,
+  readQuizModule,
+  servedItems,
+} from './domain/scenario/quizBank';
+export { STYLE_GUIDE_VERSION } from './domain/scenario/scenarioTexts';
+export type { QuizFilipinoState, QuizItemFilipino, QuizItemDoc, QuizItemDraft, QuizItemUse, QuizModuleDoc } from './domain/scenario/quizBank';
+// The seeded shuffle and the per-item allowance, for the pre/post test.
+export { orderChoices, seedForQuestion } from './domain/scenario/choiceOrder';
+export { QUIZ_SECONDS_PER_ITEM } from './domain/scenario/lessonModule';
+
 // The routing FSM in the game, behind the Legacy / New switch.
 export { default as RoutingGroupOverride } from './presentation/ui/RoutingGroupOverride';
 export {
+  adminTestModeAllowed,
   resolveRoutingGroup,
   routingGroupNow,
   loadRoutingOverride,
@@ -37,16 +63,54 @@ export {
   startFreeReplay,
   startPostTest,
 } from './application/use-cases/startCourseEntry';
-export { cursorFrontierLevel } from './domain/adaptive/courseRouting';
-export { postTestNote } from './domain/adaptive/pilotPostTest';
+export { courseProgressOf, cursorFrontierLevel } from './domain/adaptive/courseRouting';
+// What the study's device check measures against.
+export { useTouchDevice, usePortrait } from './presentation/input/useTouchDevice';
+export { KEEPS_UP_AT_FPS } from './presentation/drive/frameSteps';
+export { isTutorial } from './domain/systems/tutorial';
+export { POST_TEST_SEED, postTestNote } from './domain/adaptive/pilotPostTest';
+
+// The pilot's participant definitions: one copy, read by the export and the admin dashboard.
+export {
+  FELL_BEHIND_MS,
+  PARTICIPANT_COLUMNS,
+  PARTICIPANT_FLAGS,
+  attemptDurationMs,
+  attemptKind,
+  fsmAsRead,
+  participantExport,
+  participantSourceOf,
+} from './domain/pilot/pilotExport';
+
+// The driving FSM's structure, read from its table, for the dashboard's replay of one attempt.
+export { drivingFsmGraph, isInputTrigger } from './domain/fsm/fsmGraph';
+export type { FsmGraph, FsmGraphEdge } from './domain/fsm/fsmGraph';
+export type { FSMState, TransitionLogEntry } from './domain/fsm/fsmTypes';
+export type { FsmTelemetryDoc } from './domain/scoring/levelAttempt';
+export type { DecisionRecord, DecisionTelemetryDoc } from './domain/telemetry/decisionTelemetry';
+export type { RoutedEntryRecord, RoutingTelemetryDoc } from './domain/telemetry/routingTelemetry';
+export type {
+  AccountDocuments,
+  AttemptDocuments,
+  AttemptKind,
+  CompetencyDetail,
+  ParticipantExport,
+  ParticipantFlag,
+  ParticipantRow,
+  ParticipantSource,
+  StoredAssignment,
+  StoredAttempt,
+} from './domain/pilot/pilotExport';
 export type { RoutingGroupResolution } from './application/use-cases/resolveRoutingGroup';
 export type { CourseRun, FreeReplayRun } from './application/use-cases/startCourseEntry';
 export type { RoutingOverride } from './application/ports';
 export type { RoutingCursor, GroupInEffect } from './domain/adaptive/courseRouting';
 export type { CourseNote } from './domain/adaptive/routingBriefing';
+export { freeReplayNote } from './domain/adaptive/routingBriefing';
 
 export type { LevelConfig, ScenarioEvent } from './domain/scenario/scenarioDefinition';
 export type { LevelFsmTelemetry } from './domain/fsm/fsmMetrics';
+export type { PlayConditions } from './domain/telemetry/routingTelemetry';
 export type { AdaptivePlan } from './application/use-cases/buildAdaptivePlan';
 export type { AttemptStart } from './application/use-cases/completeMission';
 export type { LevelRecommendation, PracticeChoice } from './domain/adaptive/practiceSelection';

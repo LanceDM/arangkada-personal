@@ -1,8 +1,16 @@
-/** The bound implementation of Admin's port. Provided by `app/dependencies`. */
+/** The bound implementations of Admin's ports. Provided by `app/dependencies`. */
+import type { IrtRepository } from './irtPorts';
+import type { PilotPoolRepository, PilotRecordsRepository, StudyInvitesRepository } from './pilotPorts';
 import type { AdminReportRepository } from './ports';
+import type { QuizEditorRepository } from './quizPorts';
 
 export interface AdminDependencies {
   report: AdminReportRepository;
+  pilotPool: PilotPoolRepository;
+  invites: StudyInvitesRepository;
+  pilotRecords: PilotRecordsRepository;
+  quizEditor: QuizEditorRepository;
+  irt: IrtRepository;
 }
 
 let bound: AdminDependencies | null = null;

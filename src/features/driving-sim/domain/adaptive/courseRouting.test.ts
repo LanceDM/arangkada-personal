@@ -2,8 +2,9 @@
  * The routing FSM in the game: the cursor, the
  * decision, the entry and its settlement.
  *
- * These pin the pieces: where a player starts, what the learned policy reads
- * as its budget, that every entry
+ * That the two groups move exactly as the simulation's plain and learned arms is held in
+ * a developers' script, over whole simulated courses. These pin the
+ * pieces: where a player starts, what C reads as its budget, that every entry
  * is played on the plain FSM's settings, that a left entry is entered again
  * unchanged, and how a review and the final exam end.
  */
@@ -94,6 +95,28 @@ describe('where a player starts', () => {
   });
 });
 
+describe("the map's next level", () => {
+  const states: FrontierState[] = [...COURSE_LEVELS.map(driveState), FINAL_STATE];
+
+  it('is the level Continue enters, on any verdict, pending or not', () => {
+    for (const state of states) {
+      for (const outcome of [null, 'passed', 'failed'] as const) {
+        if (state.kind === 'FINAL' && outcome === 'passed') continue; // certifies at the attempt's end
+        const cursor = cursorAt(state, outcome);
+        const pending = decide(cursor, 'conventional');
+        const entered = enterCourseEntry(pending).levelId;
+        expect(cursorFrontierLevel(cursor), `${stateId(state)} ${outcome}`).toBe(entered);
+        expect(cursorFrontierLevel({ ...cursor, pending }), `${stateId(state)} ${outcome} pending`).toBe(entered);
+      }
+    }
+  });
+
+  it('is Level 1 once the tutorial is passed, so the tutorial is a replay', () => {
+    expect(cursorFrontierLevel(cursorAt(driveState(0), 'passed'))).toBe(1);
+    expect(cursorFrontierLevel(cursorAt(driveState(0), 'failed'))).toBe(0);
+  });
+});
+
 describe('every course entry is played on the plain FSM\'s settings', () => {
   const states: FrontierState[] = [...COURSE_LEVELS.map(driveState), FINAL_STATE];
 
@@ -131,7 +154,7 @@ describe('every course entry is played on the plain FSM\'s settings', () => {
   });
 });
 
-describe("the learned policy's budget input", () => {
+describe("C's budget input", () => {
   it('is graded decisions of course entries against 336: more below 168, less from 168 on, and less for ever after', () => {
     const at = (spent: number) =>
       decide(cursorAt(driveState(5), 'passed', spent), 'optimized', weakAt('lane_discipline')).observation;
@@ -143,7 +166,7 @@ describe("the learned policy's budget input", () => {
     expect(at(168).qState).toBe('middle:critical:passed:less');
   });
 
-  it('records the row the learned policy read and the action its move came from', () => {
+  it('records the row C read and the action its move came from', () => {
     const observation = decide(cursorAt(driveState(5), 'passed'), 'optimized', weakAt('lane_discipline')).observation;
     expect(observation.row).toEqual(PRACTISE_WEAKEST['middle:critical:passed:more']);
     expect(observation.action).toBe('weakest');

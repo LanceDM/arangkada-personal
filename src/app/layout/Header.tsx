@@ -3,11 +3,14 @@ import { Gauge, LogOut, User } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import ThemeToggle from './ThemeToggle';
 import { signOut, useAuthModal, useAuthSession } from '@/features/auth';
+import { useText } from '@/shared/i18n/useText';
+import { headerMessages as m } from './messages';
 
 const Header = () => {
   const navigate = useNavigate();
   const { isLoggedIn, profile, loading } = useAuthSession();
   const { open } = useAuthModal();
+  const t = useText();
 
   const handleSignOut = async () => {
     await signOut();
@@ -43,7 +46,7 @@ const Header = () => {
             >
               <User className="w-3.5 h-3.5 text-muted-foreground" />
               <span className="text-sm font-medium max-w-[120px] truncate">
-                {profile?.username ?? 'Driver'}
+                {profile?.username ?? t(m.driver)}
               </span>
             </button>
             <Button
@@ -53,10 +56,9 @@ const Header = () => {
               className="text-muted-foreground hover:text-foreground"
             >
               <LogOut className="w-4 h-4 mr-1" />
-              Sign out
+              {t(m.signOut)}
             </Button>
           </div>
-
         ) : (
           /* ── LOGGED OUT STATE ── */
           <div className="flex items-center gap-2">
@@ -65,14 +67,14 @@ const Header = () => {
               size="sm"
               onClick={() => open({ defaultView: 'login' })}
             >
-              Log in
+              {t(m.logIn)}
             </Button>
             <Button
               size="sm"
               className="bg-primary text-primary-foreground font-bold"
               onClick={() => open({ defaultView: 'register' })}
             >
-              Sign up
+              {t(m.signUp)}
             </Button>
           </div>
         )}

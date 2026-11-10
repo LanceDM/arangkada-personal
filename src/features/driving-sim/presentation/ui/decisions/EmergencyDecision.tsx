@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { answerHint, useInputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { AlertTriangle, BookOpen, Check, ChevronDown, X } from 'lucide-react';
 import type { EmergencyKind, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion';
 import { useChoiceOrder } from './useChoiceOrder';
+import { useText } from '@/shared/i18n/useText';
+import { Say } from '@/shared/i18n/language';
+import type { Localized } from '@/shared/lib/localized';
+import { decisionMessages as m } from '../messages';
 
 interface EmergencyDecisionProps {
   event: ScenarioEvent;
@@ -90,26 +95,26 @@ interface DiagramProps {
 }
 
 /** How each emergency is titled and framed, so the panel names what it draws. */
-const EMERGENCY_COPY: Record<EmergencyKind, { aside: string; verdictOk: string; verdictBad: string }> = {
+const EMERGENCY_COPY: Record<EmergencyKind, { aside: Localized; verdictOk: Localized; verdictBad: Localized }> = {
   blowout: {
-    aside: 'Tire blowout',
-    verdictOk: 'Vehicle held straight',
-    verdictBad: 'Control lost',
+    aside: m.tireBlowout,
+    verdictOk: m.heldStraight,
+    verdictBad: m.controlLost,
   },
   brake_loss: {
-    aside: 'Loss of brake',
-    verdictOk: 'Speed brought down',
-    verdictBad: 'Ran out of road',
+    aside: m.brakeLoss,
+    verdictOk: m.speedDown,
+    verdictBad: m.ranOut,
   },
   skid: {
-    aside: 'Skid — traction loss',
-    verdictOk: 'Traction regained',
-    verdictBad: 'Spun out',
+    aside: m.skid,
+    verdictOk: m.tractionBack,
+    verdictBad: m.spunOut,
   },
   jammed_pedal: {
-    aside: 'Jammed accelerator',
-    verdictOk: 'Vehicle brought to rest',
-    verdictBad: 'Kept accelerating',
+    aside: m.jammed,
+    verdictOk: m.atRest,
+    verdictBad: m.keptAccelerating,
   },
 };
 
@@ -201,7 +206,7 @@ const BlowoutDiagram = ({ t, outcome }: DiagramProps) => {
           style={{ font: 'bold 13px sans-serif' }}
           opacity={beat(t, 0.55, 1)}
         >
-          SPIN
+          <Say {...m.spin} />
         </text>
       )}
     </svg>
@@ -255,7 +260,7 @@ const BrakeLossDiagram = ({ t, outcome }: DiagramProps) => {
           style={{ font: 'bold 11px sans-serif' }}
           opacity={beat(t, 0.6, 1)}
         >
-          STOPPED SHORT
+          <Say {...m.stoppedShort} />
         </text>
       )}
     </svg>
@@ -347,6 +352,8 @@ const DIAGRAMS: Record<EmergencyKind, (props: DiagramProps) => ReactElement> = {
  * released all happen after the consequence has been watched.
  */
 const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyDecisionProps) => {
+  const say = useText();
+  const inputMode = useInputMode();
   const [phase, setPhase] = useState<Phase>('deciding');
   const [chosen, setChosen] = useState<string | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -451,11 +458,11 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
               id="emergency-title"
               className="truncate font-display text-[13px] font-black uppercase tracking-[0.12em] text-destructive"
             >
-              {copy.aside}
+              {say(copy.aside)}
             </p>
           </div>
           <p className="shrink-0 font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">
-            Emergency
+            {say(m.emergency)}
           </p>
         </header>
 
@@ -493,7 +500,7 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
                 {hintText && (
                   <div className="rounded-md border border-primary/40 bg-primary/10 px-3 py-2">
                     <p className="font-display text-[12px] font-black uppercase tracking-[0.12em] text-primary">
-                      Extra guidance
+                      {say(m.extraGuidance)}
                     </p>
                     <p className="mt-1 text-[13px] leading-5 text-foreground">{hintText}</p>
                   </div>
@@ -518,7 +525,7 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
                 </div>
 
                 <p className="text-center text-[12px] text-muted-foreground">
-                  Click an answer, or press its number key
+                  {answerHint(inputMode)}
                 </p>
               </>
             )}
@@ -534,7 +541,7 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
                     <X className="h-4 w-4 shrink-0" aria-hidden />
                   )}
                   <p className="font-display text-[13px] font-black uppercase tracking-[0.12em]">
-                    {correct ? copy.verdictOk : copy.verdictBad}
+                    {say(correct ? copy.verdictOk : copy.verdictBad)}
                   </p>
                 </div>
 
@@ -554,7 +561,7 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
                     >
                       <BookOpen className="h-4 w-4 shrink-0 text-primary" aria-hidden />
                       <span className="font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">
-                        Why this matters
+                        {say(m.whyMatters)}
                       </span>
                       <ChevronDown
                         className={`ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
@@ -578,7 +585,7 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
         {phase !== 'deciding' && (
           <footer className="flex shrink-0 items-center justify-between gap-3 border-t border-border bg-background/50 px-4 py-3">
             <p className="text-[12px] leading-5 text-muted-foreground" aria-live="polite">
-              {phase === 'verdict' ? 'The drive is paused.' : 'Watching what happens…'}
+              {say(phase === 'verdict' ? m.drivePaused : m.watchingHappens)}
             </p>
             <button
               ref={continueRef}
@@ -586,7 +593,7 @@ const EmergencyDecision = ({ event, onAnswer, hintText, choiceSeed }: EmergencyD
               disabled={phase !== 'verdict'}
               className="rounded-lg border border-destructive/60 bg-destructive/10 px-4 py-2 font-display text-[13px] font-black uppercase tracking-[0.12em] text-destructive transition-colors hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 focus-visible:ring-offset-card disabled:opacity-40"
             >
-              {phase === 'verdict' ? 'Continue driving' : 'Watching…'}
+              {say(phase === 'verdict' ? m.continueDriving : m.watching)}
             </button>
           </footer>
         )}

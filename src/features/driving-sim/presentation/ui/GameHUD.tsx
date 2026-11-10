@@ -1,7 +1,10 @@
-import { Gauge, Zap } from 'lucide-react';
+import { Gauge, Timer, Zap } from 'lucide-react';
+import { useInputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { LANE_COUNT } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import type { RoadPosition } from '@/features/driving-sim/domain/world/routeGeometry';
 import type { RoadPositionCue } from './roadPositionLabel';
+import { useText } from '@/shared/i18n/useText';
+import { hudMessages as m } from './messages';
 
 interface GameHUDProps {
   score: number;
@@ -18,7 +21,16 @@ interface GameHUDProps {
   oncomingLanes?: number;
   /** Speed the driver has set, which the car holds. */
   targetSpeed?: number;
+  /** The maximum in force where the car is; omitted, nothing is shown. */
+  speedLimit?: number;
+  /** Whole seconds of driving left before time's up, or null where the level has no limit. */
+  secondsLeft?: number | null;
 }
+
+/** The last stretch of a level's driving time, when the clock turns amber. */
+const TIME_RUNNING_OUT_SECONDS = 30;
+
+const clockLabel = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
 /**
  * Strip of the carriageway showing where the car is and, when a sign assigns a
@@ -112,7 +124,11 @@ const HudKey = ({ children }: { children: string }) => (
  * copy laid across the top of the canvas said the same thing twice and read as
  * a loading bar over the road.
  */
-const GameHUD = ({ score, speed, levelName, levelId, onExit, position, cue, requiredLanes = [], oncomingLanes = 0, targetSpeed = 0 }: GameHUDProps) => {
+const GameHUD = ({ score, speed, levelName, levelId, onExit, position, cue, requiredLanes = [], oncomingLanes = 0, targetSpeed = 0, speedLimit, secondsLeft = null }: GameHUDProps) => {
+  const say = useText();
+  // Shown speed against the limit, so the colour never disagrees with the digits.
+  const over = speedLimit !== undefined && Math.round(speed) > speedLimit;
+  const mode = useInputMode();
   return (
     <div className="pointer-events-none absolute inset-0 z-20 flex flex-col">
       <div className="pointer-events-auto flex items-center justify-between gap-2 px-3 pt-3">
@@ -120,18 +136,33 @@ const GameHUD = ({ score, speed, levelName, levelId, onExit, position, cue, requ
           onClick={onExit}
           className="rounded-lg border border-border bg-card/85 px-3 py-1.5 font-display text-[11px] tracking-wider text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
         >
-          EXIT
+          {say(m.exit)}
         </button>
 
         <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-card/85 px-3 py-1.5 backdrop-blur">
-          <span className="font-display text-[11px] text-muted-foreground">LVL {levelId}</span>
+          <span className="font-display text-[11px] text-muted-foreground">{say(m.level(levelId))}</span>
           <span className="h-3 w-px bg-border" />
           <span className="truncate font-body text-[11px] text-foreground">{levelName}</span>
         </div>
 
-        <div className="flex items-center gap-1.5 rounded-lg border border-border bg-card/85 px-3 py-1.5 backdrop-blur">
-          <Zap className="h-3.5 w-3.5 text-primary" />
-          <span className="font-display text-sm text-primary">{score}</span>
+        <div className="flex items-center gap-1.5">
+          {/* Driving time left. It stands still while a panel is open, because
+              reading is never counted, and turns amber for the last half minute. */}
+          {secondsLeft !== null && (
+            <div
+              aria-label={say(m.timeLeft(clockLabel(secondsLeft)))}
+              className={`flex items-center gap-1 rounded-lg border bg-card/85 px-2 py-1.5 backdrop-blur ${
+                secondsLeft <= TIME_RUNNING_OUT_SECONDS ? 'border-road-yellow/60 text-road-yellow' : 'border-border text-muted-foreground'
+              }`}
+            >
+              <Timer className="h-3.5 w-3.5" />
+              <span className="font-display text-[11px] tabular-nums">{clockLabel(secondsLeft)}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 rounded-lg border border-border bg-card/85 px-3 py-1.5 backdrop-blur">
+            <Zap className="h-3.5 w-3.5 text-primary" />
+            <span className="font-display text-sm text-primary">{score}</span>
+          </div>
         </div>
       </div>
 
@@ -144,14 +175,30 @@ const GameHUD = ({ score, speed, levelName, levelId, onExit, position, cue, requ
                 number the player is steering by on a line of its own with no
                 label beside it. */}
             <div className="flex items-baseline gap-1 whitespace-nowrap leading-none">
-              <span className="font-display text-lg text-foreground">{Math.round(speed)}</span>
+              <span
+                className={`font-display text-lg ${over ? 'text-destructive' : 'text-foreground'}`}
+                aria-label={over ? say(m.overLimit(Math.round(speed), speedLimit)) : undefined}
+              >
+                {Math.round(speed)}
+              </span>
               <span className="text-xs text-muted-foreground">km/h</span>
               {/* The speed you asked for, so a setting that has not been
                   reached yet is visible rather than guessed at. */}
               <span className="ml-1 font-display text-[10px] uppercase tracking-wider text-primary">
-                set {Math.round(targetSpeed)}
+                {say(m.speedSet(Math.round(targetSpeed)))}
               </span>
             </div>
+            {/* The limit in force here, drawn as the round sign that posts one:
+                the road's, or a scenario's posting inside its zone.
+                A fact about the road, so it shows at every support level. */}
+            {speedLimit !== undefined && (
+              <div
+                aria-label={say(m.speedLimit(speedLimit))}
+                className="ml-1 flex h-8 w-8 shrink-0 flex-col items-center justify-center rounded-full border-[3px] border-destructive bg-white leading-none"
+              >
+                <span className="font-display text-[11px] font-black text-black">{speedLimit}</span>
+              </div>
+            )}
           </div>
           <div className="h-8 w-px bg-border" />
           <LaneStrip
@@ -160,16 +207,24 @@ const GameHUD = ({ score, speed, levelName, levelId, onExit, position, cue, requ
             requiredLanes={requiredLanes}
             oncomingLanes={oncomingLanes}
           />
-          <div className="h-8 w-px bg-border" />
-          <div className="text-center">
-            <p className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">Controls</p>
-            <div className="mt-1 flex items-center gap-1">
-              <HudKey>↓</HudKey>
-              <HudKey>←</HudKey>
-              <HudKey>→</HudKey>
-              <HudKey>H</HudKey>
-            </div>
-          </div>
+          {/* The keyboard's legend. A touch screen has its controls beside the
+              board, labelled, so naming keys there would name nothing. */}
+          {mode === 'keys' && (
+            <>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-center">
+                <p className="text-[9px] uppercase tracking-[0.18em] text-muted-foreground">{say(m.controls)}</p>
+                <div className="mt-1 flex items-center gap-1">
+                  <HudKey>↑</HudKey>
+                  <HudKey>↓</HudKey>
+                  <HudKey>←</HudKey>
+                  <HudKey>→</HudKey>
+                  {/* No H: the horn is never an answer, and is graded only on
+                      Level 8, where sounding it is the mistake. The key still works. */}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

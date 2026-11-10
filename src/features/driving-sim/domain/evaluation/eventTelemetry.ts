@@ -11,18 +11,37 @@
 import type { LevelConfig, LineHoldRequirement, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { resolveLaneRole, type LaneIndex } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { CAR_LENGTH, UNITS_PER_METER } from '@/features/driving-sim/domain/world/routeGeometry';
+import { DANGER_SPEED, isSection35Road } from '@/features/driving-sim/domain/scenario/speedLimits';
+import { englishText, textIn, type TextOf } from '@/shared/lib/localized';
 
-/** At or below this the vehicle counts as having come to a complete stop. */
+/**
+ * At or below this the vehicle counts as having come to a complete stop.
+ *
+ * Derived, not chosen: it is more than one frame of the dry brake (1.2 km/h,
+ * `BRAKE_FORCE`), so a car braking to rest always passes through it, and below
+ * any speed the setting can hold (5 km/h a step).
+ */
 export const FULL_STOP_SPEED = 1.5;
 
 /**
- * A hazard sign asks for a genuine reduction, not merely for the posted limit
- * to be respected. Expressed as a share of whatever speed applies here.
+ * What "slow down" means on the expressway, as a share of the speed that
+ * applies there. Labelled: RA 4136 §35 does not govern the expressway, and no
+ * source sets a figure for slowing on one (speed-limits pack).
  */
 export const SLOWED_SHARE = 0.6;
 
-/** A posted minimum is met with a little margin, so rounding never fails you. */
-export const MINIMUM_SHARE = 0.75;
+/**
+ * The speed a hazard's "slow down" is met at or under.
+ *
+ * A hazard asks for a genuine reduction, not merely for the posted limit to be
+ * respected. On every RA 4136 road that is §35(b) row 4's 20 km/h, the figure
+ * the law sets for "similar dangerous circumstances", or the posting where one
+ * is lower. On the expressway it is `SLOWED_SHARE` of the speed that applies.
+ */
+export const slowTarget = (event: ScenarioEvent, level: LevelConfig): number => {
+  const applies = speedFor(event, level);
+  return isSection35Road(level.roadClass) ? Math.min(DANGER_SPEED, applies) : applies * SLOWED_SHARE;
+};
 
 /**
  * How far through an overtake the car actually got.
@@ -445,7 +464,7 @@ export interface NoStandingStretch {
  * The car stands within `noStandingWithin` meters of the place when any part
  * of it does: from its nose that far short of the place to its tail that far
  * past it. The place is the event's point, where the hydrant or the sign is
- * drawn. Until the first play-test this was the whole 340-unit approach, which
+ * drawn. Until a play-test this was the whole 340-unit approach, which
  * failed a stop eleven meters short of a hydrant for "within four meters" and
  * passed a car standing level with it.
  */
@@ -485,7 +504,7 @@ export const deriveAction = (
 
   if (event.type === 'speed_limit') {
     if (event.speedRule === 'minimum') {
-      return telemetry.speedAtSign >= posted * MINIMUM_SHARE ? 'accelerate' : 'brake';
+      return telemetry.speedAtSign >= posted ? 'accelerate' : 'brake';
     }
     // A posted maximum is met by being at or under it as you pass the sign.
     if (telemetry.stoppedBeforeLine && event.correctAction === 'stop') return 'stop';
@@ -517,7 +536,7 @@ export const deriveAction = (
   // where either is acceptable (see the rule engine: 'slow' satisfies a request
   // to brake), so nothing legitimate fails for it — but the action is now named
   // for what the driver actually did.
-  if (telemetry.speedAtSign <= posted * SLOWED_SHARE) {
+  if (telemetry.speedAtSign <= slowTarget(event, level)) {
     return telemetry.braked ? 'brake' : 'slow';
   }
   return 'accelerate';
@@ -664,10 +683,17 @@ export const isFailedEarly = (telemetry: EventTelemetry, event: ScenarioEvent): 
  * branch of `isSatisfiedEarly` reads `stoppedBeforeLine` — which is true of a
  * car stopped anywhere on the approach, including dead in the travel lane.
  * Settling early would pass the one driver the scenario exists to fail.
+ *
+ * And a surface that jolts a car taken over it too fast (`jarringAbove`): the
+ * jolt takes the speed off by itself, so a driver who carried speed into the
+ * water was thrown under the slow-down target inside the zone and passed for
+ * it. The speed at the sign is read after the car has had the road to
+ * pick its speed back up, which is the speed the driver chose.
  */
 export const settlesWhenMet = (event: ScenarioEvent): boolean =>
   !(
     event.type === 'speed_limit' ||
+    event.effect?.jarringAbove !== undefined ||
     event.maneuver ||
     event.avoid ||
     event.requiredLane?.strict ||
@@ -700,7 +726,7 @@ export const isSatisfiedEarly = (
 
   if (event.correctAction === 'stop') return telemetry.stoppedBeforeLine;
   if (event.correctAction === 'brake') {
-    return currentSpeed <= speedFor(event, level) * SLOWED_SHARE;
+    return currentSpeed <= slowTarget(event, level);
   }
   return false;
 };
@@ -732,7 +758,8 @@ const gradeMerge = (
   requirement: NonNullable<ScenarioEvent['merge']>,
   event: ScenarioEvent,
   level: LevelConfig,
-  progress: MergeProgress
+  progress: MergeProgress,
+  say: TextOf
 ): Grade => {
   // Never on the lane at all: there was no merge to make, so there is nothing
   // here to grade and the event falls through to its ordinary reading.
@@ -755,12 +782,11 @@ const gradeMerge = (
   }
   return {
     action: event.correctAction,
-    rewardMessage:
-      `Correct. You joined at ${Math.round(progress.speedAtJoin)} km/h` +
-      (Number.isFinite(progress.headwayAtJoin)
-        ? `, ${seconds(progress.headwayAtJoin)} seconds behind the traffic already on the carriageway`
-        : ', with the carriageway clear beside you') +
-      ', and off the acceleration lane before it ran out.',
+    rewardMessage: say(
+      Number.isFinite(progress.headwayAtJoin)
+        ? { en: `Correct. You joined at ${Math.round(progress.speedAtJoin)} km/h, ${seconds(progress.headwayAtJoin)} seconds behind the traffic already on the carriageway, and off the acceleration lane before it ran out.` }
+        : { en: `Correct. You joined at ${Math.round(progress.speedAtJoin)} km/h, with the carriageway clear beside you, and off the acceleration lane before it ran out.` }
+    ),
   };
 };
 
@@ -775,7 +801,8 @@ const gradeMerge = (
 const gradeOvertake = (
   manoeuvre: NonNullable<ScenarioEvent['overtake']>,
   event: ScenarioEvent,
-  progress: OvertakeProgress
+  progress: OvertakeProgress,
+  say: TextOf
 ): Grade => {
   if (progress.passedElsewhere && !progress.passedInLane) {
     return { action: 'undertake', penaltyMessage: manoeuvre.wrongLaneMessage };
@@ -795,7 +822,7 @@ const gradeOvertake = (
   return {
     action: event.correctAction,
     rewardMessage:
-      'Correct. You held back until the lane was yours, made the pass in Lane 1, drew clear, and gave the lane straight back.',
+      say({ en: 'Correct. You held back until the lane was yours, made the pass in Lane 1, drew clear, and gave the lane straight back.' }),
   };
 };
 
@@ -814,13 +841,14 @@ const gradeOvertake = (
 const gradeFollowing = (
   requirement: NonNullable<ScenarioEvent['following']>,
   event: ScenarioEvent,
-  telemetry: EventTelemetry
+  telemetry: EventTelemetry,
+  say: TextOf
 ): Grade | null => {
   if (telemetry.headwayFrames === 0) {
     if (telemetry.leadFrames > 0 && telemetry.followedFrames === 0) {
       return {
         action: event.correctAction,
-        rewardMessage: 'Correct. You were never behind it in its lane, so there was no following gap to keep.',
+        rewardMessage: say({ en: 'Correct. You were never behind it in its lane, so there was no following gap to keep.' }),
       };
     }
     return null;
@@ -831,8 +859,7 @@ const gradeFollowing = (
   return {
     action: event.correctAction,
     rewardMessage:
-      `Correct. Your closest gap to the vehicle ahead was ${seconds(telemetry.minHeadway)} seconds, ` +
-      `clear of the ${requirement.seconds}-second minimum.`,
+      say({ en: `Correct. Your closest gap to the vehicle ahead was ${seconds(telemetry.minHeadway)} seconds, clear of the ${requirement.seconds}-second minimum.` }),
   };
 };
 
@@ -915,10 +942,10 @@ export const gradeEvent = (
       : { action: event.correctAction };
   }
 
-  if (event.merge) return gradeMerge(event.merge, event, level, telemetry.merge);
-  if (event.overtake) return gradeOvertake(event.overtake, event, telemetry.overtake);
+  if (event.merge) return gradeMerge(event.merge, event, level, telemetry.merge, textIn(level.language));
+  if (event.overtake) return gradeOvertake(event.overtake, event, telemetry.overtake, textIn(level.language));
   if (event.following) {
-    const graded = gradeFollowing(event.following, event, telemetry);
+    const graded = gradeFollowing(event.following, event, telemetry, textIn(level.language));
     if (graded) return graded;
   }
 
@@ -930,7 +957,8 @@ export const gradeEvent = (
   // box, an emergency vehicle at a junction) fails the driver who stops, and a
   // driver who slows to look is doing what the sign asks. `derived` also names
   // a braked slow-down `brake`, and on a faster road - the final exam's 60 -
-  // that failed an ordinary approach with text about stopping dead.
+  // that failed an ordinary approach with text about stopping dead (grading
+  // key C10).
   if (forbidden.length > 0) {
     const act = derived === 'brake' && !telemetry.stoppedBeforeLine ? event.correctAction : derived;
     return { action: (forbidden as string[]).includes(act) ? act : event.correctAction };
@@ -962,5 +990,82 @@ export const gradeEvent = (
     return { action: event.correctAction };
   }
 
-  return { action: derived };
+  return { action: derived, ...speedCorrection(telemetry, event, level, derived) };
 };
+
+/** What speed a scenario's grade asks for at its sign, where its speed decides it. */
+export interface SpeedTarget {
+  /** `most`: at or under `speed`. `least`: at or over it. */
+  at: 'most' | 'least';
+  speed: number;
+}
+
+/**
+ * The speed this scenario is graded on, or null where speed does not decide
+ * it. The one answer the prompt names and the correction quotes, so
+ * the number shown is the number graded.
+ *
+ * A posted minimum is met at its figure, a posted maximum at its figure, and a
+ * request to slow down at `slowTarget`. A stop, a turn, a bay, a coast, a
+ * jammed throttle, an inspection or a question is graded on something else.
+ */
+export const speedTarget = (event: ScenarioEvent, level: LevelConfig): SpeedTarget | null => {
+  if (
+    event.neutral ||
+    event.maneuver ||
+    event.bay ||
+    event.coast ||
+    event.effect?.stuckThrottle ||
+    event.inspection ||
+    event.choices?.length ||
+    event.merge ||
+    event.overtake ||
+    event.following ||
+    event.avoid?.length
+  ) {
+    return null;
+  }
+  if (event.type === 'speed_limit') {
+    if (event.correctAction === 'stop') return null;
+    return event.speedRule === 'minimum'
+      ? { at: 'least', speed: speedFor(event, level) }
+      : { at: 'most', speed: speedFor(event, level) };
+  }
+  if (event.correctAction === 'brake') return { at: 'most', speed: slowTarget(event, level) };
+  return null;
+};
+
+/** `20 km/h or less`, `40 km/h or more`. */
+export const speedTargetText = (target: SpeedTarget, say: TextOf = englishText): string =>
+  say(target.at === 'most' ? { en: `${Math.round(target.speed)} km/h or less` } : { en: `${Math.round(target.speed)} km/h or more` });
+
+/**
+ * The correction after a speed mistake quotes the speed reached against the
+ * target: "the speed was the mistake" told a driver nothing about how
+ * far off it was. Only where speed decided the verdict and was wrong.
+ */
+const speedCorrection = (
+  telemetry: EventTelemetry,
+  event: ScenarioEvent,
+  level: LevelConfig,
+  derived: string
+): Pick<Grade, 'penaltyMessage'> => {
+  const target = speedTarget(event, level);
+  if (!target || derived === event.correctAction) return {};
+  const missed =
+    target.at === 'most' ? telemetry.speedAtSign > target.speed : telemetry.speedAtSign < target.speed;
+  if (!missed) return {};
+  const reached = Math.round(telemetry.speedAtSign);
+  const say = textIn(level.language);
+  return {
+    penaltyMessage: say({ en: `${event.penaltyMessage} You passed at ${reached} km/h; the target was ${speedTargetText(target, say)}.` }),
+  };
+};
+
+/**
+ * The maximum the car is held to here, for the HUD: a scenario's own posting
+ * while the car is in that scenario's zone, else the road's limit. A
+ * posted minimum is not a maximum, so it leaves the road's limit showing.
+ */
+export const limitInForce = (event: ScenarioEvent | null, level: LevelConfig): number =>
+  event?.postedSpeed !== undefined && event.speedRule !== 'minimum' ? event.postedSpeed : level.speedLimit;
