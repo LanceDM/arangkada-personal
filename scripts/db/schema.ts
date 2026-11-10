@@ -15,6 +15,7 @@
  */
 
 import { bktUpdateId } from '@/domain/study/bktLog';
+import { STUDY_EVENT_TYPES } from '@/domain/study/studyEvent';
 
 export const DATABASE_SCHEMA_VERSION = 3;
 
@@ -62,10 +63,7 @@ const envelope: Check = (data, id) => [
   ...(data.eventId === id ? [] : ['eventId differs from the document id']),
 ];
 
-const EVENT_TYPES = [
-  'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered', 'background_submitted',
-  'drive_planned', 'activity_reopened', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision', 'reward_computed', 'app_error',
-];
+const EVENT_TYPES = [...STUDY_EVENT_TYPES];
 const SOURCES = ['drive', 'quiz', 'diagnostic', 'post_exam'];
 
 // --- the paths ----------------------------------------------------------------------

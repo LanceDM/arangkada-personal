@@ -12,6 +12,7 @@ import type { BankItem } from '@/domain/assessment/questionBank';
 import type {
   BriefingGate,
   CourseNote,
+  DriveExit,
   LevelConfig,
   LevelFsmTelemetry,
   LevelRecommendation,
@@ -118,6 +119,10 @@ export interface StoryRunContext {
    * reach persistence without passing through React state or the progress store.
    */
   completeRun: (result: LevelResult, telemetry?: LevelFsmTelemetry) => void;
+  /** The drive was left before its end (Exit): logs what was done so far. Absent where nothing is logged. */
+  exitRun?: (partial?: DriveExit) => void;
+  /** The page is closing mid-drive: the same, best effort. */
+  abandonRun?: (partial: DriveExit) => void;
   /**
    * Discards the finished attempt so a fresh one can be rolled. Retry, Next and
    * the practice suggestion all mean "that attempt is over, plan another one".

@@ -25,6 +25,8 @@ interface BankQuizProps {
    * per-competency results to show; an exam returns nothing (no feedback).
    */
   onSubmit: (choices: (number | null)[], responseMs: (number | null)[]) => Promise<BankQuizResult[] | null>;
+  /** Each answer the moment it is given (position from 1), for the log: an abandoned sitting still shows how far it got. */
+  onAnswer?: (position: number, item: BankItem, choice: number, responseMs: number) => void;
   /** After the results: continue (passed, or retake drawn), or close. */
   onDone: () => void;
   onClose?: () => void;
@@ -37,7 +39,7 @@ interface BankQuizProps {
  * competency after the attempt, 2 of 3 to pass; the diagnostic and the
  * post-exam show nothing about the answers.
  */
-const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onDone, onClose }: BankQuizProps) => {
+const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onAnswer, onDone, onClose }: BankQuizProps) => {
   const [step, setStep] = useState(0);
   const [choices, setChoices] = useState<(number | null)[]>(() => items.map(() => null));
   const [results, setResults] = useState<BankQuizResult[] | null>(null);
@@ -69,6 +71,7 @@ const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onDone, onClose }: B
   const answer = (choice: number) => {
     const now = Date.now();
     timings.current[step] = now - shownAt.current;
+    onAnswer?.(step + 1, items[step], choice, now - shownAt.current);
     shownAt.current = now;
     const next = choices.map((c, i) => (i === step ? choice : c));
     setChoices(next);

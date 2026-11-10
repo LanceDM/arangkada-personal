@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import AppLayout from '@/app/layout/AppLayout';
-import { BankQuiz } from '@/features/driving-sim';
+import { BankQuiz, logAnswerGiven, logUiAction } from '@/features/driving-sim';
+import { useAuthSession } from '@/features/auth';
 import { useStoryRun } from './storyRunContext';
 
 /**
@@ -13,6 +14,8 @@ import { useStoryRun } from './storyRunContext';
 const AssessmentPage = ({ kind }: { kind: 'diagnostic' | 'post_exam' }) => {
   const navigate = useNavigate();
   const { course } = useStoryRun();
+  const { user } = useAuthSession();
+  const uid = user?.uid ?? null;
   const [sitting, setSitting] = useState(false);
   const assessments = course?.assessments;
 
@@ -31,6 +34,13 @@ const AssessmentPage = ({ kind }: { kind: 'diagnostic' | 'post_exam' }) => {
         onSubmit={async (choices, responseMs) => {
           await (kind === 'diagnostic' ? assessments.submitDiagnostic(choices, responseMs) : assessments.submitPostExam(choices, responseMs));
           return null;
+        }}
+        onAnswer={(position, item, choice, responseMs) => {
+          if (uid) void logAnswerGiven(uid, { sitting: kind, attempt: null, levelId: null, phase: null, position, item, choice, responseMs });
+        }}
+        onClose={() => {
+          if (uid) void logUiAction(uid, 'exam_closed', { sitting: kind });
+          setSitting(false);
         }}
         onDone={() => navigate('/play/story')}
       />
@@ -52,7 +62,10 @@ const AssessmentPage = ({ kind }: { kind: 'diagnostic' | 'post_exam' }) => {
           <p className="text-sm text-muted-foreground">It opens once you pass the final exam.</p>
         ) : (
           <button
-            onClick={() => setSitting(true)}
+            onClick={() => {
+              if (uid) void logUiAction(uid, 'exam_started', { sitting: kind });
+              setSitting(true);
+            }}
             className="rounded-xl bg-primary px-8 py-3 font-display text-sm tracking-wider text-primary-foreground transition-opacity hover:opacity-90"
           >
             START →

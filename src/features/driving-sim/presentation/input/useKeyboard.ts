@@ -15,7 +15,13 @@ export interface KeyboardControl {
   releaseHeldKeys: () => void;
 }
 
-export const useKeyboard = (keysRef: RefObject<Set<string>>): KeyboardControl => {
+/** Optional listener for every real press and release (auto-repeat excluded), for the drive's input log. */
+export interface KeyboardListener {
+  press: (key: string) => void;
+  release: (key: string) => void;
+}
+
+export const useKeyboard = (keysRef: RefObject<Set<string>>, listener?: RefObject<KeyboardListener | null>): KeyboardControl => {
   // Keys that were down when the drive was last released and have not been let
   // go since. Auto-repeat re-fires `keydown` for them, so they are filtered on
   // the way in rather than cleared once.
@@ -29,10 +35,12 @@ export const useKeyboard = (keysRef: RefObject<Set<string>>): KeyboardControl =>
     // asks for.
     const keys = keysRef.current;
     const onKeyDown = (e: KeyboardEvent) => {
+      if (!e.repeat) listener?.current?.press(e.key);
       if (!suppressed.has(e.key)) keys?.add(e.key);
       e.preventDefault();
     };
     const onKeyUp = (e: KeyboardEvent) => {
+      listener?.current?.release(e.key);
       suppressed.delete(e.key);
       keys?.delete(e.key);
     };
@@ -47,7 +55,7 @@ export const useKeyboard = (keysRef: RefObject<Set<string>>): KeyboardControl =>
       suppressed.clear();
       keys?.clear();
     };
-  }, [keysRef]);
+  }, [keysRef, listener]);
 
   const releaseHeldKeys = useCallback(() => {
     const keys = keysRef.current;

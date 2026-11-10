@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 /**
  * The course as a participant clicks through it, on in-memory repositories:
- * the map's Continue opens the diagnostic first, the diagnostic is saved, and
- * Continue then opens the tutorial's briefing with the gate's steps.
+ * Continue sends a participant without the initial exam to the main menu's
+ * initial exam, and otherwise opens the briefing with the gate's steps. Every
+ * action on the way is logged.
  */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -12,9 +13,6 @@ import { memoryCourseStore, provideInMemoryDrivingSim, type MemoryCourseStore } 
 import CompetencyStoryRun from './CompetencyStoryRun';
 import LevelMapPage from './LevelMapPage';
 import BriefingPage from './BriefingPage';
-import { DiagnosticPage } from './AssessmentPage';
-import BackgroundFormPage from './BackgroundFormPage';
-import { BACKGROUND_QUESTIONS } from '@/features/driving-sim';
 import type { StoryRouting } from './storyRunContext';
 import { lessonsRead, startingCourse } from '@/domain/competencyRouting/course';
 import { QUESTION_BANK } from '@/domain/assessment/questionBank';
@@ -50,7 +48,7 @@ const clickText = async (host: HTMLElement, text: string) => {
 };
 
 describe('the course in Story Mode', () => {
-  it('starts with the diagnostic, then opens the tutorial briefing', async () => {
+  it('sends Continue to the initial exam on the main menu while it is not taken', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
     const root = createRoot(host);
@@ -61,33 +59,18 @@ describe('the course in Story Mode', () => {
             <Route path="/play/story" element={<CompetencyStoryRun routing={routing} uid="participant" />}>
               <Route index element={<LevelMapPage />} />
               <Route path=":levelId/briefing" element={<BriefingPage />} />
-              <Route path="diagnostic" element={<DiagnosticPage />} />
             </Route>
+            <Route path="/play/initial-exam" element={<p>Initial exam page</p>} />
           </Routes>
         </MemoryRouter>
       );
     });
     await settle();
 
+    expect(host.textContent).toContain('Take the initial exam from the main menu first.');
     await clickText(host, 'CONTINUE COURSE');
-    expect(host.textContent).toContain('Diagnostic Test');
-    await clickText(host, 'START');
-    for (let i = 0; i < 55; i++) {
-      const choice = [...host.querySelectorAll('button')].find(b => b.textContent?.trim().endsWith('A'));
-      await act(async () => {
-        choice!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      });
-    }
-    await settle();
-    expect(store.sittings.get('participant')?.[0]?.kind).toBe('diagnostic');
-    expect(store.sittings.get('participant')?.[0]?.answers).toHaveLength(55);
-    await clickText(host, 'Continue');
-
-    await clickText(host, 'CONTINUE COURSE');
-    expect(host.textContent).toContain('Learning Module');
-    expect(host.textContent).toContain('Driving Simulation');
-    // The tutorial has no quiz.
-    expect(host.textContent).not.toContain('Short Quiz');
+    expect(host.textContent).toContain('Initial exam page');
+    expect(store.events.get('participant')!.some(e => e.type === 'ui_action' && e.payload.action === 'continue_blocked')).toBe(true);
     await act(async () => root.unmount());
   });
 
@@ -124,6 +107,10 @@ describe('the course in Story Mode', () => {
       await settle();
     }
     expect(host.textContent).toContain('Quiz passed');
+    // Each answer was logged the moment it was given, before the sitting was saved.
+    const given = store.events.get('participant')!.filter(e => e.type === 'answer_given');
+    expect(given.map(e => e.payload.position)).toEqual([1, 2, 3, 4, 5, 6]);
+    expect(given.every(e => e.payload.sitting === 'quiz' && e.payload.correct === true)).toBe(true);
     await clickText(host, 'Continue');
     expect(store.cursors.get('participant')?.phase).toEqual({ kind: 'DRIVE', level: 1 });
     // The drive is planned and the Drive step is open.
@@ -142,7 +129,6 @@ describe('the course in Story Mode', () => {
             <Route path="/play/story" element={<CompetencyStoryRun routing={routing} uid="participant" />}>
               <Route index element={<LevelMapPage />} />
               <Route path=":levelId/briefing" element={<BriefingPage />} />
-              <Route path="diagnostic" element={<DiagnosticPage />} />
             </Route>
           </Routes>
         </MemoryRouter>
@@ -162,6 +148,8 @@ describe('the course in Story Mode', () => {
     await clickText(host, 'Learning Module');
     await clickText(host, 'Proceed to Checkpoint');
     expect(store.cursors.get('participant')?.phase).toEqual({ kind: 'DRIVE', level: 0 });
+    const actions = store.events.get('participant')!.filter(e => e.type === 'ui_action').map(e => e.payload.action);
+    expect(actions).toEqual(expect.arrayContaining(['continue_course', 'module_opened', 'module_finished']));
     expect(host.textContent).toContain('road events');
     await act(async () => root.unmount());
   });
@@ -191,51 +179,6 @@ describe('the course in Story Mode', () => {
     const retake = QUESTION_BANK.find(item => host.textContent?.includes(item.question))!;
     expect(retake.competency).toBe('document_awareness');
     expect(shown).not.toContain(retake.id);
-    await act(async () => root.unmount());
-  });
-
-  it('skips the background form while it is muted (the default)', async () => {
-    const { host, root } = await mount();
-    await clickText(host, 'CONTINUE COURSE');
-    expect(host.textContent).toContain('Diagnostic Test');
-    expect(store.backgrounds.size).toBe(0);
-    await act(async () => root.unmount());
-  });
-
-  it('asks the background form before the diagnostic when it is turned on', async () => {
-    provideInMemoryDrivingSim(store, { backgroundFormEnabled: true });
-    const host = document.createElement('div');
-    document.body.appendChild(host);
-    const root = createRoot(host);
-    await act(async () => {
-      root.render(
-        <MemoryRouter initialEntries={['/play/story']}>
-          <Routes>
-            <Route path="/play/story" element={<CompetencyStoryRun routing={routing} uid="participant" />}>
-              <Route index element={<LevelMapPage />} />
-              <Route path="background" element={<BackgroundFormPage />} />
-              <Route path="diagnostic" element={<DiagnosticPage />} />
-            </Route>
-          </Routes>
-        </MemoryRouter>
-      );
-    });
-    await settle();
-
-    await clickText(host, 'CONTINUE COURSE');
-    expect(host.textContent).toContain('About You');
-    const submit = [...host.querySelectorAll('button')].find(b => b.textContent?.includes('SUBMIT'))!;
-    expect(submit.disabled).toBe(true);
-    for (const question of BACKGROUND_QUESTIONS) {
-      const radio = host.querySelector<HTMLInputElement>(`input[name="${question.id}"]`)!;
-      await act(async () => {
-        radio.click();
-      });
-    }
-    await clickText(host, 'SUBMIT');
-    expect(store.backgrounds.get('participant')?.answers.gaming_frequency).toBe('Never');
-    await clickText(host, 'CONTINUE COURSE');
-    expect(host.textContent).toContain('Diagnostic Test');
     await act(async () => root.unmount());
   });
 

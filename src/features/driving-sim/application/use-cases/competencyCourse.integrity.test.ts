@@ -21,6 +21,8 @@ import {
   diagnosticItems,
   finishCourseQuizReview,
   loadCompetencyCourse,
+  logDriveExited,
+  logDriveStarted,
   markCourseLessonsRead,
   openCourseQuiz,
   planCourseDrive,
@@ -131,7 +133,7 @@ describe('a reload', () => {
     const again = await openCourseQuiz(UID, cursor);
     expect(again.items.map(item => item.id)).toEqual(first.items.map(item => item.id));
     expect(store.active.get(UID)!.opens).toBe(2);
-    expect(store.events.get(UID)!.some(e => e.type === 'activity_reopened')).toBe(true);
+    expect(store.events.get(UID)!.filter(e => e.type === 'activity_opened').map(e => e.payload.opens).slice(-2)).toEqual([1, 2]);
   });
 
   it('gives a new quiz for the next attempt', async () => {
@@ -226,5 +228,32 @@ describe('a device clock that jumps back', () => {
       { kind: 'attempt', levelId: 0, attempt: null, evidenceSeq: 3, timestamp: 1, logs: [log(1, 'tutorial')] },
     ]);
     expect(logs.map(l => l.competency)).toEqual(['legacy', 'a', 'b']);
+  });
+});
+
+describe('a drive left before its end', () => {
+  it('logs the start, every decision so far (marked partial) and the key trace, and moves nothing', async () => {
+    let cursor = await toQuiz();
+    const quiz = await openCourseQuiz(UID, cursor);
+    cursor = (await submitCourseQuiz(UID, cursor, quiz.items, quiz.items.map(item => item.answer))).cursor;
+    const run = await planCourseDrive(UID, cursor);
+    await logDriveStarted(UID, run, 'DRIVE(1)');
+    const partial = resultFor(run).logs.slice(0, 2);
+    await logDriveExited(UID, run, 'DRIVE(1)', {
+      logs: partial,
+      score: 20,
+      stage: 'driving',
+      elapsedMs: 41_000,
+      inputs: [{ t: 10, key: 'ArrowUp', down: true }, { t: 900, key: 'ArrowUp', down: false }],
+      reason: 'exit',
+    });
+    const events = store.events.get(UID)!;
+    expect(events.some(e => e.type === 'drive_started' && e.payload.attemptSeed === run.attemptSeed)).toBe(true);
+    const exited = events.find(e => e.type === 'drive_exited')!;
+    expect(exited.payload).toMatchObject({ reason: 'exit', decisions: 2, elapsedMs: 41_000, inputSummary: { total: 1 } });
+    expect(events.filter(e => e.type === 'decision_made' && e.payload.partial === true)).toHaveLength(2);
+    // Nothing graded: the course has not moved and nothing was saved as evidence.
+    expect(store.cursors.get(UID)).toEqual(cursor);
+    expect(store.attempts.get(UID)!.every(a => a.levelId === 0)).toBe(true);
   });
 });

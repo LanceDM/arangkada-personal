@@ -10,6 +10,7 @@ import type { BackgroundResponse } from '@/domain/study/backgroundForm';
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { TransitionLogEntry } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
+import type { ControlInput } from '@/features/driving-sim/domain/telemetry/controlInputs';
 import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
 import type { DecisionTelemetryDoc } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import type { RoutingTelemetryDoc } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
@@ -66,6 +67,8 @@ export interface StoryAttemptRepository {
   saveDecisionTelemetry(uid: string, attemptId: string, record: DecisionTelemetryDoc): Promise<void>;
   /** The attempt's group and, for a course entry, the routing FSM's move. */
   saveRoutingTelemetry(uid: string, attemptId: string, record: RoutingTelemetryDoc): Promise<void>;
+  /** Every key pressed and released on the road, beside the attempt (`telemetry/inputs`). */
+  saveInputTelemetry?(uid: string, attemptId: string, inputs: readonly ControlInput[]): Promise<void>;
 }
 
 /** The group an admin pre-assigned a player for the pilot. */

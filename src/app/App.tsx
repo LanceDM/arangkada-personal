@@ -3,6 +3,7 @@ import { AppProviders } from './providers/AppProviders';
 import { AuthModalController } from './providers/AuthModalController';
 import { AppRouter } from './router/AppRouter';
 import { ProgressSync } from './sync/ProgressSync';
+import { StudyActivityLog } from './sync/StudyActivityLog';
 
 /**
  * Composition only: what the app is made of, in the order it nests. Anything
@@ -15,6 +16,7 @@ const App = () => (
   <AppProviders>
     <BrowserRouter>
       <ProgressSync />
+      <StudyActivityLog />
       <AppRouter />
       <AuthModalController />
     </BrowserRouter>

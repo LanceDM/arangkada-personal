@@ -31,22 +31,36 @@ For Implementation B, also: move the project to Blaze, set `VITE_DATABASE_MODE=f
 
 ### The event stream: `users/{uid}/events/{eventId}`
 
-One document per thing that happened (the `activity_reopened` type marks a quiz or drive opened again at the same position), numbered 1, 2, 3... per participant (`seq`, from `users/{uid}/state/events`). Every event carries the envelope: `eventId` (made on the device, also the document id), `uid`, `at`, `serverAt`, `sessionId`, `appBuild` (the git commit), `configVersion`.
+One document per thing that happened (`activity_opened` with `opens` > 1 marks a quiz or drive opened again at the same position), numbered 1, 2, 3... per participant (`seq`, from `users/{uid}/state/events`). Every event carries the envelope: `eventId` (made on the device, also the document id), `uid`, `at`, `serverAt`, `sessionId`, `appBuild` (the git commit), `configVersion`.
 
 | Type | Written when | Payload |
 |---|---|---|
-| `session_started` | Story Mode opens for a signed-in participant | Browser, language, screen, viewport |
-| `page_viewed` | Each Story Mode screen | Path |
+| `session_started` | A signed-in participant opens the app, or signs in | Browser, language, screen, viewport, whether the session was restored |
+| `page_viewed` | Every screen, app-wide | Path, query |
+| `ui_action` | Anything else the participant does | The action and its details: signed in / up / out; menu choices (with whether the mode was locked); theme and setting changes; the initial exam viewed, started, closed; each background-form choice; Continue (or blocked: initial exam not taken); free replay chosen; every briefing action (module opened, closed, finished; each lesson section viewed and outline jump; quiz opened or closed; review opened, closed, finished; drive overview opened, closed; Drive clicked; back to the map); result-screen choices; mock exam start, every answer and change, question jumps, submit, retake; daily challenge answer; routing override; admin exports |
+| `answer_given` | Each quiz, initial exam or post-exam answer, the moment it is given | Sitting, attempt, position, item, competency, choice, expected, correct, response ms (an abandoned sitting still shows how far it got) |
+| `app_error` | Any error the app did not catch | Kind, message, stack, path |
 | `course_transition` | Every cursor move | From, to, trigger, quiz progress, pending decisions |
 | `item_answered` | Each quiz, diagnostic or post-exam item | Item, position, choice, expected, correct, response ms |
 | `sitting_submitted` | Each sitting | Kind, attempt, items, correct |
-| `drive_planned` | A course drive is composed | Seed, counted scenarios and where each came from, route, shortfall |
+| `drive_planned` | A course drive or free replay is composed | Seed, counted scenarios and where each came from, route, shortfall |
+| `activity_opened` | A quiz or drive is opened at a course position | Kind, seed, how many times opened (more than 1 = a reload or a second tab, same seed) |
+| `drive_started` | The participant starts driving | Seed, counted scenarios, route |
+| `drive_exited` | A drive is left before its end (Exit, or the tab closed, best effort) | Reason, stage, time on the road, score so far, decisions so far (each also as a `decision_made` marked `partial`), key presses per key, the key trace (first 2,000 inputs) |
 | `decision_made` | Each graded decision in a drive (course, final, free replay) | Scenario and its format, rule, competency, action, expected, result, points, reaction ms, timed out, question timed out |
-| `drive_ended` | Each drive | Completed, score, crash reason, end reason, start and end time |
+| `drive_ended` | Each drive | Completed, score, crash reason, end reason, start and end time, key presses per key |
 | `verdict_computed` | Each competency in a drive | Counted, correct, passed, the rule, the scenarios |
 | `policy_decision` | Each routing decision | State, legal actions, Q and visits per action, probabilities, random draw, chosen action, warm-up phase, explore/exploit/forced, Q-log id |
 | `reward_computed` | Each reward | A_next, Pass, H, r, what measured it, next state, the Q update it caused |
 | `background_submitted` | The background form (muted for now) | Answers |
+
+Every key pressed and released on the road (auto-repeat left out), with its time from the start of the drive, is saved beside each finished drive at `users/{uid}/attempts/{id}/telemetry/inputs` (up to 20,000 inputs; `truncated` says if more), so a drive can be rebuilt key by key.
+
+Nothing is logged for a guest: the study requires signing in, and the modes stay locked until the initial exam is taken.
+
+### The initial exam gate
+
+The initial exam (the diagnostic, with the background form first when it is asked) is taken from its own section of the main menu (`/play/initial-exam`), not forced at the start of Story Mode. Until it is taken, Story Mode, the Daily Challenge and the mock exam are locked in the menu, and a direct link to any of them returns to the menu. Admins and developer builds see the lock but are not held by it, so the group can test each mode.
 
 ### BKT, per participant: `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates/{updateId}`
 
@@ -85,7 +99,7 @@ What is derived from those records is written right after the transaction: the e
 | The save fails (connection, closed tab) and the participant retries | Nothing of the failed step was written, so the retry saves the answers once. |
 | A step is submitted twice (double click, second tab, retry after a lost reply) | The second is refused: the cursor already moved. The page reloads the course. |
 | The diagnostic is submitted twice | It has one fixed id (`assessmentSittings/diagnostic`); the second finds it saved and writes nothing. |
-| The page is reloaded in a quiz or before a drive | The quiz or drive open at that course position is kept in `users/{uid}/state/active` with its seed, so the reload gets the same items or the same drive. A reopen is logged (`activity_reopened`); a new position (the next attempt) opens a new one. |
+| The page is reloaded in a quiz or before a drive | The quiz or drive open at that course position is kept in `users/{uid}/state/active` with its seed, so the reload gets the same items or the same drive. Every open is logged (`activity_opened`, with how many times); a new position (the next attempt) opens a new one. |
 | A tab is left open across a settings change | The transaction refuses the step (`OutdatedAppError`), and the rules refuse any Q-table change not made under the settings in force. |
 | A tab is left open across a deploy | Each build writes `version.json` next to the app. Before each step the app reads it, past every cache; if the site now serves a newer build, the step is refused and the participant reloads. (If the file cannot be read, offline or on the dev server, the step goes ahead.) |
 | Two tabs bring BKT up to date at once | Each BKT entry's id is fixed, `{settings version}_{userSeq}`, and written in a transaction that first checks it is not there yet: one tab writes, the other is skipped. |

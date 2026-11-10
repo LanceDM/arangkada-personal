@@ -24,6 +24,8 @@ const DrivePage = () => {
     priorLogs,
     liveReroll,
     completeRun,
+    exitRun,
+    abandonRun,
   } = useStoryRun();
 
   if (activeLevel === null || startedRun !== activeLevel) {
@@ -55,7 +57,11 @@ const DrivePage = () => {
         // briefing, not inside a drive that has already been scored.
         navigate(`/play/story/${activeLevel}/complete`, { replace: true });
       }}
-      onExit={() => navigate('/play/story')}
+      onExit={partial => {
+        exitRun?.(partial);
+        navigate('/play/story');
+      }}
+      onAbandon={abandonRun}
       transitionParams={practice?.transitionParams}
       support={support}
       attemptSeed={attemptSeed ?? undefined}

@@ -12,7 +12,7 @@
  * made-up numbers and has no business being reachable in a build.
  */
 import { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Landing from '@/pages/landing/LandingPage';
 import ModeSelect from '@/pages/mode-select/ModeSelectPage';
 import StoryModeLayout from '@/pages/story/StoryModeLayout';
@@ -21,8 +21,9 @@ import BriefingPage from '@/pages/story/BriefingPage';
 import DrivePage from '@/pages/story/DrivePage';
 import CompletePage from '@/pages/story/CompletePage';
 import PostTestPage from '@/pages/story/PostTestPage';
-import { DiagnosticPage, PostExamPage } from '@/pages/story/AssessmentPage';
-import BackgroundFormPage from '@/pages/story/BackgroundFormPage';
+import { PostExamPage } from '@/pages/story/AssessmentPage';
+import InitialExamPage from '@/pages/initial-exam/InitialExamPage';
+import { RequireInitialExam } from '@/app/initialExam/RequireInitialExam';
 import NotFound from '@/pages/NotFoundPage';
 import ResetPassword from '@/pages/auth/ResetPasswordPage';
 
@@ -63,7 +64,9 @@ export const AppRouter = () => (
       entry point; `drive` and `complete` hold in-memory run state and redirect
       when loaded cold. See src/pages/story/StoryModeLayout.tsx.
     */}
-    <Route path="/play/story" element={<StoryModeLayout />}>
+    {/* The initial exam is taken from the main menu; the modes stay closed until it is. */}
+    <Route path="/play/initial-exam" element={<InitialExamPage />} />
+    <Route path="/play/story" element={<RequireInitialExam><StoryModeLayout /></RequireInitialExam>}>
       <Route index element={<LevelMapPage />} />
       <Route path=":levelId/briefing" element={<BriefingPage />} />
       <Route path=":levelId/drive" element={<DrivePage />} />
@@ -71,13 +74,13 @@ export const AppRouter = () => (
       {/* The pilot's post-test, opened by the facilitator by URL. */}
       <Route path="post-test" element={<PostTestPage />} />
       {/* The per-competency course's two exams (2026-10-28). */}
-      <Route path="background" element={<BackgroundFormPage />} />
-      <Route path="diagnostic" element={<DiagnosticPage />} />
+      <Route path="background" element={<Navigate to="/play/initial-exam" replace />} />
+      <Route path="diagnostic" element={<Navigate to="/play/initial-exam" replace />} />
       <Route path="post-exam" element={<PostExamPage />} />
     </Route>
     {lazyRoute('/learn/:levelId', <Learn />)}
-    {lazyRoute('/play/eksamen', <EksamenMode />)}
-    {lazyRoute('/play/daily', <DailyChallenge />)}
+    {lazyRoute('/play/eksamen', <RequireInitialExam><EksamenMode /></RequireInitialExam>)}
+    {lazyRoute('/play/daily', <RequireInitialExam><DailyChallenge /></RequireInitialExam>)}
     {lazyRoute('/settings', <Settings />)}
     {lazyRoute('/admin', <Admin />)}
 

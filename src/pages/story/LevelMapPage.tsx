@@ -41,9 +41,12 @@ const LevelMapPage = () => {
             <div className="flex w-full max-w-md flex-col items-center gap-3">
               {course?.error && <p className="text-sm text-destructive">{course.error}</p>}
               {course?.assessments && !course.assessments.diagnosticDone && (
-                <p className="text-sm text-muted-foreground">
-                  Your course starts with a short diagnostic test: Continue opens it.
-                </p>
+                <button
+                  onClick={() => navigate('/play')}
+                  className="text-sm text-muted-foreground underline hover:text-foreground"
+                >
+                  Take the initial exam from the main menu first.
+                </button>
               )}
               {course?.assessments?.postExamDone && (
                 <p className="text-sm text-accent">Course complete. Thank you for taking part.</p>

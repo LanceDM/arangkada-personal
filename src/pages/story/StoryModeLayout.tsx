@@ -20,6 +20,7 @@ import {
   resolveRoutingGroup,
   routingGroupNow,
   saveRoutingOverride,
+  logUiAction,
   type RoutingGroupResolution,
   type RoutingOverride,
 } from '@/features/driving-sim';
@@ -80,6 +81,7 @@ const StoryModeLayout = () => {
     canOverride,
     override,
     setOverride: next => {
+      if (uid) void logUiAction(uid, 'routing_override_changed', { from: override, to: next });
       saveRoutingOverride(next);
       setOverrideState(next);
     },
