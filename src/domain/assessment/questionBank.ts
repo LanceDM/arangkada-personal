@@ -12,6 +12,10 @@ import bank from './questionBank.json';
 import blueprint from './assessmentBlueprint.json';
 
 export interface BankItem {
+  /** The bank item's revision (Firestore bank only). */
+  revision?: number;
+  /** The language the item is shown in (Firestore bank only). */
+  language?: 'en' | 'fil';
   /** Module-Competency-Number, e.g. L1-DL-01. */
   id: string;
   question: string;

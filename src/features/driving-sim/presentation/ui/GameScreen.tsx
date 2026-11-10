@@ -24,7 +24,7 @@ import { roadPositionCue } from './roadPositionLabel';
 import { resolveLaneRole } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { useKeyboard, type KeyboardListener } from '@/features/driving-sim/presentation/input/useKeyboard';
 import { createInputRecorder, type DriveExit } from '@/features/driving-sim/domain/telemetry/controlInputs';
-import { TouchInput } from '@/features/driving-sim/presentation/input/touchInput';
+import { TouchInput, type TouchControl } from '@/features/driving-sim/presentation/input/touchInput';
 import { usePortrait, useTouchDevice } from '@/features/driving-sim/presentation/input/useTouchDevice';
 import { InputModeContext, type InputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { PedalPad, SteeringPad } from './TouchControls';
@@ -192,6 +192,19 @@ const GameScreen = ({
   const [recorder] = useState(() => createInputRecorder());
   const listenerRef = useRef<KeyboardListener | null>(recorder);
   const { releaseHeldKeys } = useKeyboard(keysRef, listenerRef);
+
+  // The on-screen controls go into the same log, as `touch:<control>`, so a
+  // phone or tablet drive is recorded as fully as a keyboard one.
+  useEffect(() => {
+    const controls: TouchControl[] = ['throttle', 'brake', 'left', 'right', 'horn'];
+    const update = () => {
+      for (const control of controls) {
+        if (touchInput.holds(control)) recorder.press(`touch:${control}`);
+        else recorder.release(`touch:${control}`);
+      }
+    };
+    return touchInput.subscribe(update);
+  }, [touchInput, recorder]);
 
   // Apply the learned transition-guard parameters to this drive's machine.
   // This is where the Q-learning decision reaches the FSM: from here on, the

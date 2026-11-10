@@ -96,6 +96,10 @@ export interface ActionLog {
   itemId?: string;
   /** Short-quiz answers: which attempt of the stage's quiz (1-3). */
   quizAttempt?: number;
+  /** The bank item's revision when it was shown (quiz items from the admin-edited bank). */
+  itemRevision?: number;
+  /** The language the item was shown in: `fil` only when its Filipino was there to show. */
+  language?: 'en' | 'fil';
 }
 
 /**

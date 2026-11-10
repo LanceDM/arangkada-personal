@@ -387,6 +387,8 @@ export const answerLog = (
   source,
   itemId: item.id,
   ...(quizAttempt !== undefined ? { quizAttempt } : {}),
+  ...(item.revision !== undefined ? { itemRevision: item.revision } : {}),
+  ...(item.language ? { language: item.language } : {}),
   // How long the item was on screen before it was answered; BKT does not read it.
   ...(typeof responseMs === 'number' ? { reactionTime: responseMs } : {}),
 });
@@ -423,8 +425,12 @@ export const bankItemsFrom = (items: readonly QuizItemDoc[], language: Language 
     const stage = Number(/(\d+)$/.exec(doc.moduleId)?.[1]);
     if (!Number.isInteger(stage)) return [];
     const item = localizeQuizItem(doc, language, { showDrafts: false });
+    // Filipino only when it was there to show: localizeQuizItem falls back to the English.
+    const shown: 'en' | 'fil' = language === 'fil' && item.question !== doc.question ? 'fil' : 'en';
     return [{
       id: item.id,
+      revision: doc.revision,
+      language: shown,
       question: item.question,
       ...(item.image ? { image: item.image } : {}),
       choices: item.options,
@@ -1091,6 +1097,8 @@ export const logAnswerGiven = (
         expected: `choice_${'ABCD'[input.item.answer]}`,
         correct: input.choice === input.item.answer,
         responseMs: input.responseMs,
+        itemRevision: input.item.revision ?? null,
+        language: input.item.language ?? null,
       },
     },
   ]);
