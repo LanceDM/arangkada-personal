@@ -10,7 +10,7 @@ import type { LevelConfigRow, ScenarioConfigRow } from '@/features/driving-sim';
 import { Badge } from '@/shared/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import { COMPETENCIES, getCompetencyLabel } from '@/domain/learner/profile';
-import { Panel, SearchField, SectionHeader } from './adminUi';
+import { Legend, Panel, SearchField, SectionHeader } from './adminUi';
 
 const dash = (value: number | null | undefined, unit = '') => (value === null || value === undefined ? '–' : `${value}${unit}`);
 
@@ -82,6 +82,19 @@ export const ScenariosSection = ({ levels, scenarios }: { levels: readonly Level
         title="Scenarios"
         description="Every level's road and every scenario its drives can draw, with the numbers each is configured and graded on. Read from this build's content."
         meta={`${scenarios.length} scenarios over ${levels.length} levels`}
+      />
+      <Legend
+        title="Legend: scenarios"
+        items={[
+          { term: 'Answered by', meaning: 'driving (graded on what the car does), question (multiple choice), or inspection (a document check). "correct" is the action that passes.' },
+          { term: 'road / garage / aftermath', meaning: 'On the road, at the garage check before the drive, or at the crash scene after it.' },
+          { term: 'Source', meaning: "level road: on the level's own road; pool slot N: one of the variants drawn for that slot; stage extra / borrowed: added to course drives for a competency." },
+          { term: 'at N m', meaning: 'Where it stands on the road, in metres on the speed scale (how far the car travels at its speed).' },
+          { term: 'Warning', meaning: 'How far ahead it is announced, in metres and in seconds at the speed limit.' },
+          { term: 'limit / posted', meaning: "The road's speed limit, and a different speed its sign posts." },
+          { term: 'Targets', meaning: 'Every number it is graded on, word for word as the player reads it.' },
+          { term: 'u', meaning: "The game's route units (about 10.8 per metre at the default pace)." },
+        ]}
       />
       <LevelsPanel levels={levels} />
       <Panel

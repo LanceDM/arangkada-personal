@@ -12,7 +12,7 @@ import { DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
 import { STUDY_EXPORTS, useStudyExport } from '@/features/admin/application/useStudyExport';
 import { useCourseAdmin } from '@/features/admin/application/useCourseAdmin';
 import { MASTERY_DESCRIPTORS } from '@/features/admin/domain/courseAdmin';
-import { EmptyState, Notice, Panel, SectionHeader } from './adminUi';
+import { EmptyState, Legend, Notice, Panel, SectionHeader } from './adminUi';
 
 const LEVEL_CELL: Record<1 | 2 | 3 | 4, string> = {
   1: 'bg-red-500/15 text-red-700 dark:text-red-300',
@@ -33,6 +33,20 @@ const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => 
     return <EmptyState icon={Gauge} title="No BKT evidence yet">A player appears once their pre-test, a short quiz or a drive is saved.</EmptyState>;
   }
   return (
+    <div className="space-y-3">
+    <Legend
+      title="Legend: BKT"
+      items={[
+        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[1]}`}>0.42</span>, meaning: 'M1 Emerging: P(L) below 0.50.' },
+        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[2]}`}>0.66</span>, meaning: 'M2 Developing: 0.50–0.79.' },
+        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[3]}`}>0.88</span>, meaning: 'M3 Connecting: 0.80–0.94.' },
+        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[4]}`}>0.97</span>, meaning: 'M4 Benchmarking: 0.95+ with at least 3 drive answers.' },
+        { term: 'P(L)', meaning: 'The chance the player knows the competency, after every answer so far.' },
+        { term: 'Columns', meaning: COMPETENCIES.map(c => `${short(c)} ${getCompetencyLabel(c)}`).join(' · ') },
+        { term: 'Answers', meaning: 'Graded answers BKT has read (pre-test, quiz, drive, post-test).' },
+        { term: 'Start', meaning: 'Every competency starts at 0.30; the pre-test moves it before the course begins.' },
+      ]}
+    />
     <Panel
       title="BKT per player"
       description={`P(L) per competency now; the colour is its mastery level (${Object.values(MASTERY_DESCRIPTORS).join(', ')}). Click a player for each competency's evidence. Model (Tentative, to be fitted on the pilot): prior ${DEFAULT_BKT_MODEL.pInit}; pre-test and post-test T 0, S ${DEFAULT_BKT_MODEL.diagnostic.pSlip}, G ${DEFAULT_BKT_MODEL.diagnostic.pGuess}; quiz T ${DEFAULT_BKT_MODEL.quiz.pTransit}, S ${DEFAULT_BKT_MODEL.quiz.pSlip}, G ${DEFAULT_BKT_MODEL.quiz.pGuess}; drive T ${DEFAULT_BKT_MODEL.drive.pTransit}, S ${DEFAULT_BKT_MODEL.drive.pSlip}, G ${DEFAULT_BKT_MODEL.drive.pGuess}.`}
@@ -85,6 +99,7 @@ const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => 
         </Table>
       </div>
     </Panel>
+    </div>
   );
 };
 

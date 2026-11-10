@@ -14,7 +14,7 @@ import { MASTERY_CUTOFFS } from '@/domain/competencyRouting/mastery';
 import { ADDED_DECISIONS_PER_ACTION } from '@/domain/competencyRouting/course';
 import type { CourseAdmin } from '@/features/admin/application/useCourseAdmin';
 import type { PlayerCourseRow } from '@/features/admin/domain/courseAdmin';
-import { EmptyState, Notice, Panel, SectionHeader, SectionTabs } from './adminUi';
+import { EmptyState, Legend, Notice, Panel, SectionHeader, SectionTabs } from './adminUi';
 import { toDateTime } from './formatDate';
 
 const r = RUN_CONFIG.rules;
@@ -37,6 +37,16 @@ const COURSE_TRANSITIONS: ReadonlyArray<{ from: string; when: string; to: string
   { from: 'FINAL', when: 'Passed / failed', to: 'CERTIFIED / FINAL retry' },
   { from: 'CERTIFIED', when: 'The 30-item two-stage post-test is finished', to: "Course over: each competency's share right is its last measurement (rewards waiting decisions)" },
 ];
+
+const PLAYERS_LEGEND = [
+  { term: 'Last step', meaning: 'The newest course-log entry: quiz, drive, final or post-test, at its phase, e.g. REPEAT(3) is a repeat drive in Level 3.' },
+  { term: 'open', meaning: 'The competency still has repeat drives coming: its last decision was practice or review.' },
+  { term: 'done', meaning: 'The policy chose none after a pass at mastery 0.50+: it left the repeat drives.' },
+  { term: 'flagged', meaning: 'It reached the 3-attempt cap without none: done, and marked for the analysis.' },
+  { term: '1/3', meaning: 'Its scenarios right out of those it had in the newest drive.' },
+  { term: 'certified / cap_reached', meaning: 'The final mission was passed, or an entry ended a competency at the cap.' },
+  { term: 'Decisions · rewards', meaning: 'Per-competency decisions made, and how many have been rewarded so far.' },
+] as const;
 
 const STATUS_STYLE: Record<'open' | 'done' | 'flagged', 'secondary' | 'default' | 'destructive'> = {
   open: 'secondary',
@@ -104,6 +114,7 @@ const PlayersPanel = ({ course }: { course: CourseAdmin }) => {
   const logs = open ? course.courseLogs.filter(row => row.userId === open).sort((a, b) => a.timestamp - b.timestamp) : [];
   return (
     <div className="space-y-4">
+      <Legend title="Legend: players" items={PLAYERS_LEGEND} />
       <Panel title="Where each player is" description="From their course log: the newest entry, and the newest stage's competencies as its decisions left them." bodyClassName="p-0">
         <Table>
           <TableHeader>

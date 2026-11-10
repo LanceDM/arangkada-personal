@@ -150,3 +150,27 @@ export const SectionTabs = <V extends string>({
     </TabsList>
   </Tabs>
 );
+
+/**
+ * A legend: what a table's codes, colours and columns mean, beside the table.
+ * Open by default; one click folds it away.
+ */
+export const Legend = ({
+  title = 'Legend',
+  items,
+}: {
+  title?: string;
+  items: ReadonlyArray<{ term: ReactNode; meaning: ReactNode }>;
+}) => (
+  <details open className="rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs">
+    <summary className="cursor-pointer select-none font-semibold text-foreground">{title}</summary>
+    <dl className="mt-2 grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+      {items.map((item, i) => (
+        <div key={i} className="flex gap-2">
+          <dt className="shrink-0 font-medium text-foreground">{item.term}</dt>
+          <dd className="text-muted-foreground">{item.meaning}</dd>
+        </div>
+      ))}
+    </dl>
+  </details>
+);

@@ -3,6 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import { useLiveQTable } from '@/features/admin/application/useLiveQTable';
 import { toDateTime } from './formatDate';
+import { Legend } from './adminUi';
+import { DEFAULT_WARM_UP } from '@/domain/competencyRouting/qLearning';
+
+const w = DEFAULT_WARM_UP;
+
+/** What the live table's codes mean. */
+const Q_TABLE_LEGEND = [
+  { term: 'M1–M4', meaning: 'The competency\'s BKT mastery level after the drive: M1 below 0.50 (Emerging), M2 0.50–0.79 (Developing), M3 0.80–0.94 (Connecting), M4 0.95+ (Benchmarking; needs 3 drive answers).' },
+  { term: 'passed / failed', meaning: 'Its scenario result in that drive: 2 of its 3 scenarios right is a pass.' },
+  { term: 'none', meaning: 'Done: it leaves the repeat drives. Legal only after a pass at M2 or above.' },
+  { term: 'practice', meaning: 'Its 3 scenarios again in a repeat drive, new variants. Always legal.' },
+  { term: 'review', meaning: 'Its module section, then its scenarios. Legal only after a fail.' },
+  { term: 'not legal', meaning: 'The rules forbid that action in that state; the Q-table never chooses it.' },
+  { term: 'No choice (only_legal)', meaning: 'One legal action, so it is applied without the table (M1-passed: only practice).' },
+  { term: 'Exploring', meaning: `Warm-up: explore_1 gives each legal action ${w.exploreFirst} random visits; explore_2 gives the others ${w.exploreSecond} more after the first commit.` },
+  { term: 'Exploiting', meaning: `commit_1 picks the leader until it has ${w.commitLeader} visits; final_commit from then on. Every other legal action keeps probability ${w.floor}.` },
+  { term: 'Q', meaning: 'The action\'s value: the running average of its targets r + 0.9 · max Q(next state). – = not updated yet.' },
+  { term: 'n', meaning: 'Rewards it has learned from (α = 1/n). A decision is rewarded later, at the competency\'s next measurement.' },
+  { term: 'visits', meaning: 'Times it was chosen in that state, whoever chose it. The warm-up counts these.' },
+  { term: 'leader (bold)', meaning: 'The highest Q; ties go to fewer visits, then the fallback rule.' },
+] as const;
 
 import { COMPETENCY_ACTIONS, legalActions, Q_STATES, stateKey } from '@/domain/competencyRouting/qLearning';
 
@@ -26,6 +47,7 @@ export const QTablePanel = () => {
 
   return (
     <div className="space-y-4">
+      <Legend title="Legend: the live table" items={Q_TABLE_LEGEND} />
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Shared Q-table (live)</CardTitle>

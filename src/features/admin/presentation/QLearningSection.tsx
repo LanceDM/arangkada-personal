@@ -11,7 +11,7 @@ import { getCompetencyLabel } from '@/domain/learner/profile';
 import { RUN_CONFIG, RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { legalActions, Q_STATES, stateKey } from '@/domain/competencyRouting/qLearning';
 import type { CourseAdmin } from '@/features/admin/application/useCourseAdmin';
-import { EmptyState, Notice, Panel, SectionHeader, SectionTabs } from './adminUi';
+import { EmptyState, Legend, Notice, Panel, SectionHeader, SectionTabs } from './adminUi';
 import { QTablePanel } from './QTablePanel';
 import { toDateTime } from './formatDate';
 
@@ -59,6 +59,25 @@ const SettingsPanel = () => (
     </dl>
   </Panel>
 );
+
+const EARNED_LEGEND = [
+  { term: 'Chosen', meaning: 'Decisions that picked this action in this state.' },
+  { term: 'explore / exploit / forced', meaning: 'A random warm-up draw, the leader by the policy, or the only legal action (or the attempt cap).' },
+  { term: 'Rewarded', meaning: 'How many of those have been measured again and rewarded; the rest are waiting.' },
+  { term: 'Mean r', meaning: 'Average reward r = A_next + 0.5·Pass − 0.02·H.' },
+  { term: 'Mean A_next', meaning: "Average share of the competency's graded answers right at its next measurement (0–1)." },
+  { term: 'Pass share', meaning: 'How often it passed at that next measurement (0–1).' },
+  { term: 'Mean H', meaning: 'Graded decisions the action added (practice and review add 3, none 0).' },
+] as const;
+
+const DECISIONS_LEGEND = [
+  { term: 'State (P)', meaning: 'M1–M4 and passed/failed, with the BKT P(L) it was read from.' },
+  { term: 'Legal → chosen', meaning: 'The actions the rules allowed, and the one taken.' },
+  { term: 'By', meaning: 'The warm-up phase that chose it (explore_1, commit_1, explore_2, final_commit), only_legal, or cap (3 attempts).' },
+  { term: 'explore / exploit / forced', meaning: 'Random draw, the leader, or no choice.' },
+  { term: 'p', meaning: 'The probability the chosen action had, logged for later analysis.' },
+  { term: 'Reward', meaning: 'r with its parts (A, pass, H) and where it was measured; "waiting" until the competency is measured again.' },
+] as const;
 
 const EarnedPanel = ({ course }: { course: CourseAdmin }) => (
   <Panel
@@ -193,8 +212,18 @@ export const QLearningSection = ({ course }: { course: CourseAdmin }) => {
         ]}
       />
       {view === 'table' && <QTablePanel />}
-      {view === 'earned' && <EarnedPanel course={course} />}
-      {view === 'decisions' && <DecisionsPanel course={course} />}
+      {view === 'earned' && (
+        <>
+          <Legend title="Legend: rewards" items={EARNED_LEGEND} />
+          <EarnedPanel course={course} />
+        </>
+      )}
+      {view === 'decisions' && (
+        <>
+          <Legend title="Legend: decisions" items={DECISIONS_LEGEND} />
+          <DecisionsPanel course={course} />
+        </>
+      )}
     </div>
   );
 };
