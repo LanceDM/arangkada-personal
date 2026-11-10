@@ -3,6 +3,7 @@ import { AlertCircle, BrainCircuit, CheckCircle2, ClipboardList } from 'lucide-r
 import type { BankItem } from '@/domain/assessment/questionBank';
 import { getCompetencyLabel } from '@/domain/learner/profile';
 import { CourseConflictError, OutdatedAppError } from '@/features/driving-sim/application/errors';
+import { imageUrl } from '@/shared/lib/publicAsset';
 
 /** One competency's result on a short quiz attempt. */
 export interface BankQuizResult {
@@ -154,7 +155,7 @@ const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onAnswer, onDone, on
           <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${(step / items.length) * 100}%` }} />
         </div>
         {current.image && (
-          <img src={`/${current.image}`} alt="" className="mx-auto max-h-48 rounded-lg bg-white object-contain p-2" />
+          <img src={imageUrl(current.image)} alt="" className="mx-auto max-h-48 rounded-lg bg-white object-contain p-2" />
         )}
         <h2 className="text-xl font-semibold leading-snug text-foreground md:text-2xl">{current.question}</h2>
         <div className="grid gap-3">

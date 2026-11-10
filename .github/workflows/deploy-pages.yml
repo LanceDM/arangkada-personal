@@ -1,0 +1,70 @@
+# Builds the app and publishes it to GitHub Pages on every push to main.
+#
+# One-time setup in the repository (Settings):
+#   - Pages > Build and deployment > Source: GitHub Actions
+#   - Secrets and variables > Actions > Variables: VITE_FIREBASE_API_KEY,
+#     VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID,
+#     VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID,
+#     VITE_FIREBASE_APP_ID (the web app config; it ships in the page anyway,
+#     so variables, not secrets). Firestore rules are what protect the data.
+#   - Firebase console > Authentication > Settings > Authorized domains:
+#     add <user>.github.io
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build
+        env:
+          # A project site lives under /<repo>/.
+          BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ vars.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ vars.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ vars.VITE_FIREBASE_APP_ID }}
+          VITE_USE_FIREBASE_EMULATOR: 'false'
+          VITE_ROUTING_SWITCH: new
+          VITE_DATABASE_MODE: firestore
+        run: |
+          test -n "$VITE_FIREBASE_API_KEY" || { echo "::error::Set the VITE_FIREBASE_* repository variables first (see the top of this file)."; exit 1; }
+          npm run build
+          # Client-side routes: Pages serves 404.html for any unknown path, so
+          # it is the app itself, and the router takes over from the URL.
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

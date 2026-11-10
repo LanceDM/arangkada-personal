@@ -10,6 +10,7 @@ import { ActionBar } from '@/shared/ui/ActionBar';
 import { useText } from '@/shared/i18n/useText';
 import type { Localized } from '@/shared/lib/localized';
 import { testMessages as m } from './messages';
+import { imageUrl } from '@/shared/lib/publicAsset';
 
 /** What a test's screens say: everything else is the same for both. */
 export interface TestCopy {
@@ -79,7 +80,7 @@ const Question = ({ state, copy, preview, onLeave }: { state: TestSittingState; 
 
         {current.item.image && (
           <img
-            src={current.item.image}
+            src={imageUrl(current.item.image)}
             alt={t(m.pictureAlt)}
             className="mx-auto max-h-32 sm:max-h-48 w-auto object-contain"
           />

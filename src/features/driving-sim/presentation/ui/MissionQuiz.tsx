@@ -13,6 +13,7 @@ import {
 } from '@/features/driving-sim/domain/scenario/quizBank';
 import { nextAttemptSeed } from '@/features/driving-sim/application/attemptSeed';
 import { ActionBar } from '@/shared/ui/ActionBar';
+import { imageUrl } from '@/shared/lib/publicAsset';
 
 interface MissionQuizProps {
   quiz: LevelQuiz;
@@ -301,7 +302,7 @@ const MissionQuiz = ({ quiz, levelId, onPass, onClose, onFinish, newSeed = nextA
         {/* Question */}
         {current.item.image && (
           <img
-            src={current.item.image}
+            src={imageUrl(current.item.image)}
             alt={t(m.pictureAlt)}
             className="mx-auto max-h-48 w-auto object-contain"
           />
