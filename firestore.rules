@@ -1008,8 +1008,10 @@ service cloud.firestore {
         allow read: if isOwner(uid) || isAdmin();
         allow create: if isOwner(uid)
           && isOpenTestStatus(request.resource.data, kind)
-          && isOwnParticipantCode(request.resource.data.playerCode)
-          && hasStudyStepsBeforePreTest();
+          && ((isOwnParticipantCode(request.resource.data.playerCode) && hasStudyStepsBeforePreTest())
+            // Every other account sits the tests too (2026-11-10), under its
+            // own open-access code, with no study steps before them.
+            || (!isStudyAccount() && request.resource.data.playerCode == 'U-' + request.auth.uid));
         allow update: if isOwner(uid)
           && resource.data.status == 'open'
           && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'finishedAt'])

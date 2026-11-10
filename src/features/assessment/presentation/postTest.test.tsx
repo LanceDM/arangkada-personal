@@ -352,12 +352,12 @@ describe('the post-test screen', () => {
     expect(serverAnswers).toEqual({});
   });
 
-  it('is for participants only', async () => {
+  it('asks a guest or an unenrolled account to sign in, never starts without a code', async () => {
     for (const participantCode of ['P01', null]) {
       act(() => root.unmount());
       root = createRoot(container);
       await open({ participantCode });
-      expect(text()).toContain("for the study's participants");
+      expect(text()).toContain('Sign in to take the post-test');
       expect(button('Start')).toBeUndefined();
     }
   });

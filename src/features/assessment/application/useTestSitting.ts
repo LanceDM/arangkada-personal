@@ -23,13 +23,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { QuizItemDoc } from '@/features/driving-sim';
 import type { PresentedItem, SittingClosure, TestKind, TestSitting } from '@/domain/assessment/testResponse';
 import type { TestDraft } from '@/features/assessment/domain/testDraft';
-import { isParticipantCode } from '@/features/assessment/domain/testStatus';
+import { isOpenAccessCode, isParticipantCode } from '@/features/assessment/domain/testStatus';
 import { assessmentDeps } from './dependencies';
 
 export type TestAccess = 'participant' | 'preview' | 'none';
 
 export const testAccess = (who: { uid: string | null; participantCode: string | null; isAdmin: boolean }): TestAccess =>
-  who.uid && isParticipantCode(who.participantCode) ? 'participant' : who.uid && who.isAdmin && who.participantCode === null ? 'preview' : 'none';
+  who.uid && (isParticipantCode(who.participantCode) || isOpenAccessCode(who.participantCode))
+    ? 'participant'
+    : who.uid && who.isAdmin && who.participantCode === null
+      ? 'preview'
+      : 'none';
 
 /**
  * Why a sitting cannot open: the bank does not hold its items, the

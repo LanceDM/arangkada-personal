@@ -36,7 +36,7 @@ export const preTestMessages = {
   time: (minutes: number): Localized => ({ en: `You have ${minutes} minutes for the whole test. The clock keeps running if you leave, and carries on from any device you sign in on. Questions left when it ends count as not answered.` }),
   start: { en: 'Start the pre-test' },
   continue: { en: 'Continue the pre-test' },
-  notParticipant: { en: "The pre-test is for the study's participants. Sign in with your participant account to take it." },
+  notParticipant: { en: 'Sign in to take the pre-test. Every mode opens once it is done.', fil: 'Mag-login para sagutan ang pre-test. Bubukas ang lahat ng mode kapag tapos na ito.' },
   couldNotOpen: { en: "Couldn't open the pre-test. Check your connection and try again." },
   notReady: { en: "The pre-test isn't ready yet. Please tell the researchers." },
   preview: (count: number | null, size: number): Localized => ({
@@ -51,7 +51,7 @@ export const postTestMessages = {
   time: (minutes: number): Localized => ({ en: `You have ${minutes} minutes for each part. The clock keeps running if you leave, and carries on from any device you sign in on. Questions left when it ends count as not answered.` }),
   start: { en: 'Start the post-test' },
   continue: { en: 'Continue the post-test' },
-  notParticipant: { en: "The post-test is for the study's participants. Sign in with your participant account to take it." },
+  notParticipant: { en: 'Sign in to take the post-test.', fil: 'Mag-login para sagutan ang post-test.' },
   couldNotOpen: { en: "Couldn't open the post-test. Check your connection and try again." },
   notReadyPreTest: { en: 'The post-test opens after your pre-test is saved.' },
   notReadyDesign: { en: "The post-test isn't ready yet. It opens once the researchers have prepared it." },

@@ -201,20 +201,18 @@ const ModeSelect = () => {
                 <h2 className="mt-1 text-4xl font-black uppercase italic leading-none text-white">Pre-Test</h2>
                 <p className="mt-3 max-w-xl text-sm italic text-muted-foreground">
                   {!exam.signedIn
-                    ? 'Sign in with your study account, then take the 60-item pre-test. It sets your starting point and opens every mode.'
+                    ? 'Sign in, then take the 60-item pre-test. It sets your starting point and opens every mode.'
                     : exam.loading
                       ? 'Checking your initial exam…'
                       : exam.error
                         ? exam.error
                         : examDone
                           ? 'Done. Every mode is open.'
-                          : exam.participant
-                            ? '60 items, no pass mark. It sets your starting point in every competency and opens every mode.'
-                            : 'The pre-test is for study participants (they sign in by username). Your account is not held by it.'}
+                          : '60 items, no pass mark. It sets your starting point in every competency and opens every mode.'}
                 </p>
                 {exam.bypass && !examDone && !exam.loading && (
                   <p className="mt-2 text-[10px] font-black uppercase text-muted-foreground">
-                    {exam.participant ? 'Admin or developer build: the modes stay open for testing' : 'Not a study account: the modes stay open'}
+                    Admin or developer build: the modes stay open for testing
                   </p>
                 )}
                 {lockedFrom && examLock && (

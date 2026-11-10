@@ -20,9 +20,9 @@ export interface InitialExamGate {
   status: InitialExamStatus | null;
   /** The other modes are locked for this person now. */
   locked: boolean;
-  /** Admin, developer build, or a signed-in account that is not a study account: shown the lock, never held by it. */
+  /** Admin or developer build: shown the lock, never held by it. */
   bypass: boolean;
-  /** A study participant's account (signed in by username): the one the pre-test is for. */
+  /** A study participant's account (signed in by username): its pre-test is reached through the study's home. */
   participant: boolean;
   /** Could not read the status (offline): the modes stay locked and say so. */
   error: string | null;
@@ -33,10 +33,10 @@ export const useInitialExam = (): InitialExamGate => {
   const { user, isLoggedIn, isAdmin, loading: authLoading, studyAccount } = useAuthSession();
   const uid = isLoggedIn && user ? user.uid : null;
   const required = initialExamRequired();
-  // The initial exam is the study's pre-test (2026-11-10), which only a study
-  // account can sit: any other signed-in account is never held by it.
+  // The initial exam is the study's pre-test (2026-11-10), which every
+  // account sits, whatever its type; only an admin is not held by it.
   const participant = uid !== null && studyAccount;
-  const bypass = import.meta.env.DEV || isAdmin || (uid !== null && !studyAccount);
+  const bypass = import.meta.env.DEV || isAdmin;
   const [status, setStatus] = useState<{ uid: string; value: InitialExamStatus } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);

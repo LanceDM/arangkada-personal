@@ -61,7 +61,7 @@ Nothing is logged for a guest: the study requires signing in, and the modes stay
 
 ### The initial exam gate and the study's two tests (2026-11-10)
 
-The initial exam is the study's 60-item pre-test (`/play/pre-test`; `/play/initial-exam` redirects there), reached from the main menu's Pre-Test section or the study home. Until it is finished, Story Mode, the Daily Challenge and the mock exam are locked for a study account, and a direct link to any of them returns to the menu. Admins, developer builds and signed-in accounts that are not study accounts see the lock but are not held by it.
+The initial exam is the study's 60-item pre-test (`/play/pre-test`; `/play/initial-exam` redirects there), reached from the main menu's Pre-Test section or the study home. Every signed-in account sits it, whatever its type: a study account under its enrolment code, after consent, background and the device check; any other account (email or Google) under its open-access code `U-<uid>`, with no study steps. Until it is finished, Story Mode, the Daily Challenge and the mock exam are locked, and a direct link to any of them returns to the menu. Only admins and developer builds see the lock without being held by it (an admin previews the tests).
 
 The pre-test and post-test keep their own records (`users/{uid}/testStatus/{kind}`, `testDrafts`, `testSittings`, which the participant never reads back). When a sitting is saved, the composition root hands its graded answers to the course (`recordStudyTest`, three tries):
 

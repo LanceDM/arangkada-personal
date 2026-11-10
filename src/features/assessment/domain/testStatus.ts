@@ -111,4 +111,4 @@ export const readPostTestStatus = (data: Record<string, unknown> | null): PostTe
 };
 
 /** A participant's code, of any cohort: only an enrolled participant sits the tests. */
-export { isParticipantCode } from '@/domain/study/participantCode';
+export { isParticipantCode, isOpenAccessCode, openAccessCode } from '@/domain/study/participantCode';
