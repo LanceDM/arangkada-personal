@@ -27,7 +27,7 @@ import {
 import { BACKGROUND_FORM_ENABLED, BACKGROUND_FORM_VERSION } from './backgroundForm';
 
 /** Bump when any value below changes: `<date><letter>`. */
-export const RUN_CONFIG_VERSION = '2026-10-28b';
+export const RUN_CONFIG_VERSION = '2026-11-10a';
 
 export const RUN_CONFIG = {
   bktModel: DEFAULT_BKT_MODEL,

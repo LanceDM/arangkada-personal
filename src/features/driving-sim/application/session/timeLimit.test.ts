@@ -208,3 +208,11 @@ describe('the time a panel may hold the drive', () => {
     expect(fsm.getTransitionLog().at(-1)?.trigger).toBe('time_up');
   });
 });
+
+describe('the in-drive question clock', () => {
+  it('is the value the study settings record', async () => {
+    const { PANEL_SECONDS } = await import('@/features/driving-sim/domain/scenario/levelTimeLimits');
+    const { IN_DRIVE_QUESTION_LIMIT_SEC } = await import('@/domain/learner/stageCompetencies');
+    expect(PANEL_SECONDS).toBe(IN_DRIVE_QUESTION_LIMIT_SEC);
+  });
+});

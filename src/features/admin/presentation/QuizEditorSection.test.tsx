@@ -10,7 +10,7 @@ import type { QuizItemDoc, QuizModuleDoc } from '@/features/driving-sim';
 import { provideAdminDependencies, type AdminDependencies } from '@/features/admin/application/dependencies';
 import type { QuizEditorRepository } from '@/features/admin/application/quizPorts';
 import { QuizEditorSection } from './QuizEditorSection';
-import { choose, flush, mount, pressTab, text, unmount, view } from './routingSections.fixture';
+import { choose, flush, mount, pressTab, text, unmount, view } from './adminSections.fixture';
 
 /** A whole item, as the bank stores it. (Another feature's fixtures are out of reach.) */
 const fixtureQuizItem = (moduleId: string, n: number): QuizItemDoc => ({

@@ -46,9 +46,9 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
     heading: 'Reports',
     items: [
       { to: '/admin/replay', label: 'Replay', icon: History },
-      { to: '/admin/routing', label: 'Routing flow', icon: Route },
+      { to: '/admin/routing', label: 'Course flow', icon: Route },
       { to: '/admin/q-learning', label: 'Q-learning', icon: BrainCircuit },
-      { to: '/admin/course', label: 'Course (live Q-table)', icon: Activity },
+      { to: '/admin/course', label: 'BKT & export', icon: Activity },
       { to: '/admin/irt', label: 'IRT', icon: Sigma },
       { to: '/admin/report', label: 'Player report', icon: Users },
     ],

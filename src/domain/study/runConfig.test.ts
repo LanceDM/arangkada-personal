@@ -5,6 +5,7 @@ import { RUN_CONFIG_FINGERPRINT, RUN_CONFIG_VERSION, canonicalJSON } from './run
 const RELEASED: Record<string, string> = {
   '2026-10-28a': '561fa9bb',
   '2026-10-28b': '45470d72',
+  '2026-11-10a': 'eb6bd039',
 };
 
 describe('the run config version', () => {

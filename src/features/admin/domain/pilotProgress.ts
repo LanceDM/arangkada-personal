@@ -17,7 +17,6 @@
  *   or the one after it once the frontier is passed, since the move is made
  *   at Continue.
  */
-import { LAST_COURSE_LEVEL } from '@/domain/routing/routingTypes';
 import { compareParticipantCodes, type StudyCohort } from '@/domain/study/participantCode';
 import { FINAL_EXAM_LEVEL, studyStage, type CourseProgress, type StudyStage, type TestProgress } from '@/domain/study/studyStage';
 import type { DeviceType, GamingFrequency } from '@/domain/study/consentRecords';
@@ -32,11 +31,17 @@ export interface PilotAttemptSummary {
   savedAt: number;
 }
 
-/** The course cursor, as far as progress reads it. */
+/**
+ * The course cursor, as far as progress reads it: the per-competency course's
+ * phase (`routing/competencyCourse`), MODULE / QUIZ / QUIZ_REVIEW / DRIVE /
+ * REPEAT at a level, FINAL or CERTIFIED.
+ */
 export interface PilotCursor {
   state: { kind: string; level?: number };
-  /** The verdict on the frontier, before the next Continue moves on from it. */
+  /** Unused by the per-competency course (its phase already says where it is); kept null. */
   outcome: 'passed' | 'failed' | null;
+  /** Steps taken so far; 0 before the first. */
+  seq?: number;
   updatedAt: number;
 }
 
@@ -134,8 +139,7 @@ export const courseProgressOfCursor = (cursor: PilotCursor | null): CourseProgre
       return { started: true, frontierLevel: FINAL_EXAM_LEVEL, endReason: null };
     default: {
       const level = cursor.state.level ?? 0;
-      const next = cursor.outcome === 'passed' ? (level === LAST_COURSE_LEVEL ? FINAL_EXAM_LEVEL : level + 1) : level;
-      return { started: true, frontierLevel: next, endReason: null };
+      return { started: (cursor.seq ?? 0) > 0 || level > 0 || cursor.state.kind !== 'MODULE', frontierLevel: level, endReason: null };
     }
   }
 };
@@ -152,20 +156,26 @@ export const stageOf = (account: Pick<PilotAccountProgress, 'withdrawnAt' | 'ste
     survey: { openedAt: account.steps.surveyOpenedAt, confirmedAt: account.steps.surveyConfirmedAt },
   });
 
+const PHASE_LABEL: Record<string, string> = {
+  MODULE: 'module',
+  QUIZ: 'short quiz',
+  QUIZ_REVIEW: 'quiz review',
+  DRIVE: 'drive',
+  REPEAT: 'repeat drive',
+};
+
 export const placeLabel = (cursor: PilotCursor | null): string => {
   if (!cursor) return 'Not in the course yet';
   switch (cursor.state.kind) {
-    case 'DRIVE': {
-      const level = cursor.state.level ?? 0;
-      if (cursor.outcome !== 'passed') return level === 0 ? 'Level 0 (tutorial)' : `Level ${level}`;
-      return level === LAST_COURSE_LEVEL ? 'Final Mission' : `Level ${level + 1}`;
-    }
     case 'FINAL':
       return 'Final Mission';
     case 'CERTIFIED':
       return 'Certified';
-    default:
-      return cursor.state.kind;
+    default: {
+      const level = cursor.state.level ?? 0;
+      const where = level === 0 ? 'Level 0 (tutorial)' : `Level ${level}`;
+      return PHASE_LABEL[cursor.state.kind] ? `${where}, ${PHASE_LABEL[cursor.state.kind]}` : where;
+    }
   }
 };
 

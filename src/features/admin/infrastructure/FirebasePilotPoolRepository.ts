@@ -135,10 +135,11 @@ const watch: PilotPoolRepository['watch'] = (onChange, onError) => {
         fail
       ),
       onSnapshot(
-        doc(db, 'users', uid, 'routing', 'cursor'),
+        // The per-competency course's cursor (2026-11-10): the study's Story Mode.
+        doc(db, 'users', uid, 'routing', 'competencyCourse'),
         snap => {
-          const data = snap.data() as { state?: PilotCursor['state']; outcome?: PilotCursor['outcome']; updatedAt?: number } | undefined;
-          update({ cursor: data?.state ? { state: data.state, outcome: data.outcome ?? null, updatedAt: Number(data.updatedAt ?? 0) } : null });
+          const data = snap.data() as { phase?: PilotCursor['state']; seq?: number; updatedAt?: number } | undefined;
+          update({ cursor: data?.phase ? { state: data.phase, outcome: null, seq: Number(data.seq ?? 0), updatedAt: Number(data.updatedAt ?? 0) } : null });
         },
         fail
       ),

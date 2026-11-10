@@ -14,7 +14,8 @@
  */
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { DrivingCompetency } from '@/domain/learner/competency';
-import { buildBKTEvidence, buildBKTProfile } from '@/domain/learner/mastery/buildBKTProfile';
+import { buildBKTEvidence, buildBKTProfile, type CompetencyEvidence } from '@/domain/learner/mastery/buildBKTProfile';
+import { MASTERY_DESCRIPTORS, masteryLevel as masteryLevelOf, type MasteryLevel } from '@/domain/competencyRouting/mastery';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { DRIVE_PASS_CORRECT, QUIZ_PASS_CORRECT, STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
 import {
@@ -1206,4 +1207,30 @@ export const recordStudyTest = async (uid: string, test: FinishedStudyTest): Pro
     return;
   }
   await completePostExamAnswers(uid, state.cursor, graded, test.finishedAt);
+};
+
+// --- the player's own BKT (Profile) ------------------------------------------------------
+
+/** One competency as the player's profile shows it: BKT now, its level, and what it rests on. */
+export interface MasteryRow {
+  competency: DrivingCompetency;
+  /** P(L) now, replayed from this account's evidence with the course's model. */
+  p: number;
+  level: MasteryLevel;
+  descriptor: string;
+  evidence: CompetencyEvidence;
+}
+
+/**
+ * The account's BKT per competency, as the course reads it right now: the
+ * same evidence, the same order and the same model the routing decisions use.
+ */
+export const loadMasteryReport = async (uid: string): Promise<MasteryRow[]> => {
+  const evidence = await loadEvidence(uid);
+  const mastery = buildBKTProfile(evidence);
+  const counts = buildBKTEvidence(evidence);
+  return COMPETENCIES.map(competency => {
+    const level = masteryLevelOf(mastery[competency], counts[competency].drive);
+    return { competency, p: mastery[competency], level, descriptor: MASTERY_DESCRIPTORS[level], evidence: counts[competency] };
+  });
 };

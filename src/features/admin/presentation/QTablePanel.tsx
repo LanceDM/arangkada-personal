@@ -4,15 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useLiveQTable } from '@/features/admin/application/useLiveQTable';
 import { toDateTime } from './formatDate';
 
-const STATES = [1, 2, 3, 4].flatMap(m => (['passed', 'failed'] as const).map(r => `M${m}-${r}`));
-const ACTIONS = ['none', 'practice', 'review'] as const;
+import { COMPETENCY_ACTIONS, legalActions, Q_STATES, stateKey } from '@/domain/competencyRouting/qLearning';
 
-/** Mirrors the routing rules: none needs a pass at mastery 2+, review needs a fail. */
-const legal = (key: string, action: (typeof ACTIONS)[number]) => {
-  const mastery = Number(key[1]);
-  const passed = key.endsWith('passed');
-  return action === 'none' ? passed && mastery >= 2 : action === 'review' ? !passed : true;
-};
+const STATES = Q_STATES.map(stateKey);
+const ACTIONS = COMPETENCY_ACTIONS;
+
+/** The routing rules' own legality: none needs a pass at mastery 2+, review needs a fail. */
+const legal = (key: string, action: (typeof ACTIONS)[number]) => legalActions(Q_STATES[STATES.indexOf(key)]).includes(action);
 
 const TAG_LABEL = { exploring: 'Exploring', exploiting: 'Exploiting', no_choice: 'No choice' } as const;
 const fmt = (value: unknown, digits = 3) => (typeof value === 'number' ? value.toFixed(digits) : '–');

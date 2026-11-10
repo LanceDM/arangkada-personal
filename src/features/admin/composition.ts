@@ -1,6 +1,5 @@
 /** Admin's wiring, for the composition root alone. Kept out of `index.ts`. */
 import { provideAdminDependencies } from './application/dependencies';
-import { designatedRoutingPolicyOf, type DesignatedRoutingPolicy } from './domain/designatedRoutingPolicy';
 import { firebaseIrtRepository } from './infrastructure/FirebaseIrtRepository';
 import { firebaseAdminReportRepository } from './infrastructure/FirebaseAdminRepository';
 import { firebasePilotPoolRepository } from './infrastructure/FirebasePilotPoolRepository';
@@ -25,10 +24,3 @@ export const composeAdmin = ({ databaseMode = 'firestore' }: { databaseMode?: 'f
     logs: firebaseStudyLogs,
   });
 
-/**
- * The designated routing table (trained in simulation, seed 11), kept only so
- * the admin's legacy routing views can still show it. The study's course does
- * not read it: its Q-table is learned online from participants.
- */
-export const loadDesignatedRoutingPolicy = async (): Promise<DesignatedRoutingPolicy> =>
-  designatedRoutingPolicyOf((await import('./domain/designatedRoutingTable.json')).default);

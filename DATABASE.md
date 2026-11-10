@@ -137,7 +137,7 @@ Decided shared (one set of item difficulties from all participants), method stil
 
 ## Exports
 
-Admin → **Course (live Q-table)** → Study export: the study JSON, and CSVs of the replayed BKT trajectory, the BKT log as logged, decisions, rewards, the Q-table log and the background form. Participants appear by user id and study code.
+Admin → **BKT & export** → Study export: the study JSON, and CSVs of the replayed BKT trajectory, the BKT log as logged, decisions, rewards, the Q-table log and the background form. Participants appear by user id and study code.
 
 ## Scripts
 
@@ -182,3 +182,15 @@ Run it after each session and before any analysis. A participant whose records f
 
 - `firestore.rules` has not been run on the emulator here (the emulator download is blocked in this environment). `scripts/db/rules.test.ts` covers the new paths and runs when `FIRESTORE_EMULATOR_HOST` is set.
 - Implementation B (the `dataconnect/` schema and operations, and its adapters) has not been deployed or run against the SQL Connect emulator. Check it with `npm run emulators:sql` before switching.
+
+## Admin views of the course (2026-11-10)
+
+- **Course flow** (`/admin/routing`): the per-competency routing FSM as the code runs it (states, guarded moves, the quiz and drive rules), and each player's newest step, the newest stage's competencies (open, done, flagged) and their whole course log.
+- **Q-learning** (`/admin/q-learning`): the policy's settings from `RUN_CONFIG` (state, actions, warm-up, learning, reward, fallback), the shared table live, each state's actions with what they were chosen by and the rewards they earned (A_next, Pass, H), and every decision with its probability and reward.
+- **BKT & export** (`/admin/course`): each player's P(L) per competency, replayed from their own answers with the course's model and coloured by mastery level, with the evidence behind each; and the study export.
+- **Overview / Participants** read the per-competency course's cursor (`routing/competencyCourse`), so a participant's place reads e.g. "Level 3, repeat drive".
+- The old two-group run's views and its simulation-trained table are removed.
+
+Players see their own BKT per competency on **Profile** (`/profile`, the username in the header).
+
+Settings version **2026-11-10a**: the in-drive question limit is recorded as 60 s, the value the drive's panel clock runs at since the merge. After deploying it, run `npm run db:init` once so `policy/config` names this version; until then the course refuses to save a step and asks to reload.

@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { CERTIFIED_STATE, driveState, FINAL_STATE } from '@/domain/routing/routingTypes';
-import { courseProgressOf, type RoutingCursor } from '@/features/driving-sim';
 import { courseProgressOfCursor, formatAgo, NO_PROFILE, NO_STEPS, pilotRow, pilotRows, type PilotAccountProgress } from './pilotProgress';
 
 const MIN = 60_000;
@@ -35,34 +33,32 @@ describe('an enrolled participant on the Participants page', () => {
     expect(pilotRow(account({ steps: { ...steps, preTest: 'finished' }, withdrawnAt: T0 + 9 * MIN })).stage).toBe('withdrawn');
   });
 
-  it('counts its saved drives, and is at the level Continue enters', () => {
-    const entered = account({ cursor: { state: { kind: 'DRIVE', level: 0 }, outcome: null, updatedAt: T0 + MIN } });
-    expect(pilotRow(entered)).toMatchObject({ place: 'Level 0 (tutorial)', lastActivityAt: T0 + MIN });
+  it('counts its saved drives, and is where its course cursor is', () => {
+    const entered = account({ cursor: { state: { kind: 'DRIVE', level: 0 }, outcome: null, seq: 1, updatedAt: T0 + MIN } });
+    expect(pilotRow(entered)).toMatchObject({ place: 'Level 0 (tutorial), drive', lastActivityAt: T0 + MIN });
 
     const saved = account({
-      cursor: { state: { kind: 'DRIVE', level: 1 }, outcome: null, updatedAt: T0 + 6 * MIN },
+      cursor: { state: { kind: 'QUIZ', level: 1 }, outcome: null, seq: 3, updatedAt: T0 + 6 * MIN },
       attempts: [{ id: 'a1', levelId: 0, savedAt: T0 + 6 * MIN }, { id: 'a2', levelId: 1, savedAt: T0 + 9 * MIN }],
     });
-    expect(pilotRow(saved)).toMatchObject({ place: 'Level 1', storyAttempts: 2, lastActivityAt: T0 + 9 * MIN });
+    expect(pilotRow(saved)).toMatchObject({ place: 'Level 1, short quiz', storyAttempts: 2, lastActivityAt: T0 + 9 * MIN });
   });
 
-  it("reads the course from the stored cursor as Driving Sim's own seam does", () => {
-    const cursor = (state: RoutingCursor['state'], outcome: RoutingCursor['outcome'], seq = 3): RoutingCursor => ({ state, outcome, seq, decisionsSpent: 9, pending: null });
-    for (const [state, outcome] of [
-      [driveState(0), null], [driveState(0), 'passed'], [driveState(3), 'failed'], [driveState(5), 'passed'],
-      [driveState(11), 'passed'], [FINAL_STATE, null], [FINAL_STATE, 'failed'], [CERTIFIED_STATE, 'passed'],
-    ] as const) {
-      expect(courseProgressOfCursor({ state, outcome, updatedAt: T0 }), JSON.stringify(state) + outcome).toEqual(courseProgressOf(cursor(state, outcome)));
-    }
+  it("reads the course from the stored cursor as Driving Sim's own seam does (loadCompetencyCourseProgress)", () => {
+    const at = (kind: string, level: number | undefined, seq: number) => courseProgressOfCursor({ state: { kind, level }, outcome: null, seq, updatedAt: T0 });
+    expect(at('MODULE', 0, 0)).toEqual({ started: false, frontierLevel: 0, endReason: null });
+    expect(at('DRIVE', 0, 1)).toEqual({ started: true, frontierLevel: 0, endReason: null });
+    expect(at('REPEAT', 5, 30)).toEqual({ started: true, frontierLevel: 5, endReason: null });
+    expect(at('FINAL', undefined, 60)).toEqual({ started: true, frontierLevel: 12, endReason: null });
+    expect(at('CERTIFIED', undefined, 61)).toEqual({ started: true, frontierLevel: null, endReason: 'certified' });
     expect(courseProgressOfCursor(null)).toEqual({ started: false, frontierLevel: 0, endReason: null });
   });
 
-  it('is at the next level once its frontier is passed, since Continue makes the move', () => {
-    const at = (level: number, outcome: 'passed' | 'failed' | null) =>
-      pilotRow(account({ cursor: { state: { kind: 'DRIVE', level }, outcome, updatedAt: T0 } })).place;
-    expect(at(0, 'passed')).toBe('Level 1');
-    expect(at(2, 'failed')).toBe('Level 2');
-    expect(at(11, 'passed')).toBe('Final Mission');
+  it('names the phase within the level', () => {
+    const at = (kind: string, level: number) => pilotRow(account({ cursor: { state: { kind, level }, outcome: null, seq: 5, updatedAt: T0 } })).place;
+    expect(at('MODULE', 2)).toBe('Level 2, module');
+    expect(at('REPEAT', 2)).toBe('Level 2, repeat drive');
+    expect(at('QUIZ_REVIEW', 7)).toBe('Level 7, quiz review');
   });
 
   it('names the final exam and certification', () => {

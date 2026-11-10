@@ -1,4 +1,4 @@
-/** `/admin/course`: the per-competency course's live Q-table and the study export. */
+/** `/admin/course`: each player's BKT per competency, and the study export. */
 import { CourseSection } from '@/features/admin';
 import { useAuthSession } from '@/features/auth';
 

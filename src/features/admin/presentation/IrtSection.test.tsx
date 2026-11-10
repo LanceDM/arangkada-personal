@@ -16,7 +16,7 @@ import type { IrtRepository, ParticipantTestDocuments } from '@/features/admin/a
 import type { ItemReviewKind } from '@/features/admin/domain/contentValidity';
 import { useIrtPanel } from '@/features/admin/application/useIrtPanel';
 import { IrtSection, type IrtView } from './IrtSection';
-import { flush, mount, text, unmount, view } from './routingSections.fixture';
+import { flush, mount, text, unmount, view } from './adminSections.fixture';
 
 const items: QuizItemDoc[] = COMPETENCIES.flatMap((competency, c) =>
   Array.from({ length: c < 5 ? 6 : 5 }, (_, k) => ({

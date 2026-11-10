@@ -136,10 +136,11 @@ export {
   loadInitialExamStatus,
   loadCompetencyCourseProgress,
   recordStudyTest,
+  loadMasteryReport,
   initialExamRequired,
   submitCourseQuiz,
 } from './application/use-cases/competencyCourse';
-export type { CourseDriveRun, CourseState, FinishedStudyTest, InitialExamStatus } from './application/use-cases/competencyCourse';
+export type { CourseDriveRun, CourseState, FinishedStudyTest, InitialExamStatus, MasteryRow } from './application/use-cases/competencyCourse';
 export type { DriveExit } from './domain/telemetry/controlInputs';
 export { CourseConflictError, OutdatedAppError } from './application/errors';
 export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';

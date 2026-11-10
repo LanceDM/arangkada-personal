@@ -37,6 +37,7 @@ const Learn = lazy(() => import('@/pages/learn/LearnPage'));
 const EksamenMode = lazy(() => import('@/pages/mock-exam/MockExamPage'));
 const DailyChallenge = lazy(() => import('@/pages/daily-challenge/DailyChallengePage'));
 const Settings = lazy(() => import('@/pages/settings/SettingsPage'));
+const Profile = lazy(() => import('@/pages/profile/ProfilePage'));
 const PreTest = lazy(() => import('@/pages/pre-test/PreTestPage'));
 // The study's post-test, not the frozen pilot's at /play/story/post-test.
 const StudyPostTest = lazy(() => import('@/pages/post-test/PostTestPage'));
@@ -100,6 +101,7 @@ export const AppRouter = () => (
     {lazyRoute('/play/eksamen', <RequireInitialExam><EksamenMode /></RequireInitialExam>)}
     {lazyRoute('/play/daily', <RequireInitialExam><DailyChallenge /></RequireInitialExam>)}
     {lazyRoute('/settings', <Settings />)}
+    {lazyRoute('/profile', <Profile />)}
     {/* The study's pre-test: a participant sits it, an admin previews it. */}
     {lazyRoute('/play/pre-test', <PreTest />)}
     {/* The study's two-stage post-test, the same who as the pre-test. */}

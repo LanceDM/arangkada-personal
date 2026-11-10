@@ -46,10 +46,13 @@ export const QUIZ_ATTEMPT_CAP = 3;
 
 /**
  * TENTATIVE: seconds to answer an in-drive question (checkpoint, right-of-way,
- * emergency, parking). Running out fails the scenario without updating BKT.
- * The garage (pre-drive) and aftermath (post-drive) questions are untimed.
+ * emergency, parking). Running out leaves it unanswered: it fails the scenario
+ * and is not BKT evidence. Since the team's merge (2026-11-10) the drive's
+ * panel clock runs at one minute per question (PANEL_SECONDS, the quiz's
+ * pace); this is that value, recorded in the settings (timeLimit.test.ts
+ * holds the two together).
  */
-export const IN_DRIVE_QUESTION_LIMIT_SEC = 30;
+export const IN_DRIVE_QUESTION_LIMIT_SEC = 60;
 
 /** Diagnostic pre-test items per competency (55 for the 11). */
 export const DIAGNOSTIC_ITEMS_PER_COMPETENCY = 5;
