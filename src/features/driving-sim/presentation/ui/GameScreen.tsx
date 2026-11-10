@@ -22,12 +22,16 @@ import AdaptationNotice from './AdaptationNotice';
 import ScenarioBriefing from './ScenarioBriefing';
 import { roadPositionCue } from './roadPositionLabel';
 import { resolveLaneRole } from '@/features/driving-sim/domain/world/vehiclePhysics';
-import { useKeyboard } from '@/features/driving-sim/presentation/input/useKeyboard';
+import { useKeyboard, type KeyboardListener } from '@/features/driving-sim/presentation/input/useKeyboard';
+import { createInputRecorder, type DriveExit } from '@/features/driving-sim/domain/telemetry/controlInputs';
 import { TouchInput } from '@/features/driving-sim/presentation/input/touchInput';
 import { usePortrait, useTouchDevice } from '@/features/driving-sim/presentation/input/useTouchDevice';
 import { InputModeContext, type InputMode } from '@/features/driving-sim/presentation/input/inputMode';
 import { PedalPad, SteeringPad } from './TouchControls';
 import RotateDevicePrompt from './RotateDevicePrompt';
+import FrameMeter from '@/features/driving-sim/presentation/drive/FrameMeter';
+import { frameMeterRequested } from '@/features/driving-sim/presentation/drive/frameSteps';
+import type { PlayConditions } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 
 /** The last stretch of a panel's time, when its countdown turns amber. */
 const PANEL_WARNING_SECONDS = 15;
@@ -35,9 +39,6 @@ const PANEL_WARNING_SECONDS = 15;
 /** What a panel's countdown says: a question is answered, anything else is read and the drive resumes. */
 const panelClock = (seconds: number, asking: boolean) =>
   asking ? m.secondsToAnswer(seconds) : m.resumesIn(seconds);
-import FrameMeter from '@/features/driving-sim/presentation/drive/FrameMeter';
-import { frameMeterRequested } from '@/features/driving-sim/presentation/drive/frameSteps';
-import type { PlayConditions } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import { useFSM } from '@/features/driving-sim/application/useFSM';
 import { registerActiveFSM } from '@/features/driving-sim/domain/fsm/devRegistry';
 import { DEFAULT_TRANSITION_PARAMS, type TransitionParams } from '@/features/driving-sim/domain/fsm/fsmTypes';
@@ -56,7 +57,10 @@ interface GameScreenProps {
   level: LevelConfig;
   /** The finished run, its FSM telemetry, and how it was played. */
   onComplete: DriveComplete;
-  onExit: () => void;
+  /** Leaving before the end: everything done so far comes with it, for the log. */
+  onExit: (partial?: DriveExit) => void;
+  /** The page is closing mid-drive (tab closed, reload): a last chance to log what was done. Best effort. */
+  onAbandon?: (partial: DriveExit) => void;
   /** Dev-only: starts the drive at this road distance instead of 0. */
   initialDistance?: number;
   /**
@@ -133,6 +137,7 @@ const GameScreen = ({
   level,
   onComplete,
   onExit,
+  onAbandon,
   initialDistance,
   transitionParams,
   support = 'full',
@@ -183,7 +188,10 @@ const GameScreen = ({
 
   const reducedMotion = useReducedMotion();
   const { fsm, fsmState, snapshot, prevFsmState, transitionLabel } = useFSM();
-  const { releaseHeldKeys } = useKeyboard(keysRef);
+  // Every key pressed and released on the road, for the drive's input log.
+  const [recorder] = useState(() => createInputRecorder());
+  const listenerRef = useRef<KeyboardListener | null>(recorder);
+  const { releaseHeldKeys } = useKeyboard(keysRef, listenerRef);
 
   // Apply the learned transition-guard parameters to this drive's machine.
   // This is where the Q-learning decision reaches the FSM: from here on, the
@@ -234,6 +242,16 @@ const GameScreen = ({
    * response they did not reach would be inventing a stop that never happened.
    * So does one whose time ran out, which never arrived at all.
    */
+  const finishedRef = useRef(false);
+  /** The run is over: its result, with every key pressed on the road. */
+  const completeWithInputs = useCallback(
+    (result: LevelResult, telemetry: LevelFsmTelemetry, play: PlayConditions) => {
+      finishedRef.current = true;
+      onComplete(result, { ...telemetry, inputs: recorder.snapshot() }, play);
+    },
+    [onComplete, recorder]
+  );
+
   const handleSimComplete = useCallback(
     (result: LevelResult, telemetry: LevelFsmTelemetry, play: PlayConditions) => {
       if (level.aftermath && !result.crashReason && !result.timedOut) {
@@ -241,9 +259,9 @@ const GameScreen = ({
         setStage('aftermath');
         return;
       }
-      onComplete(result, telemetry, play);
+      completeWithInputs(result, telemetry, play);
     },
-    [level.aftermath, onComplete]
+    [level.aftermath, completeWithInputs]
   );
 
   // The road is laid out for a device on its side. Held upright, the drive
@@ -316,6 +334,7 @@ const GameScreen = ({
     weakCompetency,
   } = drive;
 
+
   // Whether the screen may mark the response the active scenario is graded on:
   // the lane strip's wanted lane, and the lane and speed a merge asks for. The
   // route's own readout - which lane the car is in, and whether the separator
@@ -375,7 +394,7 @@ const GameScreen = ({
     // counts and the competency mix, so the parked totals are stale by now.
     // Same single assembly path the drive itself ends through. The scene
     // re-rolls nothing, so the drive's re-rolls are the run's.
-    onComplete(
+    completeWithInputs(
       buildLevelResult(level, {
         score: scoreRef.current,
         violations: violationsRef.current,
@@ -386,7 +405,35 @@ const GameScreen = ({
       buildLevelFsmTelemetry(fsm.getTransitionLog(), logsRef.current, tracesRef.current, pending.telemetry.rerolls),
       pending.play
     );
-  }, [correctRef, fsm, level, logsRef, onComplete, scoreRef, signOutcomesRef, tracesRef, violationsRef]);
+  }, [correctRef, fsm, level, logsRef, completeWithInputs, scoreRef, signOutcomesRef, tracesRef, violationsRef]);
+
+  /** What was done so far, for a drive left before its end. */
+  const partial = useCallback(
+    (reason: DriveExit['reason']): DriveExit => ({
+      logs: [...logsRef.current],
+      score: scoreRef.current,
+      stage,
+      elapsedMs: recorder.elapsedMs(),
+      inputs: recorder.snapshot(),
+      reason,
+    }),
+    [logsRef, scoreRef, stage, recorder]
+  );
+  const exit = useCallback(() => {
+    finishedRef.current = true;
+    onExit(partial('exit'));
+  }, [onExit, partial]);
+
+  // Closing or reloading the tab mid-drive: log what was done (best effort; the
+  // browser may not finish the write).
+  useEffect(() => {
+    if (!onAbandon) return;
+    const onPageHide = () => {
+      if (!finishedRef.current) onAbandon(partial('page_closed'));
+    };
+    window.addEventListener('pagehide', onPageHide);
+    return () => window.removeEventListener('pagehide', onPageHide);
+  }, [onAbandon, partial]);
 
   const feedbackCards = <FeedbackStack result={result} onDismiss={dismissResult} />;
 
@@ -402,7 +449,7 @@ const GameScreen = ({
           choiceSeed={choiceSeed}
           onAnswer={handleGarageAnswer}
           onComplete={() => setStage('driving')}
-          onExit={onExit}
+          onExit={exit}
         />
         <div className="fixed bottom-3 left-3 z-[60] flex w-[min(340px,calc(100vw-1.5rem))] flex-col gap-3">
           {feedbackCards}
@@ -428,7 +475,7 @@ const GameScreen = ({
           choiceSeed={choiceSeed}
           onAnswer={handleGarageAnswer}
           onComplete={finishAftermath}
-          onExit={onExit}
+          onExit={exit}
         />
         <div className="fixed bottom-3 left-3 z-[60] flex w-[min(340px,calc(100vw-1.5rem))] flex-col gap-3">
           {feedbackCards}
@@ -652,7 +699,7 @@ const GameScreen = ({
                 speedLimit={drive.speedLimit}
                 levelName={level.name}
                 levelId={level.id}
-                onExit={onExit}
+                onExit={exit}
                 position={roadPosition}
                 cue={positionCue}
                 requiredLanes={showsResponse ? requiredLanes : NO_LANES}

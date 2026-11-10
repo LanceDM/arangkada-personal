@@ -6,6 +6,7 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import {
+  Activity,
   BrainCircuit,
   ClipboardList,
   FlaskConical,
@@ -47,6 +48,7 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
       { to: '/admin/replay', label: 'Replay', icon: History },
       { to: '/admin/routing', label: 'Routing flow', icon: Route },
       { to: '/admin/q-learning', label: 'Q-learning', icon: BrainCircuit },
+      { to: '/admin/course', label: 'Course (live Q-table)', icon: Activity },
       { to: '/admin/irt', label: 'IRT', icon: Sigma },
       { to: '/admin/report', label: 'Player report', icon: Users },
     ],

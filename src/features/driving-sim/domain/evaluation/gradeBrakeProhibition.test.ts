@@ -42,9 +42,11 @@ const verdict = (telemetry: ReturnType<typeof drive>, event: ScenarioEvent, leve
 };
 
 describe('the content this holds', () => {
-  it('is the six Level 5 variants, five of them borrowed by the final exam', () => {
+  // The yellow-box variants moved to lane_discipline (catalogue review
+  // 2026-10-28), so the final exam's right-of-way slot borrows three of them.
+  it('is the six Level 5 variants, three of them borrowed by the final exam', () => {
     expect(LEVEL5_ITEMS).toHaveLength(6);
-    expect(LEVEL12_ITEMS).toHaveLength(5);
+    expect(LEVEL12_ITEMS).toHaveLength(3);
     for (const event of [...LEVEL5_ITEMS, ...LEVEL12_ITEMS]) expect(event.correctAction).toBe('accelerate');
   });
 });

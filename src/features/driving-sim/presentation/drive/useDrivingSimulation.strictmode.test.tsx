@@ -27,6 +27,7 @@ import { provideDrivingSimDependencies } from '@/features/driving-sim/applicatio
 import { useScenarioEvaluation } from '@/features/driving-sim/application/useScenarioEvaluation';
 import { TouchInput } from '@/features/driving-sim/presentation/input/touchInput';
 import { useDrivingSimulation, type DrivingSimulation } from './useDrivingSimulation';
+import { memoryAssessments, memoryBackground, memoryStudyLogs, memoryCompetencyCourse, memoryCourseStore } from '@/features/driving-sim/application/testDependencies';
 
 /** Stands in for `app/dependencies`, which a mounted drive expects to have run. */
 provideDrivingSimDependencies({
@@ -44,6 +45,10 @@ provideDrivingSimDependencies({
   routingMode: 'legacy',
   routing: { loadAssignment: async () => null, loadCursor: async () => null, saveCursor: async () => {} },
   routingOverride: { load: () => 'assigned', save: () => {} },
+  competencyCourse: memoryCompetencyCourse(memoryCourseStore()),
+  assessments: memoryAssessments(memoryCourseStore()),
+  background: memoryBackground(memoryCourseStore()),
+  ...memoryStudyLogs(memoryCourseStore()),
   optimizedRouting: async () => {
     throw new Error('no drive here reads the routing table');
   },

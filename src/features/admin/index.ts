@@ -20,3 +20,4 @@ export { PilotDashboard } from './presentation/PilotDashboard';
 export { QuizEditorSection } from './presentation/QuizEditorSection';
 export { usePilotSessions } from './application/usePilotSessions';
 export { useStudyInvites } from './application/useStudyInvites';
+export { CourseSection } from './presentation/CourseSection';

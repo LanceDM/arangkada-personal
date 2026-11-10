@@ -130,6 +130,7 @@ describe('the admin frame', () => {
       ['Replay', '/admin/replay'],
       ['Routing flow', '/admin/routing'],
       ['Q-learning', '/admin/q-learning'],
+      ['Course (live Q-table)', '/admin/course'],
       ['IRT', '/admin/irt'],
       ['Player report', '/admin/report'],
       ['Quiz items', '/admin/quiz'],

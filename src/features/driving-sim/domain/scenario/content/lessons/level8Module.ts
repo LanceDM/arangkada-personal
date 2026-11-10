@@ -422,9 +422,113 @@ export const level8Module = {
         },
       ],
     },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-8-lane-position-and-large-vehicles',
+      title: '10. Lane Position, Counterflow, And Large Vehicles',
+      text: 'Defensive driving starts with where you put the car: the lane you keep, the room you leave, and when you decide not to overtake.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'Defensive driving starts with where you put the car: the lane you keep, the room you leave, and when you decide not to overtake.',
+        },
+        {
+          type: 'heading',
+          text: 'On Undivided Roads',
+        },
+        // FDM Vol. 1 p. 138
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'On an undivided two-lane road, keep to the outer lane and watch your speed.',
+            'If a vehicle is counterflowing toward you, keep calm and do not insist on your right. Signal and change lanes with care, and avoid eye contact with the other driver.',
+            'If an oncoming vehicle steers into your lane: read the road ahead, drive to the right, reduce speed, and be ready to drive off the road.',
+            'If you are forced off the road and cannot avoid hitting something, aim for something soft such as bushes or plastic barriers, or glance off a fixed object such as a fence at an angle.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Large And Long Vehicles',
+        },
+        // FDM Vol. 1 p. 140
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Keep adequate space for long, wide or large vehicles.',
+            'Never overtake a large hauling truck that is turning left or right; it may block all or some of the lanes.',
+            'Long vehicles may straddle lanes while turning, so give them extra room.',
+            'Overtake a large vehicle only when there is enough time and distance to complete the maneuver safely.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Lane Habits That Cause Traffic And Crashes',
+        },
+        // FDM Vol. 1 pp. 89, 110, 119, 121, 139, 156
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Lane straddling and swerving through indiscriminate, unsafe lane changes are common violations that cause heavy traffic and crashes.',
+            'Motorcycles are entitled to the same full length and width of lane as all other vehicles.',
+            'Before passing motorcyclists or cyclists, check for obstructions in front of them, behind them and on each side, and leave enough space.',
+            'Before changing lanes, take a quick glance over your shoulder at the blind spot your mirrors do not show.',
+            'Where a solid center line runs through a blind bend, stay in your lane and do not overtake.',
+          ],
+        },
+      ],
+    },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-8-hazards-and-courtesy',
+      title: '11. Hazards Around You And Everyday Courtesy',
+      text: 'Some hazards are built into the road and some come and go with the hour. Others are the drivers right behind you.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'Some hazards are built into the road and some come and go with the hour. Others are the drivers right behind you.',
+        },
+        // FDM Vol. 1 p. 148
+        {
+          type: 'table',
+          headers: ['Type', 'Examples'],
+          rows: [
+            ['Fixed hazards', 'Structures that may restrict your view: curves, hills, hidden driveways, intersections, merging roads.'],
+            ['Dynamic hazards', 'Hazards that change through the day: school zones, market areas, commercial districts, emergency vehicles.'],
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'A Tailgater Behind You',
+        },
+        // FDM Vol. 1 p. 146
+        {
+          type: 'paragraph',
+          text: 'Signal your intentions early with brake and signal lights, stop smoothly, keep ample distance ahead, and let the tailgater pass before you slow down.',
+        },
+        {
+          type: 'heading',
+          text: 'Courtesy And Fitness To Drive',
+        },
+        // FDM Vol. 1 pp. 71, 139, 169, 170, 172
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'The horn is for warning other road users of your presence, not for venting.',
+            'Behind a student driver, be patient and expect mistakes.',
+            'At a "Bicycle Lane Ahead" sign, be aware and slow down.',
+            'Approach a pedestrian lane with extreme caution, ready to give way.',
+            'If you are taking medicine that can affect your driving, do not drive, or consult a doctor first.',
+          ],
+        },
+      ],
+    },
     {
       id: 'level-8-method-and-recap',
-      title: '10. Defensive Driving Method And Mission Recap',
+      title: '12. Defensive Driving Method And Mission Recap',
       text: 'Use SIPDE as your default method for every hazard, and use courtesy and self-discipline as your default response to every provocation.',
       blocks: [
         {

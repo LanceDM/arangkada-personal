@@ -74,6 +74,33 @@ export const level7Module = {
           type: 'paragraph',
           text: 'A posted sign always overrides this default table where one exists; you already know how to recognize maximum, minimum, and end-of-restriction signs from Level 3. The table above is what applies when no sign is posted.',
         },
+        {
+          type: 'heading',
+          text: 'National Roads',
+        },
+        // FDM Vol. 1 p. 112 (DOTr-DPWH-DILG JMC 2018-001)
+        {
+          type: 'table',
+          headers: ['Road', 'Flat', 'Rolling', 'Mountainous'],
+          rows: [
+            ['Primary national road', '80 kph', '60 kph', '50 kph'],
+            ['Secondary national road', '70 kph', '60 kph', '40 kph'],
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Controlling Speed On A Descent',
+        },
+        // FDM Vol. 1 pp. 111, 177, 180
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Before driving down a steep road, shift to a low gear and use engine braking instead of riding the brakes.',
+            'If a bus ahead speeds down a steep grade, keep within the speed limit and stay well back.',
+            'Behind a long vehicle, stay further back to improve your view of the road ahead.',
+          ],
+        },
       ],
     },
     {
@@ -258,6 +285,16 @@ export const level7Module = {
           type: 'paragraph',
           text: 'Special signs appear as early as 200 meters before a toll exit to give you time to move into the correct lane; you already know how to read expressway signage from Level 3, so use that vocabulary here to plan your lane position well before the toll plaza, not at it.',
         },
+        // FDM Vol. 1 p. 128
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Plan your exit at least 1 kilometer ahead of the exit toll.',
+            'On an expressway, switch on the hazard warning lights only when stopping for an emergency.',
+            'At night, do not stare at the headlights of oncoming vehicles.',
+          ],
+        },
       ],
     },
     {
@@ -285,6 +322,19 @@ export const level7Module = {
         {
           type: 'paragraph',
           text: 'A faster road makes overtaking feel more urgent and more available, since gaps open and close quickly. Judge each gap by whether it is actually large enough to complete the pass and return safely, not by how much the vehicle ahead is slowing you down. If there is any doubt, wait for the next gap.',
+        },
+        {
+          type: 'heading',
+          text: 'When You Are The One Being Overtaken',
+        },
+        // FDM Vol. 1 p. 166; FDM Vol. 2 p. 76 (JAO 2014-01)
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'When another vehicle signals and overtakes you, give way and do not increase your speed. Never race it.',
+            'After you overtake, move back to the right only once you are safely clear of the overtaken vehicle. Cutting in early is a violation.',
+          ],
         },
       ],
     },

@@ -20,6 +20,13 @@ export const firebaseQuizBankRepository: QuizBankRepository = {
       .filter((item): item is QuizItemDoc => item !== null);
     return { items, settings: readQuizModule(settingsSnap.exists() ? settingsSnap.data() : null) };
   },
+  // The course's short quiz draws by competency across modules (2026-11-10).
+  async loadAll() {
+    const snap = await getDocs(query(collection(db, 'quiz_items'), where('use', '==', 'quiz')));
+    return snap.docs
+      .map(d => readQuizItem(d.id, d.data()))
+      .filter((item): item is QuizItemDoc => item !== null);
+  },
 };
 
 export const firebaseQuizSittingRepository: QuizSittingRepository = {

@@ -1,7 +1,7 @@
 /** The bound implementations of Admin's ports. Provided by `app/dependencies`. */
 import type { IrtRepository } from './irtPorts';
 import type { PilotPoolRepository, PilotRecordsRepository, StudyInvitesRepository } from './pilotPorts';
-import type { AdminReportRepository } from './ports';
+import type { AdminReportRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository } from './ports';
 import type { QuizEditorRepository } from './quizPorts';
 
 export interface AdminDependencies {
@@ -11,6 +11,12 @@ export interface AdminDependencies {
   pilotRecords: PilotRecordsRepository;
   quizEditor: QuizEditorRepository;
   irt: IrtRepository;
+  /** The per-competency course's records: participants, roles, settings versions. */
+  records: StudyRecordsRepository;
+  /** The shared Q-table, live. */
+  live: LiveQTableRepository;
+  /** The event stream, BKT log and Q-table log, for the study export. */
+  logs: StudyLogRepository;
 }
 
 let bound: AdminDependencies | null = null;

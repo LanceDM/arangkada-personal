@@ -9,8 +9,30 @@ rules_version = '2';
 //   users/{uid}/attempts/{id}/telemetry/fsm        FsmTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/decisions  DecisionTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/routing    RoutingTelemetryDoc
+//   users/{uid}/attempts/{id}/telemetry/inputs     InputTelemetryDoc: every key pressed and released on the road
 //   users/{uid}/routing/assignment                 the pilot group an admin assigned
 //   users/{uid}/routing/cursor                     StoredRoutingCursor
+//   users/{uid}/routing/competencyCourse           CourseCursor (per-competency routing FSM)
+//   users/{uid}/courseLog/{id}                     CourseLogEntry: decisions, rewards, table snapshot
+//   users/{uid}/assessmentSittings/{id}            AssessmentSitting: quiz, diagnostic, post-exam answers
+//   users/{uid}/study/background                   BackgroundResponse: the background form (muted by default)
+//   users/{uid}/events/{eventId}                   StudyEvent: the participant's event stream, append-only
+//   users/{uid}/state/events                       { nextSeq }: the event stream's counter
+//   users/{uid}/state/evidence                     { nextSeq }: numbers each drive and sitting (BKT's order)
+//   users/{uid}/state/active                       the quiz or drive open now, with its seed
+//   users/{uid}/bkt/profile                        BKTProfileDoc: the participant's own BKT now
+//   users/{uid}/bktUpdates/{updateId}              BKTUpdateRecord: one per graded answer, append-only
+//   policy/competencyQ                             the shared Q-table, learned online by every participant
+//   policy/competencyQ/updates/{updateId}          QLogEntry: every table change, append-only
+//   policy/config                                  the settings version in force (written by db:init)
+//   configVersions/{tag}                           every settings version (written by db:init)
+//   participants/{code}                            study enrolment (written by db:participant)
+//   roleGrants/{id}                                admin grants and revokes (written by db:role)
+//   meta/schema                                    which schema version the database was set up with
+//
+// Implementation B (VITE_DATABASE_MODE=firestore+sql) keeps participants,
+// role grants, settings versions and the background form in SQL Connect instead
+// (dataconnect/); the paths above for them are then unused. See DATABASE.md.
 //   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
 //   users/{uid}/dailyStreak/summary                DailyStreakSummary
 //   users/{uid}/dailyAttempts/{id}                 DailyAttempt, append-only
@@ -154,6 +176,14 @@ service cloud.firestore {
         && isCount(data.totalCount);
     }
 
+    function isInputTelemetry(data) {
+      return data.keys().hasAll(['schemaVersion', 'inputs', 'truncated', 'totalCount'])
+        && data.schemaVersion == 1
+        && data.inputs is list
+        && data.truncated is bool
+        && isCount(data.totalCount);
+    }
+
     function isRoutingTelemetry(data) {
       return data.keys().hasAll([
           'schemaVersion', 'mode', 'assignedGroup', 'groupInEffect', 'override',
@@ -183,6 +213,154 @@ service cloud.firestore {
         && isCount(data.seq)
         && isCount(data.decisionsSpent)
         && (data.pending == null || data.pending is map)
+        && data.updatedAt is number;
+    }
+
+    function isCourseCursor(data) {
+      return data.keys().hasAll(['schemaVersion', 'phase', 'stage', 'pending', 'seen', 'flagged', 'seq', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.phase is map
+        && data.phase.kind in ['MODULE', 'QUIZ', 'QUIZ_REVIEW', 'DRIVE', 'REPEAT', 'FINAL', 'CERTIFIED']
+        && data.stage is map
+        && data.pending is list
+        && data.seen is map
+        && data.flagged is list
+        && isCount(data.seq)
+        && data.updatedAt is number;
+    }
+
+    function isCourseLogEntry(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'decisions', 'rewards', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind in ['drive', 'quiz', 'post_exam', 'final']
+        && data.decisions is list
+        && data.rewards is list
+        && data.timestamp is number;
+    }
+
+    function isBackgroundResponse(data) {
+      return data.keys().hasOnly(['schemaVersion', 'formVersion', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.formVersion is int
+        && data.answers is map
+        && data.answers.size() <= 20
+        && data.timestamp is number;
+    }
+
+    function isActiveActivity(data) {
+      return data.keys().hasAll(['kind', 'position', 'seed', 'openedAt', 'opens'])
+        && data.kind in ['quiz', 'drive']
+        && data.position is string
+        && data.seed is int
+        && data.openedAt is number
+        && data.opens is int && data.opens >= 1;
+    }
+
+    function isAssessmentSitting(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind in ['quiz', 'diagnostic', 'post_exam']
+        && data.answers is list
+        && data.timestamp is number;
+    }
+
+    // The shared table holds 8 states; every update is the whole table,
+    // written in a transaction on the newest version.
+    // A logged record's own id is its eventId, made on the device; it never
+    // changes once written. A retried write may only touch the server time.
+    function isEnvelope(data, uid, id) {
+      return data.keys().hasAll(['schemaVersion', 'eventId', 'uid', 'at', 'sessionId', 'appBuild', 'configVersion'])
+        && data.schemaVersion == 1
+        && data.eventId == id
+        && data.uid == uid
+        && data.at is number
+        && data.sessionId is string
+        && data.appBuild is string
+        && data.configVersion is string;
+    }
+
+    function onlyServerTimeChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['serverAt']);
+    }
+
+    function isStudyEvent(data, uid, id) {
+      return isEnvelope(data, uid, id)
+        && data.keys().hasAll(['type', 'seq', 'payload'])
+        && data.type in [
+          'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered',
+          'background_submitted', 'drive_planned', 'activity_opened', 'answer_given', 'drive_started',
+          'drive_exited', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision',
+          'reward_computed', 'ui_action', 'app_error'
+        ]
+        && (data.seq == null || data.seq is int)
+        && data.payload is map;
+    }
+
+    function isBKTUpdate(data, uid, id) {
+      return isEnvelope(data, uid, id)
+        && data.keys().hasAll(['userSeq', 'competency', 'source', 'correct', 'params', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter'])
+        && data.userSeq is int
+        && data.source in ['drive', 'quiz', 'diagnostic', 'post_exam']
+        && data.correct is bool
+        && data.params is map
+        && data.pBefore is number && data.pAfter is number;
+    }
+
+    function isBKTProfile(data, uid) {
+      return data.keys().hasAll(['schemaVersion', 'uid', 'configVersion', 'updates', 'competencies', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.uid == uid
+        && data.updates is int
+        && data.competencies is map
+        && data.competencies.size() == 11;
+    }
+
+    function isQLogEntry(data, id) {
+      return isEnvelope(data, request.auth.uid, id)
+        && data.keys().hasAll(['globalSeq', 'kind', 'stateKey', 'action', 'tableAfter', 'statesAfter'])
+        && data.globalSeq is int
+        && data.kind in ['visit', 'learn']
+        && data.configVersion == settingsInForce()
+        && data.tableAfter is map;
+    }
+
+    // The settings version in force: written by `npm run db:init` only.
+    function settingsInForce() {
+      return get(/databases/$(database)/documents/policy/config).data.tag;
+    }
+
+    // A record of graded answers (a drive or a sitting) is numbered by the
+    // participant's evidence counter, moved on in the same transaction.
+    // Records from before the counter carry no number.
+    function isNumberedEvidence(uid, data) {
+      let counter = /databases/$(database)/documents/users/$(uid)/state/evidence;
+      return !data.keys().hasAny(['evidenceSeq'])
+        || (data.evidenceSeq is int
+          && existsAfter(counter)
+          && getAfter(counter).data.nextSeq == data.evidenceSeq + 1);
+    }
+
+    function isLoggedTableChange(previousUpdates) {
+      let next = request.resource.data;
+      let entryPath = /databases/$(database)/documents/policy/competencyQ/updates/$(next.lastUpdate.updateId);
+      return next.updates > previousUpdates
+        && next.lastUpdate is map
+        && next.lastUpdate.uid == request.auth.uid
+        && next.lastUpdate.globalSeq == next.updates
+        // Only the settings in force may change the shared table: a tab left
+        // open across a settings change cannot write with the old ones.
+        && next.lastUpdate.configVersion == settingsInForce()
+        && existsAfter(entryPath)
+        && getAfter(entryPath).data.globalSeq == next.updates
+        && getAfter(entryPath).data.uid == request.auth.uid;
+    }
+
+    function isQTableDoc(data) {
+      return data.keys().hasAll(['schemaVersion', 'table', 'updates', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.table is map
+        && data.table.size() <= 8
+        && isCount(data.updates)
         && data.updatedAt is number;
     }
 
@@ -701,7 +879,7 @@ service cloud.firestore {
 
       match /attempts/{attemptId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data);
+        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
         allow update, delete: if false; // append-only, never rewrite history
 
         // The raw FSM transition log, the per-decision record and the routing
@@ -714,7 +892,8 @@ service cloud.firestore {
             && exists(/databases/$(database)/documents/users/$(uid)/attempts/$(attemptId))
             && ((docId == 'fsm' && isFsmTelemetry(request.resource.data))
               || (docId == 'decisions' && isDecisionTelemetry(request.resource.data))
-              || (docId == 'routing' && isRoutingTelemetry(request.resource.data)));
+              || (docId == 'routing' && isRoutingTelemetry(request.resource.data))
+              || (docId == 'inputs' && isInputTelemetry(request.resource.data)));
           allow update, delete: if false;
         }
       }
@@ -727,8 +906,72 @@ service cloud.firestore {
       // course, rewritten as they play.
       match /routing/{docId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create, update: if isOwner(uid) && docId == 'cursor' && isRoutingCursor(request.resource.data);
+        allow create: if isOwner(uid)
+          && ((docId == 'cursor' && isRoutingCursor(request.resource.data))
+            || (docId == 'competencyCourse' && isCourseCursor(request.resource.data)));
+        // The course cursor's decision counter never goes back: an old cursor
+        // (a stale tab, a replayed request) cannot be written over a newer one.
+        allow update: if isOwner(uid)
+          && ((docId == 'cursor' && isRoutingCursor(request.resource.data))
+            || (docId == 'competencyCourse' && isCourseCursor(request.resource.data)
+              && request.resource.data.seq >= resource.data.seq));
         allow delete: if false;
+      }
+
+      // Every policy decision and reward of the per-competency routing FSM, append-only.
+      match /courseLog/{entryId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isCourseLogEntry(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      // The background form, written once and never changed.
+      match /study/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && docId == 'background' && isBackgroundResponse(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      // The event stream: append-only; its counter only moves forward.
+      match /events/{eventId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isStudyEvent(request.resource.data, uid, eventId);
+        allow update: if isOwner(uid) && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+
+      match /state/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        // The event and evidence counters only move forward; `active` is the
+        // quiz or drive open now (its seed, so a reload gets the same one).
+        allow create: if isOwner(uid)
+          && ((docId in ['events', 'evidence'] && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1)
+            || (docId == 'active' && isActiveActivity(request.resource.data)));
+        allow update: if isOwner(uid)
+          && ((docId in ['events', 'evidence'] && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq)
+            || (docId == 'active' && isActiveActivity(request.resource.data)));
+        allow delete: if false;
+      }
+
+      // The participant's own BKT: the profile now, and one log entry per answer.
+      match /bkt/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid) && docId == 'profile' && isBKTProfile(request.resource.data, uid);
+        allow delete: if false;
+      }
+
+      match /bktUpdates/{updateId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId);
+        allow update: if isOwner(uid) && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+
+      // Quiz, diagnostic and post-exam answers, append-only; BKT reads all of them.
+      match /assessmentSittings/{sittingId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isAssessmentSitting(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
+        allow update, delete: if false;
       }
 
       match /examAttempts/{attemptId} {
@@ -869,6 +1112,82 @@ service cloud.firestore {
 
     match /{path=**}/dailyAttempts/{attemptId} {
       allow read: if isAdmin();
+    }
+
+    match /{path=**}/courseLog/{entryId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/assessmentSittings/{sittingId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/study/{docId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/events/{eventId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/bktUpdates/{updateId} {
+      allow read: if isAdmin();
+    }
+
+    // ── The shared Q-table ─────────────────────────────────
+    // Learned online from the participants themselves: any signed-in player's
+    // drive updates it, in a transaction. The rules check its shape only; a
+    // value cannot be checked here, as with every score.
+    match /policy/competencyQ {
+      allow read: if isSignedIn();
+      // A participant's change must come with its log: the counter only moves
+      // forward, the last change names this participant, and the log entry it
+      // names exists in the same transaction under the new counter. Every
+      // change to the table is therefore attributed and on the record. (The
+      // values themselves cannot be checked here; see DATABASE.md.)
+      allow create: if isSignedIn() && isQTableDoc(request.resource.data) && isLoggedTableChange(0);
+      allow update: if isSignedIn() && isQTableDoc(request.resource.data) && isLoggedTableChange(resource.data.updates);
+      allow delete: if false;
+
+      // Every change to the table, written in the same transaction by the
+      // participant whose decision or reward caused it.
+      match /updates/{updateId} {
+        allow read: if isAdmin();
+        // Written only together with the table: the table after the
+        // transaction must already count this entry.
+        allow create: if isSignedIn() && isQLogEntry(request.resource.data, updateId)
+          && getAfter(/databases/$(database)/documents/policy/competencyQ).data.updates >= request.resource.data.globalSeq;
+        allow update: if isSignedIn() && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+    }
+
+    // ── Settings, enrolment and roles ───────────────────────
+    // Written only by the scripts in scripts/db with the service account,
+    // which these rules do not govern. The app reads the settings in force.
+    match /policy/config {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /configVersions/{tag} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /participants/{code} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /roleGrants/{grantId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /meta/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // ── Shared content ─────────────────────────────────────

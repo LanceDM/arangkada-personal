@@ -33,7 +33,39 @@ export interface LevelAttempt {
    * keeps it readable from the bulk-read attempt alone, as the pass rule needs.
    */
   timedOut?: true;
+  /** Per-attempt timing (2026-10-28): the course's drives record it. */
+  session?: AttemptSession;
+  /** The drive's place in the participant's evidence order (see domain/study/evidence). */
+  evidenceSeq?: number | null;
 }
+
+/** When a drive started and ended, and how long it was held still at decisions. */
+export interface AttemptSession {
+  startedAt: number;
+  endedAt: number;
+  durationMs: number;
+  /** Time spent in DECISION (frozen prompts, checkpoints, cutscenes), from the FSM's own log. */
+  pausedMs: number;
+  /** The route as designed, in route units; how far the car got is the route unless it crashed. */
+  routeLength: number;
+  crashed: boolean;
+  /** The routing FSM state the drive was played in, e.g. DRIVE(3), REPEAT(3), FINAL. */
+  phase: string;
+}
+
+/** Milliseconds spent in DECISION, read off the transition log's timestamps. */
+export const pausedMsOf = (transitions: readonly TransitionLogEntry[], endedAt: number): number => {
+  let paused = 0;
+  let since: number | null = null;
+  for (const entry of transitions) {
+    if (entry.to === 'DECISION' && since === null) since = entry.timestamp;
+    else if (entry.to !== 'DECISION' && since !== null) {
+      paused += entry.timestamp - since;
+      since = null;
+    }
+  }
+  return since !== null ? paused + (endedAt - since) : paused;
+};
 
 /**
  * `users/{uid}/attempts/{id}/telemetry/fsm` — the raw FSM transition log.

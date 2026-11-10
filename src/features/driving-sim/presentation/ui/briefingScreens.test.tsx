@@ -16,6 +16,7 @@ import type { BriefingProgress, QuizBank } from '@/features/driving-sim/applicat
 import { fixtureQuizItem } from '@/features/driving-sim/domain/scenario/quizBank.fixture';
 import type { QuizModuleDoc } from '@/features/driving-sim/domain/scenario/quizBank';
 import { provideDrivingSimDependencies } from '@/features/driving-sim/application/dependencies';
+import { courseStandIns, memoryCourseStore } from '@/features/driving-sim/application/testDependencies';
 import MissionBriefing from './MissionBriefing';
 import MissionPanel from './MissionPanel';
 import LessonReader from './LessonReader';
@@ -65,6 +66,7 @@ provideDrivingSimDependencies({
   optimizedRouting: async () => {
     throw new Error('no briefing reads the routing table');
   },
+  ...courseStandIns(memoryCourseStore()),
 });
 
 declare global {
@@ -116,9 +118,9 @@ const driveButton = () =>
 describe('the briefing', () => {
   it("counts Level 2's garage, and shows its pass score against the maximum", () => {
     const text = briefing(level(2));
-    expect(text).toContain('8 garage checks · 3 road events');
-    expect(text).toContain('3Road events+8 garage checks');
-    expect(text).toContain('170 / 240');
+    expect(text).toContain('10 garage checks · 3 road events');
+    expect(text).toContain('3Road events+10 garage checks');
+    expect(text).toContain('170 / 280');
   });
 
   it("names Level 9's crash scene and Level 10's garage beside their road events", () => {
@@ -237,7 +239,7 @@ describe('the mission panel', () => {
 
   it('asks for the pass mark out of the maximum, and claims no speed it does not grade', () => {
     const level2 = panel(level(2));
-    expect(level2).toContain('Score 170 of 240 to pass.');
+    expect(level2).toContain('Score 170 of 280 to pass.');
     expect(level2).toContain('Road limit 30 km/h; signs may post others.');
     expect(level2).not.toContain('Stay at or under');
   });

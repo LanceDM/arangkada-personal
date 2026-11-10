@@ -1,3 +1,7 @@
+// LEGACY / TENTATIVE (2026-11-10): the old two-group run's simulation-trained
+// table, kept only so the admin's Routing and Q-learning views of that run
+// still open. The study's course does not read it: its Q-table is learned
+// online from participants (policy/qTable), shown under Admin > Course.
 // The designated routing table, read from its table file exactly as recorded.
 //
 // The game's Optimized group plays the learned policy with this table, and

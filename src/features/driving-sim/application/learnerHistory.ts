@@ -10,6 +10,8 @@
  */
 import type { ActionLog } from '@/domain/learner/attempt';
 import { TUTORIAL_LEVEL_ID } from '@/features/driving-sim/domain/systems/tutorial';
+
+export { TUTORIAL_LEVEL_ID };
 import type { LearnerHistory } from './ports';
 import { drivingSimDeps } from './dependencies';
 
@@ -27,9 +29,14 @@ export const loadLearnerHistory = (uid: string | null): Promise<LearnerHistory> 
  * level id - so a naive flatMap would replay a signed-in player's most recent
  * evidence as their earliest. Sorting by each log's own `timestamp` fixes that
  * without caring which attempt a log came from. Route every consumer here.
+ *
+ * The tutorial (Level 0) is left out: its steps teach the controls, and the
+ * rule engine's competency tags on them are not evidence of a driving
+ * competency (catalogue review 2026-10-28). Quiz and diagnostic answers, which
+ * are not level attempts, are passed in as `extra` and merged by timestamp.
  */
-export const historyLogs = (history: LearnerHistory): ActionLog[] =>
-  history.attempts.flatMap(attempt => attempt.logs).sort((a, b) => a.timestamp - b.timestamp);
+export const historyLogs = (history: LearnerHistory, extra: readonly ActionLog[] = []): ActionLog[] =>
+  [...history.attempts.flatMap(attempt => attempt.logs), ...extra].sort((a, b) => a.timestamp - b.timestamp);
 
 /**
  * What the redesigned BKT may read: `historyLogs` without the
@@ -41,8 +48,9 @@ export const historyLogs = (history: LearnerHistory): ActionLog[] =>
  * decision about a rule. Practice items stay: they are scenarios.
  *
  * Filtered per attempt because a log does not record its level. Penalties saved
- * before evidence was marked carry no `standing` mark and stay in. Not yet read by the game:
- * its current policies are held to the simulations, which read every decision.
+ * before evidence was marked carry no `standing` mark and stay in. The
+ * per-competency course orders its evidence itself (domain/study/evidence) and
+ * filters the same way (isBKTEvidence).
  */
 export const bktEvidence = (history: LearnerHistory): ActionLog[] =>
   historyLogs({ ...history, attempts: history.attempts.filter(attempt => attempt.levelId !== TUTORIAL_LEVEL_ID) })

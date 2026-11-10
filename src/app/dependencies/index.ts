@@ -13,17 +13,18 @@
 import { guestAttempts } from '@/features/progression';
 import { createStudyAccount, signInStudyAccount } from '@/features/auth';
 import { loadTestProgress } from '@/features/assessment';
-import { courseProgressOf, loadCourseCursor } from '@/features/driving-sim';
+import { loadCompetencyCourseProgress, recordStudyTest } from '@/features/driving-sim';
 import { composeAuth } from '@/features/auth/composition';
 import { composeAssessment } from '@/features/assessment/composition';
 import { composeStudy } from '@/features/study/composition';
-import { composeAdmin, loadDesignatedRoutingPolicy } from '@/features/admin/composition';
+import { composeAdmin } from '@/features/admin/composition';
 import { composeDailyChallenge } from '@/features/daily-challenge/composition';
 import { composeMockExam } from '@/features/mock-exam/composition';
 import { composeProgression } from '@/features/progression/composition';
 import {
   composeDrivingSim,
   type LearnerHistoryRepository,
+  type DatabaseMode,
   type RoutingMode,
 } from '@/features/driving-sim/composition';
 
@@ -45,12 +46,27 @@ const guestAwareLearnerHistory = (
  */
 const routingMode: RoutingMode = import.meta.env.VITE_ROUTING_SWITCH === 'legacy' ? 'legacy' : 'new';
 
+/**
+ * Which database implementation stands behind the people, roles, settings and
+ * form records: A, Firestore only (the default), or B, Firestore plus SQL
+ * Connect (`VITE_DATABASE_MODE=firestore+sql`, needs the Blaze plan). The logs,
+ * the Q-table and BKT are in Firestore either way. See DATABASE.md.
+ */
+const databaseMode: DatabaseMode = import.meta.env.VITE_DATABASE_MODE === 'firestore+sql' ? 'firestore+sql' : 'firestore';
+
+/** The commit the build came from (vite.config.ts), stamped on every logged record. */
+const appBuild: string = import.meta.env.VITE_APP_BUILD ?? 'unknown';
+
 composeAuth();
 composeProgression();
-composeAdmin();
+composeAdmin({ databaseMode });
 composeDailyChallenge();
 composeMockExam();
-composeAssessment();
+// A finished pre-test seeds the course's BKT; a finished post-test is its last
+// measurement. The test never imports the course: this root joins them.
+composeAssessment({
+  onFinished: (uid, sitting) => recordStudyTest(uid, sitting),
+});
 // The study reaches Auth's accounts through its own port, and the
 // course and the tests only through what its order reads of them.
 composeStudy({
@@ -59,13 +75,24 @@ composeStudy({
     signIn: async (username, password) => ({ uid: (await signInStudyAccount(username, password)).uid }),
   },
   sources: {
-    course: async uid => courseProgressOf(await loadCourseCursor(uid)),
+    // The per-competency course's cursor (not the old two-group run's).
+    course: loadCompetencyCourseProgress,
     tests: loadTestProgress,
   },
 });
 composeDrivingSim({
   learnerHistory: guestAwareLearnerHistory,
-  // The Optimized group's table is the fifth experiment's designated one, read from admin's
-  // results file on first use.
-  routing: { mode: routingMode, optimized: loadDesignatedRoutingPolicy },
+  databaseMode,
+  appBuild,
+  studyTests: { load: loadTestProgress },
+  // The old two-group run's Optimized table (seed 11, trained in simulation)
+  // was removed on 2026-10-28: the study uses no simulated data, and the New
+  // switch now plays the per-competency course, whose Q-table is learned
+  // online from participants. Nothing in the game asks for this loader.
+  routing: {
+    mode: routingMode,
+    optimized: async () => {
+      throw new Error('The simulation-trained routing table was removed (no simulated data).');
+    },
+  },
 });

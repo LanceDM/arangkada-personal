@@ -1,0 +1,495 @@
+{
+ "lto_level_0-lesson-1": [],
+ "lto_level_0-lesson-2": [
+  "driver_legality"
+ ],
+ "lto_level_0-lesson-3": [],
+ "lto_level_0-lesson-4": [
+  "driver_legality"
+ ],
+ "lto_level_0-lesson-5": [],
+ "lto_level_0-lesson-6": [],
+ "lto_level_0-lesson-7": [],
+ "lto_level_0-lesson-8": [
+  "lane_discipline"
+ ],
+ "lto_level_0-lesson-9": [],
+ "lto_level_0-lesson-10": [],
+ "lto_level_0-lesson-11": [
+  "driver_legality"
+ ],
+ "level-1-mission-briefing": [
+  "driver_legality"
+ ],
+ "level-1-license-privilege": [
+  "driver_legality"
+ ],
+ "level-1-permit-license-types": [
+  "driver_legality"
+ ],
+ "level-1-dl-codes": [
+  "driver_legality"
+ ],
+ "level-1-vehicle-categories": [
+  "driver_legality",
+  "speed_control"
+ ],
+ "level-1-clutch-conditions": [
+  "driver_legality"
+ ],
+ "level-1-validity-demerits": [
+  "driver_legality"
+ ],
+ "level-1-eligibility-renewal-carry": [
+  "driver_legality",
+  "document_awareness"
+ ],
+ "level-1-go-no-go": [
+  "driver_legality"
+ ],
+ "level-2-mission-briefing": [
+  "document_awareness",
+  "hazard_awareness"
+ ],
+ "level-2-readiness-decision": [
+  "driver_legality",
+  "document_awareness",
+  "hazard_awareness"
+ ],
+ "level-2-documents": [
+  "document_awareness"
+ ],
+ "level-2-registration-plates": [
+  "document_awareness"
+ ],
+ "level-2-registration-awareness": [
+  "document_awareness"
+ ],
+ "level-2-blowbagets": [
+  "hazard_awareness"
+ ],
+ "level-2-unsafe-conditions": [
+  "document_awareness",
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-2-before-starting": [
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-2-maintenance-habits": [
+  "document_awareness",
+  "hazard_awareness"
+ ],
+ "level-2-leaving-the-driveway": [
+  "right_of_way"
+ ],
+ "level-2-pedestrians-near-home": [
+  "pedestrians",
+  "hazard_awareness"
+ ],
+ "level-2-street-speed": [
+  "pedestrians",
+  "speed_control"
+ ],
+ "level-2-routine-and-scenario": [
+  "document_awareness",
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-3-mission-briefing": [
+  "road_signs"
+ ],
+ "level-3-sign-taxonomy-overview": [
+  "road_signs",
+  "pedestrians",
+  "hazard_awareness"
+ ],
+ "level-3-category-a-regulatory": [
+  "road_signs",
+  "right_of_way",
+  "pedestrians",
+  "speed_control",
+  "lane_discipline",
+  "parking",
+  "general_rules"
+ ],
+ "level-3-category-b-warning": [
+  "road_signs",
+  "right_of_way",
+  "pedestrians",
+  "speed_control",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-3-category-c-guide": [
+  "road_signs",
+  "hazard_awareness",
+  "parking",
+  "general_rules"
+ ],
+ "level-3-category-d-expressway": [
+  "road_signs",
+  "lane_discipline"
+ ],
+ "level-3-category-e-traffic-instruction": [
+  "road_signs",
+  "pedestrians",
+  "lane_discipline"
+ ],
+ "level-3-category-f-hazard-markers": [
+  "road_signs",
+  "hazard_awareness"
+ ],
+ "level-3-category-g-roadwork": [
+  "road_signs"
+ ],
+ "level-3-traffic-lights": [
+  "traffic_signals",
+  "right_of_way",
+  "pedestrians"
+ ],
+ "level-3-sign-reading-method": [
+  "road_signs",
+  "hazard_awareness"
+ ],
+ "level-4-mission-briefing": [
+  "road_signs",
+  "pedestrians",
+  "lane_discipline",
+  "parking"
+ ],
+ "level-4-longitudinal-lines": [
+  "lane_discipline"
+ ],
+ "level-4-traverse-lines": [
+  "right_of_way",
+  "pedestrians",
+  "lane_discipline"
+ ],
+ "level-4-other-lines": [
+  "lane_discipline",
+  "parking"
+ ],
+ "level-4-shared-lanes": [
+  "pedestrians",
+  "lane_discipline"
+ ],
+ "level-4-no-parking": [
+  "road_signs",
+  "lane_discipline",
+  "parking"
+ ],
+ "level-4-object-and-other-markings": [
+  "speed_control",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-4-pedestrian-lane-positioning": [
+  "pedestrians",
+  "lane_discipline"
+ ],
+ "level-4-positioning-method-and-recap": [
+  "pedestrians",
+  "lane_discipline",
+  "parking"
+ ],
+ "level-5-mission-briefing": [
+  "road_signs",
+  "right_of_way",
+  "pedestrians"
+ ],
+ "level-5-right-of-way-rules": [
+  "right_of_way",
+  "pedestrians",
+  "speed_control",
+  "lane_discipline"
+ ],
+ "level-5-who-goes-first": [
+  "traffic_signals",
+  "road_signs",
+  "right_of_way",
+  "pedestrians"
+ ],
+ "level-5-pedestrians": [
+  "right_of_way",
+  "pedestrians"
+ ],
+ "level-5-emergency-vehicles": [
+  "right_of_way",
+  "hazard_awareness"
+ ],
+ "level-5-roundabouts": [
+  "right_of_way"
+ ],
+ "level-5-yellow-box-intersection-discipline": [
+  "right_of_way",
+  "lane_discipline"
+ ],
+ "level-5-signals-at-intersections": [
+  "traffic_signals",
+  "road_signs",
+  "right_of_way",
+  "pedestrians",
+  "lane_discipline"
+ ],
+ "level-5-method-and-recap": [
+  "right_of_way",
+  "pedestrians"
+ ],
+ "level-6-mission-briefing": [
+  "lane_discipline",
+  "parking"
+ ],
+ "level-6-turning": [
+  "pedestrians",
+  "speed_control",
+  "lane_discipline"
+ ],
+ "level-6-hand-signals": [
+  "lane_discipline"
+ ],
+ "level-6-lane-changes": [
+  "lane_discipline"
+ ],
+ "level-6-overtaking": [
+  "right_of_way",
+  "lane_discipline"
+ ],
+ "level-6-parking-technique": [
+  "pedestrians",
+  "lane_discipline",
+  "parking"
+ ],
+ "level-6-method-and-recap": [
+  "lane_discipline",
+  "parking"
+ ],
+ "level-7-mission-briefing": [
+  "speed_control",
+  "lane_discipline"
+ ],
+ "level-7-speed-limits": [
+  "road_signs",
+  "speed_control"
+ ],
+ "level-7-following-distance": [
+  "speed_control",
+  "hazard_awareness"
+ ],
+ "level-7-expressway-rules": [
+  "speed_control",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-7-expressway-lanes": [
+  "lane_discipline"
+ ],
+ "level-7-merging-and-toll": [
+  "road_signs",
+  "speed_control",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-7-overtaking-at-speed": [
+  "speed_control",
+  "lane_discipline"
+ ],
+ "level-7-method-and-recap": [
+  "speed_control",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-8-mission-briefing": [
+  "pedestrians",
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-8-what-is-defensive-driving": [
+  "right_of_way",
+  "pedestrians",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-8-sipde": [
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-8-last-clear-chance": [
+  "hazard_awareness"
+ ],
+ "level-8-courtesy-and-discipline": [
+  "right_of_way",
+  "general_rules"
+ ],
+ "level-8-driver-wellness-and-human-factors": [
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-8-stress": [
+  "pedestrians",
+  "general_rules"
+ ],
+ "level-8-road-rage": [
+  "lane_discipline",
+  "general_rules"
+ ],
+ "level-8-vulnerable-road-users": [
+  "pedestrians",
+  "lane_discipline",
+  "general_rules"
+ ],
+ "level-8-gender-sensitivity": [],
+ "level-8-lane-position-and-large-vehicles": [
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-8-hazards-and-courtesy": [
+  "pedestrians",
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-8-method-and-recap": [
+  "pedestrians",
+  "lane_discipline",
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-9-mission-briefing": [
+  "hazard_awareness"
+ ],
+ "level-9-tire-blowout-and-jammed-pedal": [
+  "hazard_awareness"
+ ],
+ "level-9-brake-loss": [
+  "hazard_awareness"
+ ],
+ "level-9-skid-and-hydroplaning": [
+  "hazard_awareness"
+ ],
+ "level-9-poor-visibility": [
+  "hazard_awareness"
+ ],
+ "level-9-fire-and-submersion": [],
+ "level-9-breakdown-procedure": [
+  "hazard_awareness"
+ ],
+ "level-9-road-crash-response": [
+  "hazard_awareness"
+ ],
+ "level-9-first-aid-limits": [
+  "hazard_awareness"
+ ],
+ "level-9-method-and-recap": [
+  "hazard_awareness"
+ ],
+ "level-10-mission-briefing": [
+  "general_rules"
+ ],
+ "level-10-seat-belt-act": [
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-10-child-safety-act": [
+  "general_rules"
+ ],
+ "level-10-distracted-driving-act": [
+  "driver_legality",
+  "general_rules"
+ ],
+ "level-10-drunk-and-drugged-driving-act": [
+  "driver_legality",
+  "general_rules"
+ ],
+ "level-10-clean-air-act": [
+  "document_awareness",
+  "general_rules"
+ ],
+ "level-10-overloading": [
+  "general_rules"
+ ],
+ "level-10-speed-limiter-act": [
+  "driver_legality",
+  "document_awareness",
+  "speed_control"
+ ],
+ "level-10-speed-smoke-and-loads": [
+  "speed_control",
+  "general_rules"
+ ],
+ "level-10-method-and-recap": [
+  "general_rules"
+ ],
+ "level-11-mission-briefing": [
+  "document_awareness",
+  "lane_discipline",
+  "general_rules"
+ ],
+ "level-11-motorcycle-helmet-act": [
+  "general_rules"
+ ],
+ "level-11-childrens-safety-motorcycles-act": [
+  "pedestrians"
+ ],
+ "level-11-motorcycle-accessories-and-riding": [
+  "document_awareness",
+  "hazard_awareness"
+ ],
+ "level-11-motorcycle-crime-prevention-act": [
+  "document_awareness"
+ ],
+ "level-11-tricycles": [
+  "driver_legality",
+  "document_awareness",
+  "pedestrians",
+  "lane_discipline",
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-11-puv-duties": [
+  "document_awareness",
+  "pedestrians",
+  "general_rules"
+ ],
+ "level-11-overloading": [
+  "general_rules"
+ ],
+ "level-11-lanes-blind-spots-riders": [
+  "pedestrians",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-11-method-and-recap": [
+  "document_awareness",
+  "pedestrians",
+  "general_rules"
+ ],
+ "level-12-mission-briefing": [
+  "hazard_awareness"
+ ],
+ "level-12-enforcement-system": [
+  "general_rules"
+ ],
+ "level-12-rights-and-duties": [
+  "driver_legality"
+ ],
+ "level-12-demerit-points": [
+  "driver_legality"
+ ],
+ "level-12-document-and-vehicle-violations": [
+  "driver_legality",
+  "document_awareness",
+  "lane_discipline",
+  "hazard_awareness"
+ ],
+ "level-12-final-recap": [
+  "right_of_way",
+  "lane_discipline",
+  "hazard_awareness",
+  "general_rules"
+ ],
+ "level-12-final-mission-method": [
+  "right_of_way",
+  "hazard_awareness"
+ ]
+}

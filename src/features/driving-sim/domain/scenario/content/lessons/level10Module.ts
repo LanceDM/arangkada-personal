@@ -225,6 +225,11 @@ export const level10Module = {
           type: 'paragraph',
           text: 'Drivers of public utility vehicles, school buses or services, and common carriers of volatile, flammable, or toxic materials who violate this Act within a 50-meter radius of a school are subject to a Php 30,000 penalty and a three-month suspension of their driver\'s license.',
         },
+        // FDM Vol. 1 p. 170
+        {
+          type: 'paragraph',
+          text: 'If an important call comes in while you are driving, pull over safely first, then answer.',
+        },
       ],
     },
     {
@@ -279,7 +284,7 @@ export const level10Module = {
         },
         {
           type: 'paragraph',
-          text: 'A professional driver\'s license is confiscated and perpetually revoked on the first conviction. A non-professional driver\'s license is confiscated and suspended for 12 months on the first conviction, and perpetually revoked on the second.',
+          text: 'A professional driver\'s license is confiscated and perpetually revoked on the first conviction. A non-professional driver\'s license is confiscated and suspended for 12 months on the first conviction, and revoked on the second.',
         },
         {
           type: 'heading',
@@ -403,13 +408,81 @@ export const level10Module = {
         },
         {
           type: 'paragraph',
-          text: 'In addition to the fine, a first offense suspends the driver\'s license for one month or the vehicle\'s franchise for three months. A second offense extends this to three months (license) or six months (franchise). A subsequent offense results in revocation of the license or a one-year suspension of the franchise. Tampering with a speed limiter carries a separate penalty of 6 months to 3 years imprisonment plus a Php 30,000 fine.',
+          text: 'In addition to the fine, a first offense suspends the driver\'s license for one month or the vehicle\'s franchise for three months. A second offense revokes the driver\'s license or suspends the franchise for six months. A third offense also revokes the license, or suspends the franchise for one year. Tampering with a speed limiter carries a separate penalty of 6 months to 3 years imprisonment plus a Php 30,000 fine.',
+        },
+        {
+          type: 'heading',
+          text: 'Who Is Covered',
+        },
+        // FDM Vol. 2 pp. 51-52 (RA 10916)
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Taxicabs and public utility jeepneys are excluded from the speed limiter requirement.',
+            'No speed limiter, no registration: a covered vehicle without a certified standard speed limiter cannot be registered or renewed, or given a franchise.',
+          ],
+        },
+      ],
+    },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-10-speed-smoke-and-loads',
+      title: '8. Daily Checks: Speed, Smoke, And Loads',
+      text: 'The laws in this level sit on top of daily habits: driving to the conditions, reading what the exhaust says, and marking anything that sticks out.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'The laws in this level sit on top of daily habits: driving to the conditions, reading what the exhaust says, and marking anything that sticks out.',
+        },
+        {
+          type: 'heading',
+          text: 'Speed For The Conditions',
+        },
+        // FDM Vol. 1 pp. 102, 137, 164
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Follow the speed limit, but adjust your speed further for weather and traffic.',
+            'On a wet road, slow down and take the necessary precautions.',
+            'To save fuel, accelerate and shift smoothly and follow the speed limit.',
+            'If a bus ahead speeds down a steep grade, do not match it: keep within the speed limit and stay well back (pp. 111, 180).',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'What The Smoke Tells You (Gasoline Engine)',
+        },
+        // FDM Vol. 1 p. 134
+        {
+          type: 'table',
+          headers: ['Smoke', 'Likely Cause'],
+          rows: [
+            ['Black or gray', 'Incomplete fuel combustion, such as a clogged air filter or improper ignition timing.'],
+            ['Blue', 'Engine oil is burning, for example from worn piston rings, valves or cylinders.'],
+            ['White', 'Coolant is getting into the combustion chamber, for example from a head gasket leak.'],
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Overhanging Loads And Banned Vehicles',
+        },
+        // FDM Vol. 1 pp. 125, 168, 180 (RA 4136)
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'A load that extends more than 1 meter from the vehicle body needs a red flag of at least 30 x 30 cm in daytime, and a red light visible at least 50 meters away at night.',
+            'Smoke belchers and vehicles that are not roadworthy are not allowed on expressways.',
+            'Trucks carrying sand, gravel or fill that is not leveled or covered are not allowed on expressways.',
+          ],
         },
       ],
     },
     {
       id: 'level-10-method-and-recap',
-      title: '8. Compliance Method And Mission Recap',
+      title: '9. Compliance Method And Mission Recap',
       text: 'Use one habit before every trip: confirm the belts are on, the child seat is correct, the phone is put away, and the vehicle itself is fit to be on the road.',
       blocks: [
         {

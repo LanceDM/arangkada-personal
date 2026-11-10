@@ -1,0 +1,14 @@
+# Implementation B (Firestore + SQL Connect): the relational half.
+# Used only with VITE_DATABASE_MODE=firestore+sql; needs the Blaze plan.
+# Deploy with: npm run db:deploy:sql   (firebase.sql.json points here)
+specVersion: "v1"
+serviceId: "arangkada"
+location: "asia-southeast1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "arangkada-fdc"
+connectorDirs: ["./connector"]

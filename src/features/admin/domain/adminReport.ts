@@ -7,6 +7,8 @@
  * borrowed from the writing feature's persistence types.
  */
 import type { ActionLog } from '@/domain/learner/attempt';
+import type { DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
+import type { QTable } from '@/domain/competencyRouting/qLearning';
 import type { ScenarioEvent } from '@/features/driving-sim';
 
 /**
@@ -70,6 +72,16 @@ export interface AttemptRow {
   violations: number;
   correctDecisions: number;
   logs: ActionLog[];
+  /** Timing of a course drive (start, end, pauses, route length); absent on older attempts. */
+  session?: {
+    startedAt: number;
+    endedAt: number;
+    durationMs: number;
+    pausedMs: number;
+    routeLength: number;
+    crashed: boolean;
+    phase: string;
+  };
 }
 
 /** One sitting, flattened out of `users/{uid}/examAttempts` across every user. */
@@ -113,3 +125,125 @@ export interface AdminData {
 }
 
 export type AdminCollectionErrors = Record<string, string>;
+
+/** One entry of `users/{uid}/courseLog`: a drive's, quiz's, final's or post-exam's decisions and rewards. */
+export interface CourseLogRow {
+  userId: string;
+  kind: 'drive' | 'quiz' | 'post_exam' | 'final';
+  levelId: number;
+  phase: string;
+  attemptId: string | null;
+  verdicts: { competency: string; total: number; correct: number; passed: boolean; masteryP: number; driveEvidence: number }[];
+  decisions: DecisionRecord[];
+  rewards: RewardRecord[];
+  /** The shared Q-table right after this entry. */
+  tableAfter: QTable;
+  endReason?: 'certified' | 'cap_reached';
+  timestamp: number;
+}
+
+/**
+ * One sitting of `users/{uid}/assessmentSittings`: quiz, diagnostic or
+ * post-exam answers. The stored Rasch ability is deliberately not read: IRT is
+ * excluded from the study export until the group decides what it uses.
+ */
+export interface SittingRow {
+  userId: string;
+  kind: 'quiz' | 'diagnostic' | 'post_exam';
+  levelId: number | null;
+  attempt: number | null;
+  answers: ActionLog[];
+  timestamp: number;
+}
+
+/** `users/{uid}/study/background`. */
+export interface BackgroundRow {
+  userId: string;
+  formVersion: number;
+  answers: Record<string, string>;
+  timestamp: number;
+}
+
+/** `policy/competencyQ`: the one Q-table every participant's decisions update. */
+export interface SharedQTableRow {
+  table: QTable;
+  updates: number;
+  updatedAt: number;
+}
+
+/** What the study export reads, beyond the report's four collections. */
+export interface StudyData {
+  courseLogs: CourseLogRow[];
+  sittings: SittingRow[];
+  backgrounds: BackgroundRow[];
+  sharedQTable: SharedQTableRow | null;
+}
+
+/** `participants/{code}` (A) or the `Participant` table (B): who is enrolled under which code. */
+export interface ParticipantRow {
+  code: string;
+  uid: string;
+  email: string | null;
+  consentVersion: string;
+  consentedAt: number;
+  enrolledAt: number;
+  finishedAt: number | null;
+  note: string | null;
+}
+
+/** `roleGrants/{id}` (A) or the `RoleGrant` table (B): who was given admin, by whom, and when. */
+export interface RoleGrantRow {
+  id: string;
+  uid: string;
+  email: string | null;
+  role: 'admin';
+  action: 'grant' | 'revoke';
+  by: string;
+  at: number;
+  reason: string | null;
+}
+
+/** `configVersions/{tag}` (A) or the `ConfigVersion` table (B): every settings version the study ran. */
+export interface ConfigVersionRow {
+  tag: string;
+  fingerprint: string;
+  config: Record<string, unknown>;
+  activeFrom: number;
+  activeTo: number | null;
+  note: string | null;
+}
+
+/** The people, roles and settings records, from whichever implementation is bound. */
+export interface StudyRecords {
+  participants: ParticipantRow[];
+  roleGrants: RoleGrantRow[];
+  configVersions: ConfigVersionRow[];
+}
+
+/** The live Q-table document, `policy/competencyQ`. */
+export interface LiveQTable {
+  table: Record<string, Partial<Record<'none' | 'practice' | 'review', { q: number; n: number; visits: number }>>>;
+  updates: number;
+  updatedAt: number;
+  states: Record<string, { phase: string; tag: 'exploring' | 'exploiting' | 'no_choice'; leader: string | null }>;
+  lastUpdate: { updateId: string; globalSeq: number; kind: 'visit' | 'learn'; uid: string; participantCode: string | null; at: number } | null;
+}
+
+/** One entry of `policy/competencyQ/updates`, as the dashboard reads it. */
+export interface QUpdateRow {
+  updateId: string;
+  globalSeq: number;
+  kind: 'visit' | 'learn';
+  uid: string;
+  participantCode: string | null;
+  at: number;
+  levelId: number | null;
+  phase: string | null;
+  competency: string;
+  decisionId: string;
+  stateKey: string;
+  action: string;
+  decision: Record<string, unknown> | null;
+  learning: Record<string, unknown> | null;
+  configVersion: string;
+}

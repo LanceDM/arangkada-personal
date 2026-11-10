@@ -1,3 +1,4 @@
+import type { BackgroundResponse } from '@/domain/study/backgroundForm';
 /**
  * What Driving Sim needs from the outside world, stated as interfaces.
  *
@@ -9,11 +10,19 @@
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { TransitionLogEntry } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
+import type { ControlInput } from '@/features/driving-sim/domain/telemetry/controlInputs';
 import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
 import type { DecisionTelemetryDoc } from '@/features/driving-sim/domain/telemetry/decisionTelemetry';
 import type { RoutingTelemetryDoc } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type { GroupInEffect, RoutingCursor, RoutingGroup } from '@/features/driving-sim/domain/adaptive/courseRouting';
 import type { QuizItemDoc, QuizModuleDoc, QuizSittingDoc } from '@/features/driving-sim/domain/scenario/quizBank';
+import type { CourseCursor, DecisionRecord, QOperation, RewardRecord } from '@/domain/competencyRouting/course';
+import type { QTable } from '@/domain/competencyRouting/qLearning';
+import type { EvidenceSource } from '@/domain/learner/attempt';
+import type { StudyEvent } from '@/domain/study/studyEvent';
+import type { BKTProfileDoc, BKTUpdateRecord } from '@/domain/study/bktLog';
+import type { QLogContext, QLogEntry } from '@/domain/study/qLog';
+import type { StudyEnvelope } from '@/domain/study/studyEvent';
 
 /** One recorded run, whichever source it came from. */
 export interface LearnerAttempt {
@@ -32,6 +41,8 @@ export interface LearnerAttempt {
    * absent where the source cannot say.
    */
   passed?: boolean;
+  /** The record's place in the participant's evidence order (see domain/study/evidence). */
+  evidenceSeq?: number | null;
 }
 
 export type HistorySource = 'firestore' | 'local';
@@ -57,6 +68,8 @@ export interface StoryAttemptRepository {
   saveDecisionTelemetry(uid: string, attemptId: string, record: DecisionTelemetryDoc): Promise<void>;
   /** The attempt's group and, for a course entry, the routing FSM's move. */
   saveRoutingTelemetry(uid: string, attemptId: string, record: RoutingTelemetryDoc): Promise<void>;
+  /** Every key pressed and released on the road, beside the attempt (`telemetry/inputs`). */
+  saveInputTelemetry?(uid: string, attemptId: string, inputs: readonly ControlInput[]): Promise<void>;
 }
 
 /** The group an admin pre-assigned a player for the pilot. */
@@ -111,9 +124,165 @@ export interface QuizBank {
 /** `quiz_items` and `quiz_modules`, read by every player, guests included. */
 export interface QuizBankRepository {
   load(moduleId: string): Promise<QuizBank>;
+  /** Every switched-on quiz item of the bank, every module: the course's short quiz draws from them by competency. */
+  loadAll?(): Promise<QuizItemDoc[]>;
+}
+
+/** Where the study's two tests stand for one account: never opened, open, or finished. */
+export interface StudyTestStatusSource {
+  load(uid: string): Promise<{ pre: 'none' | 'open' | 'finished'; post: 'none' | 'open' | 'finished' }>;
 }
 
 /** `users/{uid}/quizSittings/{id}`: one finished sitting, append-only. */
 export interface QuizSittingRepository {
   save(uid: string, sitting: QuizSittingDoc): Promise<void>;
+}
+// --- the per-competency routing FSM (2026-10-28) -------------------------------
+
+/** One entry of a player's course log: a drive's decisions and rewards, with the table they were taken against. */
+export interface CourseLogEntry {
+  schemaVersion: 1;
+  kind: 'drive' | 'quiz' | 'post_exam' | 'final';
+  levelId: number;
+  phase: string;
+  /** The attempt the drive was saved as, where there is one. */
+  attemptId: string | null;
+  /** Per competency: scenarios counted, correct, passed. */
+  verdicts: { competency: string; total: number; correct: number; passed: boolean; masteryP: number; driveEvidence: number }[];
+  decisions: DecisionRecord[];
+  rewards: RewardRecord[];
+  /** The shared table after this entry's operations: the per-participant snapshot. */
+  tableAfter: QTable;
+  /**
+   * Why this entry ended something: the final exam passed (`certified`), or a
+   * competency reached its 3-attempt cap (`cap_reached`). A session the
+   * participant left shows as the absence of later entries.
+   */
+  endReason?: 'certified' | 'cap_reached';
+  timestamp: number;
+}
+
+/**
+ * One step of the course, computed from the cursor it starts at and the
+ * newest shared table: the cursor it leads to, the decisions and rewards it
+ * made, the table operations they cause, and the course-log entry that
+ * records it (null for a plain move, such as lessons read).
+ */
+export interface CourseStep {
+  cursor: CourseCursor;
+  decisions: DecisionRecord[];
+  rewards: RewardRecord[];
+  operations: QOperation[];
+  log: Omit<CourseLogEntry, 'decisions' | 'rewards' | 'tableAfter'> | null;
+}
+
+/** A record of graded answers saved by a step: a drive, or a quiz, diagnostic or post-exam sitting. */
+export type EvidenceWrite =
+  | { kind: 'attempt'; id: string; attempt: LevelAttempt }
+  | { kind: 'sitting'; id: string; sitting: AssessmentSitting };
+
+/**
+ * The quiz or drive a participant has open, kept so that a reload gives the
+ * same quiz items or the same drive back. `position` is the fingerprint of the
+ * course position it was opened at; it no longer matches once the step is saved.
+ */
+export interface ActiveActivity {
+  kind: 'quiz' | 'drive';
+  position: string;
+  seed: number;
+  openedAt: number;
+  /** How many times it was opened: more than 1 means a reload or a second tab. */
+  opens: number;
+}
+
+export interface CompetencyCourseRepository {
+  loadCursor(uid: string): Promise<CourseCursor | null>;
+  /** The shared Q-table; empty until the first participant's first decision. */
+  loadQTable(): Promise<QTable>;
+  /**
+   * Commits one course step atomically, in one transaction:
+   *
+   * 1. reads the stored cursor and the newest shared table;
+   * 2. refuses with CourseConflictError if the stored cursor is not `expected`
+   *    (another tab moved the course on, or this step was already saved);
+   * 3. runs `compute` on the newest table, so every decision is chosen from the
+   *    table as it is at that moment (it may run again if the table changes
+   *    under it, and must be pure apart from its random draws);
+   * 4. writes the step's own record (the drive or the sitting, under its fixed
+   *    id, numbered by the participant's evidence counter), the table with its
+   *    update log (`globalSeq` from the table's own counter), the course-log
+   *    entry, and the new cursor, all or nothing.
+   *
+   * Refuses with OutdatedAppError, writing nothing, when the settings version
+   * in force (`policy/config`) is not the one this app was built with.
+   */
+  commitStep(
+    uid: string,
+    input: {
+      expected: CourseCursor;
+      compute: (table: QTable) => CourseStep;
+      context: QLogContext;
+      envelope: (index: number) => StudyEnvelope;
+      evidence?: EvidenceWrite | null;
+    }
+  ): Promise<{ step: CourseStep; entries: QLogEntry[]; table: QTable; evidenceSeq: number | null }>;
+  /**
+   * Saves a record that moves no course step (the diagnostic, a free replay)
+   * under its id, numbered by the evidence counter, in one transaction.
+   * Returns 'exists' and writes nothing when a record with that id is already
+   * saved. Refuses with OutdatedAppError like commitStep.
+   */
+  saveEvidence(uid: string, evidence: EvidenceWrite): Promise<'saved' | 'exists'>;
+  /**
+   * The quiz or drive open at `position`: the one already open there if there
+   * is one (its open count raised), otherwise `fresh` opened now.
+   */
+  openActivity(uid: string, fresh: Omit<ActiveActivity, 'opens'>): Promise<ActiveActivity>;
+}
+
+/** One sitting of a quiz attempt, the diagnostic or the post-exam: its answers as graded logs. */
+export interface AssessmentSitting {
+  schemaVersion: 1;
+  kind: Extract<EvidenceSource, 'quiz' | 'diagnostic' | 'post_exam'>;
+  levelId: number | null;
+  attempt: number | null;
+  answers: ActionLog[];
+  /** The post-exam's Rasch ability and its standard error. */
+  ability?: { theta: number; se: number };
+  timestamp: number;
+  /** The sitting's place in the participant's evidence order (see domain/study/evidence). */
+  evidenceSeq?: number | null;
+  /** The sitting's id in the store. */
+  id?: string;
+}
+
+/** `users/{uid}/study/background`: the background form, written once. */
+export interface BackgroundFormRepository {
+  load(uid: string): Promise<BackgroundResponse | null>;
+  save(uid: string, response: BackgroundResponse): Promise<void>;
+}
+
+export interface AssessmentRepository {
+  /** Every sitting, oldest first. Sittings are saved through CompetencyCourseRepository, with their step. */
+  load(uid: string): Promise<AssessmentSitting[]>;
+}
+
+/**
+ * `users/{uid}/events`: the participant's append-only event stream. The store
+ * numbers each event (`seq`) from the participant's counter
+ * (`users/{uid}/state/events`), in one transaction with the writes.
+ */
+export interface StudyEventRepository {
+  append(uid: string, events: readonly Omit<StudyEvent, 'seq'>[]): Promise<void>;
+}
+
+/** `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates`: the participant's own BKT, written together. */
+export interface BKTLogRepository {
+  loadProfile(uid: string): Promise<BKTProfileDoc | null>;
+  /**
+   * Writes the entries under their fixed ids (`{settings version}_{userSeq}`)
+   * and the profile, only if none of the entries is there yet: when two tabs
+   * bring the log up to date at once, one writes and the other is skipped.
+   */
+  record(uid: string, profile: BKTProfileDoc, entries: readonly BKTUpdateRecord[]): Promise<'written' | 'skipped'>;
 }

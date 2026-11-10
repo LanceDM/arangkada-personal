@@ -5,14 +5,17 @@ import ThemeToggle from './ThemeToggle';
 import { signOut, useAuthModal, useAuthSession } from '@/features/auth';
 import { useText } from '@/shared/i18n/useText';
 import { headerMessages as m } from './messages';
+import { logUiAction } from '@/features/driving-sim';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, profile, loading } = useAuthSession();
+  const { isLoggedIn, profile, loading, user } = useAuthSession();
   const { open } = useAuthModal();
   const t = useText();
 
   const handleSignOut = async () => {
+    // Logged first: once signed out, nothing more can be written for this participant.
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'header' }).catch(() => {});
     await signOut();
     navigate('/');
   };

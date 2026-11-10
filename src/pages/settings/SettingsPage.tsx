@@ -4,6 +4,7 @@ import { Eye, Globe, Settings as SettingsIcon, ArrowLeft, Sun } from 'lucide-rea
 import AppLayout from '@/app/layout/AppLayout';
 import { StudyPasswordForm, useAuthSession } from '@/features/auth';
 import { signOut } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 import ThemeToggle from '@/app/layout/ThemeToggle';
 import { useState } from 'react';
 import { useLanguage, useText } from '@/shared/i18n/useText';
@@ -48,12 +49,13 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
 ========================= */
 const Settings = () => {
   const navigate = useNavigate();
-  const { profile, studyAccount } = useAuthSession();
+  const { profile, studyAccount, user } = useAuthSession();
   const [showFSM, setShowFSM] = useState(true);
   const { language, choose } = useLanguage();
   const text = useText();
 
   const handleSignOut = async () => {
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'settings' }).catch(() => {});
     await signOut();
     navigate('/');
   };
@@ -170,7 +172,7 @@ const Settings = () => {
               <Toggle
                 on={showFSM}
                 onToggle={() => {
-                  console.log('toggle FSM clicked', !showFSM);
+                  if (user) void logUiAction(user.uid, 'setting_changed', { setting: 'showFsmDiagram', from: showFSM, to: !showFSM });
                   setShowFSM(!showFSM);
                 }}
               />

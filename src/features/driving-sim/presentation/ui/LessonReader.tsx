@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useText } from '@/shared/i18n/useText';
 import { lessonMessages as m } from './messages';
 import {
@@ -27,6 +27,11 @@ interface LessonReaderProps {
   quizSize?: number;
   onClose: () => void;
   onFinish: () => void;
+  /**
+   * For the study log: each lesson section the first time at least half of it
+   * is on screen, with how long after opening, and each outline jump.
+   */
+  onReadEvent?: (event: { action: 'section_viewed' | 'outline_jump'; lessonId: string; position: number; msSinceOpen: number }) => void;
 }
 
 /**
@@ -268,11 +273,39 @@ const LessonBlockView = ({ block }: { block: LessonBlock }) => {
   return null;
 };
 
-const LessonReader = ({ module, quizSize, onClose, onFinish }: LessonReaderProps) => {
+const LessonReader = ({ module, quizSize, onClose, onFinish, onReadEvent }: LessonReaderProps) => {
   const t = useText();
   const readMinutes = moduleReadMinutes(module);
   const hasQuiz = quizSize !== undefined && quizSize > 0;
   const levelLabel = t(module.sourceLevel === 0 ? m.tutorial : m.level(module.sourceLevel ?? 0));
+  const [openedAt] = useState(() => Date.now());
+  const report = useRef(onReadEvent);
+  useEffect(() => {
+    report.current = onReadEvent;
+  }, [onReadEvent]);
+
+  // Each section once, when at least half of it has been on screen (for the study log).
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return;
+    const seen = new Set<string>();
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          const id = entry.target.id;
+          if (!entry.isIntersecting || seen.has(id)) continue;
+          seen.add(id);
+          const position = module.lessons.findIndex(lesson => lesson.id === id) + 1;
+          report.current?.({ action: 'section_viewed', lessonId: id, position, msSinceOpen: Date.now() - openedAt });
+        }
+      },
+      { threshold: 0.5 }
+    );
+    for (const lesson of module.lessons) {
+      const element = document.getElementById(lesson.id);
+      if (element) observer.observe(element);
+    }
+    return () => observer.disconnect();
+  }, [module, openedAt]);
 
   const finish = (
     <button
@@ -355,12 +388,13 @@ const LessonReader = ({ module, quizSize, onClose, onFinish }: LessonReaderProps
                   {t(m.outline)}
                 </p>
                 <div className="space-y-2.5">
-                  {module.lessons.map(lesson => {
+                  {module.lessons.map((lesson, index) => {
                     const { mark, text } = lessonTitleParts(lesson.title);
                     return (
                       <a
                         key={lesson.id}
                         href={`#${lesson.id}`}
+                        onClick={() => onReadEvent?.({ action: 'outline_jump', lessonId: lesson.id, position: index + 1, msSinceOpen: Date.now() - openedAt })}
                         title={lesson.title}
                         className="group flex items-start gap-3 rounded-lg border border-border/70 bg-background/50 px-4 py-3.5 text-sm transition-colors hover:border-primary/40 hover:bg-primary/10"
                       >

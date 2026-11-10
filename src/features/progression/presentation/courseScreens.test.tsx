@@ -1,3 +1,4 @@
+import type { DrivingCompetency } from '@/domain/learner/competency';
 // @vitest-environment jsdom
 /**
  * The ladder and the results screen under the Legacy / New switch.
@@ -149,7 +150,7 @@ describe('the results screen', () => {
 
 describe('the results screen after the tutorial', () => {
   const tutorial = LEVELS.find(entry => entry.id === 0)!;
-  const step = (timestamp: number, competency: string, result: 'correct' | 'violation' = 'correct') => ({
+  const step = (timestamp: number, competency: DrivingCompetency, result: 'correct' | 'violation' = 'correct') => ({
     timestamp, action: 'brake', result, points: 10, competency, expectedAction: 'brake',
   });
   const run: LevelResult = {

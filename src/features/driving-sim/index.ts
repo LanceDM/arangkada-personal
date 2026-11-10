@@ -108,9 +108,55 @@ export type { RoutingCursor, GroupInEffect } from './domain/adaptive/courseRouti
 export type { CourseNote } from './domain/adaptive/routingBriefing';
 export { freeReplayNote } from './domain/adaptive/routingBriefing';
 
+// The per-competency course (2026-10-28): everyone plays it, signed in.
+export { default as BankQuiz } from './presentation/ui/BankQuiz';
+export type { BankQuizResult } from './presentation/ui/BankQuiz';
+export type { BriefingGate } from './presentation/ui/MissionBriefing';
+export {
+  completeCourseDrive,
+  completeFreeReplayDrive,
+  completePostExam,
+  diagnosticItems,
+  finishCourseQuizReview,
+  openCourseQuiz,
+  coursePosition,
+  loadCompetencyCourse,
+  markCourseLessonsRead,
+  markCourseReviewShown,
+  planCourseDrive,
+  planFreeReplay,
+  postExamItems,
+  saveDiagnostic,
+  saveBackground,
+  logStudyEvent,
+  logUiAction,
+  logAnswerGiven,
+  logDriveStarted,
+  logDriveExited,
+  loadInitialExamStatus,
+  loadCompetencyCourseProgress,
+  recordStudyTest,
+  initialExamRequired,
+  submitCourseQuiz,
+} from './application/use-cases/competencyCourse';
+export type { CourseDriveRun, CourseState, FinishedStudyTest, InitialExamStatus } from './application/use-cases/competencyCourse';
+export type { DriveExit } from './domain/telemetry/controlInputs';
+export { CourseConflictError, OutdatedAppError } from './application/errors';
+export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';
+// In-memory ports, for tests that click through the course from outside the feature.
+export { memoryCourseStore, provideInMemoryDrivingSim } from './application/testDependencies';
+export type { MemoryCourseStore } from './application/testDependencies';
+
 export type { LevelConfig, ScenarioEvent } from './domain/scenario/scenarioDefinition';
 export type { LevelFsmTelemetry } from './domain/fsm/fsmMetrics';
 export type { PlayConditions } from './domain/telemetry/routingTelemetry';
 export type { AdaptivePlan } from './application/use-cases/buildAdaptivePlan';
 export type { AttemptStart } from './application/use-cases/completeMission';
 export type { LevelRecommendation, PracticeChoice } from './domain/adaptive/practiceSelection';
+export { BACKGROUND_QUESTIONS, isCompleteBackground } from '@/domain/study/backgroundForm';
+export type { BackgroundQuestion } from '@/domain/study/backgroundForm';
+export { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
+export { drivePreview } from './domain/scenario/drivePreview';
+export type { DrivePreview, PreviewScenario } from './domain/scenario/drivePreview';
+export { scenarioFormat, SCENARIO_FORMAT_LABEL } from './domain/scenario/scenarioFormat';
+export type { ScenarioFormat } from './domain/scenario/scenarioFormat';

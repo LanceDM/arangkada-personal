@@ -1,12 +1,12 @@
-import type { ActionLog } from '@/domain/learner/attempt';
+import type { ActionLog, EvidenceSource } from '@/domain/learner/attempt';
 import type { DrivingCompetency, LearnerProfile } from '@/domain/learner/competency';
 import { buildLearnerProfile, COMPETENCIES } from '@/domain/learner/profile';
 
 /**
- * Standard 2-state Bayesian Knowledge Tracing parameters (Corbett & Anderson
- * style). One shared set applied uniformly across all competencies for now -
- * per-competency calibration (e.g. via EM against real attempt data) is
- * future work, not needed to validate the model against simulated learners.
+ * Standard 2-state Bayesian Knowledge Tracing (Corbett & Anderson, 1995):
+ * prior, learn, guess and slip, no forgetting. One model per learner and
+ * competency, updated in time order by every graded answer tagged with that
+ * competency.
  */
 export interface BKTParams {
   pInit: number;
@@ -15,12 +15,79 @@ export interface BKTParams {
   pGuess: number;
 }
 
-export const DEFAULT_BKT_PARAMS: BKTParams = {
+/** The per-observation half of a model: what one answer of a given kind updates with. */
+export type BKTEvidenceParams = Pick<BKTParams, 'pTransit' | 'pSlip' | 'pGuess'>;
+
+/**
+ * One BKT model with separate guess and slip per item class ("multigs";
+ * Bulut et al., 2023): a 4-choice question and a stop-or-go decision on the
+ * road are different kinds of evidence.
+ *
+ * - `drive`: decisions in the simulation, practice and review drives included.
+ * - `quiz`: short-quiz answers and retakes.
+ * - `diagnostic`: the pre-test. T = 0, because no feedback is given and nothing
+ *   is taught during it; the diagnostic only moves the starting value.
+ * - `post_exam`: the post-evaluation exam. Like the diagnostic: no feedback, so
+ *   T = 0. Its answers update each learner's final mastery (Lance, 2026-10-28,
+ *   reversing the earlier exclusion). IRT scoring of the exam is separate and
+ *   is not part of this model.
+ */
+export interface BKTModel {
+  pInit: number;
+  drive: BKTEvidenceParams;
+  quiz: BKTEvidenceParams;
+  diagnostic: BKTEvidenceParams;
+  post_exam: BKTEvidenceParams;
+}
+
+/**
+ * TENTATIVE defaults taken from published studies, because no study data
+ * exists yet to fit them (no pilot fitting for now; no value here comes from
+ * simulated learners). To be discussed: where the real values come from.
+ *
+ * - pInit 0.30: inside the fitting bounds of Zhang et al. (2025), P(L0)
+ *   0.001-0.5. It is only the value before the diagnostic; the diagnostic's
+ *   answers then move each learner's own starting value per competency.
+ * - T 0.03 per opportunity: the fitted learn rates of Zhang, Pradhan, Lee,
+ *   Pei, Sales & Ottmar (JEDM, perceptual scaffolding study) run 0.014-0.038
+ *   across conditions; 0.03 sits in that range and inside Zhang et al. (2025)'s
+ *   0.001-0.1 bound. T = 0 for the diagnostic and post-exam (no feedback).
+ * - S 0.10: the low end of the slips fitted by Zhang, Pradhan et al.
+ *   (0.107-0.243) and inside Zhang et al. (2025)'s 0.01-0.3 bound.
+ * - G 0.25 for 4-choice items (quiz, diagnostic, post-exam): 1/k, which is
+ *   also the prior mean Zhang, Pradhan et al. place on guess.
+ * - G 0.20 for driving decisions: inside the 0.01-0.3 bound; how many real
+ *   options a decision has is not known yet.
+ *
+ * Every class keeps G and S below 0.5 (Zhang, Pradhan et al.; Baker et al.,
+ * 2008) and G + S < 1, the non-degeneracy constraint of Shchepakin,
+ * Sankaranarayanan & Zimmaro (2024), so a right answer always raises mastery
+ * and a wrong one always lowers it.
+ */
+export const DEFAULT_BKT_MODEL: BKTModel = {
   pInit: 0.3,
-  pTransit: 0.1,
-  pSlip: 0.1,
-  pGuess: 0.2,
+  drive: { pTransit: 0.03, pSlip: 0.1, pGuess: 0.2 },
+  // OPEN: whether the quiz shows feedback after each answer decides whether
+  // the learning step applies during the quiz. Kept on until that is decided.
+  quiz: { pTransit: 0.03, pSlip: 0.1, pGuess: 0.25 },
+  diagnostic: { pTransit: 0, pSlip: 0.1, pGuess: 0.25 },
+  post_exam: { pTransit: 0, pSlip: 0.1, pGuess: 0.25 },
 };
+
+/**
+ * The drive-only parameter set, for callers that replay driving decisions
+ * alone (decision telemetry). Equal to `DEFAULT_BKT_MODEL.drive` with its prior.
+ */
+export const DEFAULT_BKT_PARAMS: BKTParams = {
+  pInit: DEFAULT_BKT_MODEL.pInit,
+  ...DEFAULT_BKT_MODEL.drive,
+};
+
+/** Where an answer came from; a log written before sources existed is a driving decision. */
+export const evidenceSourceOf = (log: Pick<ActionLog, 'source'>): EvidenceSource => log.source ?? 'drive';
+
+/** The parameters one answer is updated with. */
+export const paramsForSource = (model: BKTModel, source: EvidenceSource): BKTEvidenceParams => model[source];
 
 /**
  * One Bayesian update step: infer the posterior probability of mastery given
@@ -31,7 +98,7 @@ export const DEFAULT_BKT_PARAMS: BKTParams = {
 export const updateMastery = (
   priorMastery: number,
   isCorrect: boolean,
-  params: BKTParams = DEFAULT_BKT_PARAMS
+  params: BKTEvidenceParams = DEFAULT_BKT_MODEL.drive
 ): number => {
   const { pTransit, pSlip, pGuess } = params;
 
@@ -42,43 +109,159 @@ export const updateMastery = (
   return posterior + (1 - posterior) * pTransit;
 };
 
+const asModel = (params: BKTModel | BKTParams): BKTModel =>
+  'drive' in params
+    ? params
+    : {
+        pInit: params.pInit,
+        drive: params,
+        quiz: params,
+        diagnostic: { ...params, pTransit: 0 },
+        post_exam: { ...params, pTransit: 0 },
+      };
+
+/**
+ * Whether a log is graded evidence BKT reads: a tagged, non-neutral answer.
+ * A question whose time ran out is not evidence (it still fails its scenario).
+ */
+/**
+ * A graded answer BKT reads. Left out: an in-drive question whose time ran out
+ * (`questionTimedOut`, `unanswered`: no answer, no evidence of knowledge), a
+ * standing penalty (crawling, wrong side of the road: a charge, not a
+ * decision about a rule), and neutral results.
+ */
+const isBKTEvidence = (log: ActionLog): log is ActionLog & { competency: DrivingCompetency } =>
+  !log.questionTimedOut &&
+  !log.unanswered &&
+  !log.standing &&
+  !!log.competency &&
+  (COMPETENCIES as string[]).includes(log.competency) &&
+  log.result !== 'neutral';
+
 /**
  * Replays `logs` in order, updating a per-competency mastery probability.
- * Mirrors `buildLearnerProfile`'s `(logs) => ...` shape so it's a drop-in
- * alternative mastery signal over the same input. A competency with no logs
- * stays at `pInit` - "not yet demonstrated", not "fine" (unlike the raw
- * cumulative score, which defaults an untouched competency to a full 100).
+ * A competency with no evidence stays at `pInit` - "not yet demonstrated", not
+ * "fine". Neutral logs are skipped. The tutorial is kept
+ * out by the caller (`historyLogs` leaves Level 0 out of the stream), because
+ * its steps teach the controls, not a competency.
+ *
+ * Accepts a single `BKTParams` set too, applied to every source.
  */
 export const buildBKTProfile = (
   logs: ActionLog[],
-  params: BKTParams = DEFAULT_BKT_PARAMS
+  params: BKTModel | BKTParams = DEFAULT_BKT_MODEL
 ): Record<DrivingCompetency, number> => {
+  const model = asModel(params);
   const mastery = COMPETENCIES.reduce((acc, competency) => {
-    acc[competency] = params.pInit;
+    acc[competency] = model.pInit;
     return acc;
   }, {} as Record<DrivingCompetency, number>);
 
   for (const log of logs) {
-    const competency = log.competency as DrivingCompetency | undefined;
-    if (!competency || !(competency in mastery)) continue;
-
-    mastery[competency] = updateMastery(mastery[competency], log.result === 'correct', params);
+    if (!isBKTEvidence(log)) continue;
+    const evidence = paramsForSource(model, evidenceSourceOf(log));
+    mastery[log.competency] = updateMastery(mastery[log.competency], log.result === 'correct', evidence);
   }
 
   return mastery;
 };
 
+/** One graded answer as BKT read it: the mastery before and after, and the prediction it made. */
+export interface BKTStep {
+  timestamp: number;
+  competency: DrivingCompetency;
+  source: EvidenceSource;
+  correct: boolean;
+  /** P(L) before this answer. */
+  pBefore: number;
+  /**
+   * P(correct) BKT predicted for this answer before seeing it,
+   * P(L)(1 - S) + (1 - P(L)) G with this answer's item class: the input to
+   * next-answer AUC and RMSE.
+   */
+  predictedCorrect: number;
+  /** P(L) given this answer, before the learning step. */
+  posterior: number;
+  /** P(L) after this answer (posterior plus the learning step). */
+  pAfter: number;
+  /** The T, S and G this answer was updated with. */
+  params: BKTEvidenceParams;
+  /** Position of the answer in the logs passed in, so a caller can find where it came from. */
+  logIndex: number;
+  itemId?: string;
+  scenarioId?: string;
+}
+
+/**
+ * The same replay as `buildBKTProfile`, step by step: every graded answer
+ * with its mastery before and after and the prediction made for it. One
+ * learner's logs in, one learner's trajectory out (BKT is per learner).
+ */
+export const bktTrajectory = (logs: ActionLog[], params: BKTModel | BKTParams = DEFAULT_BKT_MODEL): BKTStep[] => {
+  const model = asModel(params);
+  const mastery = COMPETENCIES.reduce((acc, competency) => {
+    acc[competency] = model.pInit;
+    return acc;
+  }, {} as Record<DrivingCompetency, number>);
+  const steps: BKTStep[] = [];
+  logs.forEach((log, logIndex) => {
+    if (!isBKTEvidence(log)) return;
+    const source = evidenceSourceOf(log);
+    const evidence = paramsForSource(model, source);
+    const pBefore = mastery[log.competency];
+    const correct = log.result === 'correct';
+    const pAfter = updateMastery(pBefore, correct, evidence);
+    const posterior = updateMastery(pBefore, correct, { ...evidence, pTransit: 0 });
+    mastery[log.competency] = pAfter;
+    steps.push({
+      timestamp: log.timestamp,
+      competency: log.competency,
+      source,
+      correct,
+      pBefore,
+      predictedCorrect: pBefore * (1 - evidence.pSlip) + (1 - pBefore) * evidence.pGuess,
+      posterior,
+      pAfter,
+      params: evidence,
+      logIndex,
+      ...(log.itemId ? { itemId: log.itemId } : {}),
+      ...(log.scenarioId ? { scenarioId: log.scenarioId } : {}),
+    });
+  });
+  return steps;
+};
+
+/** How much evidence BKT has seen per competency, by source. */
+export interface CompetencyEvidence {
+  total: number;
+  drive: number;
+  quiz: number;
+  diagnostic: number;
+  post_exam: number;
+}
+
+export const buildBKTEvidence = (logs: ActionLog[]): Record<DrivingCompetency, CompetencyEvidence> => {
+  const evidence = COMPETENCIES.reduce((acc, competency) => {
+    acc[competency] = { total: 0, drive: 0, quiz: 0, diagnostic: 0, post_exam: 0 };
+    return acc;
+  }, {} as Record<DrivingCompetency, CompetencyEvidence>);
+  for (const log of logs) {
+    if (!isBKTEvidence(log)) continue;
+    const source = evidenceSourceOf(log);
+    evidence[log.competency].total += 1;
+    evidence[log.competency][source] += 1;
+  }
+  return evidence;
+};
+
 /**
  * A LearnerProfile whose `.score` comes from BKT mastery instead of a
  * cumulative-average score. Keeps `attempts`/`correct`/`violations`
- * bookkeeping from `buildLearnerProfile` intact (needed by
- * `getWeakestCompetency`'s `attempts > 0` filter and `getLevelRecommendation`),
- * on the same 0-100 scale, so every existing threshold comparison
- * (`isMastered`, `countWeakCompetencies`, `getMasteryState` in
- * `LevelComplete.tsx`) keeps working unmodified - only how the score is
+ * bookkeeping from `buildLearnerProfile` intact, on the same 0-100 scale, so
+ * every existing threshold comparison keeps working - only how the score is
  * computed changes.
  */
-export const buildBKTLearnerProfile = (logs: ActionLog[], params: BKTParams = DEFAULT_BKT_PARAMS): LearnerProfile => {
+export const buildBKTLearnerProfile = (logs: ActionLog[], params: BKTModel | BKTParams = DEFAULT_BKT_MODEL): LearnerProfile => {
   const profile = buildLearnerProfile(logs);
   const mastery = buildBKTProfile(logs, params);
 

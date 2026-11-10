@@ -13,7 +13,6 @@ export {
   StudyAuthError,
   requestPasswordReset,
   confirmNewPassword,
-  verifyEmailCode,
 } from './application/authActions';
 export type { AuthSession } from './application/authSession';
 export type { AuthUser, UserProfile } from './domain/userProfile';

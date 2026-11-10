@@ -30,6 +30,7 @@ import {
   type RoutingGroupResolution,
 } from './resolveRoutingGroup';
 import { loadCourseCursor, startCourseEntry, startFreeReplay, startPostTest } from './startCourseEntry';
+import { memoryAssessments, memoryBackground, memoryStudyLogs, memoryCompetencyCourse, memoryCourseStore } from '@/features/driving-sim/application/testDependencies';
 
 const graded = (competency: DrivingCompetency, result: ActionLog['result'], timestamp: number): ActionLog => ({
   timestamp, action: 'brake', result, points: result === 'correct' ? 10 : -10, competency,
@@ -92,6 +93,10 @@ const provide = () =>
       world.saved.tableLoads += 1;
       return { table: PRACTISE_WEAKEST, tableId: 'test', seed: 0, budgetSize: 336 };
     },
+    competencyCourse: memoryCompetencyCourse(memoryCourseStore()),
+    assessments: memoryAssessments(memoryCourseStore()),
+    background: memoryBackground(memoryCourseStore()),
+    ...memoryStudyLogs(memoryCourseStore()),
   } satisfies DrivingSimDependencies);
 
 beforeEach(() => {

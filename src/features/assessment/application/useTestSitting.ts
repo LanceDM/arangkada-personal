@@ -144,6 +144,24 @@ type StatusRead =
 
 const stageOf = (draft: TestDraft | null): 0 | 1 => (draft?.stage2StartedAt !== undefined ? 1 : 0);
 
+/**
+ * Hands the saved sitting to the course (its BKT and rewards), three tries.
+ * The test itself is already saved; a failure here is logged, not shown.
+ */
+const handOver = async (uid: string, sitting: TestSitting) => {
+  const { onFinished } = assessmentDeps();
+  if (!onFinished) return;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await onFinished(uid, sitting);
+      return;
+    } catch (error) {
+      console.warn(`Could not hand the ${sitting.kind}-test to the course (try ${attempt} of 3).`, error);
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+};
+
 export const useTestSitting = (form: SittingForm, { uid, participantCode, isAdmin, newSeed, clock }: TestSittingInput) => {
   const access = testAccess({ uid, participantCode, isAdmin });
   const { kind } = form;
@@ -272,6 +290,7 @@ export const useTestSitting = (form: SittingForm, { uid, participantCode, isAdmi
       const problems = form.problems(sitting);
       if (problems.length > 0) console.warn(`The ${kind}-test record has problems; saving it as it is.`, problems);
       await orTimeout(assessmentDeps().sittings.finish(uid!, sitting));
+      void handOver(uid!, sitting);
       setPhase({ kind: 'done' });
     } catch (error) {
       // Another device may have closed it first; otherwise Try again saves it,

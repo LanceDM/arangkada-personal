@@ -291,7 +291,7 @@ const LevelComplete = ({
           {/* Buttons */}
           {course ? (
             <div className="mt-6 flex flex-col gap-2">
-              <p className="text-xs leading-5 text-muted-foreground">{course.note && t(course.note)}</p>
+              <p className="whitespace-pre-line text-xs leading-5 text-muted-foreground">{course.note && t(course.note)}</p>
               {course.onContinue && (
                 <button
                   onClick={course.onContinue}

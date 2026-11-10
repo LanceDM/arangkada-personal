@@ -731,7 +731,7 @@ const emergencyYieldSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You cleared the junction before pulling over, leaving its path open.',
     duration: 200,
     lawCitation:
-      'When yielding to an emergency vehicle, move to the nearest safe edge of the road and slow or stop — but never stop within an intersection or on a pedestrian crossing.',
+      'FDM Vol. 1 p. 141: when an emergency vehicle approaches, pull over as near as possible to the right-hand edge of the road, clear of any intersection, and stop until it has passed. Never stop within an intersection or on a pedestrian crossing.',
     competency: 'right_of_way',
     severity: 'critical',
     npc: {
@@ -770,7 +770,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     avoid: ['brake'],
     lawCitation:
       'Yellow box junction rules: do not block the intersection even when turning, do not stop or make a U-turn inside the box, and yield to vehicles already within it.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',
@@ -796,7 +796,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Yellow box junction rules: do not enter the box unless your exit beyond it is clear, even on a green light.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',
@@ -819,7 +819,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Yellow box junction rules: yield the right-of-way to vehicles already within the box, which are committed to clearing the intersection.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',
@@ -860,7 +860,7 @@ const yellowBoxJunctionSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Yellow box junction rules: do not block the intersection. A vehicle already within the box is committed to clearing it and must do so rather than coming to rest inside.',
-    competency: 'right_of_way',
+    competency: 'lane_discipline',
     severity: 'major',
     marking: {
       name: 'Yellow Box Junction',

@@ -1,7 +1,7 @@
 {
-  "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level and every practice item the level can take, on its longest roll.",
-  "measuredOn": "2026-11-07",
-  "commit": "5438885+dirty",
+  "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level, every practice item the level can take on its longest roll, and every whole-stage course drive (composeDrive) over the roll seeds.",
+  "measuredOn": "2026-11-10",
+  "commit": "0cc631b+dirty",
   "factor": 2,
   "roundingSeconds": 30,
   "rollSeeds": [
@@ -35,89 +35,85 @@
       "longestRoll": null,
       "longestItem": null,
       "drives": 1,
-      "fingerprint": "bd39e2d4",
+      "fingerprint": "009538ba",
       "unpassed": []
     },
     {
       "levelId": 1,
-      "limitSeconds": 270,
-      "limitSteps": 16200,
-      "longestSteps": 7618,
-      "longestRoll": 1,
-      "longestItem": "level1.clutch-code.at-only-manual-van",
-      "drives": 35,
-      "fingerprint": "a0b4efd1",
+      "limitSeconds": 300,
+      "limitSteps": 18000,
+      "longestSteps": 8513,
+      "longestRoll": 2,
+      "longestItem": "composed",
+      "drives": 55,
+      "fingerprint": "30ece23b",
       "unpassed": []
     },
     {
       "levelId": 2,
-      "limitSeconds": 240,
-      "limitSteps": 14400,
-      "longestSteps": 6696,
+      "limitSeconds": 510,
+      "limitSteps": 30600,
+      "longestSteps": 15203,
       "longestRoll": 1,
-      "longestItem": "level2.settle.parked-cars",
-      "drives": 49,
-      "fingerprint": "04470875",
+      "longestItem": "composed",
+      "drives": 69,
+      "fingerprint": "5d3b57c4",
       "unpassed": []
     },
     {
       "levelId": 3,
-      "limitSeconds": 240,
-      "limitSteps": 14400,
-      "longestSteps": 6983,
-      "longestRoll": 6,
-      "longestItem": "level3.bend-warning.falling-rocks",
-      "drives": 96,
-      "fingerprint": "e46e54e5",
+      "limitSeconds": 360,
+      "limitSteps": 21600,
+      "longestSteps": 10050,
+      "longestRoll": 9,
+      "longestItem": "composed",
+      "drives": 116,
+      "fingerprint": "0f9bdaf3",
       "unpassed": []
     },
     {
       "levelId": 4,
-      "limitSeconds": 240,
-      "limitSteps": 14400,
-      "longestSteps": 7016,
-      "longestRoll": 9,
-      "longestItem": "level3.bend-warning.falling-rocks",
-      "drives": 122,
-      "fingerprint": "a0e7a864",
+      "limitSeconds": 360,
+      "limitSteps": 21600,
+      "longestSteps": 10791,
+      "longestRoll": 4,
+      "longestItem": "composed",
+      "drives": 142,
+      "fingerprint": "c7651b12",
       "unpassed": []
     },
     {
       "levelId": 5,
-      "limitSeconds": 450,
-      "limitSteps": 27000,
-      "longestSteps": 13130,
-      "longestRoll": 3,
-      "longestItem": "level3.bend-warning.animal-crossing",
-      "drives": 148,
-      "fingerprint": "006a0a49",
+      "limitSeconds": 870,
+      "limitSteps": 52200,
+      "longestSteps": 25239,
+      "longestRoll": 2,
+      "longestItem": "composed",
+      "drives": 168,
+      "fingerprint": "59c2525b",
       "unpassed": []
     },
     {
       "levelId": 6,
-      "limitSeconds": 360,
-      "limitSteps": 21600,
-      "longestSteps": 10429,
-      "longestRoll": null,
-      "longestItem": "level3.bend-warning.falling-rocks",
-      "drives": 136,
-      "fingerprint": "675c35cd",
+      "limitSeconds": 690,
+      "limitSteps": 41400,
+      "longestSteps": 19882,
+      "longestRoll": 14,
+      "longestItem": "composed",
+      "drives": 156,
+      "fingerprint": "3fc20db5",
       "unpassed": []
     },
     {
       "levelId": 7,
-      "limitSeconds": 630,
-      "limitSteps": 37800,
-      "longestSteps": 18459,
-      "longestRoll": null,
-      "longestItem": "level5.driveway-join.jeepney-loading",
-      "drives": 140,
-      "fingerprint": "af28c646",
+      "limitSeconds": 1290,
+      "limitSteps": 77400,
+      "longestSteps": 37856,
+      "longestRoll": 17,
+      "longestItem": "composed",
+      "drives": 160,
+      "fingerprint": "62fa689c",
       "unpassed": [
-        {
-          "item": "level3.speed.max-20",
-          "why": "3 standing penalties"
-        },
         {
           "item": "level3.speed.preferred-max-30",
           "why": "2 standing penalties"
@@ -155,53 +151,97 @@
           "why": "3 standing penalties"
         },
         {
+          "item": "level3.speed.max-20",
+          "why": "3 standing penalties"
+        },
+        {
           "item": "level4.traverse.painted-speed-limit",
           "why": "3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens"
+        },
+        {
+          "item": "composed",
+          "why": "3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
+        },
+        {
+          "item": "composed",
+          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
         }
       ]
     },
     {
       "levelId": 8,
-      "limitSeconds": 360,
-      "limitSteps": 21600,
-      "longestSteps": 10498,
-      "longestRoll": null,
-      "longestItem": "level3.bend-warning.falling-rocks",
-      "drives": 141,
-      "fingerprint": "a36a01db",
+      "limitSeconds": 810,
+      "limitSteps": 48600,
+      "longestSteps": 23861,
+      "longestRoll": 1,
+      "longestItem": "composed",
+      "drives": 161,
+      "fingerprint": "1938891e",
       "unpassed": []
     },
     {
       "levelId": 9,
-      "limitSeconds": 270,
-      "limitSteps": 16200,
-      "longestSteps": 7450,
-      "longestRoll": null,
-      "longestItem": "level3.bend-warning.falling-rocks",
-      "drives": 147,
-      "fingerprint": "4bce7a71",
+      "limitSeconds": 300,
+      "limitSteps": 18000,
+      "longestSteps": 8772,
+      "longestRoll": 10,
+      "longestItem": "composed",
+      "drives": 167,
+      "fingerprint": "d091c33e",
       "unpassed": []
     },
     {
       "levelId": 10,
-      "limitSeconds": 270,
-      "limitSteps": 16200,
-      "longestSteps": 7577,
-      "longestRoll": null,
-      "longestItem": "level3.bend-warning.animal-crossing",
-      "drives": 151,
-      "fingerprint": "53a3b199",
+      "limitSeconds": 600,
+      "limitSteps": 36000,
+      "longestSteps": 17361,
+      "longestRoll": 12,
+      "longestItem": "composed",
+      "drives": 171,
+      "fingerprint": "a801d6a1",
       "unpassed": []
     },
     {
       "levelId": 11,
-      "limitSeconds": 300,
-      "limitSteps": 18000,
-      "longestSteps": 8801,
-      "longestRoll": null,
-      "longestItem": "level9.crash-at-the-bottom",
-      "drives": 156,
-      "fingerprint": "e9e71188",
+      "limitSeconds": 540,
+      "limitSteps": 32400,
+      "longestSteps": 15924,
+      "longestRoll": 3,
+      "longestItem": "composed",
+      "drives": 176,
+      "fingerprint": "f629897d",
       "unpassed": []
     },
     {
@@ -212,7 +252,7 @@
       "longestRoll": 16,
       "longestItem": null,
       "drives": 20,
-      "fingerprint": "371b6e1f",
+      "fingerprint": "dc462774",
       "unpassed": []
     }
   ]

@@ -1,4 +1,11 @@
-import type { SupportLevel } from './competency';
+import type { DrivingCompetency, SupportLevel } from './competency';
+
+/**
+ * Where a graded answer came from. BKT reads every class, with separate guess
+ * and slip per class (`mastery/buildBKTProfile.ts`). The diagnostic and the
+ * post-evaluation exam use no learning step (T = 0).
+ */
+export type EvidenceSource = 'drive' | 'quiz' | 'diagnostic' | 'post_exam';
 
 export interface ActionLog {
   timestamp: number;
@@ -18,8 +25,16 @@ export interface ActionLog {
    * only when true, like the provenance fields below.
    */
   reactionCensored?: true;
+  /**
+   * An in-drive question (checkpoint, right-of-way, emergency, parking) whose
+   * time limit ran out before it was answered. The scenario counts as not
+   * passed, but BKT does not read the answer: running out of time is not
+   * evidence about the rule (Lance, 2026-10-28). Written only when true.
+   */
+  questionTimedOut?: true;
   ruleId?: string;
-  competency?: string;
+  /** One of the 11 competencies: a misspelled tag fails to compile instead of being dropped by BKT. */
+  competency?: DrivingCompetency;
   severity?: string;
   weight?: number;
   expectedAction?: string;
@@ -69,6 +84,18 @@ export interface ActionLog {
    * is not BKT evidence. Written only when true.
    */
   unanswered?: true;
+  /**
+   * Where this answer came from. Absent on every driving decision, including
+   * all attempts saved before quiz and diagnostic answers were logged: absent
+   * means `drive`.
+   */
+  source?: EvidenceSource;
+  /** The scenario (drive) this decision was graded on. */
+  scenarioId?: string;
+  /** Quiz, diagnostic and post-exam answers: the bank item answered. */
+  itemId?: string;
+  /** Short-quiz answers: which attempt of the stage's quiz (1-3). */
+  quizAttempt?: number;
 }
 
 /**

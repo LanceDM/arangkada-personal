@@ -18,18 +18,59 @@ import { localRoutingOverrideRepository } from './infrastructure/LocalRoutingOve
 import { localSignCoverageRepository } from './infrastructure/LocalSignCoverageRepository';
 import { localBriefingProgressRepository } from './infrastructure/LocalBriefingProgressRepository';
 import { firebaseQuizBankRepository, firebaseQuizSittingRepository } from './infrastructure/FirebaseQuizBankRepository';
+import {
+  firebaseAssessmentRepository,
+  firebaseBackgroundFormRepository,
+  firebaseCompetencyCourseRepository,
+} from './infrastructure/FirebaseCompetencyCourseRepository';
+import {
+  firebaseBKTLogRepository,
+  firebaseStudyEventRepository,
+} from './infrastructure/FirebaseStudyLogRepositories';
+import { sqlBackgroundFormRepository } from './infrastructure/SqlConnectStudyRecords';
+import type { DatabaseMode } from '@/shared/infrastructure/firebase/dataConnect';
 
 export type { LearnerHistoryRepository, OptimizedRouting, RoutingMode };
 
+export type { DatabaseMode };
+
+import type { StudyTestStatusSource } from './application/ports';
+
 interface DrivingSimComposition {
+  /**
+   * Implementation A (`firestore`): every record in Firestore. Implementation
+   * B (`firestore+sql`): the background form in SQL
+   * Connect; the logs, the Q-table and BKT stay in Firestore either way.
+   */
+  databaseMode?: DatabaseMode;
+  /** The commit the build came from, stamped on every logged record. */
+  appBuild?: string;
   learnerHistory?: (signedIn: LearnerHistoryRepository) => LearnerHistoryRepository;
+  /** Where the study's pre-test and post-test stand: the pre-test is then the initial exam. */
+  studyTests?: StudyTestStatusSource;
   routing: {
     mode: RoutingMode;
     optimized: () => Promise<OptimizedRouting>;
   };
 }
 
-export const composeDrivingSim = ({ learnerHistory, routing }: DrivingSimComposition) =>
+/**
+ * The build the site serves now: `version.json`, written next to the app by
+ * the build (vite.config.ts). Fetched past every cache, so a tab opened before
+ * a deploy learns that a newer build is out. Null when it cannot be read.
+ */
+const fetchLatestBuild = async (): Promise<string | null> => {
+  try {
+    const response = await fetch(`${import.meta.env.BASE_URL}version.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) return null;
+    const body = (await response.json()) as { build?: unknown };
+    return typeof body.build === 'string' ? body.build : null;
+  } catch {
+    return null;
+  }
+};
+
+export const composeDrivingSim = ({ learnerHistory, routing, databaseMode = 'firestore', appBuild, studyTests }: DrivingSimComposition) =>
   provideDrivingSimDependencies({
     learnerHistory: learnerHistory
       ? learnerHistory(firebaseLearnerHistoryRepository)
@@ -43,4 +84,12 @@ export const composeDrivingSim = ({ learnerHistory, routing }: DrivingSimComposi
     routing: firebaseRoutingRepository,
     routingOverride: localRoutingOverrideRepository,
     optimizedRouting: routing.optimized,
+    competencyCourse: firebaseCompetencyCourseRepository,
+    assessments: firebaseAssessmentRepository,
+    background: databaseMode === 'firestore+sql' ? sqlBackgroundFormRepository : firebaseBackgroundFormRepository,
+    studyEvents: firebaseStudyEventRepository,
+    bktLog: firebaseBKTLogRepository,
+    appBuild,
+    latestBuild: fetchLatestBuild,
+    studyTests,
   });

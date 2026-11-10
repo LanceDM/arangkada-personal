@@ -1,0 +1,4988 @@
+[
+ {
+  "id": "L1-DL-01",
+  "question": "Ana holds a valid Student-Driver's Permit for a passenger car. Under what condition may she drive on a public road?",
+  "choices": [
+   "Only when accompanied by a duly licensed driver, acting as instructor, who holds the right DL code for the vehicle",
+   "Only on weekends and holidays",
+   "Alone, as long as she stays below 40 kph",
+   "Alone, once she has finished the theoretical driving course"
+  ],
+  "answer": 0,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 2"
+ },
+ {
+  "id": "L1-DL-02",
+  "question": "What does a Conductor's License allow its holder to do?",
+  "choices": [
+   "Drive a public utility vehicle when the regular driver is unwell",
+   "Drive any private vehicle",
+   "Assist the driver of a public utility vehicle with fares and passenger safety, but not drive it",
+   "Drive a jeepney on its franchised route only"
+  ],
+  "answer": 2,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 3; Ch. VI, p. 159"
+ },
+ {
+  "id": "L1-DL-03",
+  "question": "A company pays Ben to drive its delivery van. Which license must he hold?",
+  "choices": [
+   "Student-Driver's Permit",
+   "Non-professional driver's license",
+   "Conductor's License",
+   "Professional driver's license"
+  ],
+  "answer": 3,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 4"
+ },
+ {
+  "id": "L1-DL-04",
+  "question": "Which DL code covers a passenger car (vehicle category M1)?",
+  "choices": [
+   "A",
+   "B",
+   "B2",
+   "C"
+  ],
+  "answer": 1,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 5"
+ },
+ {
+  "id": "L1-DL-05",
+  "question": "A driver's license shows DL Code A. Which vehicle may its holder drive?",
+  "choices": [
+   "Motorcycle (categories L1, L2, L3)",
+   "Tricycle (motorcycle with sidecar)",
+   "Passenger car",
+   "Passenger van or jeepney"
+  ],
+  "answer": 0,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 5"
+ },
+ {
+  "id": "L1-DL-06",
+  "question": "Carla's Code B license carries the AT (automatic transmission) clutch code. Her family's car is manual transmission. May she drive it?",
+  "choices": [
+   "Yes, the clutch code applies only to professional drivers",
+   "Yes, as long as she keeps to the speed limit",
+   "No, she must first take and pass the practical driving test for manual transmission",
+   "No, she must first apply for a professional license"
+  ],
+  "answer": 2,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, pp. 5, 16"
+ },
+ {
+  "id": "L1-DL-07",
+  "question": "What is the minimum age for a Filipino to apply for a Student-Driver's Permit?",
+  "choices": [
+   "15",
+   "16",
+   "17",
+   "18"
+  ],
+  "answer": 1,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 9"
+ },
+ {
+  "id": "L1-DL-08",
+  "question": "A first-time applicant with no existing license applies for a driver's license. What may be issued?",
+  "choices": [
+   "A professional license for Code C (heavy commercial)",
+   "A professional license for Code D (bus)",
+   "Any DL code, as long as the practical test is passed",
+   "A non-professional license for Codes A, A1, B, B1 or B2 only"
+  ],
+  "answer": 3,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 5 (note c)"
+ },
+ {
+  "id": "L1-DL-09",
+  "question": "A tourist holds a valid foreign driver's license. How long after arriving may they drive in the Philippines on it?",
+  "choices": [
+   "30 days",
+   "60 days",
+   "90 days",
+   "1 year"
+  ],
+  "answer": 2,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 24; FDM Vol. 2 (2021), Ch. III, p. 72"
+ },
+ {
+  "id": "L1-DL-10",
+  "question": "A student driver with only a Student-Driver's Permit wants to drive alone. What is the correct decision?",
+  "choices": [
+   "Do not proceed; a duly licensed companion with the proper DL code for the vehicle is required",
+   "Proceed if the student driver already passed the written exam",
+   "Proceed if the route is short",
+   "Proceed if the vehicle is automatic"
+  ],
+  "answer": 0,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 2; adapted from app L1 lesson quiz"
+ },
+ {
+  "id": "L1-DL-11",
+  "question": "A person presents only a Conductor's License and says they will drive the vehicle. What should happen?",
+  "choices": [
+   "Do not proceed as the driver; a Conductor's License is not driving authority",
+   "Proceed if the conductor knows the route",
+   "Proceed if passengers are waiting",
+   "Proceed if the vehicle is a public utility vehicle"
+  ],
+  "answer": 0,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I/VI, pp. 3, 159; adapted from app L1 lesson quiz"
+ },
+ {
+  "id": "L1-DL-12",
+  "question": "A driver has DL Code A only but is assigned to drive a passenger car. What is missing?",
+  "choices": [
+   "A public utility route permit",
+   "The proper DL code for a passenger car (Code B)",
+   "A Conductor's License",
+   "A Student-Driver's Permit"
+  ],
+  "answer": 1,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 5; adapted from app L1 lesson quiz"
+ },
+ {
+  "id": "L1-DL-13",
+  "question": "A driver has Code B with automatic-only (AT) authority. The assigned car has a manual transmission. What is the legal decision?",
+  "choices": [
+   "Proceed slowly until past the checkpoint",
+   "Do not proceed unless the license allows manual transmission",
+   "Proceed if a passenger shifts the gears",
+   "Proceed, because Code B is enough by itself"
+  ],
+  "answer": 1,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, pp. 5, 16; adapted from app L1 lesson quiz"
+ },
+ {
+  "id": "L1-DL-14",
+  "question": "A driver with a non-professional license (NPDL) is asked to drive as paid work. What should be checked?",
+  "choices": [
+   "Whether professional authority (PDL) is required for the trip",
+   "Whether the vehicle has a loud horn",
+   "Whether the route is familiar",
+   "Whether the passenger owns the vehicle"
+  ],
+  "answer": 0,
+  "competency": "driver_legality",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 4; adapted from app L1 lesson quiz"
+ },
+ {
+  "id": "L1-DA-01",
+  "question": "Which documents must the driver of a private car have while driving?",
+  "choices": [
+   "Driver's license only",
+   "Driver's license, Certificate of Registration (CR), and current Official Receipt (OR)",
+   "Driver's license and the vehicle's insurance policy only",
+   "Any government ID and the CR"
+  ],
+  "answer": 1,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 105; Ch. VI, p. 162; FDM Vol. 2 (2021), Ch. III, p. 75"
+ },
+ {
+  "id": "L1-DA-02",
+  "question": "A newly issued driver's license is valid for how long?",
+  "choices": [
+   "1 year from the date of issue",
+   "3 years from the holder's birthdate",
+   "5 years from the holder's birthdate",
+   "10 years from the date of issue"
+  ],
+  "answer": 2,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 13; FDM Vol. 2 (2021), Ch. II, p. 56 (RA 10930)"
+ },
+ {
+  "id": "L1-DA-03",
+  "question": "When is a driver entitled to a renewed license valid for 10 years?",
+  "choices": [
+   "Automatically, upon reaching age 25",
+   "When renewing at least 60 days before expiry",
+   "After completing any driving school course",
+   "When the driver committed no traffic violations during the 5 years before the license expired"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 13; FDM Vol. 2 (2021), Ch. II, p. 56 (RA 10930)"
+ },
+ {
+  "id": "L1-DA-04",
+  "question": "A driver's license lists Condition Code 1. What does it require of the driver?",
+  "choices": [
+   "Drive only with corrective lenses",
+   "Drive only during daylight",
+   "Drive only with a hearing aid",
+   "Drive only a customized vehicle"
+  ],
+  "answer": 0,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 8"
+ },
+ {
+  "id": "L1-DA-05",
+  "question": "A driver's license lists Condition Code 4. When may the holder drive?",
+  "choices": [
+   "Only with a licensed companion",
+   "Only during daylight",
+   "Only on roads posted at 40 kph or less",
+   "Only within the province where the license was issued"
+  ],
+  "answer": 1,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 8"
+ },
+ {
+  "id": "L1-DA-06",
+  "question": "How long is a Student-Driver's Permit valid from its date of issue?",
+  "choices": [
+   "6 months",
+   "1 year",
+   "2 years",
+   "5 years"
+  ],
+  "answer": 1,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 2"
+ },
+ {
+  "id": "L1-DA-07",
+  "question": "Dan's license expired three years ago. What must he do to renew it?",
+  "choices": [
+   "Pay only the basic renewal fee",
+   "Pay a late penalty; no exam is needed",
+   "Apply for a new Student-Driver's Permit and wait one month",
+   "Take and pass the theoretical and practical exams, and pay the penalty on top of the basic fee"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 15"
+ },
+ {
+  "id": "L1-DA-08",
+  "question": "Without any special exception, how early may a driver renew a license before it expires?",
+  "choices": [
+   "Not earlier than 60 days before the expiry date",
+   "Up to 6 months before the expiry date",
+   "Any time within the expiry year",
+   "Only on or after the expiry date"
+  ],
+  "answer": 0,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 1 (2021), Ch. I, p. 27"
+ },
+ {
+  "id": "L1-DA-09",
+  "question": "An enforcer stops a driver whose license expired last month. How is this treated?",
+  "choices": [
+   "As failure to carry a driver's license",
+   "Not a violation, since the license can still be renewed within 2 years",
+   "As driving without a valid driver's license",
+   "As a warning only, since it expired less than a year ago"
+  ],
+  "answer": 2,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 2 (2021), Ch. III, p. 72 (JAO 2014-01)"
+ },
+ {
+  "id": "L1-DA-10",
+  "question": "At a checkpoint, the driver's license is expired or suspended. What is the correct Go / No-Go decision?",
+  "choices": [
+   "Go, if the road is clear",
+   "Go, if the driver promises to renew later",
+   "No-Go; valid authority is required before driving",
+   "Go, if the driver has used the license before"
+  ],
+  "answer": 2,
+  "competency": "document_awareness",
+  "stage": 1,
+  "source": "FDM Vol. 2 (2021), Ch. III, p. 72 (JAO 2014-01); adapted from app L1 lesson quiz"
+ },
+ {
+  "id": "L2-DA-01",
+  "question": "A private car has plate number ABC 1435. In which month must its registration be renewed?",
+  "choices": [
+   "March",
+   "April",
+   "January",
+   "May"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. I, pp. 17, 18"
+ },
+ {
+  "id": "L2-DA-02",
+  "question": "For plate number ABC 1435, which week of the registration month applies?",
+  "choices": [
+   "2nd week (8th to 14th)",
+   "4th week (22nd to the end of the month)",
+   "3rd week (15th to 21st)",
+   "1st week (working days from the 1st to the 7th)"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. I, pp. 17, 18"
+ },
+ {
+  "id": "L2-DA-03",
+  "question": "A vehicle's plate number ends in 0. In which month is its registration due?",
+  "choices": [
+   "December",
+   "January",
+   "November",
+   "October"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. I, p. 17"
+ },
+ {
+  "id": "L2-DA-04",
+  "question": "A car has plate number NBC 1297. When is its registration due?",
+  "choices": [
+   "December, 4th week (22nd to the end of the month)",
+   "September, 2nd week (8th to 14th)",
+   "July, 1st week (1st to 7th)",
+   "July, 4th week (22nd to the end of the month)"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. I, p. 17"
+ },
+ {
+  "id": "L2-DA-05",
+  "question": "Which document is part of the requirements for renewing a private car's registration?",
+  "choices": [
+   "Medical certificate of the driver",
+   "Certificate of Public Convenience",
+   "Barangay clearance of the owner",
+   "Certificate of Emission Compliance (CEC) from an emission testing center"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. I, p. 4"
+ },
+ {
+  "id": "L2-DA-06",
+  "question": "What kind of insurance cover must be presented when registering a motor vehicle?",
+  "choices": [
+   "Life insurance of the registered owner",
+   "Comprehensive own-damage insurance",
+   "No insurance is required",
+   "Third Party Liability (TPL) insurance Certificate of Cover"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. I, pp. 2, 4"
+ },
+ {
+  "id": "L2-DA-07",
+  "question": "Under JAO 2014-01, what is the fine for driving an unregistered motor vehicle?",
+  "choices": [
+   "₱1,000",
+   "₱3,000",
+   "₱5,000",
+   "₱10,000"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. III, p. 80 (JAO 2014-01)"
+ },
+ {
+  "id": "L2-DA-08",
+  "question": "Which pair of documents shows that a private vehicle is currently registered?",
+  "choices": [
+   "Emission test result and toll receipt",
+   "Sales invoice and Deed of Sale",
+   "Driver's license and medical certificate",
+   "Certificate of Registration (CR) and the current Official Receipt (OR)"
+  ],
+  "answer": 3,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 105, 162"
+ },
+ {
+  "id": "L2-DA-09",
+  "question": "Under the Motorcycle Crime Prevention Act, how soon must a newly bought motorcycle be registered with the LTO?",
+  "choices": [
+   "Within 3 days",
+   "Within 5 days",
+   "Within 15 days",
+   "Within 30 days"
+  ],
+  "answer": 1,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 64 (RA 11235)"
+ },
+ {
+  "id": "L2-DA-10",
+  "question": "Which vehicle documents should be in the car before a trip?",
+  "choices": [
+   "The current Official Receipt (OR) and Certificate of Registration (CR)",
+   "Only the driver's license",
+   "A receipt from the last fuel purchase",
+   "Only the RFID sticker"
+  ],
+  "answer": 0,
+  "competency": "document_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 105, 162; adapted from app L2 lesson quiz"
+ },
+ {
+  "id": "L2-RW-01",
+  "question": "You are driving out of a private driveway onto a highway. Who has the right of way?",
+  "choices": [
+   "Whoever sounds the horn first",
+   "You, if your vehicle is larger",
+   "You, because you are already moving",
+   "All vehicles approaching on the highway"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 115"
+ },
+ {
+  "id": "L2-RW-02",
+  "question": "You are about to enter a \"through highway\" from a side street. What must you do?",
+  "choices": [
+   "Yield only to vehicles coming from your right",
+   "Sound your horn and enter",
+   "Enter first, since vehicles on the through highway must slow down",
+   "Yield to all vehicles approaching from either direction on the through highway"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 115"
+ },
+ {
+  "id": "L2-RW-03",
+  "question": "A driver reaches an intersection at the same time as another car but is going above the legal speed. What happens to that driver's right of way?",
+  "choices": [
+   "It passes to whichever vehicle is larger",
+   "It is kept, since right of way depends only on direction",
+   "It is kept only during daytime",
+   "It is forfeited"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 114"
+ },
+ {
+  "id": "L2-RW-04",
+  "question": "You are unsure who should go first as you approach an intersection. What should you do?",
+  "choices": [
+   "Flash your headlights and proceed",
+   "Sound your horn and proceed",
+   "Speed up to clear the intersection first",
+   "Yield the right of way to avoid a crash"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 179"
+ },
+ {
+  "id": "L2-RW-05",
+  "question": "On a narrow road on a slope, there is room for only one vehicle to pass. Which vehicle should be given the right of way?",
+  "choices": [
+   "The vehicle that sounds its horn first",
+   "The vehicle going downhill",
+   "The vehicle going uphill (ascending)",
+   "The smaller vehicle"
+  ],
+  "answer": 2,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+ },
+ {
+  "id": "L2-RW-06",
+  "question": "You are driving on a through highway, and a car is entering from a side street. Does your right of way let you ignore it?",
+  "choices": [
+   "No, you must still drive with due regard for the safety of vehicles entering",
+   "No, you must always stop and let it enter first",
+   "Yes, the entering car must always stop for you",
+   "Yes, as long as you sound your horn"
+  ],
+  "answer": 0,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 115"
+ },
+ {
+  "id": "L2-RW-07",
+  "question": "Under defensive driving, which vehicle should you give way to?",
+  "choices": [
+   "A private car that is overtaking on the shoulder",
+   "A vehicle behind you that flashes its lights",
+   "A vehicle that is speeding",
+   "A school service"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+ },
+ {
+  "id": "L2-RW-08",
+  "question": "You are approaching a railroad crossing with no hazard visible. What does RA 4136 require at minimum?",
+  "choices": [
+   "Stop only if a train can be heard",
+   "Speed up to clear the tracks quickly",
+   "Cross at the posted speed limit",
+   "Slow down to about 5 miles per hour (or come to a full stop) before crossing"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 115 (RA 4136)"
+ },
+ {
+  "id": "L2-RW-09",
+  "question": "What does the right-of-way rule describe?",
+  "choices": [
+   "When a driver must yield or give way to other road users",
+   "The lane each type of vehicle must use",
+   "The speed limit at intersections",
+   "Which drivers may use the road shoulder"
+  ],
+  "answer": 0,
+  "competency": "right_of_way",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 167"
+ },
+ {
+  "id": "L2-PD-01",
+  "question": "You are about to move off from the curb, and a pedestrian nearby may be affected. What does the law require?",
+  "choices": [
+   "Give a clearly audible signal by sounding the horn",
+   "Flash your headlights only",
+   "Wait for the pedestrian to wave you through",
+   "Nothing, as long as you signal with your turn lights"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 120"
+ },
+ {
+  "id": "L2-PD-02",
+  "question": "Before backing out of a driveway, what should you check first?",
+  "choices": [
+   "Only the rearview mirror",
+   "Nothing, if the reverse camera is on",
+   "Only the side mirror on the driver's side",
+   "Traffic, vehicles and pedestrians around the vehicle"
+  ],
+  "answer": 3,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 108"
+ },
+ {
+  "id": "L2-PD-03",
+  "question": "What is the main cause of crashes when reversing?",
+  "choices": [
+   "Using the hazard lights",
+   "Worn tires",
+   "Poor visibility of what is behind the vehicle",
+   "Engine overheating"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 107"
+ },
+ {
+  "id": "L2-PD-04",
+  "question": "A school service is parked on the other side of the road with its hazard lights on. What should you do?",
+  "choices": [
+   "Slow down and prepare to stop, because students may cross the street",
+   "Sound your horn and pass quickly",
+   "Keep your speed, since it is on the other side",
+   "Overtake it on the left"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170"
+ },
+ {
+  "id": "L2-PD-05",
+  "question": "Which of these is a \"dynamic hazard\" that changes through the day?",
+  "choices": [
+   "A sharp curve",
+   "A hidden driveway",
+   "A school zone",
+   "A hill crest"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 148"
+ },
+ {
+  "id": "L2-PD-06",
+  "question": "Which road users should you give the right of way under defensive driving?",
+  "choices": [
+   "PWDs, senior citizens, children, pregnant women and road workers",
+   "Only pedestrians inside a marked crosswalk",
+   "Only children going to school",
+   "Only uniformed traffic enforcers"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+ },
+ {
+  "id": "L2-PD-07",
+  "question": "An elderly person is slowly crossing the pedestrian lane ahead of you. What should you do?",
+  "choices": [
+   "Be patient and let them finish crossing",
+   "Sound your horn so they hurry",
+   "Flash your headlights to warn them",
+   "Drive around them carefully"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 169"
+ },
+ {
+  "id": "L2-PD-08",
+  "question": "You are driving through an area with many pedestrians. What should you do?",
+  "choices": [
+   "Slow down",
+   "Keep to the speed limit and sound your horn often",
+   "Switch on your hazard lights and keep your speed",
+   "Move to the leftmost lane"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L2-PD-09",
+  "question": "Why should you allow extra time for some pedestrians at a crossing?",
+  "choices": [
+   "Crossings are only for children",
+   "Persons with disabilities may need more time to cross",
+   "Pedestrians must wait for all vehicles to pass first",
+   "It is required only at night"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L2-PD-10",
+  "question": "In a school zone, what extra precaution should you take?",
+  "choices": [
+   "Sound your horn to warn children",
+   "Flash your headlights",
+   "Slow to 20 kph and watch for children",
+   "Drive normally if no children are visible"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35); adapted from app mock exam #28"
+ },
+ {
+  "id": "L2-SC-01",
+  "question": "Under RA 4136, what is the speed limit for a passenger car on a city or municipal street with light traffic (not a through street)?",
+  "choices": [
+   "20 kph",
+   "30 kph",
+   "40 kph",
+   "60 kph"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+ },
+ {
+  "id": "L2-SC-02",
+  "question": "What is the speed limit when passing a school zone?",
+  "choices": [
+   "20 kph",
+   "30 kph",
+   "40 kph",
+   "50 kph"
+  ],
+  "answer": 0,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+ },
+ {
+  "id": "L2-SC-03",
+  "question": "On a designated through street or boulevard that is clear of traffic, what is the speed limit for a passenger car?",
+  "choices": [
+   "20 kph",
+   "40 kph",
+   "60 kph",
+   "80 kph"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+ },
+ {
+  "id": "L2-SC-04",
+  "question": "What is the prescribed speed for cars on barangay roads?",
+  "choices": [
+   "20 kph",
+   "30 kph",
+   "40 kph",
+   "50 kph"
+  ],
+  "answer": 0,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 113"
+ },
+ {
+  "id": "L2-SC-05",
+  "question": "You are approaching an intersection at a \"blind corner.\" What is the speed limit?",
+  "choices": [
+   "20 kph",
+   "30 kph",
+   "40 kph",
+   "50 kph"
+  ],
+  "answer": 0,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+ },
+ {
+  "id": "L2-SC-06",
+  "question": "The posted speed limit sign on a street differs from the RA 4136 table. Which applies?",
+  "choices": [
+   "Whichever is lower, only at night",
+   "The posted speed limit",
+   "The RA 4136 table",
+   "Whichever is higher"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112"
+ },
+ {
+  "id": "L2-SC-07",
+  "question": "What is the speed limit when passing other vehicles that are stationary on a street?",
+  "choices": [
+   "20 kph",
+   "30 kph",
+   "40 kph",
+   "60 kph"
+  ],
+  "answer": 0,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+ },
+ {
+  "id": "L2-SC-08",
+  "question": "Which driver may exceed the speed limit under RA 4136?",
+  "choices": [
+   "A driver on an empty road at night",
+   "A driver who is late for work",
+   "A driver testing a new car",
+   "A driver bringing a wounded or sick person for emergency treatment"
+  ],
+  "answer": 3,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 113 (RA 4136)"
+ },
+ {
+  "id": "L2-SC-09",
+  "question": "An ambulance driver on an emergency run is exempt from speed limits. What does the exemption still not allow?",
+  "choices": [
+   "Using national roads",
+   "Useless or unnecessary fast driving",
+   "Sounding the siren",
+   "Carrying a patient"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 113"
+ },
+ {
+  "id": "L2-HA-01",
+  "question": "What is BLOWBAGETS used for?",
+  "choices": [
+   "A do-it-yourself vehicle check to avoid crashes and breakdowns",
+   "A list of documents to carry",
+   "A method for parallel parking",
+   "A set of hand signals"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 103"
+ },
+ {
+  "id": "L2-HA-02",
+  "question": "In BLOWBAGETS, what does the final S stand for?",
+  "choices": [
+   "Self (the driver's own physical and mental fitness)",
+   "Steering",
+   "Spare tire",
+   "Seatbelt"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 103"
+ },
+ {
+  "id": "L2-HA-03",
+  "question": "During the brake check of BLOWBAGETS, what should you look for?",
+  "choices": [
+   "Tire tread depth",
+   "Fluid leaks and the thickness of the brake pads and rotors",
+   "Battery terminal corrosion",
+   "Windshield washer level"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 101"
+ },
+ {
+  "id": "L2-HA-04",
+  "question": "When should you NOT check tire pressure?",
+  "choices": [
+   "When the tires are hot",
+   "In the morning before driving",
+   "Before a long trip",
+   "At a scheduled stop"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 133"
+ },
+ {
+  "id": "L2-HA-05",
+  "question": "Generally, brand-new tires should be used within how many years of their manufacture date?",
+  "choices": [
+   "1 year",
+   "3 years",
+   "5 years",
+   "10 years"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 133"
+ },
+ {
+  "id": "L2-HA-06",
+  "question": "Your pre-drive check finds the brake fluid low and leaking. What should you do?",
+  "choices": [
+   "Drive, but use the parking brake to stop",
+   "Top it up with water and drive",
+   "Drive slowly to your destination",
+   "Do not drive until the leak is repaired"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 101, 171"
+ },
+ {
+  "id": "L2-HA-07",
+  "question": "When checking the coolant with the engine cold, what should the level be?",
+  "choices": [
+   "Below the lower marker",
+   "Filled to the very top of the reservoir",
+   "Between the lower and upper markers",
+   "Any level, as long as the engine starts"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 101, 180"
+ },
+ {
+  "id": "L2-HA-08",
+  "question": "When should a car's headlights be switched on?",
+  "choices": [
+   "Only on expressways",
+   "Only when it is completely dark",
+   "Before sunset",
+   "Only when it rains"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 100"
+ },
+ {
+  "id": "L2-HA-09",
+  "question": "The outer sides of the front tires are wearing abnormally. What is the likely remedy?",
+  "choices": [
+   "Replacing the battery",
+   "Wheel alignment",
+   "Changing the engine oil",
+   "Bleeding the fuel system"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 132"
+ },
+ {
+  "id": "L2-HA-10",
+  "question": "During a pre-drive check, you find the brake pedal is soft and brake fluid is leaking. What is the correct decision?",
+  "choices": [
+   "Drive only on side streets",
+   "Do not drive until the brakes are repaired",
+   "Continue, since the handbrake still works",
+   "Drive slowly and brake earlier than usual"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 101, 171; adapted from app L2 lesson quiz"
+ },
+ {
+  "id": "L2-GR-01",
+  "question": "Before starting a manual transmission vehicle, what must you make sure of?",
+  "choices": [
+   "The gear is in neutral",
+   "The parking brake is released",
+   "The gear is in reverse",
+   "The gear is in first"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+ },
+ {
+  "id": "L2-GR-02",
+  "question": "Before starting an automatic transmission vehicle, where should the shift lever be?",
+  "choices": [
+   "In Reverse (R)",
+   "In Park (P)",
+   "In Low (L)",
+   "In Drive (D)"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+ },
+ {
+  "id": "L2-GR-03",
+  "question": "Before driving off, what should you do about seat belts?",
+  "choices": [
+   "Wear it only if a passenger is in front",
+   "Wear it only on expressways",
+   "Leave it off for short trips",
+   "Wear your seat belt and advise your passengers to do the same"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+ },
+ {
+  "id": "L2-GR-04",
+  "question": "Which hand position on the steering wheel gives good and full control?",
+  "choices": [
+   "12-and-6",
+   "Both hands at 6 o'clock",
+   "One hand at 12 o'clock",
+   "9-and-3 or 10-and-2"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 107"
+ },
+ {
+  "id": "L2-GR-05",
+  "question": "How should you adjust the seat and mirrors before starting?",
+  "choices": [
+   "Set the seat as far back as possible",
+   "Adjust them while driving",
+   "So you can use them without leaning forward or backward",
+   "Only the rearview mirror needs adjusting"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+ },
+ {
+  "id": "L2-GR-06",
+  "question": "Which habit should you avoid while driving?",
+  "choices": [
+   "Resting one arm on the window",
+   "Keeping both hands on the wheel",
+   "Checking the mirrors",
+   "Locking all doors"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+ },
+ {
+  "id": "L2-GR-07",
+  "question": "What should you do with the doors before driving off?",
+  "choices": [
+   "Lock only the driver's door",
+   "Lock them only at night",
+   "Lock all doors",
+   "Leave them unlocked for quick exit"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+ },
+ {
+  "id": "L2-GR-08",
+  "question": "What is proactive vehicle maintenance?",
+  "choices": [
+   "Repairing the vehicle only after it breaks down",
+   "Checking and servicing the vehicle in advance, following its service manual",
+   "Replacing parts only when they fail",
+   "Washing the vehicle every week"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 129"
+ },
+ {
+  "id": "L2-GR-09",
+  "question": "May you leave your vehicle with its engine running while it is stopped on the road?",
+  "choices": [
+   "Yes, if the hazard lights are on",
+   "No, it may confuse other motorists and cause a crash",
+   "Yes, if the vehicle is in neutral",
+   "Yes, if you are back within five minutes"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 2,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 171"
+ },
+ {
+  "id": "L3-TS-01",
+  "question": "What does a steady red traffic signal mean?",
+  "choices": [
+   "Proceed only if turning left",
+   "Slow down and proceed with caution",
+   "Bring your vehicle to a stop at the marked stop line",
+   "Stop, then proceed when safe without waiting for green"
+  ],
+  "answer": 2,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+ },
+ {
+  "id": "L3-TS-02",
+  "question": "What does a flashing red traffic signal mean?",
+  "choices": [
+   "The signal is broken, so ignore it",
+   "Stop and wait for a steady green",
+   "Stop, then proceed only when it is safe",
+   "Slow down and proceed without stopping"
+  ],
+  "answer": 2,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+ },
+ {
+  "id": "L3-TS-03",
+  "question": "What does a steady yellow (amber) light mean?",
+  "choices": [
+   "Proceed, since yellow means go with caution",
+   "The red signal is about to appear, so slow down and prepare to stop",
+   "Speed up to clear the intersection",
+   "Stop only if turning"
+  ],
+  "answer": 1,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 109, 178"
+ },
+ {
+  "id": "L3-TS-04",
+  "question": "What does a flashing yellow light mean?",
+  "choices": [
+   "The light will turn green next",
+   "Slow down and proceed with caution",
+   "Pedestrians have the right of way",
+   "Stop and wait for green"
+  ],
+  "answer": 1,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+ },
+ {
+  "id": "L3-TS-05",
+  "question": "What does a steady green signal mean?",
+  "choices": [
+   "Only vehicles turning right may proceed",
+   "Slow down and prepare to stop",
+   "You may proceed without checking for others",
+   "You may proceed, after yielding to pedestrians and vehicles lawfully in the intersection"
+  ],
+  "answer": 3,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+ },
+ {
+  "id": "L3-TS-06",
+  "question": "What does a flashing green signal mean?",
+  "choices": [
+   "Proceed at full speed",
+   "Only buses may proceed",
+   "Stop, the signal is about to turn red",
+   "Proceed with caution and be ready for pedestrians who may cross"
+  ],
+  "answer": 3,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+ },
+ {
+  "id": "L3-TS-07",
+  "question": "What does a green arrow traffic light mean?",
+  "choices": [
+   "Only pedestrians may cross",
+   "All vehicles must stop",
+   "Vehicles going straight must turn",
+   "Vehicles turning in the direction of the arrow may proceed"
+  ],
+  "answer": 3,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170"
+ },
+ {
+  "id": "L3-TS-08",
+  "question": "What does a steady yellow arrow mean?",
+  "choices": [
+   "Turning vehicles facing the arrow must slow down and prepare to stop",
+   "Turning vehicles may proceed at full speed",
+   "Pedestrians may cross",
+   "All vehicles must turn in that direction"
+  ],
+  "answer": 0,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 181"
+ },
+ {
+  "id": "L3-TS-09",
+  "question": "Under the FDM, disregarding a yellow light to rush through an intersection is treated as what?",
+  "choices": [
+   "Allowed if no vehicle is coming",
+   "Beating the red light, which amounts to reckless driving",
+   "A minor offense with no penalty",
+   "Allowed only for public utility vehicles"
+  ],
+  "answer": 1,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 178"
+ },
+ {
+  "id": "L3-TS-10",
+  "question": "The traffic light turns yellow as you approach. What is the correct action?",
+  "choices": [
+   "Sound your horn and proceed",
+   "Stop immediately even if already in the intersection",
+   "Slow down and prepare to stop",
+   "Speed up to beat the red"
+  ],
+  "answer": 2,
+  "competency": "traffic_signals",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 109, 178; adapted from app mock exam #7"
+ },
+ {
+  "id": "L3-RS-01",
+  "question": "What does this sign require?",
+  "image": "arangkada_extracted_images/level3/stop-sign-octagon.png",
+  "choices": [
+   "No stopping anytime",
+   "Stop at the designated stop line before proceeding",
+   "Slow down and give way only if a vehicle is coming",
+   "Stop only for pedestrians"
+  ],
+  "answer": 1,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 60"
+ },
+ {
+  "id": "L3-RS-02",
+  "question": "What does this sign require?",
+  "image": "arangkada_extracted_images/level3/give-way-yield-sign-inverted-triangle.png",
+  "choices": [
+   "Merge without slowing down",
+   "Slow down and give way to vehicles at the intersection",
+   "No entry for all vehicles",
+   "Stop for at least 5 seconds"
+  ],
+  "answer": 1,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 60, 177"
+ },
+ {
+  "id": "L3-RS-03",
+  "question": "What does this sign mean?",
+  "image": "arangkada_extracted_images/question-bank/no-entry-symbol.png",
+  "choices": [
+   "No entry for all types of vehicles",
+   "One-way street ahead",
+   "No parking",
+   "Road closed to pedestrians only"
+  ],
+  "answer": 0,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 62, 184"
+ },
+ {
+  "id": "L3-RS-04",
+  "question": "What does this sign mean?",
+  "image": "arangkada_extracted_images/question-bank/no-u-turn-symbol.png",
+  "choices": [
+   "No left turn",
+   "No U-turn",
+   "No right turn",
+   "Winding road ahead"
+  ],
+  "answer": 1,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 63, 186"
+ },
+ {
+  "id": "L3-RS-05",
+  "question": "What does this sign warn of?",
+  "image": "arangkada_extracted_images/level3/hairpin-bend.png",
+  "choices": [
+   "A steep descent ahead",
+   "A U-turn slot ahead",
+   "A roundabout ahead",
+   "A hairpin bend ahead"
+  ],
+  "answer": 3,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 67"
+ },
+ {
+  "id": "L3-RS-06",
+  "question": "Signs that inform road users of traffic laws and regulations, which become an offense if disregarded, are called:",
+  "choices": [
+   "Warning signs",
+   "Guide or informative signs",
+   "Hazard markers",
+   "Regulatory signs"
+  ],
+  "answer": 3,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 60, 162"
+ },
+ {
+  "id": "L3-RS-07",
+  "question": "Signs that warn motorists of potentially hazardous conditions on or beside the road are called:",
+  "choices": [
+   "Regulatory signs",
+   "Traffic instruction signs",
+   "Guide or informative signs",
+   "Warning signs"
+  ],
+  "answer": 3,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 67, 162"
+ },
+ {
+  "id": "L3-RS-08",
+  "question": "What is the shape of a STOP sign?",
+  "choices": [
+   "Inverted triangle",
+   "Octagon",
+   "Circle",
+   "Diamond"
+  ],
+  "answer": 1,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 181"
+ },
+ {
+  "id": "L3-RS-09",
+  "question": "What does an orange traffic sign usually indicate?",
+  "choices": [
+   "A tourist destination",
+   "Roadwork ahead, so follow the prescribed speed limit",
+   "An expressway exit",
+   "A hospital nearby"
+  ],
+  "answer": 1,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 176"
+ },
+ {
+  "id": "L3-RS-10",
+  "question": "A circular sign with a red border usually gives what kind of message?",
+  "choices": [
+   "Information about services",
+   "A recommended speed",
+   "A prohibition or restriction (regulatory sign)",
+   "A warning of danger ahead"
+  ],
+  "answer": 2,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, pp. 62, 63; adapted from app mock exam #12",
+  "reviewerNotes": "The FDM shows these signs but does not state the shape rule in words; please confirm against the DPWH sign manual."
+ },
+ {
+  "id": "L3-RS-11",
+  "question": "What does a \"No U-Turn\" sign look like?",
+  "choices": [
+   "A red-bordered circle with a crossed-out U-turn arrow",
+   "A yellow diamond with a U-turn arrow",
+   "A white rectangle with text only",
+   "A blue circle with a U-turn arrow"
+  ],
+  "answer": 0,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 63, 186; adapted from app mock exam #13"
+ },
+ {
+  "id": "L3-RS-12",
+  "question": "A white triangular sign with a red border is what type of sign?",
+  "choices": [
+   "A regulatory sign",
+   "A hazard marker",
+   "A warning sign",
+   "A guide or informative sign"
+  ],
+  "answer": 2,
+  "competency": "road_signs",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, pp. 67, 68, 69, 70; adapted from app mock exam #11"
+ },
+ {
+  "id": "L3-PD-01",
+  "question": "What does this sign tell drivers?",
+  "image": "arangkada_extracted_images/level3/be-aware-of-pedestrian-crossing.png",
+  "choices": [
+   "School zone ends here",
+   "Be aware of pedestrians crossing ahead",
+   "Pedestrians must use the overpass",
+   "Pedestrians are not allowed to cross"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, pp. 66, 71"
+ },
+ {
+  "id": "L3-PD-02",
+  "question": "What does this sign tell drivers?",
+  "image": "arangkada_extracted_images/level3/be-aware-of-children-crossing.png",
+  "choices": [
+   "Pedestrian overpass ahead",
+   "No entry for bicycles",
+   "Be aware of and stop for children crossing ahead",
+   "Playground parking only"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, pp. 66, 71"
+ },
+ {
+  "id": "L3-PD-03",
+  "question": "What does this sign tell drivers?",
+  "image": "arangkada_extracted_images/level3/be-aware-of-pwd-crossing.png",
+  "choices": [
+   "Persons with disabilities may be crossing ahead",
+   "Hospital ahead",
+   "Parking for PWDs only",
+   "No entry for wheelchairs"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, pp. 66, 71"
+ },
+ {
+  "id": "L3-PD-04",
+  "question": "A \"Driver must give way to pedestrians\" sign stands at a crossing. What must you do?",
+  "choices": [
+   "Give way only to children",
+   "Sound your horn and proceed",
+   "Give way to any pedestrian crossing there",
+   "Give way only if a traffic enforcer is present"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 83"
+ },
+ {
+  "id": "L3-PD-05",
+  "question": "What does a \"No Pedestrian Crossing\" sign mean?",
+  "choices": [
+   "Pedestrians may cross only at night",
+   "Drivers must stop for pedestrians there",
+   "Pedestrians are not allowed to cross the road there",
+   "A pedestrian lane is ahead"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 63"
+ },
+ {
+  "id": "L3-PD-06",
+  "question": "What does a \"Use Overpass or Ped Xing\" sign instruct?",
+  "choices": [
+   "Pedestrians must use an overpass or a pedestrian crossing",
+   "Drivers must stop at the overpass",
+   "Pedestrians may cross anywhere",
+   "Vehicles must use the overpass"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 63"
+ },
+ {
+  "id": "L3-PD-07",
+  "question": "How should you approach a crosswalk or pedestrian lane?",
+  "choices": [
+   "Slow down and stop to yield to pedestrians",
+   "Sound your horn and pass",
+   "Keep your speed if no one is on it yet",
+   "Speed up to pass before pedestrians step in"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 167"
+ },
+ {
+  "id": "L3-PD-08",
+  "question": "May a motorist park on a pedestrian lane?",
+  "choices": [
+   "Yes, at night only",
+   "Yes, for up to five minutes",
+   "No, under no circumstances",
+   "Yes, if the hazard lights are on"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 124, 180 (RA 4136)"
+ },
+ {
+  "id": "L3-PD-09",
+  "question": "Which of these is a common traffic violation by public utility vehicle drivers?",
+  "choices": [
+   "Slowing down near schools",
+   "Stopping on a pedestrian crosswalk to wait for passengers",
+   "Using the horn to warn pedestrians",
+   "Yielding to pedestrians at crossings"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+ },
+ {
+  "id": "L3-LD-01",
+  "question": "A sign reads \"Stay on right lane unless passing.\" What does it require?",
+  "choices": [
+   "Use the right lane only for turning",
+   "Stay in the left lane except when turning",
+   "Keep to the right lane except when passing other vehicles",
+   "Overtake only on the right"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 83"
+ },
+ {
+  "id": "L3-LD-02",
+  "question": "What does the sign \"Vehicle may turn left or right if intersection is clear\" mean?",
+  "choices": [
+   "No turns are allowed",
+   "Turns are allowed only on green",
+   "You may turn either way, but only when the intersection is clear",
+   "You must turn right"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 82"
+ },
+ {
+  "id": "L3-LD-03",
+  "question": "Where do you usually see a directional traffic sign?",
+  "choices": [
+   "Before the junction",
+   "After the junction",
+   "Only on expressways",
+   "Only at toll plazas"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180"
+ },
+ {
+  "id": "L3-LD-04",
+  "question": "What is the purpose of a lane direction sign on an expressway?",
+  "choices": [
+   "To show toll charges",
+   "To guide motorists into the correct lanes leading to an interchange",
+   "To show rest areas",
+   "To show the speed limit"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 79"
+ },
+ {
+  "id": "L3-LD-05",
+  "question": "A \"Right turner cross at broken lines\" sign stands beside a Bus/PUJ zone. What does it allow?",
+  "choices": [
+   "Parking is allowed along the broken line",
+   "Overtaking on the right is allowed",
+   "Buses may turn right from any lane",
+   "Vehicles from the left lane may cross the broken line to turn right within the Bus/PUJ zone"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 65"
+ },
+ {
+  "id": "L3-LD-06",
+  "question": "What does a one-way hazard marker at the end of a road show?",
+  "choices": [
+   "That the road continues straight",
+   "The only direction allowed",
+   "A two-way road ahead",
+   "A parking area"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 84"
+ },
+ {
+  "id": "L3-LD-07",
+  "question": "What do chevron signs do?",
+  "choices": [
+   "Mark a pedestrian crossing",
+   "Mark a parking bay",
+   "Show a speed limit",
+   "Guide drivers through a change in the road's horizontal alignment"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 85"
+ },
+ {
+  "id": "L3-LD-08",
+  "question": "What do obstruction markers indicate?",
+  "choices": [
+   "A road closure ahead",
+   "An expressway entrance",
+   "A bus stop",
+   "A pedestrian lane"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 85"
+ },
+ {
+  "id": "L3-LD-09",
+  "question": "What does the directional sign \"Vehicle may pass either side\" mean?",
+  "choices": [
+   "Vehicles must keep left",
+   "Vehicles may keep to either side of the obstruction or island",
+   "Vehicles must stop before passing",
+   "Overtaking is allowed on both sides at all times"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 3,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 61"
+ },
+ {
+  "id": "L4-LD-01",
+  "question": "What do double solid yellow lines mean?",
+  "choices": [
+   "Crossing allowed only when turning",
+   "Overtaking allowed on the right",
+   "Overtaking allowed with caution",
+   "No overtaking and no crossing"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 89, 163"
+ },
+ {
+  "id": "L4-LD-02",
+  "question": "What does a single solid yellow line mean?",
+  "choices": [
+   "No crossing and no overtaking at all times",
+   "Overtaking is allowed with caution",
+   "Crossing is allowed, but overtaking is not",
+   "It marks a bus lane"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 89"
+ },
+ {
+  "id": "L4-LD-03",
+  "question": "A single yellow line runs beside a broken white line. Which driver may overtake?",
+  "choices": [
+   "Both drivers",
+   "Neither driver",
+   "The driver on the side of the solid yellow line",
+   "The driver on the side of the broken white line"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 89"
+ },
+ {
+  "id": "L4-LD-04",
+  "question": "What does a broken yellow line allow?",
+  "choices": [
+   "Only turning into a driveway",
+   "No crossing at any time",
+   "Only buses may cross",
+   "Crossing and overtaking with the necessary precaution"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 90, 175"
+ },
+ {
+  "id": "L4-LD-05",
+  "question": "What does a broken white lane line between lanes going the same way mean?",
+  "choices": [
+   "Changing lanes is never allowed",
+   "Changing lanes is allowed if it is safe and does not obstruct others",
+   "It marks a bicycle lane",
+   "It marks the road edge"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 88, 181"
+ },
+ {
+  "id": "L4-LD-06",
+  "question": "What does a solid white center (separation) line mean?",
+  "choices": [
+   "It marks a parking area",
+   "Crossing it requires special care and is discouraged",
+   "Crossing it is always allowed",
+   "It marks a bus lane"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 88"
+ },
+ {
+  "id": "L4-LD-07",
+  "question": "What is the purpose of an edge line?",
+  "choices": [
+   "To mark a no-parking zone",
+   "To separate the outside edge of the road from the shoulder",
+   "To separate opposing traffic",
+   "To mark a pedestrian crossing"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 90"
+ },
+ {
+  "id": "L4-LD-08",
+  "question": "What does a yellow box with diagonal lines at an intersection mean?",
+  "choices": [
+   "Pedestrians must not cross the box",
+   "Only buses may stop inside the box",
+   "Parking is allowed inside the box",
+   "No vehicle should stop or stay inside the box"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. II, pp. 65, 94"
+ },
+ {
+  "id": "L4-LD-09",
+  "question": "May a private vehicle drive in a yellow bus lane?",
+  "choices": [
+   "Yes, at any time",
+   "Yes, during rush hour",
+   "No, except when turning or entering a garage within 100 meters",
+   "Only if there are no buses"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 4,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180"
+ },
+ {
+  "id": "L5-TS-01",
+  "question": "Your light turns green, but pedestrians who started on the last phase are still crossing. What should you do?",
+  "choices": [
+   "Proceed, since green gives you priority",
+   "Sound your horn so they hurry",
+   "Drive around them",
+   "Yield to them before proceeding"
+  ],
+  "answer": 3,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 109, 147"
+ },
+ {
+  "id": "L5-TS-02",
+  "question": "Your light is green, but a car from the last phase is still clearing the intersection. What should you do?",
+  "choices": [
+   "Proceed, since your light is green",
+   "Sound your horn and go",
+   "Let it clear the intersection before you proceed",
+   "Flash your headlights and go"
+  ],
+  "answer": 2,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 109, 147"
+ },
+ {
+  "id": "L5-TS-03",
+  "question": "At an intersection where a right turn on red is allowed, what must you do first?",
+  "choices": [
+   "Stop, then yield to pedestrians and cross traffic before turning",
+   "Wait for the yellow light",
+   "Turn without stopping if it looks clear",
+   "Sound your horn and turn"
+  ],
+  "answer": 0,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+ },
+ {
+  "id": "L5-TS-04",
+  "question": "Your light is red, and no sign allows a turn on red. You want to turn right. What should you do?",
+  "choices": [
+   "Turn right if a pedestrian waves you on",
+   "Turn right if no car is coming",
+   "Turn right after a full stop",
+   "Stop and wait for the green light"
+  ],
+  "answer": 3,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 118"
+ },
+ {
+  "id": "L5-TS-05",
+  "question": "Turning on red from a one-way street into another one-way street is allowed. Where should you position your vehicle?",
+  "choices": [
+   "Nearest to the curb of the intersection",
+   "On the pedestrian lane",
+   "In the lane farthest from the curb",
+   "In the middle lane"
+  ],
+  "answer": 0,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 118"
+ },
+ {
+  "id": "L5-TS-06",
+  "question": "Within how many meters of a \"Traffic Lights Ahead\" sign must you not park or stop?",
+  "choices": [
+   "2 meters",
+   "4 meters",
+   "6 meters",
+   "10 meters"
+  ],
+  "answer": 2,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 69"
+ },
+ {
+  "id": "L5-TS-07",
+  "question": "Which is a common violation by public utility vehicle drivers at signalized intersections?",
+  "choices": [
+   "Stopping at the stop line on red",
+   "Delaying movement on a green light to wait for passengers",
+   "Slowing down on yellow",
+   "Yielding to pedestrians on green"
+  ],
+  "answer": 1,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+ },
+ {
+  "id": "L5-TS-08",
+  "question": "At a red light, where should all vehicles facing it stop?",
+  "choices": [
+   "At the STOP line",
+   "Inside the pedestrian crossing",
+   "Anywhere before the next street",
+   "In the middle of the intersection"
+  ],
+  "answer": 0,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 182"
+ },
+ {
+  "id": "L5-TS-09",
+  "question": "A sign at the intersection reads \"Turn right on green light only.\" What does it mean?",
+  "choices": [
+   "You may turn right only when the signal is green",
+   "Right turns are not allowed",
+   "You may turn right on red after stopping",
+   "You must turn right"
+  ],
+  "answer": 0,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 83"
+ },
+ {
+  "id": "L5-TS-10",
+  "question": "A traffic enforcer is directing traffic differently from what the traffic light shows. Which should you follow?",
+  "choices": [
+   "The traffic enforcer",
+   "Wait until both agree",
+   "The traffic light",
+   "Whichever lets you go faster"
+  ],
+  "answer": 0,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 114, 141; adapted from app mock exam #8",
+  "reviewerNotes": "The FDM refers to directions from a peace officer (pp. 114, 141) but does not state this rule outright; please confirm the basis."
+ },
+ {
+  "id": "L5-TS-11",
+  "question": "May you turn right on a red light?",
+  "choices": [
+   "Only if no other vehicle is in sight",
+   "Only where a sign allows it, after stopping and yielding",
+   "Yes, always",
+   "No, never"
+  ],
+  "answer": 1,
+  "competency": "traffic_signals",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 118, 147; adapted from app mock exam #10"
+ },
+ {
+  "id": "L5-RW-01",
+  "question": "Two vehicles reach an uncontrolled intersection at about the same time. Who must yield?",
+  "choices": [
+   "The slower vehicle yields",
+   "The vehicle on the right yields to the vehicle on the left",
+   "The smaller vehicle yields",
+   "The vehicle on the left yields to the vehicle on the right"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 114, 178 (RA 4136 Sec. 42)"
+ },
+ {
+  "id": "L5-RW-02",
+  "question": "Two vehicles stopped at stop lines at the same time on intersecting roads. Who goes first?",
+  "choices": [
+   "The vehicle that sounds its horn first",
+   "The larger vehicle",
+   "The vehicle on the left",
+   "The vehicle on the right; the vehicle on the left yields"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+ },
+ {
+  "id": "L5-RW-03",
+  "question": "You approach an intersection with a Give Way sign. What must you do?",
+  "choices": [
+   "Stop for at least 5 seconds every time",
+   "Give way to any vehicle in or closely approaching the intersection",
+   "Proceed if you are on the main road",
+   "Give way only to vehicles on your right"
+  ],
+  "answer": 1,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+ },
+ {
+  "id": "L5-RW-04",
+  "question": "You are approaching an intersection. An oncoming vehicle already in it is turning left across your path and signaled first. What should you do?",
+  "choices": [
+   "Yield to the turning vehicle",
+   "Flash your lights and proceed",
+   "Proceed, since you are going straight",
+   "Sound your horn and proceed"
+  ],
+  "answer": 0,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+ },
+ {
+  "id": "L5-RW-05",
+  "question": "An ambulance with its siren on approaches from behind. What must you do?",
+  "choices": [
+   "Move to the left lane and keep going",
+   "Speed up to stay ahead of it",
+   "Stop immediately in your lane",
+   "Pull over as near as possible to the right-hand edge, clear of any intersection, and stop until it passes"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 141"
+ },
+ {
+  "id": "L5-RW-06",
+  "question": "You are about to enter a roundabout. Who has the right of way?",
+  "choices": [
+   "The largest vehicle",
+   "Vehicles already inside the roundabout",
+   "The vehicle on the right of the entry",
+   "Vehicles entering the roundabout"
+  ],
+  "answer": 1,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. II/III/VI, pp. 92, 120, 170"
+ },
+ {
+  "id": "L5-RW-07",
+  "question": "Before turning at an intersection, whom must you give way to?",
+  "choices": [
+   "Only vehicles behind you",
+   "Only buses",
+   "No one, if you signaled",
+   "Pedestrians and vehicles that have priority right of way"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 172"
+ },
+ {
+  "id": "L5-RW-08",
+  "question": "You are approaching an intersection, and another vehicle is already inside it. Who has the right of way?",
+  "choices": [
+   "You, because you are approaching from the right",
+   "The faster vehicle",
+   "Whoever sounds the horn first",
+   "The vehicle already inside the intersection"
+  ],
+  "answer": 3,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+ },
+ {
+  "id": "L5-RW-09",
+  "question": "At a stop sign intersection, what is required?",
+  "choices": [
+   "A full stop, then yield to vehicles in or approaching the intersection; never a rolling stop",
+   "Slow down and proceed if clear",
+   "Sound your horn and proceed",
+   "Stop only if a vehicle is coming"
+  ],
+  "answer": 0,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+ },
+ {
+  "id": "L5-RW-10",
+  "question": "You reach a crossroads with no signal, no stop sign and no give-way line. Another car arrives at the same moment on your right. Who goes first?",
+  "choices": [
+   "Whoever is already moving faster",
+   "You, because you are on the wider road",
+   "The car on your right; you are the vehicle on the left, so you yield",
+   "Whoever sounds the horn first"
+  ],
+  "answer": 2,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 114, 147 (RA 4136 Sec. 42); adapted from app L5 lesson quiz"
+ },
+ {
+  "id": "L5-RW-11",
+  "question": "You are stopped at a Stop sign. Cross traffic has cleared and the junction is empty. What was required of you before moving off?",
+  "choices": [
+   "Slowing to about 8 kph was enough, since the way was clear",
+   "A complete stop, then yielding to any vehicle in or approaching the junction",
+   "Nothing, because arriving first gives you the right of way",
+   "A complete stop only if another vehicle was visible"
+  ],
+  "answer": 1,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147; adapted from app L5 lesson quiz"
+ },
+ {
+  "id": "L5-RW-12",
+  "question": "An ambulance on official business is closing behind you with its siren sounding. What is the correct response?",
+  "choices": [
+   "Move as near as possible to the right-hand edge, clear of any intersection, and stop until it passes",
+   "Move over, then follow closely behind it through traffic",
+   "Hold your lane and speed so your movements stay predictable",
+   "Brake hard immediately in your lane"
+  ],
+  "answer": 0,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 141; adapted from app L5 lesson quiz"
+ },
+ {
+  "id": "L5-RW-13",
+  "question": "You arrive at a roundabout entry. A vehicle is already circulating slowly. May you enter ahead of it?",
+  "choices": [
+   "Yes, it is slow enough that you will not obstruct it",
+   "No; traffic already inside the roundabout has the right of way",
+   "Yes, if you signal before entering",
+   "Only if you will take the first exit"
+  ],
+  "answer": 1,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. II/III, pp. 92, 120; adapted from app L5 lesson quiz"
+ },
+ {
+  "id": "L5-RW-14",
+  "question": "Traffic ahead is backed up, a yellow box is painted across the junction, and you have a green light. What may you NOT do?",
+  "choices": [
+   "Enter the box when your exit beyond it is clear",
+   "Wait behind the box until your exit clears",
+   "Enter and stop inside the box while waiting for traffic ahead to move",
+   "Give way to a vehicle already inside the box"
+  ],
+  "answer": 2,
+  "competency": "right_of_way",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. II/IV, pp. 94, 137; adapted from app L5 lesson quiz"
+ },
+ {
+  "id": "L5-PD-01",
+  "question": "In a business or residential district, a pedestrian is crossing within a crosswalk. What must you do?",
+  "choices": [
+   "Sound your horn so the pedestrian hurries",
+   "Yield only if the pedestrian is elderly",
+   "Proceed if you reached the crosswalk first",
+   "Yield the right of way to the pedestrian"
+  ],
+  "answer": 3,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+ },
+ {
+  "id": "L5-PD-02",
+  "question": "When does the rule to yield to pedestrians on a crosswalk NOT apply in the same way?",
+  "choices": [
+   "At intersections where a traffic signal or a peace officer controls movement",
+   "When the driver is in a hurry",
+   "At night",
+   "On roads wider than two lanes"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+ },
+ {
+  "id": "L5-PD-03",
+  "question": "In a business district, a pedestrian crosses the highway away from any crosswalk. Under RA 4136, who must yield?",
+  "choices": [
+   "Whoever is faster",
+   "Vehicles must always yield",
+   "The pedestrian must yield to vehicles",
+   "Only buses must yield"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+ },
+ {
+  "id": "L5-PD-04",
+  "question": "You are making a right turn at an intersection. What should you check besides traffic from the left?",
+  "choices": [
+   "Nothing else",
+   "Only vehicles behind you",
+   "Pedestrians and other obstructions",
+   "Only your fuel gauge"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 117"
+ },
+ {
+  "id": "L5-PD-05",
+  "question": "A person in a wheelchair is about to cross the street ahead of you. What should you do?",
+  "choices": [
+   "Drive around them",
+   "Sound your horn to warn them",
+   "Pass quickly before they start",
+   "Stop and wait for the person to cross"
+  ],
+  "answer": 3,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 182"
+ },
+ {
+  "id": "L5-PD-06",
+  "question": "When turning right on red where allowed, who must you yield to after stopping?",
+  "choices": [
+   "No one, since the turn is allowed",
+   "Only vehicles behind you",
+   "Pedestrians and cross-traffic vehicles",
+   "Only buses"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+ },
+ {
+  "id": "L5-PD-07",
+  "question": "At an intersection, where should you give way to pedestrians?",
+  "choices": [
+   "Only near schools",
+   "Only at marked crossings with signals",
+   "Only when an enforcer is present",
+   "At crossings, pavements and intersections"
+  ],
+  "answer": 3,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L5-PD-08",
+  "question": "A flashing green signal at a crossing with a pedestrian push button tells you to:",
+  "choices": [
+   "Proceed with caution and be prepared for pedestrians who might cross",
+   "Speed up before it turns red",
+   "Stop for 5 seconds",
+   "Ignore pedestrians"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+ },
+ {
+  "id": "L5-PD-09",
+  "question": "How should you approach a pedestrian lane at an intersection?",
+  "choices": [
+   "At your normal speed",
+   "With the high beams on",
+   "With extreme caution",
+   "While sounding the horn"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L5-PD-10",
+  "question": "A pedestrian is crossing inside a marked crosswalk in a business district, and no officer or signal controls the crossing. What must you do?",
+  "choices": [
+   "Sound the horn so they hurry",
+   "Yield the right of way and let them finish crossing",
+   "Ease past behind them without stopping",
+   "Proceed, since vehicles always outrank pedestrians"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42); adapted from app L5 lesson quiz"
+ },
+ {
+  "id": "L5-PD-11",
+  "question": "A pedestrian steps into the road well away from any crosswalk. What is the legal position, and what should you do?",
+  "choices": [
+   "They have the right of way, so you must always stop",
+   "They must yield to you, but you should still slow down and be ready to stop",
+   "It depends only on whether the road is in a business district",
+   "They must yield to you, so you may keep your speed"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 114, 139; adapted from app L5 lesson quiz"
+ },
+ {
+  "id": "L5-PD-12",
+  "question": "A blind pedestrian with a white cane is at a crosswalk. What should you do?",
+  "choices": [
+   "Sound your horn to alert them",
+   "Stop completely and let them cross",
+   "Drive slowly around them",
+   "Flash your lights to signal them"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 5,
+  "source": "FDM Vol. 1 (2021), Ch. IV, pp. 137, 139; adapted from app mock exam #29",
+  "reviewerNotes": "The FDM covers yielding to PWDs (pp. 137, 139) but does not mention white canes; please confirm."
+ },
+ {
+  "id": "L6-LD-01",
+  "question": "You plan to turn right at the next intersection. Where should your vehicle be?",
+  "choices": [
+   "On the shoulder",
+   "In the right lane, well in advance",
+   "In the middle lane",
+   "In the left lane until the last moment"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 117"
+ },
+ {
+  "id": "L6-LD-02",
+  "question": "On a two-way road, you are making a left turn into another two-way road. Which lane should you turn into?",
+  "choices": [
+   "The lane nearest the center line",
+   "The bus lane",
+   "The lane nearest the curb",
+   "Any lane that is free"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 117"
+ },
+ {
+  "id": "L6-LD-03",
+  "question": "Where should a U-turn begin?",
+  "choices": [
+   "From the outermost lane",
+   "From any lane, without signaling",
+   "From the shoulder",
+   "From the right side of the innermost lane, after checking traffic both ways and signaling"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+ },
+ {
+  "id": "L6-LD-04",
+  "question": "What is the first thing to do when changing lanes?",
+  "choices": [
+   "Sound your horn",
+   "Check traffic ahead, behind and on the sides",
+   "Speed up",
+   "Switch on the signal and move at once"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+ },
+ {
+  "id": "L6-LD-05",
+  "question": "What is the hand signal for a left turn?",
+  "choices": [
+   "Right arm out the window",
+   "Left arm held straight out horizontally",
+   "Left arm held down, hand pointing to the ground",
+   "Left arm bent at the elbow, hand pointing up"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 162"
+ },
+ {
+  "id": "L6-LD-06",
+  "question": "What is the hand signal for a right turn?",
+  "choices": [
+   "Left arm bent at the elbow, hand pointing up",
+   "Left arm held straight out horizontally",
+   "Left arm held down, hand pointing to the ground",
+   "Right arm pointing right"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 168"
+ },
+ {
+  "id": "L6-LD-07",
+  "question": "What is the hand signal to stop or slow down?",
+  "choices": [
+   "Left arm held down, hand pointing to the ground",
+   "Waving the left hand back and forth",
+   "Left arm bent at the elbow, hand pointing up",
+   "Left arm held straight out horizontally"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 162"
+ },
+ {
+  "id": "L6-LD-08",
+  "question": "Where is overtaking prohibited?",
+  "choices": [
+   "On a road with a broken white line",
+   "On a straight road with a broken yellow line",
+   "On a curve or near a crest where the view ahead is blocked",
+   "On a one-way street with two clear lanes"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 121 (RA 4136 Sec. 41)"
+ },
+ {
+  "id": "L6-LD-09",
+  "question": "In a business district on a road with two or more lanes going your way, may you overtake on the right?",
+  "choices": [
+   "Yes, when it is safe",
+   "Only at night",
+   "No, never",
+   "Only motorcycles may"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 121 (RA 4136 Sec. 41)"
+ },
+ {
+  "id": "L6-LD-10",
+  "question": "You are turning left from one highway into another. Where must the vehicle pass, and which lane do you turn into?",
+  "choices": [
+   "To the right of the center of the intersection, turning into the lane nearest the center line",
+   "To the left of the center of the intersection, into the rightmost lane",
+   "Straight through the middle, into any clear lane",
+   "Along the curb line, into the lane nearest the curb"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, pp. 116, 117 (RA 4136); adapted from app L6 lesson quiz"
+ },
+ {
+  "id": "L6-LD-11",
+  "question": "Your signal lights have failed, and you need to show a right turn by hand. What is the correct signal?",
+  "choices": [
+   "Left arm bent at the elbow, hand pointing down",
+   "Left arm extended straight out",
+   "Left arm bent at the elbow, hand pointing up",
+   "Right arm extended out of the passenger window"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 168; adapted from app L6 lesson quiz"
+ },
+ {
+  "id": "L6-LD-12",
+  "question": "In a business district, you are behind a slow jeepney in the lane beside the center line. A second lane going your way is clear on your right. May you pass on the right?",
+  "choices": [
+   "Only if you sound the horn first",
+   "No; overtaking on the right is never allowed",
+   "Only if the jeepney is signaling a left turn",
+   "Yes; on a road with two or more lanes going one direction in a business or residential district, passing on the right is allowed if safe"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 121 (RA 4136 Sec. 41); adapted from app L6 lesson quiz"
+ },
+ {
+  "id": "L6-LD-13",
+  "question": "Where should you NOT overtake, however clear the road looks?",
+  "choices": [
+   "Only at night or in poor weather",
+   "Only on expressways and national highways",
+   "Only where a No Overtaking sign is posted",
+   "At intersections, when approaching a bridge, curve or crest, at railroad crossings, and on solid yellow or white lines"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 121, 122, 169; adapted from app L6 lesson quiz"
+ },
+ {
+  "id": "L6-LD-14",
+  "question": "Where is a U-turn not permitted?",
+  "choices": [
+   "Only on expressways",
+   "On a double solid yellow line, and where a No U-Turn sign is posted",
+   "Anywhere on a two-way road",
+   "Only between 6 a.m. and 6 p.m."
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 164; adapted from app L6 lesson quiz"
+ },
+ {
+  "id": "L6-LD-15",
+  "question": "In which situation may you pass another vehicle on the right?",
+  "choices": [
+   "On the road shoulder",
+   "When the vehicle ahead is slow",
+   "Whenever there is space",
+   "When the vehicle ahead is making or about to make a left turn"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 122 (RA 4136 Sec. 41); adapted from app mock exam #19"
+ },
+ {
+  "id": "L6-PK-01",
+  "question": "How far from a fire hydrant must you not park?",
+  "choices": [
+   "Within 1 meter",
+   "Within 2 meters",
+   "Within 4 meters",
+   "Within 10 meters"
+  ],
+  "answer": 2,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. II/III/VI, pp. 64, 124, 178 (RA 4136 Sec. 46)"
+ },
+ {
+  "id": "L6-PK-02",
+  "question": "How far from the intersection of curb lines must you not park?",
+  "choices": [
+   "Within 2 meters",
+   "Within 4 meters",
+   "Within 6 meters",
+   "Within 10 meters"
+  ],
+  "answer": 2,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 124 (RA 4136 Sec. 46)"
+ },
+ {
+  "id": "L6-PK-03",
+  "question": "May you park on the roadway side of a vehicle already parked at the curb (double parking)?",
+  "choices": [
+   "No, it is prohibited",
+   "Yes, for up to 5 minutes",
+   "Yes, if your hazard lights are on",
+   "Yes, if the other driver agrees"
+  ],
+  "answer": 0,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 124 (RA 4136 Sec. 46)"
+ },
+ {
+  "id": "L6-PK-04",
+  "question": "Where angle parking is required, how should the vehicle be parked?",
+  "choices": [
+   "At 90 degrees with the rear wheels on the curb",
+   "At about 30 degrees, a meter from the curb",
+   "At about 45 degrees to the curb, with a front wheel touching or within one foot of it",
+   "Parallel to the curb"
+  ],
+  "answer": 2,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 123"
+ },
+ {
+  "id": "L6-PK-05",
+  "question": "When parking downhill on a road with a curb, which way should the front wheels point?",
+  "choices": [
+   "Straight ahead",
+   "Toward the curb",
+   "It does not matter",
+   "Away from the curb"
+  ],
+  "answer": 1,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 123, 168"
+ },
+ {
+  "id": "L6-PK-06",
+  "question": "When parking uphill on a road with a curb, which way should the front wheels point?",
+  "choices": [
+   "Away from the curb",
+   "Toward the curb",
+   "It does not matter",
+   "Straight ahead"
+  ],
+  "answer": 0,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 168, 182",
+  "reviewerNotes": "FDM Vol. 1 p. 123 says to turn the wheels into the curb for both uphill and downhill; the reviewer (pp. 168, 182) says away from the curb uphill. Please confirm the correct rule."
+ },
+ {
+  "id": "L6-PK-07",
+  "question": "When parking uphill on a road without a curb, which way should you turn the wheels?",
+  "choices": [
+   "Toward the center of the road",
+   "It does not matter",
+   "Straight ahead",
+   "Toward the edge of the road"
+  ],
+  "answer": 3,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 123, 168"
+ },
+ {
+  "id": "L6-PK-08",
+  "question": "How do you parallel park?",
+  "choices": [
+   "Stop beside the space and push the vehicle in",
+   "Reverse in at a 45-degree angle from the opposite lane",
+   "Drive straight in, nose first",
+   "Drive slightly past the space, parallel to the parked vehicle in front, then reverse into it"
+  ],
+  "answer": 3,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 123"
+ },
+ {
+  "id": "L6-PK-09",
+  "question": "A parking lot is full except for a PWD parking space. May you park there?",
+  "choices": [
+   "Yes, if you stay less than 10 minutes",
+   "Yes, at night",
+   "No, unless you are a PWD or are with one",
+   "Yes, if no PWD is waiting"
+  ],
+  "answer": 2,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 172"
+ },
+ {
+  "id": "L6-PK-10",
+  "question": "You are parking in a marked bay at about 45 degrees to the curb. Where should the front wheel finish?",
+  "choices": [
+   "At least three feet from the curb",
+   "Anywhere inside the painted lines",
+   "Turned hard away from the curb",
+   "Touching the curb, or within about one foot of it"
+  ],
+  "answer": 3,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 123; adapted from app L6 lesson quiz"
+ },
+ {
+  "id": "L6-PK-11",
+  "question": "What is double parking?",
+  "choices": [
+   "Backing into a parking space",
+   "Parking twice in the same spot in one day",
+   "Parking on the roadway side of a vehicle already parked at the curb",
+   "Parking across two marked bays"
+  ],
+  "answer": 2,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 124 (RA 4136 Sec. 46); adapted from app mock exam #26"
+ },
+ {
+  "id": "L6-PK-12",
+  "question": "You need to drop off a package quickly, but the only spot is a No Loading/Unloading zone. What should you do?",
+  "choices": [
+   "Stop there, since it takes only 30 seconds",
+   "Stop there with your hazard lights on",
+   "Stop there if a passenger stays in the car",
+   "Find a proper loading zone, even if it is farther"
+  ],
+  "answer": 3,
+  "competency": "parking",
+  "stage": 6,
+  "source": "FDM Vol. 1 (2021), Ch. II, pp. 64, 96; adapted from app daily challenge 'loading-zone'"
+ },
+ {
+  "id": "L7-SC-01",
+  "question": "On an open country road with no blind corners, what is the RA 4136 speed limit for passenger cars and motorcycles?",
+  "choices": [
+   "50 kph",
+   "60 kph",
+   "80 kph",
+   "100 kph"
+  ],
+  "answer": 2,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 112, 165 (RA 4136 Sec. 35)"
+ },
+ {
+  "id": "L7-SC-02",
+  "question": "On an open country road with no blind corners, what is the RA 4136 speed limit for trucks and buses?",
+  "choices": [
+   "30 kph",
+   "50 kph",
+   "60 kph",
+   "80 kph"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+ },
+ {
+  "id": "L7-SC-03",
+  "question": "Unless another limit is posted, what is the maximum speed on an expressway?",
+  "choices": [
+   "60 kph",
+   "80 kph",
+   "100 kph",
+   "120 kph"
+  ],
+  "answer": 2,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 126, 181"
+ },
+ {
+  "id": "L7-SC-04",
+  "question": "Unless another limit is posted, what is the minimum speed on an expressway?",
+  "choices": [
+   "30 kph",
+   "40 kph",
+   "60 kph",
+   "80 kph"
+  ],
+  "answer": 2,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+ },
+ {
+  "id": "L7-SC-05",
+  "question": "In ideal conditions, what is the total stopping distance of a vehicle running at 100 kph on a full brake?",
+  "choices": [
+   "20 meters",
+   "40 meters",
+   "60 meters",
+   "80 meters"
+  ],
+  "answer": 3,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+ },
+ {
+  "id": "L7-SC-06",
+  "question": "When merging onto an expressway, how should you match the speed of traffic?",
+  "choices": [
+   "Stop at the end of the ramp, then enter",
+   "Use the shoulder to speed up",
+   "Enter slowly in the first lane",
+   "Make full use of the acceleration lane"
+  ],
+  "answer": 3,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 128, 169"
+ },
+ {
+  "id": "L7-SC-07",
+  "question": "Before driving down a steep road, what should you do to control your speed?",
+  "choices": [
+   "Shift to neutral to save fuel",
+   "Shift to a low gear and use engine braking",
+   "Switch off the engine",
+   "Rely on the foot brake the whole way"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180"
+ },
+ {
+  "id": "L7-SC-08",
+  "question": "Under the DOTr-DPWH-DILG guidelines, what is the speed limit on a primary national road in flat terrain?",
+  "choices": [
+   "50 kph",
+   "60 kph",
+   "80 kph",
+   "100 kph"
+  ],
+  "answer": 2,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 112"
+ },
+ {
+  "id": "L7-SC-09",
+  "question": "How should you approach the entry and exit toll plazas of an expressway?",
+  "choices": [
+   "Speed up to find a free lane",
+   "Slow down",
+   "Keep the expressway speed",
+   "Switch on the hazard lights"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+ },
+ {
+  "id": "L7-SC-10",
+  "question": "On a national highway with an 80 kph limit, a bus ahead of you is going about 90 kph. What should you do?",
+  "choices": [
+   "Flash your lights until the bus slows down",
+   "Overtake the bus since it is speeding",
+   "Keep to 80 kph and a safe following distance",
+   "Match the bus's speed to stay with traffic"
+  ],
+  "answer": 2,
+  "competency": "speed_control",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, pp. 111, 112; adapted from app daily challenge 'provincial-bus'"
+ },
+ {
+  "id": "L7-LD-01",
+  "question": "On an expressway, what is Lane 1 (the innermost lane, next to the median) for?",
+  "choices": [
+   "Trucks and buses",
+   "Slow-moving vehicles",
+   "Stopping in emergencies",
+   "Overtaking other vehicles only"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+ },
+ {
+  "id": "L7-LD-02",
+  "question": "May cargo trucks, buses and slow-moving vehicles use Lane 1 of an expressway?",
+  "choices": [
+   "No, not at any time",
+   "Yes, at night",
+   "Yes, when overtaking",
+   "Yes, if traffic is light"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+ },
+ {
+  "id": "L7-LD-03",
+  "question": "You are overtaking in Lane 1 of an expressway. Do you have the right of way?",
+  "choices": [
+   "Yes, always",
+   "Yes, if you are within the speed limit",
+   "No, overtaking vehicles do not have the right of way",
+   "Yes, if you signaled"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+ },
+ {
+  "id": "L7-LD-04",
+  "question": "On a four-lane expressway, which lane is for large passenger buses and freight vehicles over 1.5 tons?",
+  "choices": [
+   "Lane 1",
+   "Lane 2",
+   "Lane 3",
+   "Lane 4"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+ },
+ {
+  "id": "L7-LD-05",
+  "question": "Which motorcycles are allowed on expressways?",
+  "choices": [
+   "Motorcycles of 400 cc and above",
+   "Motorcycles of 150 cc and above",
+   "No motorcycles at all",
+   "All motorcycles"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 125, 175"
+ },
+ {
+  "id": "L7-LD-06",
+  "question": "At a toll gate, what does a red X light or sign over a lane mean?",
+  "choices": [
+   "Slow down and proceed",
+   "You cannot drive through that lane",
+   "The lane is for RFID only",
+   "Pay with cash only"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 168"
+ },
+ {
+  "id": "L7-LD-07",
+  "question": "How far ahead should you plan for your expressway exit?",
+  "choices": [
+   "100 meters before the exit",
+   "At the exit ramp itself",
+   "At least 1 kilometer ahead of the exit toll",
+   "After passing the exit"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+ },
+ {
+  "id": "L7-LD-08",
+  "question": "Another vehicle is overtaking you. What should you do?",
+  "choices": [
+   "Keep your speed and do not race it",
+   "Move to the left to block it",
+   "Speed up to stay ahead",
+   "Brake hard"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 166"
+ },
+ {
+  "id": "L7-LD-09",
+  "question": "After overtaking a vehicle, when may you move back to the right?",
+  "choices": [
+   "Whenever the other driver slows down",
+   "Only once you are safely clear of the overtaken vehicle",
+   "As soon as you signal",
+   "Right after your front bumper passes it"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 2 (2021), Ch. III, p. 76 (JAO 2014-01)"
+ },
+ {
+  "id": "L7-LD-10",
+  "question": "Another vehicle has signaled and is overtaking you. What should you do?",
+  "choices": [
+   "Speed up to prevent it",
+   "Sound your horn repeatedly",
+   "Move to the left",
+   "Give way to the overtaking vehicle and do not increase your speed"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 7,
+  "source": "FDM Vol. 2 (2021), Ch. III, p. 76 (JAO 2014-01); adapted from app mock exam #22"
+ },
+ {
+  "id": "L7-HA-01",
+  "question": "What is the \"two or three second rule\"?",
+  "choices": [
+   "Stop for three seconds at a stop sign",
+   "Stay at least two or three seconds behind the vehicle directly in front",
+   "Check mirrors every three seconds",
+   "Signal for three seconds before turning"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 111"
+ },
+ {
+  "id": "L7-HA-02",
+  "question": "How do you measure your following time behind another vehicle?",
+  "choices": [
+   "Wait for its brake lights",
+   "Watch your speedometer",
+   "Count the seconds from when it passes a fixed object until you reach the same object",
+   "Count the car lengths between you"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 111"
+ },
+ {
+  "id": "L7-HA-03",
+  "question": "Why is tailgating dangerous?",
+  "choices": [
+   "It is allowed only on expressways",
+   "It makes your engine overheat",
+   "It uses more fuel",
+   "It leaves no room to maneuver or stop if there is an obstruction"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+ },
+ {
+  "id": "L7-HA-04",
+  "question": "How much following distance should you give a motorcycle?",
+  "choices": [
+   "Only one car length",
+   "The same distance you would give any other vehicle",
+   "Half the usual distance",
+   "No distance, since motorcycles are small"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+ },
+ {
+  "id": "L7-HA-05",
+  "question": "A tire blows out while you are on the expressway. What should you NOT do?",
+  "choices": [
+   "Slow down gradually",
+   "Slam on the brakes",
+   "Take your foot off the accelerator",
+   "Hold the steering wheel firmly"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 128, 143"
+ },
+ {
+  "id": "L7-HA-06",
+  "question": "Which condition should you be aware of when driving on expressways?",
+  "choices": [
+   "Tricycle traffic",
+   "Jeepney stops",
+   "Crosswinds",
+   "Pedestrian crossings"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+ },
+ {
+  "id": "L7-HA-07",
+  "question": "On an expressway, when should you switch on your hazard warning lights?",
+  "choices": [
+   "Whenever it rains",
+   "When overtaking",
+   "Only when stopping for an emergency",
+   "When driving in Lane 1"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+ },
+ {
+  "id": "L7-HA-08",
+  "question": "What should you avoid doing when another vehicle approaches at night with its headlights on?",
+  "choices": [
+   "Staring at the oncoming headlights",
+   "Slowing down if dazzled",
+   "Keeping to your lane",
+   "Dimming your own headlights"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+ },
+ {
+  "id": "L7-HA-09",
+  "question": "You are behind a long vehicle. What should you do to improve your view?",
+  "choices": [
+   "Switch on your high beams",
+   "Follow in its blind spot",
+   "Drive closer to it",
+   "Stay further back"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 7,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 177"
+ },
+ {
+  "id": "L8-PD-01",
+  "question": "What does the doctrine of last clear chance say?",
+  "choices": [
+   "The vehicle that arrived first is never liable",
+   "Pedestrians are always at fault outside crosswalks",
+   "The person who had the last opportunity to avoid the crash is held responsible, even if the other party was negligent",
+   "The faster vehicle is always at fault"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139",
+  "reviewerNotes": "FDM Vol. 1 p. 139 contradicts itself: the definition says the driver with the last clear chance is solely responsible, but the worked example says jointly liable. The answer avoids both words; please confirm the wording with the LTO reviewers."
+ },
+ {
+  "id": "L8-PD-02",
+  "question": "A pedestrian steps into the road away from any crossing, but you can still stop safely. What does the doctrine of last clear chance mean for you?",
+  "choices": [
+   "You must avoid the pedestrian; if you could have and did not, you can be held liable",
+   "You may keep going, since the pedestrian is at fault",
+   "You may sound your horn and continue",
+   "Only the pedestrian is liable"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139",
+  "reviewerNotes": "FDM Vol. 1 p. 139 contradicts itself: the definition says the driver with the last clear chance is solely responsible, but the worked example says jointly liable. The answer avoids both words; please confirm the wording with the LTO reviewers."
+ },
+ {
+  "id": "L8-PD-03",
+  "question": "How should you overtake a cyclist?",
+  "choices": [
+   "Pass as close as possible to save time",
+   "Overtake only on the right",
+   "Leave enough space when passing",
+   "Sound your horn and pass at speed"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L8-PD-04",
+  "question": "Before opening your car door at the roadside, what should you check for?",
+  "choices": [
+   "Nothing, if your hazard lights are on",
+   "Only the parking meter",
+   "Only cars ahead",
+   "Cyclists and motorcyclists coming up beside you"
+  ],
+  "answer": 3,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L8-PD-05",
+  "question": "Cyclists and motorcyclists have a designated lane beside you. What should you do?",
+  "choices": [
+   "Use their lane to overtake",
+   "Give way to them in their designated lane",
+   "Sound your horn to clear the lane",
+   "Park in their lane briefly"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L8-PD-06",
+  "question": "Road workers are on the road ahead. Under defensive driving, what should you do?",
+  "choices": [
+   "Give them the right of way",
+   "Speed up to pass quickly",
+   "Expect them to move aside",
+   "Sound your horn and pass"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+ },
+ {
+  "id": "L8-PD-07",
+  "question": "What should you do when you see a \"Bicycle lane ahead\" sign?",
+  "choices": [
+   "Be aware and slow down",
+   "Sound your horn continuously",
+   "Use the bicycle lane to overtake",
+   "Speed up before the lane begins"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 71"
+ },
+ {
+  "id": "L8-PD-08",
+  "question": "When passing motorcyclists or cyclists, what should you check?",
+  "choices": [
+   "Only their helmet",
+   "Obstructions in front of them, behind them and on each side",
+   "Only their speed",
+   "Only your own fuel level"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L8-PD-09",
+  "question": "Under defensive driving, how should you approach a pedestrian lane?",
+  "choices": [
+   "Faster, to clear it before people step in",
+   "With extreme caution, ready to give way",
+   "Only checking the right side",
+   "At a steady speed, sounding the horn"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+ },
+ {
+  "id": "L8-PD-10",
+  "question": "You are about to pass a cyclist riding near the curb on a narrow street. What is required of you?",
+  "choices": [
+   "Give enough clearance and watch your speed, checking your blind spot first",
+   "Pass as close and quickly as possible",
+   "Sound your horn so they move over",
+   "Wait behind them until the street ends"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139; adapted from app L8 lesson quiz"
+ },
+ {
+  "id": "L8-LD-01",
+  "question": "On an undivided two-lane road, which lane should you keep to?",
+  "choices": [
+   "The outer lane, watching your speed",
+   "The shoulder",
+   "The lane nearest the center line",
+   "Whichever lane is faster"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+ },
+ {
+  "id": "L8-LD-02",
+  "question": "A vehicle is counterflowing toward you on a two-way road. What should you do?",
+  "choices": [
+   "Hold your lane and sound your horn",
+   "Flash your lights and speed up",
+   "Keep calm, do not insist on your right, signal and change lanes with care",
+   "Stop in your lane"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+ },
+ {
+  "id": "L8-LD-03",
+  "question": "A large hauling truck ahead is turning left. What should you do?",
+  "choices": [
+   "Overtake it quickly on the right",
+   "Do not overtake it",
+   "Overtake it on the left",
+   "Follow closely in its blind spot"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 140"
+ },
+ {
+  "id": "L8-LD-04",
+  "question": "Why should you give long vehicles extra room when they turn?",
+  "choices": [
+   "They may straddle lanes while turning",
+   "They cannot use turn signals",
+   "They always turn from the left lane",
+   "They have the right of way at all times"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 140"
+ },
+ {
+  "id": "L8-LD-05",
+  "question": "When may you overtake a long, wide or large vehicle?",
+  "choices": [
+   "Only on its right side",
+   "Only on a curve",
+   "Whenever it slows down",
+   "Only when there is enough time and distance to complete the maneuver safely"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 140"
+ },
+ {
+  "id": "L8-LD-06",
+  "question": "Which of these is a common traffic violation that causes heavy traffic?",
+  "choices": [
+   "Signaling before turning",
+   "Lane straddling",
+   "Keeping to the right lane",
+   "Leaving a safe gap"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+ },
+ {
+  "id": "L8-LD-07",
+  "question": "How much lane space are motorcycles entitled to?",
+  "choices": [
+   "Only the space between lanes",
+   "Half a lane",
+   "The same full length and width as all other vehicles",
+   "Only the road shoulder"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+ },
+ {
+  "id": "L8-LD-08",
+  "question": "A solid center line runs through a blind bend, and a bus is coming the other way. What should you do?",
+  "choices": [
+   "Stop in the middle of the road",
+   "Stay in your lane and do not overtake",
+   "Cross the line to get a better view",
+   "Overtake quickly before the bus arrives"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. II/III, pp. 89, 121"
+ },
+ {
+  "id": "L8-LD-09",
+  "question": "Which driving practice is a common cause of heavy traffic and crashes?",
+  "choices": [
+   "Swerving through indiscriminate and unsafe lane changes",
+   "Checking blind spots",
+   "Driving at a steady speed",
+   "Using the turn signal"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+ },
+ {
+  "id": "L8-HA-01",
+  "question": "What does SIPDE stand for?",
+  "choices": [
+   "Stop, Inspect, Proceed, Drive, Evaluate",
+   "Search, Identify, Predict, Decide, Execute",
+   "Signal, Inspect, Park, Drive, Exit",
+   "Search, Inform, Pass, Drive, Exit"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145"
+ },
+ {
+  "id": "L8-HA-02",
+  "question": "In SIPDE, what does the \"P\" step involve?",
+  "choices": [
+   "Predicting the actions of other road users",
+   "Parking safely",
+   "Pressing the brake",
+   "Passing slower vehicles"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145"
+ },
+ {
+  "id": "L8-HA-03",
+  "question": "What is defensive driving?",
+  "choices": [
+   "Driving only in the right lane",
+   "Driving slowly at all times",
+   "Using driving techniques to minimize risk and help avoid crashes",
+   "Insisting on your right of way"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+ },
+ {
+  "id": "L8-HA-04",
+  "question": "Which is a fixed hazard?",
+  "choices": [
+   "A hidden driveway",
+   "A busy market area",
+   "An approaching emergency vehicle",
+   "A school zone at dismissal time"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 148"
+ },
+ {
+  "id": "L8-HA-05",
+  "question": "A tailgater is close behind you. What should you do?",
+  "choices": [
+   "Stop in your lane",
+   "Brake suddenly to warn them",
+   "Signal early, stop smoothly, and let the tailgater pass before slowing down",
+   "Speed up to lose them"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 146"
+ },
+ {
+  "id": "L8-HA-06",
+  "question": "An oncoming vehicle starts to steer into your lane. What should you do?",
+  "choices": [
+   "Speed up",
+   "Swerve into the opposite lane",
+   "Drive to the right, reduce speed, and be ready to drive off the road",
+   "Hold your lane and sound the horn"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+ },
+ {
+  "id": "L8-HA-07",
+  "question": "You are forced off the road and cannot avoid hitting something. What should you aim for?",
+  "choices": [
+   "Pedestrians on the shoulder",
+   "A head-on hit with a solid object",
+   "Something soft, or a fixed object hit at an angle",
+   "Another moving vehicle"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+ },
+ {
+  "id": "L8-HA-08",
+  "question": "Before changing lanes, how do you check the area your mirrors do not show?",
+  "choices": [
+   "Take a quick glance over your shoulder at the blind spot",
+   "Sound your horn",
+   "Rely on the rearview mirror only",
+   "Speed up and move over"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+ },
+ {
+  "id": "L8-HA-09",
+  "question": "Which tip helps you avoid a collision with the vehicle ahead?",
+  "choices": [
+   "Keep your eyes only on the car directly ahead",
+   "Drive in its blind spot",
+   "Search the road ahead, around and behind your vehicle",
+   "Follow closely to see its brake lights"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145"
+ },
+ {
+  "id": "L8-HA-10",
+  "question": "You are following a delivery van that completely blocks your view beyond it. Which SIPDE step are you most at risk of skipping?",
+  "choices": [
+   "Search: you can see the van perfectly well",
+   "Execute: you have not had to do anything yet",
+   "Predict: deciding in advance what could come out from behind it",
+   "Identify: the van is already identified"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145; adapted from app L8 lesson quiz"
+ },
+ {
+  "id": "L8-GR-01",
+  "question": "Which of these is an act a driver must NOT do because it can lead to road rage?",
+  "choices": [
+   "Giving way at intersections",
+   "Tailgating",
+   "Keeping a safe distance",
+   "Signaling before turning"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 136"
+ },
+ {
+  "id": "L8-GR-02",
+  "question": "Another driver provokes you with rude gestures. What is the best way to avoid road rage?",
+  "choices": [
+   "Block them from passing",
+   "Stay calm, keep a safe distance, and do not retaliate",
+   "Gesture back",
+   "Follow them to confront them"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 136"
+ },
+ {
+  "id": "L8-GR-03",
+  "question": "On a long drive, you feel tired and sleepy. What should you do?",
+  "choices": [
+   "Stop at an appropriate rest stop and take a short nap",
+   "Drive faster to arrive sooner",
+   "Turn up the music",
+   "Open the windows and keep going"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 162"
+ },
+ {
+  "id": "L8-GR-04",
+  "question": "You are taking medicine that can affect your driving. What should you do?",
+  "choices": [
+   "Drive only short distances",
+   "Drive only at night",
+   "Do not drive, or consult a doctor before driving",
+   "Drive with the hazard lights on"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 169"
+ },
+ {
+  "id": "L8-GR-05",
+  "question": "You are following a student-driver. What should you do?",
+  "choices": [
+   "Sound your horn to hurry them",
+   "Overtake them at once",
+   "Follow closely to push them",
+   "Be patient and expect mistakes"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 172"
+ },
+ {
+  "id": "L8-GR-06",
+  "question": "What is a motor vehicle's horn for?",
+  "choices": [
+   "To ask others to move faster",
+   "To express annoyance",
+   "To warn other road users of your presence",
+   "To greet other drivers"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170"
+ },
+ {
+  "id": "L8-GR-07",
+  "question": "How should you deal with an oncoming driver who is counterflowing?",
+  "choices": [
+   "Block their path",
+   "Avoid eye-to-eye contact to reduce tension",
+   "Gesture at them",
+   "Stare them down"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+ },
+ {
+  "id": "L8-GR-08",
+  "question": "Another driver gives way to you. What does the FDM suggest?",
+  "choices": [
+   "Flash your high beams",
+   "Speed up without acknowledging",
+   "Indicate \"thank you\"",
+   "Sound your horn twice"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+ },
+ {
+  "id": "L8-GR-09",
+  "question": "Which statement describes a responsible driver's health?",
+  "choices": [
+   "Fitness matters only on long trips",
+   "Only professional drivers need to be fit",
+   "A driver should be in a healthy condition before driving",
+   "Health does not affect driving"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 151"
+ },
+ {
+  "id": "L8-GR-10",
+  "question": "You slept badly and are getting over the flu, and a long drive is planned this afternoon. How should you treat this?",
+  "choices": [
+   "As a problem only if the trip is over four hours",
+   "As a reason to drive a bit slower, which is enough",
+   "As a private matter with no bearing on driving",
+   "As a condition that can cause a crash, so the trip should be delayed"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. III/V, pp. 103, 151; adapted from app L8 lesson quiz"
+ },
+ {
+  "id": "L8-GR-11",
+  "question": "You are driving after a serious family argument and keep replaying it instead of watching the road. What is the correct response?",
+  "choices": [
+   "Pull over, calm down, and drive only when you are in control",
+   "Turn the music up loud",
+   "Drive faster so the trip is over sooner",
+   "Keep going, since stopping would make you late"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. IV, pp. 136, 148; adapted from app L8 lesson quiz",
+  "reviewerNotes": "Based on the module's stress-management lesson; the FDM lists stress management as a course topic (p. 48) without detail."
+ },
+ {
+  "id": "L8-GR-12",
+  "question": "Which statement fits courtesy and gender sensitivity toward other road users?",
+  "choices": [
+   "Road conduct is a contest between drivers",
+   "Extra courtesy is owed to women drivers only",
+   "Courtesy is optional if no law is broken",
+   "Courtesy and right-of-way decisions should not depend on who the other road user is"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 8,
+  "source": "FDM Vol. 1 (2021), Ch. II/IV, pp. 42, 137; adapted from app L8 lesson quiz"
+ },
+ {
+  "id": "L9-HA-01",
+  "question": "Your brakes fail. If the car does NOT have anti-lock brakes, what should you do first?",
+  "choices": [
+   "Shift to neutral and coast",
+   "Rapidly pump the brake pedal several times to build pressure",
+   "Switch off the engine",
+   "Pull the parking brake hard at once"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+ },
+ {
+  "id": "L9-HA-02",
+  "question": "Your brakes have failed. Which of these should you also do?",
+  "choices": [
+   "Turn the steering sharply",
+   "Shift to a lower gear and use the parking brake sporadically",
+   "Shift to neutral",
+   "Switch off the engine"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+ },
+ {
+  "id": "L9-HA-03",
+  "question": "Your vehicle starts to skid. What should you do?",
+  "choices": [
+   "Take your foot off the gas and steer gently in the direction you want to go",
+   "Brake hard",
+   "Turn sharply the other way",
+   "Accelerate"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 143"
+ },
+ {
+  "id": "L9-HA-04",
+  "question": "The gas pedal is jammed. What should you NOT do?",
+  "choices": [
+   "Shut off the engine while still moving",
+   "Steer to a safe area",
+   "Shift to neutral",
+   "Press the brake firmly"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 143"
+ },
+ {
+  "id": "L9-HA-05",
+  "question": "A tire blows out. What should you do?",
+  "choices": [
+   "Take your foot off the accelerator, hold the wheel firmly and slow down gradually",
+   "Accelerate to keep control",
+   "Slam on the brakes",
+   "Turn sharply to the shoulder"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 143"
+ },
+ {
+  "id": "L9-HA-06",
+  "question": "Your vehicle has crashed into a river. What should you do?",
+  "choices": [
+   "Stay inside until rescuers arrive",
+   "Get out of the vehicle immediately",
+   "Wait for the vehicle to settle on the bottom",
+   "Call for help before leaving"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+ },
+ {
+  "id": "L9-HA-07",
+  "question": "You must pass through a flooded road. What should you do?",
+  "choices": [
+   "Brake hard throughout",
+   "Speed through to avoid stalling",
+   "Avoid braking as much as possible, release the accelerator to slow, and dry the brakes gently afterward",
+   "Switch to neutral"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+ },
+ {
+  "id": "L9-HA-08",
+  "question": "Why does a road become slippery when it first gets wet?",
+  "choices": [
+   "Tar, rubber and oil on the dry road mix with water",
+   "The tires get colder",
+   "The paint becomes thicker",
+   "The road surface expands"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+ },
+ {
+  "id": "L9-HA-09",
+  "question": "Your vehicle catches fire. What should you NOT do?",
+  "choices": [
+   "Use an ABC fire extinguisher",
+   "Call for assistance",
+   "Put water on a gasoline or diesel fire",
+   "Leave the vehicle if the fire cannot be stopped"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+ },
+ {
+  "id": "L9-HA-10",
+  "question": "After heavy rain, the underpass ahead has knee-deep floodwater. Should you cross?",
+  "choices": [
+   "No; find another route",
+   "Yes, if a jeepney ahead made it through",
+   "Yes, drive through slowly",
+   "Yes, speed through quickly"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142; adapted from app daily challenge 'flooded-road'"
+ },
+ {
+  "id": "L9-HA-11",
+  "question": "Fog cuts visibility to about 20 meters on a mountain road at dawn. What should you do?",
+  "choices": [
+   "Stop in your lane and wait",
+   "Use low beams and reduce your speed",
+   "Follow the car ahead closely to use its lights",
+   "Use high beams to see better"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. II/III, pp. 47, 100; adapted from app daily challenge 'foggy-mountain'"
+ },
+ {
+  "id": "L9-GR-01",
+  "question": "You are involved in a road crash. What should you do first?",
+  "choices": [
+   "Stop",
+   "Leave to find help",
+   "Argue about who is at fault",
+   "Move the vehicles before anything else"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+ },
+ {
+  "id": "L9-GR-02",
+  "question": "After stopping at a crash scene, what should you switch on?",
+  "choices": [
+   "The high beams",
+   "The radio",
+   "The hazard flashers",
+   "The interior lights"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+ },
+ {
+  "id": "L9-GR-03",
+  "question": "Which step is part of handling a road crash?",
+  "choices": [
+   "Move injured people at once",
+   "Leave before the police arrive",
+   "Take photos of the crash",
+   "Repaint the road markings"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+ },
+ {
+  "id": "L9-GR-04",
+  "question": "After a road crash, whom should you call?",
+  "choices": [
+   "Your insurance agent only",
+   "The local law enforcement officers",
+   "No one, if damage is small",
+   "The other driver's employer"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+ },
+ {
+  "id": "L9-GR-05",
+  "question": "What is the primary responsibility of a driver involved in a road crash?",
+  "choices": [
+   "Assess the situation and, if possible, assist the injured and call for help",
+   "Repair the vehicle",
+   "Leave the scene",
+   "Argue with the other driver"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 178"
+ },
+ {
+  "id": "L9-GR-06",
+  "question": "A person is lying unconscious after a crash involving a pedestrian. What does the FDM advise?",
+  "choices": [
+   "Lift the person into your car",
+   "Do not attempt to touch the unconscious or injured person; get help",
+   "Move the person to the side of the road",
+   "Give the person water"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 164"
+ },
+ {
+  "id": "L9-GR-07",
+  "question": "Your vehicle has broken down. Where should the early warning devices (EWD) be placed?",
+  "choices": [
+   "Only behind the vehicle, 1 meter away",
+   "Only in front, 10 meters away",
+   "On the roof of the vehicle",
+   "4 meters in front of and 4 meters behind the stalled vehicle"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 160"
+ },
+ {
+  "id": "L9-GR-08",
+  "question": "A crash causes death or physical injury. What does RA 10586 require of the drivers involved?",
+  "choices": [
+   "Chemical tests for alcohol and drugs",
+   "Nothing, if they were not speeding",
+   "A new driving test",
+   "Only a written statement"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 44 (RA 10586)"
+ },
+ {
+  "id": "L9-GR-09",
+  "question": "A vehicle breaks down on an expressway. How is it removed from the travel way?",
+  "choices": [
+   "By other motorists pushing it",
+   "By the toll operator for free",
+   "It stays until the next day",
+   "By authorized towing operators without delay, at the owner's or driver's expense"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 9,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 125"
+ },
+ {
+  "id": "L10-SC-01",
+  "question": "What does the Road Speed Limiter Act (RA 10916) require?",
+  "choices": [
+   "All vehicles must be under 60 kph",
+   "Speed cameras on all roads",
+   "All private cars must have a speed limiter",
+   "Covered vehicles must have a standard speed limiter installed"
+  ],
+  "answer": 3,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, pp. 51, 52 (RA 10916)"
+ },
+ {
+  "id": "L10-SC-02",
+  "question": "Which vehicles are excluded from RA 10916's speed limiter requirement?",
+  "choices": [
+   "Tanker trucks",
+   "Taxicabs and public utility jeepneys",
+   "Shuttle services",
+   "Buses and trucks"
+  ],
+  "answer": 1,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 51 (RA 10916)"
+ },
+ {
+  "id": "L10-SC-03",
+  "question": "Under RA 10916, what happens to a covered vehicle without a standard speed limiter?",
+  "choices": [
+   "It cannot be registered or renewed (no speed limiter, no registration)",
+   "It may run only at night",
+   "Nothing, if the driver is careful",
+   "It is fined only once a year"
+  ],
+  "answer": 0,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 52 (RA 10916)"
+ },
+ {
+  "id": "L10-SC-04",
+  "question": "What is the first-offense fine under RA 10916 for operating a covered vehicle without a speed limiter?",
+  "choices": [
+   "₱5,000",
+   "₱10,000",
+   "₱20,000",
+   "₱50,000"
+  ],
+  "answer": 3,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 53 (RA 10916)"
+ },
+ {
+  "id": "L10-SC-05",
+  "question": "What is the penalty for tampering with a speed limiter?",
+  "choices": [
+   "₱30,000 and 6 months to 3 years of imprisonment",
+   "Suspension of registration for a week",
+   "₱1,000 only",
+   "A warning"
+  ],
+  "answer": 0,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 53 (RA 10916)"
+ },
+ {
+  "id": "L10-SC-06",
+  "question": "What should a driver do on a wet road?",
+  "choices": [
+   "Slow down and take the necessary precautions",
+   "Keep the same speed",
+   "Drive in the middle of the road",
+   "Speed up to get home sooner"
+  ],
+  "answer": 0,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 164"
+ },
+ {
+  "id": "L10-SC-07",
+  "question": "How should you treat the speed limit when weather or traffic is bad?",
+  "choices": [
+   "Ignore it in heavy rain",
+   "Drive faster to leave the bad weather",
+   "Follow it, but adjust your speed further for weather and traffic conditions",
+   "Always drive at the limit"
+  ],
+  "answer": 2,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+ },
+ {
+  "id": "L10-SC-08",
+  "question": "Which habit helps save fuel?",
+  "choices": [
+   "Brake late and hard",
+   "Drive at high speed in low gear",
+   "Accelerate smoothly and follow the speed limit",
+   "Accelerate hard from every stop"
+  ],
+  "answer": 2,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 102"
+ },
+ {
+  "id": "L10-SC-09",
+  "question": "A bus ahead of you speeds down a steep grade. What should you do?",
+  "choices": [
+   "Tailgate to use its slipstream",
+   "Overtake it on the downhill",
+   "Follow it at the same speed",
+   "Keep within the speed limit and stay well back"
+  ],
+  "answer": 3,
+  "competency": "speed_control",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 111, 180"
+ },
+ {
+  "id": "L10-HA-01",
+  "question": "Black or gray smoke from a gasoline engine usually comes from:",
+  "choices": [
+   "Coolant in the combustion chamber",
+   "A full fuel tank",
+   "Incomplete fuel combustion",
+   "Burning engine oil"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 134"
+ },
+ {
+  "id": "L10-HA-02",
+  "question": "Blue smoke from the exhaust usually means:",
+  "choices": [
+   "The tires are worn",
+   "Fuel is not burning",
+   "Engine oil is burning",
+   "The engine is too cold"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 134"
+ },
+ {
+  "id": "L10-HA-03",
+  "question": "White smoke from a gasoline engine may mean:",
+  "choices": [
+   "The tires are underinflated",
+   "The battery is weak",
+   "Coolant is getting into the combustion chamber",
+   "The air filter is clogged"
+  ],
+  "answer": 2,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 134"
+ },
+ {
+  "id": "L10-HA-04",
+  "question": "A load extends more than 1 meter from the body of a vehicle. What must be attached to it in daytime?",
+  "choices": [
+   "A green light",
+   "A red flag of at least 30 x 30 cm",
+   "Nothing, if the load is tied",
+   "A white cloth"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 168, 180 (RA 4136)"
+ },
+ {
+  "id": "L10-HA-05",
+  "question": "At night, what replaces the red flag on a load that extends over 1 meter?",
+  "choices": [
+   "A red light visible at least 50 meters away",
+   "A white light",
+   "Reflective tape only",
+   "Nothing, if the hazard lights are on"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180 (RA 4136)"
+ },
+ {
+  "id": "L10-HA-06",
+  "question": "A vehicle on a public highway is emitting excessive smoke. Under the Clean Air Act, what may happen?",
+  "choices": [
+   "It is towed at once",
+   "The driver's license is revoked",
+   "Nothing, since emission is checked only at registration",
+   "It may be subjected to a roadside emission test"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 31 (RA 8749)"
+ },
+ {
+  "id": "L10-HA-07",
+  "question": "Which trucks are NOT allowed on expressways?",
+  "choices": [
+   "Trucks with covered loads",
+   "Trucks carrying sand, gravel or fill that is not leveled or covered",
+   "Trucks with speed limiters",
+   "Trucks below 4,500 kg"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 125"
+ },
+ {
+  "id": "L10-HA-08",
+  "question": "Which vehicles are NOT allowed on expressways?",
+  "choices": [
+   "Smoke belchers and vehicles that are not roadworthy",
+   "Vehicles with RFID",
+   "Vehicles with tinted windows",
+   "Vehicles with passengers"
+  ],
+  "answer": 0,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 125"
+ },
+ {
+  "id": "L10-HA-09",
+  "question": "Under the Clean Air Act, what is the penalty for a third smoke-belching offense?",
+  "choices": [
+   "₱500",
+   "A fine of up to ₱6,000 and a one-year suspension of the vehicle's registration",
+   "Revocation of the driver's license",
+   "A warning only"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 31 (RA 8749)"
+ },
+ {
+  "id": "L10-GR-01",
+  "question": "Under the Anti-Distracted Driving Act, when is using a handheld mobile phone prohibited?",
+  "choices": [
+   "Only on expressways",
+   "Only at night",
+   "Only while the vehicle is moving fast",
+   "While the vehicle is moving or temporarily stopped at a traffic light or intersection"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 48 (RA 10913)"
+ },
+ {
+  "id": "L10-GR-02",
+  "question": "Under RA 10913, how may a driver use a mobile phone for calls while driving?",
+  "choices": [
+   "Only to send text messages",
+   "Holding it to the ear at low speed",
+   "Not at all, even hands-free",
+   "With a hands-free device, such as a Bluetooth earpiece"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 166 (RA 10913)"
+ },
+ {
+  "id": "L10-GR-03",
+  "question": "What is the blood alcohol concentration (BAC) limit for drivers of private vehicles up to 4,500 kg?",
+  "choices": [
+   "0.00%",
+   "Below 0.05%",
+   "Below 0.08%",
+   "Below 0.10%"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 39 (RA 10586)"
+ },
+ {
+  "id": "L10-GR-04",
+  "question": "Under RA 10586, drivers of trucks, buses, motorcycles and public utility vehicles are considered under the influence at what BAC level?",
+  "choices": [
+   "0.10% or higher",
+   "More than 0.00%",
+   "0.08% or higher",
+   "0.05% or higher"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 39 (RA 10586)"
+ },
+ {
+  "id": "L10-GR-05",
+  "question": "A driver refuses to undergo the required alcohol or drug test. What is the penalty?",
+  "choices": [
+   "One week of suspension",
+   "A ₱1,000 fine only",
+   "A warning",
+   "Confiscation and automatic revocation of the driver's license"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 44 (RA 10586)"
+ },
+ {
+  "id": "L10-GR-06",
+  "question": "How many field sobriety tests does a law enforcement officer ask a driver to perform?",
+  "choices": [
+   "One",
+   "Two",
+   "Three",
+   "Five"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 41 (RA 10586)"
+ },
+ {
+  "id": "L10-GR-07",
+  "question": "Under RA 11229, when may a child ride using only the regular seat belt instead of a child restraint system?",
+  "choices": [
+   "When the child sits in front",
+   "When the trip is short",
+   "When the child is at least 150 cm (59 inches) tall",
+   "When the child is at least 5 years old"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 61 (RA 11229)"
+ },
+ {
+  "id": "L10-GR-08",
+  "question": "Under the Seat Belts Use Act, what is prohibited for children six years old and below?",
+  "choices": [
+   "Sitting in the front passenger seat",
+   "Wearing a seat belt",
+   "Riding in a private car",
+   "Riding in the back seat"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 34 (RA 8750)"
+ },
+ {
+  "id": "L10-GR-09",
+  "question": "What is the penalty for a third seat belt violation under RA 8750?",
+  "choices": [
+   "A warning",
+   "₱5,000 plus a one-week suspension of the driver's license",
+   "Revocation of the vehicle's registration",
+   "₱1,000 only"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 34 (RA 8750)"
+ },
+ {
+  "id": "L10-GR-10",
+  "question": "Which children must use a child restraint system in a private car?",
+  "choices": [
+   "Only children below 6 years old",
+   "Only children below 10 years old",
+   "All passengers under 18",
+   "Children 12 years old and below who are shorter than 150 cm (about 4'11\")"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 61 (RA 11229); adapted from app mock exam #38"
+ },
+ {
+  "id": "L10-GR-11",
+  "question": "You had three bottles of beer at a friend's birthday, and home is only 2 km away. Should you drive?",
+  "choices": [
+   "Yes, if you drive slowly",
+   "Yes, if you drink coffee first",
+   "Yes, it is a short drive",
+   "No; take a taxi or have a sober friend drive"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, pp. 38, 39 (RA 10586); adapted from app daily challenge 'drunk-driving'"
+ },
+ {
+  "id": "L10-GR-12",
+  "question": "Your 8-year-old niece, about 142 cm (4'8\") tall, is riding with you, and the back seat has no child seat. What should you do?",
+  "choices": [
+   "Let her sit in front with a regular seat belt",
+   "Let her ride on an adult's lap in the back",
+   "Use a proper child restraint system for her",
+   "Use the regular seat belt, since she is old enough"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 61 (RA 11229); adapted from app daily challenge 'child-seat'"
+ },
+ {
+  "id": "L10-GR-13",
+  "question": "You are driving when an important work call comes in on your phone. What should you do?",
+  "choices": [
+   "Text \"call you back\" while driving",
+   "Answer on speaker while holding the phone",
+   "Answer quickly at the next red light",
+   "Pull over safely, then answer"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 10,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170; adapted from app daily challenge 'distracted-driving'"
+ },
+ {
+  "id": "L11-PD-01",
+  "question": "An elderly woman is part-way across the pedestrian crossing at a jeepney stop. What should you do?",
+  "choices": [
+   "Wait patiently for her to finish crossing",
+   "Sound your horn so she hurries",
+   "Drive around her",
+   "Follow the jeepney past her"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. IV/VI, pp. 139, 169"
+ },
+ {
+  "id": "L11-PD-02",
+  "question": "Where must public utility vehicle drivers pick up and drop off passengers?",
+  "choices": [
+   "In the middle of the intersection",
+   "At designated loading and unloading zones only",
+   "Wherever a passenger signals",
+   "On the pedestrian crossing"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V/VI, pp. 152, 161"
+ },
+ {
+  "id": "L11-PD-03",
+  "question": "A jeepney driver stops on the crosswalk to wait for passengers. What is this?",
+  "choices": [
+   "A common traffic violation",
+   "Allowed during rush hour",
+   "Allowed for jeepneys only",
+   "Allowed if no pedestrian is crossing"
+  ],
+  "answer": 0,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+ },
+ {
+  "id": "L11-PD-04",
+  "question": "Which passengers must buses and jeepneys accommodate in properly designated seats?",
+  "choices": [
+   "Students only",
+   "Passengers who pay extra",
+   "Persons with disabilities, pregnant women and senior citizens",
+   "Passengers with large baggage"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 152"
+ },
+ {
+  "id": "L11-PD-05",
+  "question": "Are passengers allowed to stand while the bus is moving?",
+  "choices": [
+   "Yes, in the city only",
+   "Yes, on short trips",
+   "No, not at any time",
+   "Yes, if the bus is full"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 160"
+ },
+ {
+  "id": "L11-PD-06",
+  "question": "Which is a common PUV violation that endangers passengers getting on and off?",
+  "choices": [
+   "Stopping at loading zones",
+   "Opening the door while the vehicle is moving",
+   "Displaying the fare matrix",
+   "Closing the door before moving off"
+  ],
+  "answer": 1,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+ },
+ {
+  "id": "L11-PD-07",
+  "question": "Before a school service moves off, what must the driver make sure of?",
+  "choices": [
+   "The radio is on",
+   "The windows are open",
+   "The fare has been collected",
+   "All passengers are seated properly"
+  ],
+  "answer": 3,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 154"
+ },
+ {
+  "id": "L11-PD-08",
+  "question": "Before parking a school service at the garage, what must the driver check?",
+  "choices": [
+   "That the windows are clean",
+   "That the fuel tank is full",
+   "That no sleeping students or other passengers are left inside",
+   "That the radio is off"
+  ],
+  "answer": 2,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 154"
+ },
+ {
+  "id": "L11-PD-09",
+  "question": "Passengers are waiting at the curb where a jeepney has stopped. What should a passing driver do?",
+  "choices": [
+   "Speed up to pass the jeepney",
+   "Overtake on the curb side",
+   "Sound the horn continuously",
+   "Slow down and watch for people stepping out around the jeepney"
+  ],
+  "answer": 3,
+  "competency": "pedestrians",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. IV, pp. 139, 148"
+ },
+ {
+  "id": "L11-LD-01",
+  "question": "May motorcycle riders leave the designated motorcycle lane?",
+  "choices": [
+   "Only when instructed by enforcers, or when turning into an intersection and signaling within 100 meters",
+   "No, never, even to turn",
+   "Yes, whenever traffic is slow",
+   "Yes, to overtake buses"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 97"
+ },
+ {
+  "id": "L11-LD-02",
+  "question": "May bus drivers use lanes other than the bus lane?",
+  "choices": [
+   "Yes, during rush hour",
+   "Yes, whenever the bus lane is busy",
+   "Only when instructed by enforcers or when turning into an intersection",
+   "Yes, to overtake other buses"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 97"
+ },
+ {
+  "id": "L11-LD-03",
+  "question": "Who may use a bicycle lane?",
+  "choices": [
+   "Bicycles only; motor vehicles are not allowed",
+   "Tricycles",
+   "Motorcycles and bicycles",
+   "Any vehicle in heavy traffic"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. II, p. 98"
+ },
+ {
+  "id": "L11-LD-04",
+  "question": "What is a major cause of road crashes for motorcycle riders?",
+  "choices": [
+   "Wearing a helmet",
+   "Riding in the motorcycle lane",
+   "Habitual and unnecessary changing of lanes",
+   "Using turn signals"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+ },
+ {
+  "id": "L11-LD-05",
+  "question": "A vehicle ahead of you is turning. What should a motorcycle rider NOT do?",
+  "choices": [
+   "Wait for it to finish turning",
+   "Overtake it, especially in its blind spots",
+   "Keep a safe distance",
+   "Slow down"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+ },
+ {
+  "id": "L11-LD-06",
+  "question": "Which vehicles have more blind spots than cars and jeepneys?",
+  "choices": [
+   "Large vehicles such as buses and trucks",
+   "Tricycles",
+   "Motorcycles",
+   "Bicycles"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+ },
+ {
+  "id": "L11-LD-07",
+  "question": "Why is riding a motorcycle alongside a car risky?",
+  "choices": [
+   "It uses more fuel",
+   "Cars must give way to motorcycles",
+   "It is faster",
+   "You may be in the car's blind spot"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 176"
+ },
+ {
+  "id": "L11-LD-08",
+  "question": "Where does the law prohibit motorcycle riders from riding?",
+  "choices": [
+   "In the motorcycle lane",
+   "On sidewalks and center islands",
+   "On provincial roads",
+   "On national roads"
+  ],
+  "answer": 1,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 174 (RA 4136)"
+ },
+ {
+  "id": "L11-LD-09",
+  "question": "May a motorcycle rider stop inside a yellow box?",
+  "choices": [
+   "No, not at any time",
+   "Yes, to wait for passengers",
+   "Yes, if traffic is heavy",
+   "Yes, for up to a minute"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 175"
+ },
+ {
+  "id": "L11-LD-10",
+  "question": "You are turning right on a narrow street, and a tricycle is in your right blind spot. What do you do?",
+  "choices": [
+   "Sound your horn twice and turn",
+   "Swing wide into the opposite lane",
+   "Turn quickly before the tricycle moves",
+   "Check your right mirror and blind spot, then turn slowly"
+  ],
+  "answer": 3,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. III, pp. 117, 119; adapted from app daily challenge 'tricycle-blind-spot'"
+ },
+ {
+  "id": "L11-LD-11",
+  "question": "You are driving a private car on EDSA. The busway is clear while your lane is stuck. May you use the busway?",
+  "choices": [
+   "No; it is reserved for buses",
+   "Yes, since it is empty",
+   "Yes, if you merge back before the next stop",
+   "Yes, during rush hour only"
+  ],
+  "answer": 0,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 97, 180; adapted from app daily challenge 'edsa-bus-lane'",
+  "reviewerNotes": "The EDSA Busway follows DOTr/MMDA rules; the FDM covers bus lanes generally (pp. 97, 180)."
+ },
+ {
+  "id": "L11-LD-12",
+  "question": "A motorcycle is weaving between lanes, and you are about to change lanes. What should you check?",
+  "choices": [
+   "Sound your horn and move over",
+   "Only the rearview mirror",
+   "All your mirrors, plus a shoulder check of the blind spot",
+   "Nothing; motorcycles should watch for cars"
+  ],
+  "answer": 2,
+  "competency": "lane_discipline",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 119; adapted from app daily challenge 'motorcycle-lane'"
+ },
+ {
+  "id": "L11-HA-01",
+  "question": "What shows that a motorcycle helmet meets the quality standard?",
+  "choices": [
+   "A visor",
+   "A full-face design",
+   "A bright color",
+   "ICC or PS stickers on the helmet"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 163, 173"
+ },
+ {
+  "id": "L11-HA-02",
+  "question": "Spilled diesel or oil on the road is especially dangerous to whom?",
+  "choices": [
+   "Bus passengers",
+   "Truck drivers",
+   "Pedestrians on the sidewalk",
+   "Motorcyclists"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 173"
+ },
+ {
+  "id": "L11-HA-03",
+  "question": "What clothing is advisable when riding a motorcycle at night?",
+  "choices": [
+   "Any clothing",
+   "Dark clothing",
+   "Loose clothing",
+   "Bright clothing, so other motorists can see you"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 173"
+ },
+ {
+  "id": "L11-HA-04",
+  "question": "When riding a motorcycle with a back rider, what should you expect?",
+  "choices": [
+   "Faster acceleration",
+   "Better balance at low speed",
+   "A shorter braking distance",
+   "A longer braking distance"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 176"
+ },
+ {
+  "id": "L11-HA-05",
+  "question": "May a rider install a blinking or flashing taillight on a motorcycle?",
+  "choices": [
+   "Yes, for better visibility",
+   "No, it is an illegal modification",
+   "Yes, at night only",
+   "Yes, if it is red"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 175 (JAO 2014-01)"
+ },
+ {
+  "id": "L11-HA-06",
+  "question": "For safety, what should a motorcycle rider do with the headlights?",
+  "choices": [
+   "Use only the high beam",
+   "Switch them on when riding",
+   "Keep them off in the daytime",
+   "Switch them on only at night"
+  ],
+  "answer": 1,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 153"
+ },
+ {
+  "id": "L11-HA-07",
+  "question": "What must a tricycle driver do with the sidecar at night?",
+  "choices": [
+   "Leave it unlit",
+   "Cover it",
+   "Fold it",
+   "Light it properly"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V, p. 155"
+ },
+ {
+  "id": "L11-HA-08",
+  "question": "When is it safest to stop a motorcycle?",
+  "choices": [
+   "Using only the front brake",
+   "Using only the rear brake",
+   "Using the engine kill switch",
+   "Using the front and rear brakes at the same time"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 174"
+ },
+ {
+  "id": "L11-HA-09",
+  "question": "Why should a rider avoid overtaking on a curve?",
+  "choices": [
+   "Curves have no speed limit",
+   "Overtaking is allowed only on curves",
+   "Curves are always one-way",
+   "The motorcycle may skid, especially with inferior rear tires"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. III, p. 122"
+ },
+ {
+  "id": "L11-HA-10",
+  "question": "A jeepney suddenly stops in the middle of the road to pick up passengers, blocking your lane. What should you do?",
+  "choices": [
+   "Overtake on the curb side",
+   "Sound your horn and swerve around it",
+   "Follow it closely so you can pass the moment it moves",
+   "Slow down, check your mirrors, and pass carefully when it is safe"
+  ],
+  "answer": 3,
+  "competency": "hazard_awareness",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. III, pp. 119, 121; adapted from app daily challenge 'jeepney-stop'"
+ },
+ {
+  "id": "L11-GR-01",
+  "question": "Under RA 10666, which condition must a child back rider meet on covered roads?",
+  "choices": [
+   "The child wears a seat belt",
+   "The child is at least 5 years old",
+   "The child sits in front of the rider",
+   "The child's feet reach the foot pegs, the child can grasp the rider's waist, and wears a standard helmet"
+  ],
+  "answer": 3,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 46 (RA 10666)"
+ },
+ {
+  "id": "L11-GR-02",
+  "question": "Under RA 10666, when may a child ride a motorcycle without meeting the usual conditions?",
+  "choices": [
+   "When the child needs immediate medical attention",
+   "When it is daytime",
+   "When the rider is a parent",
+   "When the trip is short"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 166 (RA 10666)"
+ },
+ {
+  "id": "L11-GR-03",
+  "question": "Two passengers insist on riding behind you on a motorcycle. What should you do?",
+  "choices": [
+   "Allow only one back rider",
+   "Allow both on short trips",
+   "Allow both if they wear helmets",
+   "Allow both if they are small"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, p. 177"
+ },
+ {
+  "id": "L11-GR-04",
+  "question": "Where does a tricycle operator get a permit to operate for hire?",
+  "choices": [
+   "From the LTO only",
+   "From the local government unit (LGU)",
+   "From the barangay tanod",
+   "From the LTFRB"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 173, 175"
+ },
+ {
+  "id": "L11-GR-05",
+  "question": "Under the Motorcycle Helmet Act, what is the fine for a first offense of not wearing a standard helmet?",
+  "choices": [
+   "₱500",
+   "₱1,000",
+   "₱1,500",
+   "₱3,000"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 37 (RA 10054)"
+ },
+ {
+  "id": "L11-GR-06",
+  "question": "Who is exempt from the mandatory helmet rule under RA 10054?",
+  "choices": [
+   "Riders below 125 cc",
+   "Drivers of tricycles",
+   "Back riders",
+   "Riders on short trips"
+  ],
+  "answer": 1,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 37 (RA 10054)"
+ },
+ {
+  "id": "L11-GR-07",
+  "question": "What is the maximum size of a custom-made motorcycle top box?",
+  "choices": [
+   "1 foot x 1 foot x 1 foot",
+   "3 feet x 3 feet x 3 feet",
+   "2 feet x 2 feet x 2 feet",
+   "No limit"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V/VI, pp. 153, 165"
+ },
+ {
+  "id": "L11-GR-08",
+  "question": "How far may motorcycle saddle bags extend from the sides of the motorcycle?",
+  "choices": [
+   "Not more than 6 inches",
+   "Not more than 24 inches",
+   "Not more than 14 inches",
+   "No limit"
+  ],
+  "answer": 2,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 1 (2021), Ch. V/VI, pp. 153, 177"
+ },
+ {
+  "id": "L11-GR-09",
+  "question": "RA 10666 restricts carrying children on motorcycles on which roads?",
+  "choices": [
+   "Roads with heavy or fast-moving traffic, or with a speed limit above 60 kph",
+   "Barangay roads only",
+   "Expressways only",
+   "All roads at night only"
+  ],
+  "answer": 0,
+  "competency": "general_rules",
+  "stage": 11,
+  "source": "FDM Vol. 2 (2021), Ch. II, p. 46 (RA 10666)"
+ }
+]

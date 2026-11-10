@@ -96,6 +96,13 @@ export const briefingMessages = {
   checkpointSized: (size: number, tutorial: boolean): Localized => ({ en: `pass the ${size}-item ${tutorial ? 'tutorial ' : ''}checkpoint, then ` }),
   checkpointPlain: (tutorial: boolean): Localized => ({ en: `pass the ${tutorial ? 'tutorial ' : ''}checkpoint, then ` }),
   thenOnly: { en: 'then ' },
+  // The per-competency course (its quiz is drawn per competency from the bank).
+  courseCheckpoint: { en: 'pass the short quiz (3 items per competency, 2 of 3 to pass), then ', fil: 'ipasa ang maikling pagsusulit (3 tanong bawat kakayahan, 2 sa 3 para pumasa), saka ' },
+  courseObjectiveTutorial: { en: 'Learn how Arangkada works, then try the first guided drive.', fil: 'Alamin kung paano gumagana ang Arangkada, saka subukan ang unang ginabayang pagmamaneho.' },
+  courseObjective: (title: string): Localized => ({
+    en: `Study ${title}, pass the short quiz (3 items per competency, 2 of 3 to pass), then apply it in the drive: 3 scenarios per competency, 2 of 3 to pass each.`,
+    fil: `Pag-aralan ang ${title}, ipasa ang maikling pagsusulit (3 tanong bawat kakayahan, 2 sa 3 para pumasa), saka gamitin ito sa pagmamaneho: 3 sitwasyon bawat kakayahan, 2 sa 3 para pumasa.`,
+  }),
   tutorialModule: { en: 'Tutorial Module' },
   ltoModule: (level: number | undefined): Localized => ({ en: `LTO Module ${level}` }),
   loadingCheckpoint: { en: 'Loading the checkpoint…' },

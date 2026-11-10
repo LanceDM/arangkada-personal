@@ -10,6 +10,10 @@
  *   from this level or an earlier one (`remediationCandidates`). The final
  *   exam and the tutorial take none.
  *
+ * - and, on a competency stage, every course drive `composeDrive` gives over
+ *   `ROLL_SEEDS` for the whole stage (3 scenarios per competency): the
+ *   per-competency course plays those, not the level's own road (2026-11-10).
+ *
  * An appended item lengthens the road by the level's own last spacing,
  * whatever was rolled, so the longest roll with the longest item is the
  * longest drive the level can be.
@@ -33,6 +37,9 @@ import { FINAL_EXAM_LEVEL } from '@/domain/routing/routingTypes';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import { rng } from './driveSamples';
+import { composeDrive } from '@/features/driving-sim/domain/scenario/composeDrive';
+import { isCompetencyStage, STAGE_COMPETENCIES } from '@/domain/learner/stageCompetencies';
+import { createRng } from '@/shared/lib/rng';
 import { driveReference, isCorrectDrive, referenceCruise, type ReferenceDriveResult } from './referenceDrive';
 
 /** The rolls a pooled level is measured over. Fixed, so a re-measure on the same content gives the same limit. */
@@ -75,6 +82,7 @@ export const timeLimitFingerprint = (levelId: number): string => {
       level,
       pooled: getPooledSlots(levelId),
       practice: takesPractice(level) ? practiceItemsFor(levelId) : [],
+      composed: isCompetencyStage(levelId) ? ROLL_SEEDS.map(seed => composedFor(levelId, seed)) : [],
       cruise: referenceCruise(level),
     })
   );
@@ -103,6 +111,10 @@ export const whyNotCorrect = (result: ReferenceDriveResult): string =>
     .filter(Boolean)
     .join('; ');
 
+/** The course's whole-stage drive for `seed`: every competency the stage teaches, 3 scenarios each. */
+export const composedFor = (levelId: number, seed: number): LevelConfig =>
+  composeDrive({ levelId, competencies: isCompetencyStage(levelId) ? STAGE_COMPETENCIES[levelId] : [], rng: createRng(seed) }).level;
+
 /** Measures one level's limit. */
 export const measureLevelTimeLimit = (levelId: number): LevelMeasurement => {
   const base = LEVELS.find(entry => entry.id === levelId)!;
@@ -126,6 +138,12 @@ export const measureLevelTimeLimit = (levelId: number): LevelMeasurement => {
         item: item.id,
         result: driveReference(withRemediation(rolled, item), { seed }),
       });
+    }
+  }
+
+  if (isCompetencyStage(levelId)) {
+    for (const seed of ROLL_SEEDS) {
+      drives.push({ roll: seed, item: 'composed', result: driveReference(composedFor(levelId, seed), { seed }) });
     }
   }
 

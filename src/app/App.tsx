@@ -4,6 +4,7 @@ import { AuthModalController } from './providers/AuthModalController';
 import { StudyGate } from './layout/StudyGate';
 import { AppRouter } from './router/AppRouter';
 import { ProgressSync } from './sync/ProgressSync';
+import { StudyActivityLog } from './sync/StudyActivityLog';
 
 /**
  * Composition only: what the app is made of, in the order it nests. Anything
@@ -17,6 +18,7 @@ const App = () => (
   <AppProviders>
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <ProgressSync />
+      <StudyActivityLog />
       <StudyGate>
         <AppRouter />
       </StudyGate>

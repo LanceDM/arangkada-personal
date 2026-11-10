@@ -23,10 +23,13 @@ const firebaseConfig = useEmulator
       appId: import.meta.env.VITE_FIREBASE_APP_ID,
     };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+/** Whether this build talks to the local emulators. */
+export const usingEmulator = useEmulator;
 
 if (useEmulator) {
   if (!configured && import.meta.env.VITE_USE_FIREBASE_EMULATOR !== 'true') {
