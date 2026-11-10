@@ -18,3 +18,4 @@ export { CourseSection } from './presentation/CourseSection';
 export { CourseFlowSection } from './presentation/CourseFlowSection';
 export { QLearningSection } from './presentation/QLearningSection';
 export { useCourseAdmin } from './application/useCourseAdmin';
+export { ScenariosSection } from './presentation/ScenariosSection';

@@ -134,6 +134,7 @@ describe('the admin frame', () => {
       ['IRT', '/admin/irt'],
       ['Player report', '/admin/report'],
       ['Quiz items', '/admin/quiz'],
+      ['Scenarios', '/admin/scenarios'],
       ['Test mode', '/admin/test-mode'],
     ]);
     expect(links.filter(link => link.getAttribute('aria-current') === 'page').map(link => link.textContent)).toEqual(['Participants']);

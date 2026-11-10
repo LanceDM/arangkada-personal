@@ -25,6 +25,8 @@ import type { LevelConfig, ScenarioEvent } from './scenarioDefinition';
 import { speedTarget, speedTargetText } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import type { NpcVehicleSpec, RoadActorKind, PedestrianKind, RoadScene, ScenePrefab, SignPlate, MarkingPlate } from './scenarioScene';
 import { scenarioInstruction } from './scenarioCopy';
+import { UNITS_PER_METER } from '@/features/driving-sim/domain/world/routeGeometry';
+import { CRAWL_SPEED_SHARE } from '@/features/driving-sim/domain/systems/standingPenalties';
 import { englishText, type Localized, type TextOf } from '@/shared/lib/localized';
 
 export interface ScenarioSupport {
@@ -309,10 +311,60 @@ export const supportCue = (event: ScenarioEvent, say: TextOf = englishText): str
     .join(' ');
 };
 
-/** The instruction with the speed it is graded on, where speed decides it. */
+const metreText = (m: number): string => (m < 10 ? `${Math.round(m * 10) / 10} m` : `${Math.round(m)} m`);
+
+/** Metres from the road's own units, on the scale the car is drawn at (`UNITS_PER_METER`). */
+const metres = (units: number): string => metreText(units / UNITS_PER_METER);
+
+/**
+ * Metres across the road from canvas pixels: the car is drawn half a pixel per
+ * route unit, so its 4.5 m length is CAR_LENGTH / 2 pixels.
+ */
+const metresAcross = (px: number): string => metreText(px / (UNITS_PER_METER / 2));
+
+/**
+ * Every number this scenario is graded against, as short target sentences
+ * (2026-11-10, the panel's review: a scenario that asked a driver to slow down
+ * did not say by how much). Read from the same fields the grader reads, so the
+ * figure shown is the figure graded. Empty where nothing numeric decides it (a
+ * question, an inspection, a lane, a plain stop).
+ */
+export const scenarioTargets = (event: ScenarioEvent, level: LevelConfig, say: TextOf = englishText): string[] => {
+  const out: string[] = [];
+  const target = speedTarget(event, level);
+  if (target) out.push(say({ en: `Target: ${speedTargetText(target, say)} by the time you reach it.` }));
+  if (event.maneuver?.maxSpeed !== undefined) {
+    out.push(say({ en: `Target: make the turn at ${Math.round(event.maneuver.maxSpeed)} km/h or less.` }));
+  }
+  if (event.following) {
+    out.push(say({ en: `Target: at least ${event.following.seconds} seconds behind the vehicle ahead, the whole way through.` }));
+  }
+  if (event.lineHold) {
+    const side = event.lineHold.toward ? ` toward the ${event.lineHold.toward}` : '';
+    out.push(say({ en: `Target: drift no more than ${metresAcross(event.lineHold.maxDrift)} sideways${side} while it lasts.` }));
+  }
+  if (event.coast) {
+    out.push(say({ en: `Target: no long brake above ${Math.round(event.coast.brakeBelow)} km/h (taps are fine); at or below it, brake to a stop.` }));
+  }
+  if (event.effect?.stuckThrottle) {
+    out.push(say({ en: `Target: hold the brake until the speed is ${Math.round(level.speedLimit * CRAWL_SPEED_SHARE)} km/h or less.` }));
+  }
+  if (event.merge) {
+    out.push(say({ en: `Target: at least ${Math.round(event.merge.minSpeed)} km/h, and at least ${event.merge.safeGapSeconds} seconds behind the car you join.` }));
+  }
+  if (event.overtake) {
+    out.push(say({ en: `Target: be ${metres(event.overtake.clearBy)} past the vehicle before you move back.` }));
+  }
+  if (event.noStandingWithin !== undefined) {
+    out.push(say({ en: `Target: do not come to rest within ${metres(event.noStandingWithin * UNITS_PER_METER)} of it.` }));
+  }
+  return out;
+};
+
+/** The instruction with every number it is graded on. */
 const withSpeedTarget = (instruction: string, event: ScenarioEvent, level: LevelConfig | undefined, say: TextOf): string => {
-  const target = level ? speedTarget(event, level) : null;
-  if (!target) return instruction;
+  const targets = level ? scenarioTargets(event, level, say) : [];
+  if (targets.length === 0) return instruction;
   const sentence = /[.!?]$/.test(instruction.trim()) ? instruction.trim() : `${instruction.trim()}.`;
-  return say({ en: `${sentence} Target: ${speedTargetText(target, say)}.` });
+  return [sentence, ...targets].join(' ');
 };

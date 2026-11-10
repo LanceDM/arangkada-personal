@@ -161,3 +161,5 @@ export { drivePreview } from './domain/scenario/drivePreview';
 export type { DrivePreview, PreviewScenario } from './domain/scenario/drivePreview';
 export { scenarioFormat, SCENARIO_FORMAT_LABEL } from './domain/scenario/scenarioFormat';
 export type { ScenarioFormat } from './domain/scenario/scenarioFormat';
+export { levelConfigRows, scenarioConfigRows } from './domain/scenario/scenarioCatalog';
+export type { LevelConfigRow, ScenarioConfigRow } from './domain/scenario/scenarioCatalog';

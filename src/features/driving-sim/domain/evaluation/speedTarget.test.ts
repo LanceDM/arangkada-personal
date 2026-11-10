@@ -78,7 +78,7 @@ describe('speedTarget and the prompt', () => {
   });
 
   it('is named on the instruction at full support only', () => {
-    expect(scenarioSupport(hazard, 'full', street).instruction).toMatch(/Target: 20 km\/h or less\.$/);
+    expect(scenarioSupport(hazard, 'full', street).instruction).toMatch(/Target: 20 km\/h or less by the time you reach it\.$/);
     expect(scenarioSupport(hazard, 'cue', street).instruction).toBeNull();
     expect(scenarioSupport(hazard, 'full').instruction).not.toMatch(/Target/);
   });

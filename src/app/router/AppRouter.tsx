@@ -53,6 +53,7 @@ const AdminQLearning = lazy(() => import('@/pages/admin/QLearningPage'));
 const AdminQuiz = lazy(() => import('@/pages/admin/QuizPage'));
 const AdminIrt = lazy(() => import('@/pages/admin/IrtPage'));
 const AdminCourse = lazy(() => import('@/pages/admin/CoursePage'));
+const AdminScenarios = lazy(() => import('@/pages/admin/ScenariosPage'));
 // The study's own pages: a participant joins and signs in by username.
 const StudyHome = lazy(() => import('@/pages/study/StudyHomePage'));
 const StudyJoin = lazy(() => import('@/pages/study/StudyJoinPage'));
@@ -123,6 +124,7 @@ export const AppRouter = () => (
       <Route path="q-learning" element={<AdminQLearning />} />
       <Route path="irt" element={<AdminIrt />} />
       <Route path="course" element={<AdminCourse />} />
+      <Route path="scenarios" element={<AdminScenarios />} />
       <Route path="report" element={<AdminReport />} />
       <Route path="quiz" element={<AdminQuiz />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />

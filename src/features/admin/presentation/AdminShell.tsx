@@ -55,7 +55,10 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
   },
   {
     heading: 'Content',
-    items: [{ to: '/admin/quiz', label: 'Quiz items', icon: ListChecks }],
+    items: [
+      { to: '/admin/quiz', label: 'Quiz items', icon: ListChecks },
+      { to: '/admin/scenarios', label: 'Scenarios', icon: Route },
+    ],
   },
   {
     heading: 'Tools',
