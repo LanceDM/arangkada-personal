@@ -1,3 +1,4 @@
+import type { SiteStatus } from '@/features/admin/domain/siteStatus';
 /**
  * What Admin needs from the outside world, stated as an interface.
  *
@@ -59,3 +60,9 @@ export interface StudyLogRepository {
   events(): Promise<Record<string, unknown>[]>;
 }
 
+
+/** `site/status`: whether the site is open to players. Live for everyone; written by an admin. */
+export interface SiteStatusRepository {
+  watch(onChange: (status: SiteStatus) => void, onError: (error: Error) => void): () => void;
+  set(status: { suspended: boolean; message: string }, uid: string): Promise<void>;
+}

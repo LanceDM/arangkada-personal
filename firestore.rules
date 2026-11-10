@@ -1192,6 +1192,19 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Whether the site is open to players (2026-11-10). Everyone reads it, a
+    // guest included, so the paused screen shows before sign-in; only an admin
+    // writes it, naming themselves.
+    match /site/{docId} {
+      allow read: if true;
+      allow write: if isAdmin() && docId == 'status'
+        && request.resource.data.keys().hasOnly(['suspended', 'message', 'updatedAt', 'updatedBy'])
+        && request.resource.data.suspended is bool
+        && request.resource.data.message is string && request.resource.data.message.size() <= 300
+        && request.resource.data.updatedAt is number
+        && request.resource.data.updatedBy == request.auth.uid;
+    }
+
     // ── Shared content ─────────────────────────────────────
     // Public: guests sit the mock exam too, and the bank also ships in the
     // bundle as the local fallback.

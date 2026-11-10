@@ -8,6 +8,7 @@ import { firebasePilotRecordsRepository } from './infrastructure/FirebasePilotRe
 import { firebaseQuizEditorRepository } from './infrastructure/FirebaseQuizEditorRepository';
 import { firebaseLiveQTable, firebaseStudyLogs, firebaseStudyRecords } from './infrastructure/FirebaseStudyRecords';
 import { sqlBackgrounds, sqlStudyRecords } from './infrastructure/SqlConnectStudyRecords';
+import { firebaseSiteStatus } from './infrastructure/FirebaseSiteStatus';
 
 /** `firestore` (Implementation A) or `firestore+sql` (Implementation B): where the people, roles and settings records live. */
 export const composeAdmin = ({ databaseMode = 'firestore' }: { databaseMode?: 'firestore' | 'firestore+sql' } = {}) =>
@@ -22,5 +23,6 @@ export const composeAdmin = ({ databaseMode = 'firestore' }: { databaseMode?: 'f
     records: databaseMode === 'firestore+sql' ? sqlStudyRecords : firebaseStudyRecords,
     live: firebaseLiveQTable,
     logs: firebaseStudyLogs,
+    site: firebaseSiteStatus,
   });
 

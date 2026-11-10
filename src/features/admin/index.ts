@@ -19,3 +19,5 @@ export { CourseFlowSection } from './presentation/CourseFlowSection';
 export { QLearningSection } from './presentation/QLearningSection';
 export { useCourseAdmin } from './application/useCourseAdmin';
 export { ScenariosSection } from './presentation/ScenariosSection';
+export { SiteStatusPanel } from './presentation/SiteStatusPanel';
+export { useSiteStatus } from './application/useSiteStatus';
