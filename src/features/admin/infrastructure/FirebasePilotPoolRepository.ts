@@ -27,7 +27,6 @@ import {
   NO_STEPS,
   type PilotAccountProgress,
   type PilotAttemptSummary,
-  type PilotCursor,
   type PilotDeviceCheck,
   type PilotGroup,
   type PilotSteps,
@@ -134,11 +133,21 @@ const watch: PilotPoolRepository['watch'] = (onChange, onError) => {
         },
         fail
       ),
+      // The per-competency course's cursor, read as
+      // the place it stands: a stage's module, quiz, drive or repeat is that
+      // level, then the final exam, then certified. Before its first step, none.
       onSnapshot(
-        doc(db, 'users', uid, 'routing', 'cursor'),
+        doc(db, 'users', uid, 'course', 'cursor'),
         snap => {
-          const data = snap.data() as { state?: PilotCursor['state']; outcome?: PilotCursor['outcome']; updatedAt?: number } | undefined;
-          update({ cursor: data?.state ? { state: data.state, outcome: data.outcome ?? null, updatedAt: Number(data.updatedAt ?? 0) } : null });
+          const data = snap.data() as { phase?: { kind?: string; level?: number }; seq?: number; updatedAt?: number } | undefined;
+          const phase = data?.phase;
+          const kind = phase?.kind === 'FINAL' || phase?.kind === 'CERTIFIED' ? phase.kind : 'DRIVE';
+          const started = Boolean(phase) && !(phase?.kind === 'MODULE' && phase.level === 0 && !data?.seq);
+          update({
+            cursor: started
+              ? { state: { kind, ...(kind === 'DRIVE' ? { level: phase?.level ?? 0 } : {}) }, outcome: null, updatedAt: Number(data?.updatedAt ?? 0) }
+              : null,
+          });
         },
         fail
       ),

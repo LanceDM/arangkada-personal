@@ -5,6 +5,7 @@
  */
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { FsmMetrics, ReactionLatency } from '@/features/driving-sim/domain/fsm/fsmMetrics';
+import type { PlayConditions } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type { TransitionLogEntry } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import type { Language } from '@/shared/lib/localized';
 
@@ -27,6 +28,12 @@ export interface LevelAttempt {
    */
   fsmMetrics?: FsmMetrics;
   reactionLatencies?: ReactionLatency[];
+  /**
+   * How a per-competency course drive was played (controls, window,
+   * frame rate, real time lost), inline because a course drive writes no
+   * routing record, where every other attempt keeps it.
+   */
+  play?: PlayConditions;
   /**
    * Written, as true, only when the run ended because the level's driving time
    * ran out. The `time_up` entry in the raw log says the same; this

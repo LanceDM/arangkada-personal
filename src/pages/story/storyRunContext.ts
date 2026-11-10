@@ -10,6 +10,7 @@ import { useOutletContext } from 'react-router-dom';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import type { SupportLevel, WeakArea } from '@/domain/learner/competency';
 import type {
+  BriefingCourse,
   CourseNote,
   LevelConfig,
   LevelFsmTelemetry,
@@ -48,6 +49,9 @@ export interface StoryCourse {
   resultNote: Localized | null;
   /** The finished attempt is still being saved; Continue waits for it. */
   saving: boolean;
+  /** The per-competency course: the topics the drive counted and, once saved, each one's verdict. */
+  topics?: readonly string[];
+  verdicts?: readonly { competency: string; correct: number; total: number; passed: boolean }[] | null;
   /** Something went wrong loading or entering the course. */
   error: Localized | null;
   continueCourse: () => void;
@@ -110,6 +114,8 @@ export interface StoryRunContext {
   course: StoryCourse | null;
   /** Whether the drive re-rolls toward a weak competency: Legacy's game only. */
   liveReroll: boolean;
+  /** The per-competency course's quiz and drive readiness in the briefing; null in every other run. */
+  courseBriefing?: BriefingCourse | null;
 }
 
 export const useStoryRun = () => useOutletContext<StoryRunContext>();

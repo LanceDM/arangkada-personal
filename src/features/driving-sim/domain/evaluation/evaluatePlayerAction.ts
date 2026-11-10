@@ -127,6 +127,9 @@ export const evaluatePlayerAction = (
       result: result.isCorrect ? 'correct' : 'violation',
       points: result.points,
       ruleId: result.trace.ruleId,
+      // The scenario answered, so a repeat drive draws unseen ones and a
+      // competency's drive verdict is read per scenario.
+      scenarioId: event.id,
       competency: result.trace.competency,
       severity: result.trace.severity,
       weight: result.trace.weight,

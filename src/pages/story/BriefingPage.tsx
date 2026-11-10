@@ -15,7 +15,7 @@ import { useStoryRun } from './storyRunContext';
  */
 const BriefingPage = () => {
   const navigate = useNavigate();
-  const { activeLevel, levelConfig, weakArea, course, beginDrive } = useStoryRun();
+  const { activeLevel, levelConfig, weakArea, course, beginDrive, courseBriefing } = useStoryRun();
 
   // `buildLevelConfig` returns null for a level id with no content behind it.
   if (activeLevel === null || !levelConfig) return <Navigate to="/play/story" replace />;
@@ -26,6 +26,7 @@ const BriefingPage = () => {
         level={levelConfig}
         weakArea={weakArea}
         courseNote={course?.note ?? null}
+        course={courseBriefing ?? null}
         onBack={() => navigate('/play/story')}
         onStartGame={() => {
           beginDrive(activeLevel);

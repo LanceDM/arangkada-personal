@@ -53,6 +53,7 @@ const CompletePage = () => {
           course && {
             note: course.saving ? m.savingResult : course.resultNote,
             onContinue: course.saving || course.certified ? null : course.continueCourse,
+            ...(course.topics ? { topics: course.topics, verdicts: course.verdicts ?? null } : {}),
           }
         }
         onPracticeRecommended={() => {

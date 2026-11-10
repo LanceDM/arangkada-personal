@@ -6,6 +6,8 @@
 import type { Localized } from '@/shared/lib/localized';
 
 export const quizMessages = {
+  courseQuizRule: { en: 'Get at least 2 of the 3 questions right for each topic. A topic you pass is not asked again.' },
+  courseNextAttempt: { en: 'Next attempt' },
   timesUp: { en: "Time's up: unanswered questions count as wrong" },
   cleared: { en: 'Checkpoint Cleared!' },
   failed: { en: 'Checkpoint Failed' },
@@ -84,6 +86,8 @@ export const driveMessages = {
 } as const;
 
 export const briefingMessages = {
+  coursePassed: { en: 'Passed' },
+  courseCounted: (n: number): Localized => ({ en: `${n} graded scenarios, 3 for each topic` }),
   tutorialSubtitleQuiz: { en: 'Learn how the lessons, the checkpoint, the drive and its scoring work before the road lessons begin.' },
   tutorialSubtitle: { en: 'Learn how the lessons, the drive and its scoring work before the road lessons begin.' },
   finalSubtitle: { en: 'Study the module, then drive the Final Mission: scenarios drawn from across the course, driven with no hints.' },

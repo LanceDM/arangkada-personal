@@ -19,6 +19,8 @@ export const mapMessages = {
 } as const;
 
 export const resultMessages = {
+  topicVerdict: (correct: number, total: number, passed: boolean): Localized => ({ en: `${correct} of ${total}, ${passed ? 'passed' : 'not passed'}` }),
+  topicRule: { en: 'Each topic passes at 2 of its 3 scenarios.' },
   notRecorded: { en: 'Not recorded' },
   mastered: { en: 'Mastered' },
   improving: { en: 'Improving' },

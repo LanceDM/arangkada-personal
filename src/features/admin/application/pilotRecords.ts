@@ -114,7 +114,12 @@ const eachLimited = async <T>(items: readonly T[], limit: number, work: (item: T
 
 const codeOrder = (a: { code: string }, b: { code: string }) => compareParticipantCodes(a.code, b.code);
 
-const complete = (records: AttemptRecordDocuments) => records.fsm != null && records.decisions != null && records.routing != null;
+// A course drive (it carries an evidence number)
+// saves its FSM log beside it and no decision or routing record: its decisions
+// are in the course log. Any other attempt has all three.
+const isCourseDrive = (attempt: unknown) => typeof (attempt as { evidenceSeq?: unknown } | null)?.evidenceSeq === 'number';
+const complete = (records: AttemptRecordDocuments, attempt?: unknown) =>
+  records.fsm != null && (isCourseDrive(attempt) || (records.decisions != null && records.routing != null));
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
@@ -145,7 +150,7 @@ export const createPilotRecordsStore = <Source, Exported>(
       await eachLimited(unsettled, recordsAtOnce, async attempt => {
         const records = await repository.attemptRecords(entry.uid, attempt.id);
         attempt.records = { ...records, fsm: records.fsm == null ? null : definitions.keepFsm(records.fsm) };
-        attempt.settled = complete(records) || now() - attempt.savedAt >= graceMs;
+        attempt.settled = complete(records, attempt.attempt) || now() - attempt.savedAt >= graceMs;
       });
 
       // Oldest first, ties by id: the order the export's query returns them in.

@@ -9,7 +9,9 @@
 import type { OptimizedRouting } from '@/features/driving-sim/domain/adaptive/courseRouting';
 import type { RoutingMode } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import type {
+  BKTLogRepository,
   BriefingProgressRepository,
+  CompetencyCourseRepository,
   LearnerHistoryRepository,
   QuizBankRepository,
   QuizSittingRepository,
@@ -36,6 +38,9 @@ export interface DrivingSimDependencies {
   routingOverride: RoutingOverrideRepository;
   /** The fifth experiment's designated table, loaded on first use by the Optimized group. */
   optimizedRouting: () => Promise<OptimizedRouting>;
+  /** The per-competency course's store and its BKT log; the game reads them from port step 5. */
+  competencyCourse?: CompetencyCourseRepository;
+  bktLog?: BKTLogRepository;
 }
 
 let bound: DrivingSimDependencies | null = null;

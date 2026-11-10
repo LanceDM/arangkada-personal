@@ -31,6 +31,16 @@ rules_version = '2';
 //   study_invites/{invite}                         StudyInviteDoc, an invite and its cohort
 //   study_counters/{cohort}                        StudyCounterDoc, the cohort's next enrolment
 //   participants/{code}                            ParticipantDoc, the study's registry
+//   users/{uid}/course/cursor                      CourseCursor, the per-competency course
+//   users/{uid}/course/active                      ActiveActivity, the quiz or drive open, with its seed
+//   users/{uid}/course/evidence                    { nextSeq }: numbers each drive and course quiz (BKT's order)
+//   users/{uid}/course/preTestSeed                 PreTestSeed: per-competency counts, written with the pre-test
+//   users/{uid}/courseQuizSittings/{id}            CourseQuizSitting, append-only
+//   users/{uid}/courseLog/{id}                     CourseLogEntry: decisions, rewards, table snapshot, append-only
+//   users/{uid}/bkt/profile                        BKTProfileDoc, the participant's BKT now
+//   users/{uid}/bktUpdates/{id}                    BKTUpdateRecord, one per graded answer, append-only
+//   q_tables/{cohort}                              the shared Q-table of a cohort: study, dryrun or test
+//   q_tables/{cohort}/updates/{id}                 QLogEntry: every change to that table, append-only
 //
 // Who:
 //   - A player reads and writes only their own users/{uid} tree, and can delete
@@ -112,6 +122,148 @@ service cloud.firestore {
         && data.unlockedLevels is list
         && data.levelBest is map
         && data.updatedAt is number;
+    }
+
+    // ── The per-competency course ──
+
+    function isCourseCursor(data) {
+      return data.keys().hasAll(['schemaVersion', 'phase', 'stage', 'pending', 'seen', 'flagged', 'seq', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.phase is map
+        && data.phase.kind in ['MODULE', 'QUIZ', 'QUIZ_REVIEW', 'DRIVE', 'REPEAT', 'FINAL', 'CERTIFIED']
+        && data.stage is map
+        && data.pending is list
+        && data.seen is map
+        && data.flagged is list
+        && isCount(data.seq)
+        && data.updatedAt is number;
+    }
+
+    function isActiveActivity(data) {
+      return data.keys().hasAll(['kind', 'position', 'seed', 'openedAt', 'opens'])
+        && data.kind in ['quiz', 'drive']
+        && data.position is string
+        && data.seed is int
+        && data.openedAt is number
+        && data.opens is int && data.opens >= 1;
+    }
+
+    // The pre-test seeds BKT once (no learning step), as counts per
+    // competency: the device never holds which items were missed.
+    function isPreTestSeed(data) {
+      return data.keys().hasOnly(['schemaVersion', 'counts', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.counts is map
+        && data.counts.size() <= 11
+        && data.timestamp is number;
+    }
+
+    function isCourseQuizSitting(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'attempt', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind == 'quiz'
+        && data.levelId is int
+        && data.attempt is int && data.attempt >= 1 && data.attempt <= 3
+        && data.answers is list
+        && data.timestamp is number;
+    }
+
+    // The post-test is never a course-log kind: it rewards no decision.
+    function isCourseLogEntry(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'decisions', 'rewards', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind in ['drive', 'quiz', 'final']
+        && data.decisions is list
+        && data.rewards is list
+        && data.timestamp is number;
+    }
+
+    // A drive or course quiz is numbered by the participant's evidence counter,
+    // moved on in the same write. Records from before the counter carry none.
+    function isNumberedEvidence(uid, data) {
+      let counter = /databases/$(database)/documents/users/$(uid)/course/evidence;
+      return !data.keys().hasAny(['evidenceSeq'])
+        || (data.evidenceSeq is int
+          && existsAfter(counter)
+          && getAfter(counter).data.nextSeq == data.evidenceSeq + 1);
+    }
+
+    // A logged record's id is its eventId, made on the device; a retried
+    // write may touch only the server time.
+    function isEnvelope(data, uid, id) {
+      return data.keys().hasAll(['schemaVersion', 'eventId', 'uid', 'at', 'sessionId', 'appBuild', 'configVersion'])
+        && data.schemaVersion == 1
+        && data.eventId == id
+        && data.uid == uid
+        && data.at is number
+        && data.sessionId is string
+        && data.appBuild is string
+        && data.configVersion is string;
+    }
+
+    function onlyServerTimeChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['serverAt']);
+    }
+
+    function isBKTUpdate(data, uid, id) {
+      return isEnvelope(data, uid, id)
+        && data.keys().hasAll(['userSeq', 'competency', 'source', 'correct', 'params', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter'])
+        && data.userSeq is int
+        && data.source in ['drive', 'quiz', 'pre_test']
+        && data.correct is bool
+        && data.params is map
+        && data.pBefore is number && data.pAfter is number;
+    }
+
+    function isBKTProfile(data, uid) {
+      return data.keys().hasAll(['schemaVersion', 'uid', 'configVersion', 'updates', 'competencies', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.uid == uid
+        && data.updates is int
+        && data.competencies is map
+        && data.competencies.size() == 11;
+    }
+
+    // Which shared table an account trains: an active participant only their
+    // own cohort's, and an account outside the study (the team) only `test`,
+    // so no tester's play reaches the table the study's participants learn.
+    function mayTrainTable(table) {
+      let enrolment = enrolmentPath(request.auth.uid);
+      return isSignedIn()
+        && ((exists(enrolment) && get(enrolment).data.cohort == table && isActiveParticipant(request.auth.uid))
+          || (!isStudyAccount() && !exists(enrolment) && table == 'test'));
+    }
+
+    function isQTableDoc(data) {
+      return data.keys().hasAll(['schemaVersion', 'table', 'updates', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.table is map
+        && data.table.size() <= 8
+        && isCount(data.updates)
+        && data.updatedAt is number;
+    }
+
+    // The table's values cannot be checked here, so every change must come
+    // with its log: the counter only moves forward, the last change names
+    // this account, and the entry it names exists in the same write.
+    function isLoggedTableChange(table, previousUpdates) {
+      let next = request.resource.data;
+      let entryPath = /databases/$(database)/documents/q_tables/$(table)/updates/$(next.lastUpdate.updateId);
+      return next.updates > previousUpdates
+        && next.lastUpdate is map
+        && next.lastUpdate.uid == request.auth.uid
+        && next.lastUpdate.globalSeq == next.updates
+        && existsAfter(entryPath)
+        && getAfter(entryPath).data.globalSeq == next.updates
+        && getAfter(entryPath).data.uid == request.auth.uid;
+    }
+
+    function isQLogEntry(data, id) {
+      return isEnvelope(data, request.auth.uid, id)
+        && data.keys().hasAll(['globalSeq', 'kind', 'stateKey', 'action', 'tableAfter', 'statesAfter'])
+        && data.globalSeq is int
+        && data.kind in ['visit', 'learn']
+        && data.tableAfter is map;
     }
 
     function isLevelAttempt(data) {
@@ -701,7 +853,7 @@ service cloud.firestore {
 
       match /attempts/{attemptId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data);
+        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
         allow update, delete: if false; // append-only, never rewrite history
 
         // The raw FSM transition log, the per-decision record and the routing
@@ -818,6 +970,52 @@ service cloud.firestore {
       // written once and only after the one before it: consent (whose
       // record, with the name, is the admin-only `consents/{uid}`), the
       // device check, and the survey once the post-test is finished.
+      // ── The per-competency course ──
+      // The cursor and the open activity are rewritten as the course moves;
+      // the evidence counter only counts forward; the pre-test's seed is
+      // written once, only in the write that finishes the pre-test.
+      match /course/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid)
+          && ((docId == 'cursor' && isCourseCursor(request.resource.data))
+            || (docId == 'active' && isActiveActivity(request.resource.data))
+            || (docId == 'evidence' && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1)
+            || (docId == 'preTestSeed' && isPreTestSeed(request.resource.data)
+              && get(/databases/$(database)/documents/users/$(uid)/testStatus/pre).data.status == 'open'
+              && getAfter(/databases/$(database)/documents/users/$(uid)/testStatus/pre).data.status == 'finished'
+              && existsAfter(/databases/$(database)/documents/users/$(uid)/testSittings/pre)));
+        allow update: if isOwner(uid)
+          && ((docId == 'cursor' && isCourseCursor(request.resource.data))
+            || (docId == 'active' && isActiveActivity(request.resource.data))
+            || (docId == 'evidence' && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq));
+        allow delete: if false;
+      }
+
+      match /courseQuizSittings/{sittingId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isCourseQuizSitting(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
+        allow update, delete: if false;
+      }
+
+      match /courseLog/{entryId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isCourseLogEntry(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      match /bkt/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid) && docId == 'profile' && isBKTProfile(request.resource.data, uid);
+        allow delete: if false;
+      }
+
+      match /bktUpdates/{updateId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId);
+        allow update: if isOwner(uid) && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+
       match /study/{docId} {
         allow read: if isOwner(uid) || isAdmin();
         allow create: if isOwner(uid)
@@ -856,6 +1054,26 @@ service cloud.firestore {
       }
     }
 
+    // ── The shared Q-tables ───
+    // One per cohort. Read by any signed-in account, which chooses from it;
+    // trained only as mayTrainTable allows, and every change with its log.
+    match /q_tables/{table} {
+      allow read: if isSignedIn();
+      allow create: if table in ['study', 'dryrun', 'test'] && mayTrainTable(table)
+        && isQTableDoc(request.resource.data) && isLoggedTableChange(table, 0);
+      allow update: if mayTrainTable(table)
+        && isQTableDoc(request.resource.data) && isLoggedTableChange(table, resource.data.updates);
+      allow delete: if false;
+
+      match /updates/{updateId} {
+        allow read: if isAdmin();
+        allow create: if mayTrainTable(table) && isQLogEntry(request.resource.data, updateId)
+          && getAfter(/databases/$(database)/documents/q_tables/$(table)).data.updates >= request.resource.data.globalSeq;
+        allow update: if isSignedIn() && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+    }
+
     // ── The admin report's collection-group queries ────────
     // A collection-group query is judged against a recursive match only, never
     // against the per-user rules above.
@@ -868,6 +1086,10 @@ service cloud.firestore {
     }
 
     match /{path=**}/dailyAttempts/{attemptId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/courseLog/{entryId} {
       allow read: if isAdmin();
     }
 

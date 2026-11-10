@@ -64,6 +64,23 @@ export {
   startPostTest,
 } from './application/use-cases/startCourseEntry';
 export { courseProgressOf, cursorFrontierLevel } from './domain/adaptive/courseRouting';
+export { competencyCourseProgressOf } from './domain/adaptive/competencyCourseProgress';
+// The per-competency course.
+export {
+  finishCourseQuizReview,
+  loadCourse,
+  markCourseLessonsRead,
+  markCourseReviewShown,
+  openCourseQuiz,
+  planCourseDrive,
+  submitCourseQuiz,
+  type CourseDriveRun,
+  type QuizCompetencyResult,
+} from './application/use-cases/competencyCourse';
+export { courseDepsFor, finishCourseDrive, loadCompetencyCourseCursor, type CourseAccount } from './application/use-cases/courseSession';
+export type { BriefingCourse } from './presentation/ui/MissionBriefing';
+export type { QTableId } from './application/ports';
+export type { QuizSittingDoc } from './domain/scenario/quizBank';
 // What the study's device check measures against.
 export { useTouchDevice, usePortrait } from './presentation/input/useTouchDevice';
 export { KEEPS_UP_AT_FPS } from './presentation/drive/frameSteps';

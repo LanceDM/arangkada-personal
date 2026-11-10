@@ -544,7 +544,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
     ],
     lawCitation:
       'A Student Permit holder may only drive under the direct supervision of a licensed driver occupying the seat beside them, and only while the permit itself remains valid.',
-    competency: 'document_awareness',
+    competency: 'driver_legality',
     severity: 'critical',
     inspection: {
       officerLine: 'Tapos na po ba ang validity ng permit ninyo?',

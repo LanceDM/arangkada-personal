@@ -13,7 +13,7 @@
 import { guestAttempts } from '@/features/progression';
 import { createStudyAccount, signInStudyAccount } from '@/features/auth';
 import { loadTestProgress } from '@/features/assessment';
-import { courseProgressOf, loadCourseCursor } from '@/features/driving-sim';
+import { competencyCourseProgressOf, loadCompetencyCourseCursor } from '@/features/driving-sim';
 import { composeAuth } from '@/features/auth/composition';
 import { composeAssessment } from '@/features/assessment/composition';
 import { composeStudy } from '@/features/study/composition';
@@ -59,7 +59,8 @@ composeStudy({
     signIn: async (username, password) => ({ uid: (await signInStudyAccount(username, password)).uid }),
   },
   sources: {
-    course: async uid => courseProgressOf(await loadCourseCursor(uid)),
+    // The per-competency course, as the game plays it.
+    course: async uid => competencyCourseProgressOf(await loadCompetencyCourseCursor(uid)),
     tests: loadTestProgress,
   },
 });

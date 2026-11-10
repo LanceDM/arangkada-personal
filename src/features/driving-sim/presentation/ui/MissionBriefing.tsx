@@ -33,12 +33,31 @@ import type { CourseNote } from '@/features/driving-sim/domain/adaptive/routingB
 import { useProgressStore } from '@/features/progression';
 import { useAuthSession } from '@/features/auth';
 import { useBriefing, type QuizGate } from '@/features/driving-sim/application/useBriefing';
-import { recordQuizSitting, useLevelQuiz } from '@/features/driving-sim/application/levelQuiz';
-import type { QuizSittingDoc } from '@/features/driving-sim/domain/scenario/quizBank';
+import { recordQuizSitting, useLevelQuiz, type LevelQuizLoad } from '@/features/driving-sim/application/levelQuiz';
+import type { QuizItemDoc, QuizSittingDoc } from '@/features/driving-sim/domain/scenario/quizBank';
 import LessonReader from './LessonReader';
 import MissionQuiz from './MissionQuiz';
 import type { TextOf } from '@/shared/i18n/useText';
 import { briefingMessages as m } from './messages';
+
+/**
+ * The per-competency course's part of a briefing:
+ * its own quiz draw and verdict in place of the level's sitting, and a drive
+ * that opens only once the course has planned it.
+ */
+export interface BriefingCourse {
+  /** The course's draw for this attempt; `no-quiz` once the quiz is behind the participant. */
+  quiz: LevelQuizLoad;
+  passes: (answers: Readonly<Record<string, number>>, items: readonly QuizItemDoc[]) => boolean;
+  onQuizFinish: (sitting: QuizSittingDoc) => void;
+  onQuizRetry: () => void;
+  retryLoad: () => void;
+  driveReady: boolean;
+  /** This stage's quiz is behind the participant: its step stays, shown passed. */
+  quizDone: boolean;
+  /** The graded scenarios the planned drive counts; null until it is planned. */
+  countedScenarios: number | null;
+}
 
 interface MissionBriefingProps {
   level: LevelConfig;
@@ -47,6 +66,7 @@ interface MissionBriefingProps {
   courseNote?: CourseNote | null;
   onBack: () => void;
   onStartGame: () => void;
+  course?: BriefingCourse | null;
 }
 
 const moduleSubtitle = (level: LevelConfig, hasQuiz: boolean, t: TextOf) => {
@@ -77,7 +97,7 @@ const weakAreaLine = (levelId: number, label: string, t: TextOf) =>
     ? t(m.weakRoll(label))
     : t(m.weakPractice);
 
-const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame }: MissionBriefingProps) => {
+const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, course = null }: MissionBriefingProps) => {
   const t = useText();
   const { language } = useLanguage();
   const authoredModule = LEVEL_MODULES[level.moduleId] ?? getLevelModule(level.id);
@@ -90,11 +110,14 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame }: M
     return names.length ? summariseCoverage(names, loadSignCoverage()) : null;
   }, [level.id]);
   const simulationDone = Boolean(levelResult?.completed);
-  const { quiz: quizLoad, retry: retryQuiz } = useLevelQuiz(level.moduleId);
-  const levelQuiz = quizLoad.kind === 'quiz' ? quizLoad.quiz : null;
-  const gate: QuizGate = quizLoad.kind === 'quiz' ? 'required' : quizLoad.kind === 'no-quiz' ? 'open' : 'blocked';
+  const own = useLevelQuiz(level.moduleId);
+  const quizLoad = course ? course.quiz : own.quiz;
+  const retryQuiz = course ? course.retryLoad : own.retry;
+  const levelQuiz = quizLoad.kind === 'quiz' && !isTutorial(level) ? quizLoad.quiz : null;
+  // The tutorial teaches the controls and has no quiz, whatever the bank holds for its module.
+  const gate: QuizGate = isTutorial(level) ? 'open' : quizLoad.kind === 'quiz' ? 'required' : quizLoad.kind === 'no-quiz' ? 'open' : 'blocked';
   // A blocked quiz still shows its step: that is where the retry is.
-  const hasQuiz = gate !== 'open';
+  const hasQuiz = gate !== 'open' || (course?.quizDone ?? false);
   const quizSize = levelQuiz?.itemsPerSitting ?? 0;
   const readMinutes = moduleReadMinutes(levelModule);
   const subtitle = moduleSubtitle(level, hasQuiz, t);
@@ -135,13 +158,15 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame }: M
   // Signed-in players only: a guest's sittings are never stored.
   const handleQuizFinish = useCallback(
     (sitting: QuizSittingDoc) => {
-      if (uid) recordQuizSitting(uid, sitting);
+      if (course) course.onQuizFinish(sitting);
+      else if (uid) recordQuizSitting(uid, sitting);
     },
-    [uid]
+    [uid, course]
   );
 
-  const quizStep =
-    quizLoad.kind === 'loading'
+  const quizStep = course?.quizDone
+    ? { detail: t(m.coursePassed), actionText: t(m.coursePassed), disabled: true, active: false, onClick: openQuiz }
+    : quizLoad.kind === 'loading'
       ? { detail: t(m.loadingCheckpoint), actionText: t(m.loading), disabled: true, active: false, onClick: openQuiz }
       : gate === 'blocked'
         ? { detail: t(m.quizLoadFailed), actionText: t(m.retry), disabled: false, active: true, onClick: retryQuiz }
@@ -167,16 +192,16 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame }: M
     {
       title: t(m.shortQuiz),
       ...quizStep,
-      done: quizPassed && gate === 'required',
+      done: (quizPassed && gate === 'required') || (course?.quizDone ?? false),
       icon: BrainCircuit,
     },
     {
       title: t(m.drivingSimulation),
-      detail: parts.join(' · '),
-      done: simulationDone,
-      active: canStartMission && !simulationDone,
-      disabled: !canStartMission,
-      actionText: t(simulationDone ? m.replay : m.drive),
+      detail: course && course.countedScenarios !== null ? t(m.courseCounted(course.countedScenarios)) : parts.join(' · '),
+      done: course ? false : simulationDone,
+      active: canStartMission && (course ? course.driveReady : !simulationDone),
+      disabled: !canStartMission || (course !== null && !course.driveReady),
+      actionText: t(simulationDone && !course ? m.replay : m.drive),
       onClick: onStartGame,
       icon: Route,
     },
@@ -439,6 +464,7 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame }: M
           onPass={markQuizPassed}
           onClose={closeQuiz}
           onFinish={handleQuizFinish}
+          course={course ? { passes: course.passes, onRetry: () => { closeQuiz(); course.onQuizRetry(); } } : undefined}
         />
       )}
     </div>

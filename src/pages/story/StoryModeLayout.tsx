@@ -13,17 +13,20 @@
  */
 import { Say } from '@/shared/i18n/language';
 import { storyMessages as m } from './messages';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useEnrolment } from '@/features/study';
 import { useAuthSession } from '@/features/auth';
 import {
   adminTestModeAllowed,
   loadRoutingOverride,
   resolveRoutingGroup,
   routingGroupNow,
+  type CourseAccount,
   type RoutingGroupResolution,
 } from '@/features/driving-sim';
 import LegacyStoryRun from './LegacyStoryRun';
 import RoutedStoryRun from './RoutedStoryRun';
+import CompetencyStoryRun from './CompetencyStoryRun';
 import type { StoryRouting } from './storyRunContext';
 
 const StoryModeLayout = () => {
@@ -33,6 +36,16 @@ const StoryModeLayout = () => {
   // never a study participant's.
   const canOverride = adminTestModeAllowed({ isAdmin, studyAccount });
   const override = loadRoutingOverride(canOverride);
+
+  // A signed-in account plays the per-competency course: a participant on their cohort's shared table, anyone else (the
+  // team) on `test`. A guest saves nothing and keeps the old game.
+  const enrolment = useEnrolment(uid);
+  const account = useMemo<CourseAccount | null>(() => {
+    if (!uid) return null;
+    if (enrolment.status === 'enrolled') return { uid, participantCode: enrolment.enrolment.code, table: enrolment.enrolment.cohort };
+    if (enrolment.status === 'not-enrolled') return { uid, participantCode: null, table: 'test' };
+    return null;
+  }, [uid, enrolment]);
 
   const immediate = routingGroupNow({ uid, canOverride, authLoading: loading });
   const key = `${uid ?? 'guest'}:${canOverride}:${override}`;
@@ -59,11 +72,12 @@ const StoryModeLayout = () => {
   }, [needsLoad, key, uid, canOverride]);
 
   const resolution = immediate ?? (loaded?.key === key ? loaded.resolution : null);
-  if (!resolution) {
+  const enrolmentPending = uid !== null && account === null;
+  if (!resolution || enrolmentPending) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <p className="font-display text-sm uppercase tracking-widest text-muted-foreground">
-          <Say {...(failed === key ? m.courseNotLoaded : m.loadingCourse)} />
+          <Say {...(failed === key || enrolment.status === 'error' ? m.courseNotLoaded : m.loadingCourse)} />
         </p>
       </div>
     );
@@ -75,6 +89,8 @@ const StoryModeLayout = () => {
     openAll: (import.meta.env.DEV || isAdmin) && !studyAccount,
     participant: studyAccount,
   };
+
+  if (account) return <CompetencyStoryRun key={account.uid} routing={routing} account={account} />;
 
   return resolution.groupInEffect === 'legacy' ? (
     <LegacyStoryRun routing={routing} />

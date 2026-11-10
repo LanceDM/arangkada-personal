@@ -1,5 +1,12 @@
 import type { SupportLevel } from './competency';
 
+/**
+ * Where a graded answer came from. Absent means
+ * `drive`, which every attempt saved before this field existed is. The
+ * post-test is not a source: it is the outcome measure, never evidence.
+ */
+export type EvidenceSource = 'drive' | 'quiz' | 'pre_test';
+
 export interface ActionLog {
   timestamp: number;
   action: string;
@@ -69,6 +76,14 @@ export interface ActionLog {
    * is not BKT evidence. Written only when true.
    */
   unanswered?: true;
+  /** Where this answer came from; absent means `drive`. */
+  source?: EvidenceSource;
+  /** The scenario a drive decision was graded on, so a repeat drive draws unseen content. */
+  scenarioId?: string;
+  /** A quiz or pre-test answer: the bank item answered. */
+  itemId?: string;
+  /** A short-quiz answer: which attempt of the stage's quiz (1-3). */
+  quizAttempt?: number;
 }
 
 /**

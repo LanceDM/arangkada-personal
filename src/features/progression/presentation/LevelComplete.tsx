@@ -35,6 +35,14 @@ export interface LevelCompleteCourse {
   note: Localized | null;
   /** Null once the course is complete, or while the attempt is still being saved. */
   onContinue: (() => void) | null;
+  /**
+   * The per-competency course: the topics this
+   * drive counted, and each one's verdict once saved. The course passes a
+   * topic at 2 of its 3 and reads no score, so the screen shows these in place
+   * of the stars, the score and the pass mark, and names only these topics.
+   */
+  topics?: readonly string[];
+  verdicts?: readonly { competency: string; correct: number; total: number; passed: boolean }[] | null;
 }
 
 const formatCompetency = (competency: string | null | undefined, t: TextOf) => t(competencyText(competency));
@@ -176,14 +184,30 @@ const LevelComplete = ({
   course,
 }: LevelCompleteProps) => {
   const t = useText();
-  const passed = result.score >= level.requiredScore;
+  const perTopic = course?.topics !== undefined;
+  const verdicts = course?.verdicts ?? null;
+  const passed = perTopic ? (verdicts ? verdicts.every(v => v.passed) : result.completed) : result.score >= level.requiredScore;
+  // In the course the stars follow its own rule, the one the algorithm reads
+  //: 3 when every topic is all right, 2 when every
+  // topic passes (2 of 3), 1 otherwise. Display only: nothing reads them.
+  const stars = !perTopic
+    ? result.stars
+    : !verdicts
+      ? 0
+      : verdicts.every(v => v.correct === v.total) && verdicts.every(v => v.passed)
+        ? 3
+        : verdicts.every(v => v.passed)
+          ? 2
+          : 1;
   // The tutorial teaches the controls. Its steps carry a competency only because
   // their scenario type implies one, so naming skills after it would report as
   // knowledge what was a keypress: no breakdown, no focus, no practice.
   const tutorial = isTutorial(level);
   const competencyEntries = tutorial
     ? []
-    : getPracticedCompetencies(result.logs, result.competencyScores ?? {}).slice(0, 6);
+    : getPracticedCompetencies(result.logs, result.competencyScores ?? {})
+        .filter(([competency]) => !perTopic || course!.topics!.includes(competency))
+        .slice(0, 6);
   const hasProfile = competencyEntries.length > 0;
 
   // Sorted weakest-first: anything below 100 is what to work on, otherwise the
@@ -254,12 +278,25 @@ const LevelComplete = ({
             </div>
           )}
 
+          {perTopic && (
+            <div className="mt-5 space-y-2 text-left">
+              {(verdicts ?? []).map(v => (
+                <div key={v.competency} className="flex items-center justify-between rounded-xl bg-secondary px-3 py-2">
+                  <span className="text-xs font-medium text-foreground">{formatCompetency(v.competency, t)}</span>
+                  <span className={`font-display text-xs ${v.passed ? 'text-accent' : 'text-destructive'}`}>
+                    {t(m.topicVerdict(v.correct, v.total, v.passed))}
+                  </span>
+                </div>
+              ))}
+              <p className="text-center text-[11px] text-muted-foreground">{t(m.topicRule)}</p>
+            </div>
+          )}
           {/* Stars */}
           <div className="mt-5 flex justify-center gap-2">
             {[1, 2, 3].map(s => (
               <Star
                 key={s}
-                className={`h-9 w-9 transition-all duration-500 ${s <= result.stars
+                className={`h-9 w-9 transition-all duration-500 ${s <= stars
                   ? 'text-primary fill-primary drop-shadow-lg'
                   : 'text-muted-foreground/20'
                 }`}

@@ -767,6 +767,11 @@ export type GarageDetailArt =
  */
 export interface GarageHotspot {
   id: string;
+  /**
+   * What a decision log records as its scenario, so a repeat drive can draw
+   * content the learner has not seen. Absent: the point's `id`.
+   */
+  scenarioId?: string;
   label: string;
   /**
    * What this point is about, for the marker that stands on it.

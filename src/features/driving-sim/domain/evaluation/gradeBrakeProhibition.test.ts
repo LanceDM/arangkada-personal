@@ -42,9 +42,9 @@ const verdict = (telemetry: ReturnType<typeof drive>, event: ScenarioEvent, leve
 };
 
 describe('the content this holds', () => {
-  it('is the six Level 5 variants, five of them borrowed by the final exam', () => {
+  it('is the six Level 5 variants, three of them borrowed by the final exam (the yellow boxes left with their retag)', () => {
     expect(LEVEL5_ITEMS).toHaveLength(6);
-    expect(LEVEL12_ITEMS).toHaveLength(5);
+    expect(LEVEL12_ITEMS).toHaveLength(3);
     for (const event of [...LEVEL5_ITEMS, ...LEVEL12_ITEMS]) expect(event.correctAction).toBe('accelerate');
   });
 });

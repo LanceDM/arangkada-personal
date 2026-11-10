@@ -29,7 +29,7 @@ describe('a level counted the way the drive scores it', () => {
     expect(counted).toEqual({
       0: [5, 0, 0, 85],
       1: [5, 0, 0, 110],
-      2: [3, 8, 0, 240],
+      2: [3, 10, 0, 280],
       3: [8, 0, 0, 165],
       4: [5, 0, 0, 110],
       5: [8, 0, 0, 180],
@@ -62,7 +62,7 @@ describe('a level counted the way the drive scores it', () => {
   });
 
   it('lists the parts in the order they are played', () => {
-    expect(compositionParts(missionComposition(level(2)))).toEqual(['8 garage checks', '3 road events']);
+    expect(compositionParts(missionComposition(level(2)))).toEqual(['10 garage checks', '3 road events']);
     expect(compositionParts(missionComposition(level(9)))).toEqual(['6 road events', '4 crash-scene steps']);
     expect(compositionParts(missionComposition(level(10)))).toEqual(['4 garage checks', '7 road events']);
   });
