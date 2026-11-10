@@ -27,29 +27,45 @@ const chunks = <T>(items: readonly T[]): T[][] =>
 const counterDoc = (uid: string) => doc(db, 'users', uid, 'state', 'events');
 const eventDoc = (uid: string, eventId: string) => doc(collection(db, 'users', uid, 'events'), eventId);
 
+/**
+ * One append at a time per account. Two appends at once (an answer and a
+ * button logged in the same moment) contend for the same counter, and a
+ * transaction that loses five times gives up, which left those events without
+ * a sequence number (db:validate, 2026-11-10). Queued, each append reads the
+ * counter the previous one wrote; offline is then the only fallback.
+ */
+const queues = new Map<string, Promise<void>>();
+const inTurn = (uid: string, work: () => Promise<void>): Promise<void> => {
+  const next = (queues.get(uid) ?? Promise.resolve()).then(work, work);
+  queues.set(uid, next.catch(() => {}));
+  return next;
+};
+
 export const firebaseStudyEventRepository: StudyEventRepository = {
-  async append(uid, events) {
-    for (const part of chunks(events)) {
-      try {
-        await runTransaction(db, async transaction => {
-          const snap = await transaction.get(counterDoc(uid));
-          const next = snap.exists() ? Number(snap.data().nextSeq ?? 1) : 1;
-          part.forEach((event, i) => {
-            transaction.set(eventDoc(uid, event.eventId), { ...plain({ ...event, seq: next + i }), serverAt: serverTimestamp() });
-          });
-          transaction.set(counterDoc(uid), { nextSeq: next + part.length, updatedAt: Date.now() });
+  append: (uid, events) => inTurn(uid, () => appendNow(uid, events)),
+};
+
+const appendNow = async (uid: string, events: Parameters<StudyEventRepository['append']>[1]): Promise<void> => {
+  for (const part of chunks(events)) {
+    try {
+      await runTransaction(db, async transaction => {
+        const snap = await transaction.get(counterDoc(uid));
+        const next = snap.exists() ? Number(snap.data().nextSeq ?? 1) : 1;
+        part.forEach((event, i) => {
+          transaction.set(eventDoc(uid, event.eventId), { ...plain({ ...event, seq: next + i }), serverAt: serverTimestamp() });
         });
-      } catch (failure) {
-        // A transaction needs the network. Offline, the events still go in a
-        // batch (Firestore queues it) without a sequence number; the replay
-        // orders those by device time and event id.
-        console.warn('Event counter unreachable; writing events without seq.', failure);
-        const batch = writeBatch(db);
-        part.forEach(event => batch.set(eventDoc(uid, event.eventId), { ...plain({ ...event, seq: null }), serverAt: serverTimestamp() }));
-        await batch.commit();
-      }
+        transaction.set(counterDoc(uid), { nextSeq: next + part.length, updatedAt: Date.now() });
+      });
+    } catch (failure) {
+      // A transaction needs the network. Offline, the events still go in a
+      // batch (Firestore queues it) without a sequence number; the replay
+      // orders those by device time and event id.
+      console.warn('Event counter unreachable; writing events without seq.', failure);
+      const batch = writeBatch(db);
+      part.forEach(event => batch.set(eventDoc(uid, event.eventId), { ...plain({ ...event, seq: null }), serverAt: serverTimestamp() }));
+      await batch.commit();
     }
-  },
+  }
 };
 
 const profileDoc = (uid: string) => doc(db, 'users', uid, 'bkt', 'profile');
