@@ -12,6 +12,13 @@
  * - An id already in the bank is never overwritten, so an admin's edits (and
  *   any `test` item with the same id) stay as they are. Safe to run again.
  *
+ * npm run db:seed-tests  (--tests)
+ *
+ * Writes the 60 items the bundled bank holds back from the quizzes (5 or 6
+ * per competency) as the pre-test's `test` items. The pre-test opens only
+ * on exactly 60 switched-on test items. The admin can replace them under
+ * Admin > Quiz items; ids already in the bank are left as they are.
+ *
  * DRY_RUN=1 prints what it would write and writes nothing.
  */
 import { QUESTION_BANK, RESERVED_FOR_POST_EXAM } from '@/domain/assessment/questionBank';
@@ -21,8 +28,10 @@ import { fail, firestore, operator } from './admin';
 const main = async () => {
   const db = firestore();
   const dryRun = process.env.DRY_RUN === '1';
+  const tests = process.argv.includes('--tests');
+  const use = tests ? 'test' : 'quiz';
   const now = Date.now();
-  const items = QUESTION_BANK.filter(item => !RESERVED_FOR_POST_EXAM.has(item.id));
+  const items = QUESTION_BANK.filter(item => RESERVED_FOR_POST_EXAM.has(item.id) === tests);
   const existing = new Set((await db.collection('quiz_items').select().get()).docs.map(doc => doc.id));
 
   let written = 0;
@@ -45,7 +54,7 @@ const main = async () => {
       image: image.startsWith(QUIZ_IMAGE_PREFIX) ? image : '',
       competency: item.competency,
       source: item.source,
-      use: 'quiz',
+      use,
       isActive: true,
       order,
     };
@@ -73,7 +82,7 @@ const main = async () => {
   }
   if (!dryRun && pending > 0) await batch.commit();
   for (const line of problems) console.warn(`Skipped ${line}`);
-  console.log(`${dryRun ? 'Would write' : 'Wrote'} ${written} quiz items; ${kept} already in the bank were left as they are; ${problems.length} skipped.`);
+  console.log(`${dryRun ? 'Would write' : 'Wrote'} ${written} ${use} items; ${kept} already in the bank were left as they are; ${problems.length} skipped.`);
 };
 
 main().then(
