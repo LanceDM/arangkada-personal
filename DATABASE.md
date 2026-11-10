@@ -194,3 +194,11 @@ Run it after each session and before any analysis. A participant whose records f
 Players see their own BKT per competency on **Profile** (`/profile`, the username in the header).
 
 Settings version **2026-11-10a**: the in-drive question limit is recorded as 60 s, the value the drive's panel clock runs at since the merge. After deploying it, run `npm run db:init` once so `policy/config` names this version; until then the course refuses to save a step and asks to reload.
+
+## The post-test's design (2026-11-10)
+
+The post-test is the team's two-stage design: a 15-item routing block everyone takes, then an easy, medium or hard block of 15 chosen by the routing score (30 items each sitting, the 60 test items in four blocks). It opens only once `test_designs/post` exists, which only `npm run db:post-design` writes.
+
+- **Now (Tentative): `npm run db:post-design -- placeholder`.** Parallel blocks with the competencies spread evenly, cuts at thirds of the routing score (5 and 10). No difficulty is known yet, so "easy / medium / hard" are names only; every sitting records `calibrationId: placeholder`, so these sittings can be set apart in the analysis.
+- **Once there are pre-tests (default at least 20): `npm run db:post-design -- irt`.** Each item's Rasch difficulty b = ln((1 − p)/p) from the share right on the pre-tests; the routing block spans the range, the other 45 fill easy, medium and hard in order of difficulty, and the cuts are the pre-test takers' routing-score thirds.
+- `-- show` prints the design in force; `DRY_RUN=1` prints a new one without writing it. Both modes refuse while a post-test is open (`--force` overrides).

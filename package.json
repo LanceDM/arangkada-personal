@@ -26,6 +26,7 @@
     "db:participant": "tsx scripts/db/participant.ts",
     "db:seed-quiz": "tsx scripts/db/seedQuiz.ts",
     "db:seed-tests": "tsx scripts/db/seedQuiz.ts --tests",
+    "db:post-design": "tsx scripts/db/postTestDesign.ts",
     "db:deploy": "firebase deploy --only firestore:rules,firestore:indexes",
     "db:deploy:sql": "firebase deploy --config firebase.sql.json --only dataconnect",
     "emulators:sql": "firebase emulators:start --config firebase.sql.json --only dataconnect"
