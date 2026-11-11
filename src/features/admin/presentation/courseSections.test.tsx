@@ -5,7 +5,9 @@ import { provideAdminDependencies, type AdminDependencies } from '@/features/adm
 import type { CourseAdmin } from '@/features/admin/application/useCourseAdmin';
 import { CourseFlowSection } from './CourseFlowSection';
 import { QLearningSection } from './QLearningSection';
-import { mount, pressTab, text, unmount, view } from './adminSections.fixture';
+import { EvaluationSection } from './EvaluationSection';
+import type { EvaluationLogs } from '@/features/admin/application/useEvaluationLogs';
+import { clickLabel, mount, pressTab, text, unmount, view } from './adminSections.fixture';
 
 provideAdminDependencies({
   live: { watchTable: (on: (t: null) => void) => (on(null), () => {}), watchUpdates: (_: number, on: (r: []) => void) => (on([]), () => {}) },
@@ -51,5 +53,34 @@ describe('the course admin sections', () => {
     expect(text()).toContain('No decisions yet');
     await act(async () => {});
     expect(view()).toBeTruthy();
+  });
+});
+
+describe('the model evaluation section', () => {
+  const logs = (over: Partial<EvaluationLogs> = {}): EvaluationLogs => ({ data: null, loading: false, error: null, load: () => {}, ...over });
+  const update = (uid: string, predictedCorrect: number, correct: boolean, source = 'quiz') => ({
+    uid, competency: 'driver_legality', source, predictedCorrect, correct, userSeq: 1,
+  });
+
+  it('asks for the logs before it shows BKT, and loads them on the button', async () => {
+    let loaded = 0;
+    await mount(<EvaluationSection course={course()} logs={logs({ load: () => void loaded++ })} />);
+    expect(text()).toContain('The logs are not loaded');
+    await clickLabel('Load the logs');
+    expect(loaded).toBe(1);
+  });
+
+  it('shows the whole model three ways, then each player', async () => {
+    const bktUpdates = [update('u1', 0.9, true), update('u1', 0.2, false), update('u2', 0.8, true, 'drive'), update('u2', 0.6, false, 'drive')];
+    await mount(<EvaluationSection course={course()} logs={logs({ data: { bktUpdates, qUpdates: [], loadedAt: 1 } })} />);
+    expect(text()).toContain('Pooled over 4 predictions (headline)');
+    expect(text()).toContain('Per-player average');
+    expect(text()).toContain('1.000 ± 0.000 (2)');
+    expect(text()).toContain('Expected calibration error');
+    await pressTab('BKT: per player');
+    expect(text()).toContain('U-1');
+    expect(text()).toContain('u2');
+    await pressTab('Q-learning');
+    expect(text()).toContain('No decisions yet');
   });
 });

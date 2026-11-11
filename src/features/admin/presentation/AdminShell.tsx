@@ -19,6 +19,7 @@ import {
   Shield,
   Sigma,
   Users,
+  LineChart,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -49,6 +50,7 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
       { to: '/admin/routing', label: 'Course flow', icon: Route },
       { to: '/admin/q-learning', label: 'Q-learning', icon: BrainCircuit },
       { to: '/admin/course', label: 'BKT & export', icon: Activity },
+      { to: '/admin/evaluation', label: 'Model evaluation', icon: LineChart },
       { to: '/admin/irt', label: 'IRT', icon: Sigma },
       { to: '/admin/report', label: 'Player report', icon: Users },
     ],

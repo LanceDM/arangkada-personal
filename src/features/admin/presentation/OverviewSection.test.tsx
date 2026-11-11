@@ -131,6 +131,7 @@ describe('the admin frame', () => {
       ['Course flow', '/admin/routing'],
       ['Q-learning', '/admin/q-learning'],
       ['BKT & export', '/admin/course'],
+      ['Model evaluation', '/admin/evaluation'],
       ['IRT', '/admin/irt'],
       ['Player report', '/admin/report'],
       ['Quiz items', '/admin/quiz'],

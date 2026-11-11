@@ -18,6 +18,8 @@ export { CourseSection } from './presentation/CourseSection';
 export { CourseFlowSection } from './presentation/CourseFlowSection';
 export { QLearningSection } from './presentation/QLearningSection';
 export { useCourseAdmin } from './application/useCourseAdmin';
+export { EvaluationSection } from './presentation/EvaluationSection';
+export { useEvaluationLogs } from './application/useEvaluationLogs';
 export { ScenariosSection } from './presentation/ScenariosSection';
 export { SiteStatusPanel } from './presentation/SiteStatusPanel';
 export { useSiteStatus } from './application/useSiteStatus';
