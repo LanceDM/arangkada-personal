@@ -34,6 +34,13 @@ export type BKTEvidenceParams = Pick<BKTParams, 'pTransit' | 'pSlip' | 'pGuess'>
  */
 export interface BKTModel {
   pInit: number;
+  /**
+   * A starting value per competency, estimated from a group's pre-test answers
+   * (the calibration stage, 2026-11-13). A competency without one starts at
+   * `pInit`. Each learner's own pre-test answers then update it, so the start is
+   * the group's and the result is the learner's.
+   */
+  pInitBy?: Partial<Record<DrivingCompetency, number>>;
   drive: BKTEvidenceParams;
   quiz: BKTEvidenceParams;
   diagnostic: BKTEvidenceParams;
@@ -81,6 +88,28 @@ export const DEFAULT_BKT_MODEL: BKTModel = {
 export const DEFAULT_BKT_PARAMS: BKTParams = {
   pInit: DEFAULT_BKT_MODEL.pInit,
   ...DEFAULT_BKT_MODEL.drive,
+};
+
+/** The value a competency starts at: its own calibrated start when the model has one, else `pInit`. */
+export const priorFor = (model: Pick<BKTModel, 'pInit' | 'pInitBy'>, competency: DrivingCompetency): number =>
+  model.pInitBy?.[competency] ?? model.pInit;
+
+/** Every competency at its starting value. */
+export const startingMastery = (model: Pick<BKTModel, 'pInit' | 'pInitBy'>): Record<DrivingCompetency, number> =>
+  Object.fromEntries(COMPETENCIES.map(competency => [competency, priorFor(model, competency)])) as Record<DrivingCompetency, number>;
+
+/**
+ * Where the BKT values stand (2026-11-13). `collecting`: the published
+ * starting values are in force while pilot players' answers are gathered.
+ * `calibrated`: values estimated from the pilot are in force (set here, with
+ * `pInitBy` and the fitted T, S and G above, and a new settings version).
+ * Values change between the pilot and the main study, never during one.
+ */
+export type BKTCalibrationStage = 'collecting' | 'calibrated';
+export const BKT_CALIBRATION: { stage: BKTCalibrationStage; appliedOn: string | null; pilotPlayers: number | null } = {
+  stage: 'collecting',
+  appliedOn: null,
+  pilotPlayers: null,
 };
 
 /** Where an answer came from; a log written before sources existed is a driving decision. */
@@ -152,10 +181,7 @@ export const buildBKTProfile = (
   params: BKTModel | BKTParams = DEFAULT_BKT_MODEL
 ): Record<DrivingCompetency, number> => {
   const model = asModel(params);
-  const mastery = COMPETENCIES.reduce((acc, competency) => {
-    acc[competency] = model.pInit;
-    return acc;
-  }, {} as Record<DrivingCompetency, number>);
+  const mastery = startingMastery(model);
 
   for (const log of logs) {
     if (!isBKTEvidence(log)) continue;
@@ -199,10 +225,7 @@ export interface BKTStep {
  */
 export const bktTrajectory = (logs: ActionLog[], params: BKTModel | BKTParams = DEFAULT_BKT_MODEL): BKTStep[] => {
   const model = asModel(params);
-  const mastery = COMPETENCIES.reduce((acc, competency) => {
-    acc[competency] = model.pInit;
-    return acc;
-  }, {} as Record<DrivingCompetency, number>);
+  const mastery = startingMastery(model);
   const steps: BKTStep[] = [];
   logs.forEach((log, logIndex) => {
     if (!isBKTEvidence(log)) return;

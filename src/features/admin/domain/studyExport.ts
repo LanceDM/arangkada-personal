@@ -20,6 +20,7 @@ import type { DrivingCompetency } from '@/domain/learner/competency';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import {
   DEFAULT_BKT_MODEL,
+  startingMastery,
   bktTrajectory,
   buildBKTEvidence,
   type BKTStep,
@@ -128,7 +129,7 @@ export const buildStudyExport = (
     const evidence = participantEvidence(attempts, sittings);
     const trajectory = bktTrajectory(evidence);
     const counts = buildBKTEvidence(evidence);
-    const finalMastery = Object.fromEntries(COMPETENCIES.map(c => [c, DEFAULT_BKT_MODEL.pInit])) as Record<DrivingCompetency, number>;
+    const finalMastery = startingMastery(DEFAULT_BKT_MODEL);
     for (const step of trajectory) finalMastery[step.competency] = step.pAfter;
     const finalLevel = Object.fromEntries(
       COMPETENCIES.map(c => [c, masteryLevel(finalMastery[c], counts[c].drive)])

@@ -13,6 +13,8 @@ import { COMPETENCIES } from '@/domain/learner/profile';
 import {
   DEFAULT_BKT_MODEL,
   bktTrajectory,
+  priorFor,
+  startingMastery,
   type BKTEvidenceParams,
   type BKTModel,
 } from '@/domain/learner/mastery/buildBKTProfile';
@@ -104,7 +106,7 @@ export const emptyBKTProfile = (uid: string, configVersion: string, at: number, 
   competencies: Object.fromEntries(
     COMPETENCIES.map(c => [
       c,
-      { p: model.pInit, level: masteryLevel(model.pInit, 0), capped: false, startP: null, answers: zeroCounts(), correct: zeroCounts(), lastUpdatedAt: null },
+      { p: priorFor(model, c), level: masteryLevel(priorFor(model, c), 0), capped: false, startP: null, answers: zeroCounts(), correct: zeroCounts(), lastUpdatedAt: null },
     ])
   ) as Record<DrivingCompetency, BKTCompetencyProfile>,
 });
@@ -131,7 +133,7 @@ export const buildBKTLog = (input: {
   const model = input.model ?? DEFAULT_BKT_MODEL;
   const steps = bktTrajectory([...input.logs], model);
   const profile = emptyBKTProfile(input.uid, input.configVersion, input.now, model);
-  const all = Object.fromEntries(COMPETENCIES.map(c => [c, model.pInit])) as Record<DrivingCompetency, number>;
+  const all = startingMastery(model);
   const seen = new Set<DrivingCompetency>();
   const entries: BKTUpdateRecord[] = [];
 
@@ -174,7 +176,7 @@ export const buildBKTLog = (input: {
       responseMs: log.reactionTime ?? null,
       timedOut: log.reactionCensored === true,
       params: step.params,
-      pInit: first ? model.pInit : null,
+      pInit: first ? priorFor(model, step.competency) : null,
       pBefore: step.pBefore,
       predictedCorrect: step.predictedCorrect,
       posterior: step.posterior,
