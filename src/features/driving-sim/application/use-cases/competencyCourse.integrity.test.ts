@@ -16,11 +16,13 @@ import { orderEvidence } from '@/domain/study/evidence';
 import { memoryCourseStore, provideInMemoryDrivingSim, type MemoryCourseStore } from '../testDependencies';
 import { CourseConflictError, OutdatedAppError } from '../errors';
 import { recordBKT } from '../studyRecorder';
+import { BKT_MODEL_SETS, DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
 import {
   completeCourseDrive,
   diagnosticItems,
   finishCourseQuizReview,
   loadCompetencyCourse,
+  loadMasteryReport,
   logDriveExited,
   logDriveStarted,
   markCourseLessonsRead,
@@ -211,6 +213,24 @@ describe('the pilot mark', () => {
     delete profile.modelSet;
     await recordBKT(UID);
     expect(store.bktProfiles.get(UID)!.modelSet).toBe('pilot');
+  });
+});
+
+describe('a player keeps the values they started on', () => {
+  it('reads the mastery with the set the player is marked with, once a calibrated set exists', async () => {
+    await toQuiz();
+    await recordBKT(UID);
+    const pilot = await loadMasteryReport(UID);
+    try {
+      BKT_MODEL_SETS.calibrated = { ...DEFAULT_BKT_MODEL, pInit: 0.05 };
+      // Marked pilot: still the pilot values, though a calibrated set now exists.
+      expect(await loadMasteryReport(UID)).toEqual(pilot);
+      store.bktProfiles.get(UID)!.modelSet = 'calibrated';
+      const calibrated = await loadMasteryReport(UID);
+      expect(calibrated.map(row => row.p)).not.toEqual(pilot.map(row => row.p));
+    } finally {
+      BKT_MODEL_SETS.calibrated = null;
+    }
   });
 });
 
