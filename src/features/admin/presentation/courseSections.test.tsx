@@ -171,6 +171,8 @@ describe('the model evaluation section', () => {
     await clickLabel('Confirm apply');
     expect(applied).toEqual([{ note: '', pilots: 7, by: 'admin-1' }]);
     expect(text()).toContain('Calibration 1 is saved and is now the set new players get');
+    // The result is spent: it cannot be applied a second time.
+    expect([...document.querySelectorAll('button')].some(b => b.textContent?.startsWith('Apply as Calibration'))).toBe(false);
 
     // The log reads the saved set back.
     unmount();

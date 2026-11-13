@@ -125,28 +125,38 @@ describe.skipIf(!host)('security rules for the study logs', () => {
     await assertFails(setDoc(doc(admin, 'policy/config'), { tag: 'x' }));
   });
 
-  it('lets only an admin save a value set, never edit it, and point new players at it in the same write', async () => {
+  it('lets only an admin save a value set with its log, never edit it, and keeps the log from players', async () => {
     const admin = env.authenticatedContext('ada', { admin: true }).firestore();
     const alice = env.authenticatedContext('alice').firestore();
-    const set = { setId: 'cal-1', number: 1, model: { pInit: 0.2 }, pilots: [], appliedAt: 1, appliedBy: 'ada' };
+    const set = { setId: 'cal-1', number: 1, model: { pInit: 0.2 }, appliedAt: 1 };
+    const log = { ...set, pilots: [{ uid: 'bob', label: 'Bob' }], appliedBy: 'ada', appliedByEmail: 'ada@example.com' };
     const state = { activeSetId: 'cal-1', number: 1, appliedAt: 1, appliedBy: 'ada' };
-    // A player can do neither.
-    await assertFails(setDoc(doc(alice, 'bktSets/cal-1'), { ...set, appliedBy: 'alice' }));
-    // The state cannot name a set that does not exist.
+    // A player can write none of them; the state cannot name a set that does not exist; a set needs its log.
+    await assertFails(setDoc(doc(alice, 'bktSets/cal-1'), set));
     await assertFails(setDoc(doc(admin, 'bktCalibration/state'), state));
+    await assertFails(setDoc(doc(admin, 'bktSets/cal-1'), set));
+    // Names do not go in the document players read.
+    const leaky = writeBatch(admin);
+    leaky.set(doc(admin, 'bktSets/cal-1'), log);
+    leaky.set(doc(admin, 'bktSetLogs/cal-1'), log);
+    await assertFails(leaky.commit());
     const batch = writeBatch(admin);
     batch.set(doc(admin, 'bktSets/cal-1'), set);
+    batch.set(doc(admin, 'bktSetLogs/cal-1'), log);
     batch.set(doc(admin, 'bktCalibration/state'), state);
     await assertSucceeds(batch.commit());
-    // Saved sets never change; numbers only move forward by one; players read both.
+    // Saved sets never change; players read the values and the state, not the log.
     await assertFails(updateDoc(doc(admin, 'bktSets/cal-1'), { model: { pInit: 0.4 } }));
-    await assertFails(setDoc(doc(admin, 'bktSets/cal-3'), { ...set, setId: 'cal-3', number: 2 }));
+    await assertFails(updateDoc(doc(admin, 'bktSetLogs/cal-1'), { note: 'changed' }));
     await assertSucceeds(getDoc(doc(alice, 'bktSets/cal-1')));
     await assertSucceeds(getDoc(doc(alice, 'bktCalibration/state')));
-    const second = writeBatch(admin);
-    second.set(doc(admin, 'bktSets/cal-3'), { ...set, setId: 'cal-3', number: 3 });
-    second.set(doc(admin, 'bktCalibration/state'), { ...state, activeSetId: 'cal-3', number: 3 });
-    await assertFails(second.commit());
+    await assertFails(getDoc(doc(alice, 'bktSetLogs/cal-1')));
+    // Numbers only move forward by one.
+    const skip = writeBatch(admin);
+    skip.set(doc(admin, 'bktSets/cal-3'), { ...set, setId: 'cal-3', number: 3 });
+    skip.set(doc(admin, 'bktSetLogs/cal-3'), { ...log, setId: 'cal-3', number: 3 });
+    skip.set(doc(admin, 'bktCalibration/state'), { ...state, activeSetId: 'cal-3', number: 3 });
+    await assertFails(skip.commit());
   });
 
   it('lets only an admin mark pilot players, and keeps the log append-only', async () => {

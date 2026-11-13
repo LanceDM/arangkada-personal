@@ -1,6 +1,7 @@
 /**
  * The BKT value sets and pilot marks in Firestore (firestore.rules):
- * `bktCalibration/state`, `bktSets/cal-N`, `bktPilots/{uid}`,
+ * `bktCalibration/state`, `bktSets/cal-N` (the values, which players read),
+ * `bktSetLogs/cal-N` (the full log, admins only), `bktPilots/{uid}`,
  * `bktPilotLog/{id}`, and every player's `users/{uid}/bkt/profile` for the
  * set they run on.
  */
@@ -19,7 +20,7 @@ export const firebaseBktSets: BktSetsRepository = {
   async load() {
     const [state, sets, pilots, log, profiles] = await Promise.all([
       getDoc(stateDoc()),
-      getDocs(collection(db, 'bktSets')),
+      getDocs(collection(db, 'bktSetLogs')),
       getDocs(collection(db, 'bktPilots')),
       getDocs(collection(db, 'bktPilotLog')),
       getDocs(collectionGroup(db, 'bkt')),
@@ -59,7 +60,9 @@ export const firebaseBktSets: BktSetsRepository = {
       const setId = calibratedSetId(number);
       const appliedAt = Date.now();
       const saved: SavedValueSet = plain({ ...record, setId, number, appliedAt, appliedBy: admin.uid, appliedByEmail: admin.email });
-      transaction.set(doc(db, 'bktSets', setId), saved);
+      // Players read the values only; the log, with names in it, is the admins'.
+      transaction.set(doc(db, 'bktSets', setId), { setId, number, model: saved.model, appliedAt });
+      transaction.set(doc(db, 'bktSetLogs', setId), saved);
       transaction.set(stateDoc(), { activeSetId: setId, number, appliedAt, appliedBy: admin.uid });
       return saved;
     });

@@ -301,13 +301,12 @@ const Result = ({ result, sensitivity, base, baseLabel }: { result: BktCalibrati
   );
 };
 
-const ApplyPanel = ({ result, sensitivity, bkt, label }: { result: BktCalibration; sensitivity: SensitivityRow[]; bkt: BktSets; label: (uid: string) => string }) => {
+const ApplyPanel = ({ result, sensitivity, bkt, label, onApplied }: { result: BktCalibration; sensitivity: SensitivityRow[]; bkt: BktSets; label: (uid: string) => string; onApplied: (setId: string) => void }) => {
   const { user } = useAuthSession();
   const [note, setNote] = useState('');
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [applied, setApplied] = useState<string | null>(null);
   const next = bkt.state.number + 1;
   const allowed = canApply(result) && bkt.wired && !!user;
   const pilots = [...bkt.pilotIds].map(uid => ({ uid, label: label(uid) })).sort((a, b) => a.label.localeCompare(b.label));
@@ -319,8 +318,7 @@ const ApplyPanel = ({ result, sensitivity, bkt, label }: { result: BktCalibratio
     try {
       const record = calibrationRecord({ result, sensitivity, pilots, state: bkt.state, note, settingsVersion: RUN_CONFIG_VERSION });
       const saved = await bkt.apply(record, { uid: user.uid, email: user.email });
-      setApplied(setLabel(saved.setId));
-      setConfirming(false);
+      onApplied(saved.setId);
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : String(failure));
     } finally {
@@ -328,13 +326,6 @@ const ApplyPanel = ({ result, sensitivity, bkt, label }: { result: BktCalibratio
     }
   };
 
-  if (applied) {
-    return (
-      <Notice>
-        <CheckCircle2 className="mr-1 inline h-4 w-4" /> {applied} is saved and is now the set new players get. Players who already started keep theirs.
-      </Notice>
-    );
-  }
   return (
     <Panel
       title={`Apply as Calibration ${next}`}
@@ -503,7 +494,9 @@ export const CalibrationLog = ({ bkt }: { bkt: BktSets }) => {
 };
 
 export const BktCalibrationPanel = ({ rows, label, bkt }: { rows: readonly Record<string, unknown>[] | null; label: (uid: string) => string; bkt: BktSets }) => {
-  const [result, setResult] = useState<{ rows: readonly Record<string, unknown>[]; value: BktCalibration; sensitivity: ReturnType<typeof sensitivityCheck> } | null>(null);
+  const [result, setResult] = useState<{ rows: readonly Record<string, unknown>[]; pilots: string; value: BktCalibration; sensitivity: ReturnType<typeof sensitivityCheck> } | null>(null);
+  const [applied, setApplied] = useState<string | null>(null);
+  const pilotsKey = [...bkt.pilotIds].sort().join('|');
   const base = modelOfSet(bkt.state.activeSetId, bkt.models);
   const baseLabel = setLabel(bkt.state.activeSetId);
   if (!rows) {
@@ -516,8 +509,8 @@ export const BktCalibrationPanel = ({ rows, label, bkt }: { rows: readonly Recor
       </div>
     );
   }
-  // A result belongs to the log and the marks it was computed from: reloading either clears it.
-  const shown = result && result.rows === rows ? result : null;
+  // A result belongs to the log and the pilot marks it was computed from: a change to either clears it.
+  const shown = result && result.rows === rows && result.pilots === pilotsKey ? result : null;
   return (
     <div className="space-y-4">
       <Legend title="Legend: BKT calibration" items={LEGEND} />
@@ -528,7 +521,7 @@ export const BktCalibrationPanel = ({ rows, label, bkt }: { rows: readonly Recor
           <Button
             size="sm"
             aria-label="Run the calibration"
-            onClick={() => setResult({ rows, value: calibrateBkt(rows, label, base, bkt.pilotIds), sensitivity: sensitivityCheck(rows.filter(row => bkt.pilotIds.has(String(row.uid))), base) })}
+            onClick={() => (setApplied(null), setResult({ rows, pilots: pilotsKey, value: calibrateBkt(rows, label, base, bkt.pilotIds), sensitivity: sensitivityCheck(rows.filter(row => bkt.pilotIds.has(String(row.uid))), base) }))}
           >
             <Play className="mr-2 h-4 w-4" />
             {shown ? 'Run again' : 'Run the calibration'}
@@ -539,10 +532,25 @@ export const BktCalibrationPanel = ({ rows, label, bkt }: { rows: readonly Recor
           {rows.length} logged BKT update(s). Pilot players' pre-test, quiz and drive answers are used, whatever value set they run on; post-test answers still update each player's final BKT but are not used here. Grid search inside the published bounds, by the likelihood of each answer given the answers before it. Real players only.
         </p>
       </Panel>
+      {applied && !shown && (
+        <Notice>
+          <CheckCircle2 className="mr-1 inline h-4 w-4" /> {applied} is saved and is now the set new players get. Players who already started keep theirs.
+        </Notice>
+      )}
       {shown && (
         <>
           <Result result={shown.value} sensitivity={shown.sensitivity} base={base} baseLabel={baseLabel} />
-          <ApplyPanel key={bkt.state.number} result={shown.value} sensitivity={shown.sensitivity.rows} bkt={bkt} label={label} />
+          <ApplyPanel
+            result={shown.value}
+            sensitivity={shown.sensitivity.rows}
+            bkt={bkt}
+            label={label}
+            onApplied={setId => {
+              // The result is spent: applying it again would save the same values as the next calibration.
+              setResult(null);
+              setApplied(setLabel(setId));
+            }}
+          />
         </>
       )}
       <CalibrationLog bkt={bkt} />

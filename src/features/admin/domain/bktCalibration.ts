@@ -464,7 +464,7 @@ export interface PilotRef {
 }
 
 /**
- * Everything saved with an applied calibration (`bktSets/cal-N`): the values,
+ * Everything saved with an applied calibration (`bktSetLogs/cal-N`): the values,
  * and the log of how they were reached, so the calibration can be reported
  * and checked later without the admin page.
  */

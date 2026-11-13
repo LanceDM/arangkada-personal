@@ -7,7 +7,7 @@ import type { BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
 import { DEFAULT_SET_ID, modelOfSet, readModel, setIdOf, type BKTCalibrationState } from '@/domain/learner/mastery/bktValueSets';
 import type { CalibrationRecord, PilotRef } from './bktCalibration';
 
-/** `bktSets/cal-N`: an applied calibration and its log. */
+/** `bktSetLogs/cal-N`: an applied calibration and its log (admins only; players read `bktSets/cal-N`, the values alone). */
 export interface SavedValueSet extends CalibrationRecord {
   setId: string;
   number: number;
