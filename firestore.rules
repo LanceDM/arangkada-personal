@@ -113,7 +113,7 @@ service cloud.firestore {
     // ── Shapes ─────────────────────────────────────────────
 
     function profileKeys() {
-      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore', 'language'];
+      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore', 'language', 'termsVersion', 'termsAcceptedAt'];
     }
 
     // Checks only the keys a write sets, so a field an old profile already
@@ -126,7 +126,10 @@ service cloud.firestore {
         && (!keys.hasAny(['longestStreak']) || isCount(data.longestStreak))
         && (!keys.hasAny(['bestExamScore']) || isCount(data.bestExamScore))
         // The language the account chose.
-        && (!keys.hasAny(['language']) || data.language in ['en', 'fil']);
+        && (!keys.hasAny(['language']) || data.language in ['en', 'fil'])
+        // The Terms and Data Use the account agreed to at sign-up, and when.
+        && (!keys.hasAny(['termsVersion']) || data.termsVersion is string)
+        && (!keys.hasAny(['termsAcceptedAt']) || data.termsAcceptedAt is number);
     }
 
     function isProgressSummary(data) {

@@ -29,7 +29,7 @@ beforeEach(() => {
   saveLanguage.mockClear();
   provideAuthDependencies({
     auth: {} as AuthDependencies['auth'],
-    userProfiles: { get: async () => null, saveLanguage },
+    userProfiles: { get: async () => null, saveLanguage, saveTermsAcceptance: async () => {} },
     deviceLanguage: { load: () => device, save: language => void (device = language) },
   });
 });

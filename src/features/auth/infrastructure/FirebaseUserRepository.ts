@@ -19,7 +19,12 @@ export const saveUserLanguage = async (uid: string, language: Language) => {
   await setDoc(doc(db, 'users', uid), { language }, { merge: true });
 };
 
+export const saveTermsAcceptance = async (uid: string, version: string, at: number) => {
+  await setDoc(doc(db, 'users', uid), { termsVersion: version, termsAcceptedAt: at }, { merge: true });
+};
+
 export const firebaseUserProfileRepository: UserProfileRepository = {
   get: getUserProfile,
   saveLanguage: saveUserLanguage,
+  saveTermsAcceptance,
 };

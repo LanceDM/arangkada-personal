@@ -39,6 +39,8 @@ export interface UserProfileRepository {
   get(uid: string): Promise<UserProfile | null>;
   /** Merges the account's chosen language into its profile. */
   saveLanguage(uid: string, language: Language): Promise<void>;
+  /** Merges the Terms and Data Use the account agreed to into its profile. */
+  saveTermsAcceptance(uid: string, version: string, at: number): Promise<void>;
 }
 
 /** The language chosen on this device, before any sign-in and for a guest. */

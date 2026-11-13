@@ -7,6 +7,7 @@
 import { authDeps } from './dependencies';
 import type { Localized } from '@/shared/lib/localized';
 import type { AuthUser } from '@/features/auth/domain/userProfile';
+import { TERMS_VERSION } from '@/features/auth/domain/terms';
 import {
   normalizeUsername,
   passwordProblem,
@@ -78,6 +79,19 @@ export const signInWithGoogle = (): Promise<AuthUser | null> =>
 
 export const signUp = (email: string, password: string, username: string): Promise<AuthUser> =>
   authDeps().auth.signUp(email, password, username);
+
+/**
+ * Records that the account agreed to the Terms and Data Use. The form does not
+ * let an account be made without the tick; this is the record of it. Best
+ * effort, so a failed write never blocks the sign-in that just succeeded.
+ */
+export const recordTermsAcceptance = async (uid: string): Promise<void> => {
+  try {
+    await authDeps().userProfiles.saveTermsAcceptance(uid, TERMS_VERSION, Date.now());
+  } catch {
+    // The account exists and the tick was required; the record can be written at a later sign-in.
+  }
+};
 
 export const signOut = (): Promise<void> => authDeps().auth.signOut();
 

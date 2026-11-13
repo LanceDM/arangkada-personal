@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
-import { signIn, signInWithGoogle, signUp } from '@/features/auth/application/authActions';
+import { recordTermsAcceptance, signIn, signInWithGoogle, signUp } from '@/features/auth/application/authActions';
+import { TERMS_AGREEMENT, TERMS_REQUIRED, TERMS_SECTIONS, TERMS_TITLE } from '@/features/auth/domain/terms';
 import { AuthFormProps, AuthView } from '@/features/auth/domain/credentials';
 
 const AuthForm = ({ defaultView = 'login', onSuccess, onCancel }: AuthFormProps) => {
@@ -13,6 +14,9 @@ const AuthForm = ({ defaultView = 'login', onSuccess, onCancel }: AuthFormProps)
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  // Making an account (by sign-up, or by Google) needs the Terms and Data Use agreed to.
+  const [agreed, setAgreed] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,12 +27,18 @@ const AuthForm = ({ defaultView = 'login', onSuccess, onCancel }: AuthFormProps)
       return;
     }
 
+    if (view === 'register' && !agreed) {
+      setError(TERMS_REQUIRED);
+      return;
+    }
+
     setLoading(true);
     try {
       if (view === 'login') {
         await signIn(email, password);
       } else {
-        await signUp(email, password, username);
+        const user = await signUp(email, password, username);
+        await recordTermsAcceptance(user.uid);
       }
       onSuccess();
     } catch (err: unknown) {
@@ -39,11 +49,17 @@ const AuthForm = ({ defaultView = 'login', onSuccess, onCancel }: AuthFormProps)
   };
   
   const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
     setError('');
+    // Google makes the account on a first sign-in, so it needs the same agreement.
+    if (!agreed) {
+      setError(TERMS_REQUIRED);
+      return;
+    }
+    setGoogleLoading(true);
 
     try {
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+      if (user) await recordTermsAcceptance(user.uid);
       onSuccess();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Google sign-in failed.');
@@ -54,6 +70,39 @@ const AuthForm = ({ defaultView = 'login', onSuccess, onCancel }: AuthFormProps)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Terms and Data Use: needed to make an account (sign-up or Google) */}
+      <div className="space-y-2 rounded-xl border border-border bg-muted/30 p-3">
+        <label className="flex items-start gap-2 text-xs text-foreground">
+          <input
+            type="checkbox"
+            aria-label={TERMS_AGREEMENT}
+            checked={agreed}
+            onChange={e => { setAgreed(e.target.checked); setError(''); }}
+            className="mt-0.5"
+          />
+          <span>{TERMS_AGREEMENT}</span>
+        </label>
+        <button
+          type="button"
+          onClick={() => setShowTerms(v => !v)}
+          aria-expanded={showTerms}
+          className="text-xs font-medium text-primary underline underline-offset-2"
+        >
+          {showTerms ? `Hide the ${TERMS_TITLE}` : `Read the ${TERMS_TITLE}`}
+        </button>
+        {showTerms && (
+          <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border border-border bg-background p-3 text-xs">
+            {TERMS_SECTIONS.map(section => (
+              <section key={section.title}>
+                <h3 className="font-semibold text-foreground">{section.title}</h3>
+                <p className="text-muted-foreground">{section.body}</p>
+              </section>
+            ))}
+          </div>
+        )}
+        <p className="text-[11px] text-muted-foreground">Needed for a new account and for Google sign-in.</p>
+      </div>
+
       {/* Google Sign-in */}
       <button
         type="button"

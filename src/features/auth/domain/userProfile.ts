@@ -41,4 +41,7 @@ export interface UserProfile {
   bestExamScore: number;
   /** The language the account chose; absent until it chooses one. */
   language?: Language;
+  /** The Terms and Data Use the account agreed to at sign-up, and when; absent on older accounts. */
+  termsVersion?: string;
+  termsAcceptedAt?: number;
 }
