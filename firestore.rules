@@ -377,7 +377,10 @@ service cloud.firestore {
         && data.passed is bool
         && data.wrongIds is list
         && data.questionIds is list
-        && data.timestamp is number;
+        && data.timestamp is number
+        // Since 2026-11-13: each answer per bank item, for the bank's calibration.
+        && (!data.keys().hasAny(['responses']) || (data.responses is list && data.responses.size() <= 60))
+        && (!data.keys().hasAny(['bank']) || data.bank in ['served', 'bundled']);
     }
 
     function isDailyStreak(data) {

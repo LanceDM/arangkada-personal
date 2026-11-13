@@ -40,7 +40,7 @@ import type { SceneNode, ScriptedVehicleRole } from './SceneNode';
  * the move, which the support level decides whether to show, and the
  * world, drawn the same at every level, never shows it.
  */
-const CHECKPOINT_LABEL = 'LTO CHECKPOINT';
+const CHECKPOINT_LABEL = 'ROADSIDE CHECKPOINT';
 
 /**
  * The traffic that makes a yellow box mean something: a vehicle committed

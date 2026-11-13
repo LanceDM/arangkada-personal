@@ -6,7 +6,7 @@ export const level3Module = {
   id: 'lto_level_3',
   title: 'Signs And Signals',
   sourceLevel: 3,
-  desc: 'Learn to recognize every LTO road sign category (A through G) and correctly interpret traffic light signals, building the complete sign vocabulary tested on the LTO written exam.',
+  desc: 'Learn to recognize every road sign category (A through G) and correctly interpret traffic light signals, building the complete sign vocabulary tested on the written licensing exam.',
   lessons: [
     {
       id: 'level-3-mission-briefing',
@@ -19,7 +19,7 @@ export const level3Module = {
         },
         {
           type: 'paragraph',
-          text: 'A driver who cannot read the road is dangerous no matter how legal or roadworthy the vehicle is. This level walks through every official LTO sign category, A through G, plus traffic lights and signals. Treat the reference tables as study material for the written exam, not just flavor text.',
+          text: 'A driver who cannot read the road is dangerous no matter how legal or roadworthy the vehicle is. This level walks through every road sign category, A through G, as set by the DPWH road sign standards (DO 41, s. 2012), plus traffic lights and signals. Treat the reference tables as study material for the written exam, not just flavor text.',
         },
         {
           type: 'heading',
@@ -34,19 +34,19 @@ export const level3Module = {
             'Use guide and informative signs to understand direction, distance, and services.',
             'Recognize expressway, traffic-instruction, hazard-marker, and roadwork signs on sight.',
             'Correctly interpret solid and flashing traffic light signals.',
-            'Build a complete working vocabulary of LTO sign types for exam review.',
+            'Build a complete working vocabulary of sign types for exam review.',
           ],
         },
       ],
     },
     {
       id: 'level-3-sign-taxonomy-overview',
-      title: '1. How LTO Organizes Road Signs',
-      text: 'Every road sign belongs to one of seven official LTO categories, lettered A through G. Recognizing the category first, from shape and color, tells you how to react before you even read the specific symbol.',
+      title: '1. How Road Signs Are Organized',
+      text: 'Every road sign belongs to one of seven categories, lettered A through G. Recognizing the category first, from shape and color, tells you how to react before you even read the specific symbol.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'Every road sign belongs to one of seven official LTO categories, lettered A through G. Recognizing the category first, from shape and color, tells you how to react before you even read the specific symbol.',
+          text: 'Every road sign belongs to one of seven categories, lettered A through G. Recognizing the category first, from shape and color, tells you how to react before you even read the specific symbol.',
         },
         {
           type: 'paragraph',
@@ -67,7 +67,7 @@ export const level3Module = {
         },
         {
           type: 'image',
-          alt: 'Reference sheet showing the seven official LTO sign category shapes and colors side by side.',
+          alt: 'Reference sheet showing the seven sign category shapes and colors side by side.',
           src: IMG + 'road-sign-categories.png',
         },
         {
@@ -258,7 +258,7 @@ export const level3Module = {
         // FDM Vol. 1 pp. 67-72: warning signs are shown as white triangles with a red border.
         {
           type: 'paragraph',
-          text: 'Most warning signs in the FDM share one shape: a white triangle, point up, with a red border and a black symbol. If you see that shape, expect a hazard ahead even before you read the symbol. Crossing warnings for pedestrians, children and PWDs use a bright yellow-green background so they stand out.',
+          text: 'Most warning signs share one shape: a white triangle, point up, with a red border and a black symbol. If you see that shape, expect a hazard ahead even before you read the symbol. Crossing warnings for pedestrians, children and PWDs use a bright yellow-green background so they stand out.',
         },
         {
           type: 'heading',
@@ -778,7 +778,7 @@ export const level3Module = {
         },
         {
           type: 'paragraph',
-          text: 'Regulatory signs enforce a rule. Warning signs call for caution before a hazard. Guide and informative signs help with navigation. Expressway, traffic instruction, hazard marker, and roadwork signs each mark a more specific situation. Traffic lights and flashing signals control movement moment to moment. The reference tables in this level cover the full sign vocabulary the LTO written exam tests; the mission tests whether you can act on that vocabulary in real time.',
+          text: 'Regulatory signs enforce a rule. Warning signs call for caution before a hazard. Guide and informative signs help with navigation. Expressway, traffic instruction, hazard marker, and roadwork signs each mark a more specific situation. Traffic lights and flashing signals control movement moment to moment. The reference tables in this level cover the full sign vocabulary the written licensing exam tests; the mission tests whether you can act on that vocabulary in real time.',
         },
       ],
     },

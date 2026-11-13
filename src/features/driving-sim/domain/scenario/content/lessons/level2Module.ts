@@ -75,7 +75,7 @@ export const level2Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'Before operating a vehicle, the driver should know where the important documents are and why they matter. The extracted LTO source states that a photocopy or the original CR must be preserved and carried in the car by the owner or driver.',
+          text: 'Before operating a vehicle, the driver should know where the important documents are and why they matter. Under RA 4136 (Sec. 15), the Certificate of Registration, or a copy, is kept in the vehicle, and the driver carries the license at all times (Sec. 19).',
         },
         {
           type: 'image',
@@ -170,15 +170,15 @@ export const level2Module = {
     {
       id: 'level-2-registration-awareness',
       title: '4. Motor Vehicle Registration Awareness',
-      text: 'A beginner does not need to memorize every LTO office workflow, but should recognize the pattern behind a legally ready vehicle.',
+      text: 'A beginner does not need to memorize every registration workflow, but should recognize the pattern behind a legally ready vehicle.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'A beginner does not need to memorize every LTO office workflow, but should recognize the pattern behind a legally ready vehicle: proof of ownership, proof of identity, insurance, inspection, emissions compliance, clearances, plates, and special authority documents may be required depending on the transaction.',
+          text: 'A beginner does not need to memorize every registration workflow, but should recognize the pattern behind a legally ready vehicle: proof of ownership, proof of identity, insurance, inspection, emissions compliance, clearances, plates, and special authority documents may be required depending on the transaction.',
         },
         {
           type: 'paragraph',
-          text: "When the extracted source conflicts with the LTO Citizen's Charter, the Citizen's Charter prevails.",
+          text: 'Every motor vehicle must be registered before it is used on a public highway (RA 4136, Sec. 5).',
         },
         {
           type: 'table',
@@ -197,7 +197,7 @@ export const level2Module = {
         },
         {
           type: 'paragraph',
-          text: 'For Level 2 gameplay, the question is not whether you can process registration at an LTO office. The question is whether the vehicle has the required legal proof before it is driven.',
+          text: 'For Level 2 gameplay, the question is not whether you can process a registration yourself. The question is whether the vehicle has the required legal proof before it is driven.',
         },
       ],
     },
@@ -322,14 +322,14 @@ export const level2Module = {
           type: 'table',
           headers: ['Type Of Maintenance', 'What It Means'],
           rows: [
-            ['Proactive', 'The driver checks and services the vehicle in advance, following its service manual. Parts are serviced or replaced when the manual says they are due. This is the approach the FDM encourages.'],
+            ['Proactive', 'The driver checks and services the vehicle in advance, following its service manual. Parts are serviced or replaced when the manual says they are due. This is the approach to follow.'],
             ['Preventive', 'Parts found worn during an inspection are replaced before they cause a breakdown.'],
             ['Corrective', 'A mechanic repairs what an inspection or a breakdown has already found.'],
           ],
         },
         {
           type: 'heading',
-          text: 'Checks The FDM Highlights',
+          text: 'Checks To Highlight',
         },
         // FDM Vol. 1 pp. 100, 101, 106, 132, 133, 171, 180
         {
@@ -355,7 +355,7 @@ export const level2Module = {
           ordered: false,
           items: [
             'Driving an unregistered motor vehicle is fined Php 10,000 (JAO 2014-01).',
-            'A newly bought motorcycle must be registered with the LTO within 5 days (RA 11235, Motorcycle Crime Prevention Act).',
+            'A newly bought motorcycle must be registered within 5 days (RA 11235, Motorcycle Crime Prevention Act).',
           ],
         },
       ],

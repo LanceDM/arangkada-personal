@@ -121,8 +121,8 @@ const ModeSelect = () => {
     {
       id: 'eksamen',
       title: 'Eksamen Mode',
-      subtitle: 'LTO Mock Exam',
-      description: '40-item exam based on the real LTO test. See your weak areas and get recommendations.',
+      subtitle: 'Mock Exam',
+      description: '40-item practice exam in the license exam format, grounded in traffic law. See your weak areas and get recommendations.',
       icon: FileText,
       color: 'from-red-500/20 to-rose-600/5',
       borderColor: eksamenUnlocked ? 'border-red-400/40 hover:border-red-400/70' : 'border-muted/30',

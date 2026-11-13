@@ -95,8 +95,12 @@ export interface ExamRow {
   userId: string;
   score: number;
   passed: boolean;
-  wrongIds: number[];
-  questionIds?: number[];
+  /** Numbers for sittings of the old 40-item exam bank; bank item ids since 2026-11-13. */
+  wrongIds: (number | string)[];
+  questionIds?: (number | string)[];
+  /** Each answer per bank item (since 2026-11-13). */
+  responses?: { itemId: string; level: number; chosen: number | null; correct: boolean }[];
+  bank?: 'served' | 'bundled';
   timestamp: number;
 }
 

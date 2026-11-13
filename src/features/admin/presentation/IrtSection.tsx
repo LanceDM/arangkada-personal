@@ -30,13 +30,14 @@ import { InformationCurves, WrightMap } from './IrtCharts';
 import { BLOCK_COLOR, BLOCK_LABEL } from './irtPalette';
 import { toShortDateTime } from './formatDate';
 
-export type IrtView = 'bank' | 'calibration' | 'design' | 'results';
+export type IrtView = 'bank' | 'calibration' | 'design' | 'results' | 'item-bank';
 
 const VIEWS: ReadonlyArray<{ value: IrtView; label: string }> = [
-  { value: 'bank', label: 'Item bank' },
+  { value: 'bank', label: 'Test items' },
   { value: 'calibration', label: 'Calibration' },
   { value: 'design', label: 'Post-test design' },
   { value: 'results', label: 'Results' },
+  { value: 'item-bank', label: 'Item bank (mock exam)' },
 ];
 
 const COHORT_NAME: Record<string, string> = { dryrun: 'dry-run (D-)', test: 'test (T-)', other: 'unknown' };
@@ -558,6 +559,58 @@ const ResultsView = ({ data }: { data: IrtData }) => {
   );
 };
 
+// ── The rest of the bank, from the mock exam ─────────────────────────────
+
+const ItemBankView = ({ data }: { data: IrtData }) => {
+  const { bank } = data;
+  return (
+    <div className="space-y-4">
+      <Notice tone="info">
+        The 60 test items are calibrated on the pre-test, which everyone takes. The rest of the bank is calibrated here, from
+        the optional Mock Exam, as answers build up: an item's difficulty is shown once {bank.minPlayers} different players
+        have answered it (first answers only). Exploratory: mock exam takers choose to take it.
+      </Notice>
+      <div className="grid gap-3 sm:grid-cols-4">
+        <StatTile label="Mock exam sittings" value={bank.sittings} />
+        <StatTile label="Players" value={bank.players} />
+        <StatTile label="Items answered" value={bank.items.length} />
+        <StatTile label={`Items with ${bank.minPlayers}+ players`} value={bank.calibrated} />
+      </div>
+      <Panel title="Items" description="Per item: different players, share right, and the Rasch difficulty b = ln((1 − p) / p) once the item has enough players.">
+        {bank.items.length === 0 ? (
+          <EmptyState title="No mock exam answers yet">Sittings saved from 2026-11-13 on carry per-item answers.</EmptyState>
+        ) : (
+          <Table
+            head={
+              <>
+                <Th>Item</Th>
+                <Th right>Level</Th>
+                <Th right>Players</Th>
+                <Th right>Share right</Th>
+                <Th right>b</Th>
+              </>
+            }
+          >
+            {bank.items.map(item => (
+              <tr key={item.itemId}>
+                <Td className="font-mono">{item.itemId}</Td>
+                <Td right>{item.level ?? '—'}</Td>
+                <Td right>
+                  {item.players}/{bank.minPlayers}
+                </Td>
+                <Td right>{pct(item.p === null ? null : item.p * 100)}</Td>
+                <Td right className={cn(!item.calibrated && 'text-muted-foreground')}>
+                  {item.calibrated ? num(item.b) : 'collecting'}
+                </Td>
+              </tr>
+            ))}
+          </Table>
+        )}
+      </Panel>
+    </div>
+  );
+};
+
 // ── The section ───────────────────────────────────────────────────────────
 
 export const IrtSection = ({ irt, view, onView }: { irt: IrtPanel; view: IrtView; onView: (view: IrtView) => void }) => {
@@ -593,6 +646,7 @@ export const IrtSection = ({ irt, view, onView }: { irt: IrtPanel; view: IrtView
           <NotCalibrated>The post-test's design is built on calibration day (raschAssemble.ts) and published to test_designs/post.</NotCalibrated>
         ))}
       {data && view === 'results' && <ResultsView data={data} />}
+      {data && view === 'item-bank' && <ItemBankView data={data} />}
     </div>
   );
 };

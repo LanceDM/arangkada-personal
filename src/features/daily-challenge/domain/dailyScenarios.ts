@@ -67,7 +67,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'No, find an alternate route', correct: true, explanation: 'Correct! Never drive through flood water you can\'t gauge the depth of. Find a safer route.' },
       { label: 'Yes, if I speed through quickly', correct: false, explanation: 'Speeding through floodwater causes hydroplaning and can damage your vehicle severely.' },
     ],
-    lawCitation: 'LTO Advisory — Avoid flooded roads. Water above tire level can stall engines and cause accidents.',
+    lawCitation: 'RA 4136, Sec. 48 (reckless driving): avoid flooded roads. Water above tire level can stall engines and cause accidents.',
   },
   {
     id: 'distracted-driving',

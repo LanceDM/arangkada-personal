@@ -79,7 +79,7 @@ const rightTurnCurbLaneSlot: SlotVariant[] = [
     rewardMessage: 'Correct. curb lane before the junction, then round with the rear wheel close to the curb.',
     duration: 200,
     lawCitation:
-      'RA 4136: proceed to the right lane well in advance, reduce to a safe speed, signal your intention, and keep the rear right wheel nearest the curb or edge of the highway through the turn.',
+      'RA 4136, Sec. 45(a): proceed to the right lane well in advance, reduce to a safe speed, signal your intention, and keep the rear right wheel nearest the curb or edge of the highway through the turn.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {
@@ -109,7 +109,7 @@ const leftTurnCentreLaneSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Positioned nearest the center line, right of the center of the intersection, then through.',
     duration: 200,
     lawCitation:
-      'RA 4136: when turning left from one highway to another, the vehicle shall be conducted to the right of the center of the intersection, and shall turn into the lane nearest the center line.',
+      'RA 4136, Sec. 45(b): when turning left from one highway to another, the vehicle shall be conducted to the right of the center of the intersection, and shall turn into the lane nearest the center line.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {
@@ -145,7 +145,7 @@ const laneChangeSlowBusSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Mirrors, blind spot, signal, and across into the clear curb lane.',
     duration: 200,
     lawCitation:
-      'Changing lanes: check ahead, behind and to the sides, check your mirrors, glance at the blind spot, signal, then steer across and cancel the signal. RA 4136 Sec. 41 (FDM Vol. 1 p. 121): overtaking on the right is allowed on a road in a business or residential district with two or more lanes running in the same direction.',
+      'Changing lanes: check ahead, behind and to the sides, check your mirrors, glance at the blind spot, signal, then steer across and cancel the signal. RA 4136, Sec. 39: overtaking on the right is allowed on a road in a business or residential district with two or more lanes running in the same direction.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -181,7 +181,7 @@ const noOvertakeDoubleYellowSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stayed on your side of the line and waited it out.',
     duration: 200,
     lawCitation:
-      'RA 4136: do not drive to the left of the center line of a highway to overtake unless that side is clearly visible and free of oncoming traffic for a sufficient distance to pass safely. Overtaking is prohibited on a solid yellow or solid white line, at intersections, on bridges, curves, crests and railroad crossings.',
+      'RA 4136, Sec. 41(a): do not drive to the left of the center line of a highway to overtake unless that side is clearly visible and free of oncoming traffic for a sufficient distance to pass safely. Overtaking is prohibited on a solid yellow or solid white line, at intersections, on bridges, curves, crests and railroad crossings.',
     competency: 'lane_discipline',
     severity: 'critical',
     requiredLane: {
@@ -221,7 +221,7 @@ const redCurbNoParkingSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You recognized the red curb and carried on to find a legal space.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1 p. 96, painted curbs: a red-painted curb means No Loading and Unloading; a yellow-painted curb means No Parking.',
+      'Pavement marking standard (DPWH DO 41, s. 2012): Painted curbs: a red-painted curb means No Loading and Unloading; a yellow-painted curb means No Parking.',
     competency: 'parking',
     severity: 'major',
     marking: {
@@ -266,7 +266,7 @@ const hydrantAtTheCurbSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You did not stop within four meters of the hydrant.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1, Parking Prohibitions In Specified Places: "No driver shall park a vehicle, or permit it to stand, whether attended or unattended, upon a highway in any of the following places: … Within four meters of a fire hydrant." RO102: "Within 4 meters from a fire hydrant." FDM Vol. 1\'s review item: never park or stop at the side of the road within 4 meters from a fire hydrant, pursuant to R.A. No. 4136.',
+      'RA 4136, Sec. 46(e): no driver shall park a vehicle, or permit it to stand, attended or unattended, within four meters of a fire hydrant. Never park or stop at the side of the road within 4 meters of a hydrant.',
     competency: 'parking',
     severity: 'major',
   },
@@ -294,7 +294,7 @@ const towAwayZoneSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You read the sign and did not stop at it.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1, Parking Prohibitions In Specified Places: "No driver shall park a vehicle, or permit it to stand, whether attended or unattended, upon a highway in any of the following places: … At any place where official signs have been displayed prohibiting parking." The sign, in FDM Vol. 1 and RO102: "NO PARKING: TOW-AWAY ZONE -- parked vehicle will be towed."',
+      'RA 4136, Sec. 46(h): no driver shall park a vehicle, or permit it to stand, at any place where official signs prohibit parking. The sign reads: NO PARKING, TOW-AWAY ZONE; a parked vehicle will be towed.',
     competency: 'parking',
     severity: 'major',
     sign: {
@@ -339,7 +339,7 @@ const parallelParkingBaySlot: SlotVariant[] = [
       'Correct. Level with the car in front, then reversed in and straightened up against the curb — parallel parking, done the way the space required.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1, parallel parking: "driving slightly past the parking space, parallel to the parked vehicles in front of that space, keeping a safe distance, then followed by reversing into that space." Angle parking sits at about 45 degrees to the curb with one front wheel within a foot of it; perpendicular parking sits square to a wall or curb.',
+      'Parallel parking: drive slightly past the space, parallel to the vehicle parked in front of it and at a safe distance, then reverse into the space. Angle parking sits at about 45 degrees to the curb with one front wheel within a foot of it; perpendicular parking sits square to a wall or curb.',
     competency: 'parking',
     severity: 'major',
     marking: {

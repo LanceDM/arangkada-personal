@@ -11,11 +11,11 @@ export const level1Module = {
     {
       id: 'level-1-mission-briefing',
       title: 'Mission Briefing: Legal To Drive',
-      text: 'Your first official trip begins before the engine starts. At an LTO-style checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
+      text: 'Your first official trip begins before the engine starts. At a roadside checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'Your first official trip begins before the engine starts. At an LTO-style checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
+          text: 'Your first official trip begins before the engine starts. At a roadside checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
         },
         {
           type: 'paragraph',
@@ -46,11 +46,11 @@ export const level1Module = {
     {
       id: 'level-1-license-privilege',
       title: '1. License Is Authority',
-      text: "The LTO describes a driver's license as a privilege, not a right. It is authority to drive only within the limits granted by the LTO.",
+      text: "A driver's license is a privilege, not a right. Under RA 4136 (Sec. 24), it is authority to drive only the kinds of vehicles, and only within the conditions, written on it.",
       blocks: [
         {
           type: 'paragraph',
-          text: "The LTO describes a driver's license as a privilege, not a right. It is authority to drive only within the limits granted by the LTO.",
+          text: "A driver's license is a privilege, not a right. Under RA 4136 (Sec. 24), it is authority to drive only the kinds of vehicles, and only within the conditions, written on it.",
         },
         {
           type: 'paragraph',
@@ -79,11 +79,11 @@ export const level1Module = {
     {
       id: 'level-1-permit-license-types',
       title: '2. Permit And License Types',
-      text: 'Level 1 focuses on four kinds of LTO authority: SP, CL, NPDL, and PDL. They are not interchangeable.',
+      text: 'Level 1 focuses on four kinds of authority under RA 4136: SP, CL, NPDL, and PDL. They are not interchangeable.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'Level 1 focuses on four kinds of LTO authority. They are not interchangeable.',
+          text: 'Level 1 focuses on four kinds of authority under RA 4136. They are not interchangeable.',
         },
         {
           type: 'table',
@@ -324,12 +324,12 @@ export const level1Module = {
         // FDM Vol. 1 pp. 5, 9, 13, 24
         {
           type: 'table',
-          headers: ['Rule', 'What The FDM Says'],
+          headers: ['Rule', 'What The Law Says'],
           rows: [
-            ['Minimum age for a Student-Driver\'s Permit', 'At least 16 years old. Applicants below 18 need parental or guardian consent.'],
-            ['Minimum age for a driver\'s license', 'At least 17 years old.'],
+            ['Minimum age for a Student-Driver\'s Permit', 'At least 16 years old (RA 4136, Sec. 30, as amended by BP 398). Applicants below 18 need parental or guardian consent.'],
+            ['Minimum age for a driver\'s license', 'At least 17 for a non-professional license, 18 for a professional one (RA 4136, Sec. 22, as amended by BP 398).'],
             ['First license for a new applicant', 'A first-time applicant may only be issued a non-professional license for DL Codes A, A1, B, B1 or B2.'],
-            ['Tourist with a valid foreign license', 'May drive in the Philippines for no more than 90 days of their stay.'],
+            ['Tourist with a valid foreign license', 'May drive in the Philippines for no more than 90 days of their stay (RA 4136, Sec. 21).'],
           ],
         },
         {
@@ -388,7 +388,7 @@ export const level1Module = {
           type: 'list',
           ordered: false,
           items: [
-            'Thinking any LTO document allows driving.',
+            'Thinking any government ID or document allows driving.',
             'Letting a student driver proceed alone.',
             "Using a Conductor's License as driving authority.",
             'Matching the vehicle type but ignoring transmission limits.',

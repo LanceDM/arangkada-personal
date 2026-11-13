@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui/dialog';
-import { CATEGORY_LABELS, type ExamQuestion } from '../domain/questionBank';
+import { levelTopic, type ExamQuestion } from '../domain/examItems';
 
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
@@ -73,7 +73,7 @@ export const ExamPaper = ({
       <div className="flex-1 px-4 py-6 space-y-6">
         <div className="bg-card border border-border rounded-2xl p-6">
           <span className="text-xs text-muted-foreground mb-2 block">
-            {CATEGORY_LABELS[current.category]}
+            Level {current.level} · {levelTopic(current.level)}
           </span>
           <p className="text-base font-medium leading-relaxed">{current.question}</p>
         </div>

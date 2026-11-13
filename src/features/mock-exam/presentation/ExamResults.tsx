@@ -1,7 +1,7 @@
 import { AlertTriangle, BookOpen, CheckCircle2, RotateCcw, XCircle } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
-import type { ExamQuestion } from '../domain/questionBank';
-import { CATEGORY_TO_LEVEL, type WeakArea } from '../domain/grading';
+import type { ExamQuestion } from '../domain/examItems';
+import type { WeakArea } from '../domain/grading';
 
 interface ExamResultsProps {
   questions: ExamQuestion[];
@@ -51,25 +51,18 @@ export const ExamResults = ({
           </div>
           <div className="space-y-3">
             {weakAreas.map(area => {
-              const levelId = CATEGORY_TO_LEVEL[area.category];
+              const levelId = area.level;
               return (
-                <div key={area.category} className="flex items-center justify-between">
+                <div key={area.level} className="flex items-center justify-between">
                   <div>
                     <span className="text-sm font-medium">{area.label}</span>
                     <span className="text-xs text-destructive ml-2">
                       {area.wrong}/{area.total} wrong
                     </span>
                   </div>
-                  {levelId !== undefined && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => onPractice(levelId)}
-                    >
-                      Practice Level {levelId} →
-                    </Button>
-                  )}
+                  <Button variant="ghost" size="sm" className="text-xs" onClick={() => onPractice(levelId)}>
+                    Practice Level {levelId} →
+                  </Button>
                 </div>
               );
             })}
@@ -88,7 +81,7 @@ export const ExamResults = ({
           return (
             <div key={q.id} className="bg-card border border-border rounded-xl p-4 space-y-2">
               <p className="text-sm font-medium">
-                Q{q.id}. {q.question}
+                Q{i + 1}. {q.question}
               </p>
               <div className="flex items-center gap-2 text-xs">
                 <XCircle className="w-3 h-3 text-destructive" />
@@ -100,9 +93,9 @@ export const ExamResults = ({
                 <CheckCircle2 className="w-3 h-3 text-accent" />
                 <span className="text-accent">Correct: {q.choices[q.correctIndex]}</span>
               </div>
-              <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2 mt-1">
-                📖 {q.lawCitation}
-              </p>
+              {q.lawCitation && (
+                <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-2 mt-1">📖 {q.lawCitation}</p>
+              )}
             </div>
           );
         })}

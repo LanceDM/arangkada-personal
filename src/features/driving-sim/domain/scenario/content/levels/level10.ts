@@ -129,7 +129,7 @@ const hotspots: GarageHotspot[] = [
     rewardMessage:
       'Right — the keys stay with the sober driver. Knowing the road does nothing for a reaction time that is already gone.',
     lawCitation:
-      "RA 10586, the Anti-Drunk and Drugged Driving Act, makes it unlawful to drive a motor vehicle while under the influence of alcohol, dangerous drugs or similar substances. For a private vehicle of up to 4,500 kg gross vehicle weight, a blood alcohol concentration of 0.05% or higher is conclusive proof; for drivers of trucks, buses, motorcycles and public utility vehicles, anything above 0.00% is. Nobody reads their own number: alcohol slows the brain, reduces the ability to decide and makes a driver sleepy, whatever they feel. The LTO's own checklist asks before every drive whether you have been drinking in the last twenty-four hours, and its rule is plain: don't drink and drive. Where nobody is hurt the penalty is three months' imprisonment and a fine of Php 20,000 to Php 80,000, and a non-professional license is confiscated and suspended for twelve months on a first conviction.",
+      "RA 10586, the Anti-Drunk and Drugged Driving Act, makes it unlawful to drive a motor vehicle while under the influence of alcohol, dangerous drugs or similar substances. For a private vehicle of up to 4,500 kg gross vehicle weight, a blood alcohol concentration of 0.05% or higher is conclusive proof; for drivers of trucks, buses, motorcycles and public utility vehicles, anything above 0.00% is. Nobody reads their own number: alcohol slows the brain, reduces the ability to decide and makes a driver sleepy, whatever they feel. A driver's self-check before every drive asks whether you have been drinking in the last twenty-four hours, and its rule is plain: don't drink and drive. Where nobody is hurt the penalty is three months' imprisonment and a fine of Php 20,000 to Php 80,000, and a non-professional license is confiscated and suspended for twelve months on a first conviction.",
     competency: 'general_rules',
     severity: 'critical',
   },
@@ -394,7 +394,7 @@ const smokeInTheLaneSlot: SlotVariant[] = [
       'Right. Well back in clear air, with room to stop, and the violation left to the people who can actually test for it.',
     duration: 200,
     lawCitation:
-      "RA 8749, the Clean Air Act, ties a vehicle's registration to its emissions: a new vehicle needs a Certificate of Conformity and a used one a Certificate of Compliance to Emission Standard, from a test taken within sixty days before registration. A vehicle found emitting excessive smoke while operating on a public highway is subject to an emission test by the DOTr, through the LTO, its designated enforcement units or its deputized agents. Fines run to not more than Php 2,000 for a first offense, Php 4,000 for a second, and Php 6,000 with a one-year suspension of the registration for a third, and the driver and operator attend a DOTr seminar on pollution control. Enforcement is theirs, not yours, and it is not done from a bumper. Yours is the smoke itself: it hides the road, so slow down, keep your eyes on the road, and keep a suitable braking distance — two or three seconds — behind the vehicle ahead.",
+      "RA 8749, the Clean Air Act, ties a vehicle's registration to its emissions: a new vehicle needs a Certificate of Conformity and a used one a Certificate of Compliance to Emission Standard, from a test taken within sixty days before registration. A vehicle found emitting excessive smoke while operating on a public highway is subject to a roadside emission test by the DOTr, its designated enforcement units or its deputized agents (Sec. 46). Fines run to not more than Php 2,000 for a first offense, Php 4,000 for a second, and Php 6,000 with a one-year suspension of the registration for a third, and the driver and operator attend a DOTr seminar on pollution control. Enforcement is theirs, not yours, and it is not done from a bumper. Yours is the smoke itself: it hides the road, so slow down, keep your eyes on the road, and keep a suitable braking distance — two or three seconds — behind the vehicle ahead.",
     competency: 'hazard_awareness',
     severity: 'major',
     following: {
@@ -432,7 +432,7 @@ const smokeInTheLaneSlot: SlotVariant[] = [
 const theCheckpointSlot: SlotVariant[] = [
   {
     id: 'level10.the-checkpoint',
-    label: 'LTO checkpoint',
+    label: 'Roadside checkpoint',
     type: 'stop_sign',
     description:
       'An enforcer waves you into a checkpoint, tells you your eyes look bloodshot, and directs you to take the three field sobriety tests.',
@@ -580,7 +580,7 @@ const busOnTheGradeSlot: SlotVariant[] = [
       'Right — twenty held all the way down, while the bus ran away from you. Its speed is not a limit you have to match.',
     duration: 200,
     lawCitation:
-      "RA 10916, the Road Speed Limiter Act, requires covered vehicles — closed vans, haulers and cargo trucks or trailers, public utility vehicles, shuttle services and tanker trucks, but not taxicabs or public utility jeepneys — to run with a standard speed limiter, set under LTO or LTFRB supervision to the maximum allowed on the route they ply, and a covered vehicle without one is not registered. Operating without one, or with one that does not work or has been tampered with, carries a Php 50,000 fine with the driver's license suspended for one month or the franchise for three months on a first offense, and the vehicle is impounded until the fine is paid. Tampering with a limiter carries six months to three years' imprisonment and a Php 30,000 fine. None of it applies to your car: yours is the posted limit, and on a descent a suitable speed, so that the brakes are not worked all the way down.",
+      "RA 10916, the Road Speed Limiter Act, requires covered vehicles — closed vans, haulers and cargo trucks or trailers, public utility vehicles, shuttle services and tanker trucks, but not taxicabs or public utility jeepneys — to run with a standard speed limiter, set to the maximum allowed on the route they ply, and a covered vehicle without one is not registered. Operating without one, or with one that does not work or has been tampered with, carries a Php 50,000 fine with the driver's license suspended for one month or the franchise for three months on a first offense, and the vehicle is impounded until the fine is paid. Tampering with a limiter carries six months to three years' imprisonment and a Php 30,000 fine. None of it applies to your car: yours is the posted limit, and on a descent a suitable speed, so that the brakes are not worked all the way down.",
     competency: 'speed_control',
     severity: 'major',
     effect: { gradient: 0.08, span: 220 },

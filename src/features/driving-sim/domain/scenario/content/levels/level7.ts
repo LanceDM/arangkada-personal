@@ -146,7 +146,7 @@ const accelerationLaneMergeSlot: SlotVariant[] = [
       'Correct. Up to speed, into Lane 4, and off the acceleration lane in good time. Settle there before thinking about moving further in.',
     duration: 200,
     lawCitation:
-      'Except where a specific speed limit is posted, the expressway minimum speed is 60 km/h and the maximum is 100 km/h. Look ahead, enter slowly, and accelerate before merging, making full use of the acceleration (continuity) lane.',
+      'RA 2000 (Limited Access Highway Act) and expressway rules: Except where a specific speed limit is posted, the expressway minimum speed is 60 km/h and the maximum is 100 km/h. Look ahead, enter slowly, and accelerate before merging, making full use of the acceleration (continuity) lane.',
     competency: 'speed_control',
     severity: 'critical',
     merge: {
@@ -207,7 +207,7 @@ const lane2PassengerCarSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Lane 2 — the lane the table assigns to cars — with Lane 1 left clear for the traffic that needs it.',
     duration: 200,
     lawCitation:
-      'On a four-lane expressway: Lane 1 is used by vehicles from Lane 2 for passing and overtaking; Lane 2 carries passenger cars, small and medium passenger buses, and freight under 1.5 tons; Lane 3 carries large passenger buses and freight over 1.5 tons; Lane 4 carries special vehicles and construction equipment.',
+      'RA 2000 (Limited Access Highway Act) and expressway rules: On a four-lane expressway: Lane 1 is used by vehicles from Lane 2 for passing and overtaking; Lane 2 carries passenger cars, small and medium passenger buses, and freight under 1.5 tons; Lane 3 carries large passenger buses and freight over 1.5 tons; Lane 4 carries special vehicles and construction equipment.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -246,7 +246,7 @@ const followingDistanceLeadVanSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You kept a full two-second gap to the van the whole way in.',
     duration: 200,
     lawCitation:
-      'Keep a two-to-three second following gap, measured in time rather than meters, and widen it for higher speed, a heavier load or reduced visibility. Total stopping distance is perception and reaction distance plus braking distance: about 80 meters at 100 km/h.',
+      'RA 4136, Sec. 35(a): Keep a two-to-three second following gap, measured in time rather than meters, and widen it for higher speed, a heavier load or reduced visibility. Total stopping distance is perception and reaction distance plus braking distance: about 80 meters at 100 km/h.',
     competency: 'hazard_awareness',
     severity: 'critical',
     npc: {
@@ -290,7 +290,7 @@ const lane1OvertakeFreightTruckSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Into Lane 1 for the pass, and back to your own lane once the truck was clear behind you.',
     duration: 200,
     lawCitation:
-      'Expressway overtaking happens only in Lane 1, the innermost lane; an overtaking vehicle does not have right-of-way and must return to its own lane once clear. Judge the gap by whether it is large enough to complete the pass and return safely, not by how much the vehicle ahead is slowing you down.',
+      'RA 2000 (Limited Access Highway Act) and expressway rules: Expressway overtaking happens only in Lane 1, the innermost lane; an overtaking vehicle does not have right-of-way and must return to its own lane once clear. Judge the gap by whether it is large enough to complete the pass and return safely, not by how much the vehicle ahead is slowing you down.',
     competency: 'lane_discipline',
     severity: 'major',
     npc: {
@@ -352,7 +352,7 @@ const lane1YieldToFasterTrafficSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stayed out of Lane 1 and let the faster car take it.',
     duration: 200,
     lawCitation:
-      'The innermost lane (Lane 1), nearest the median barrier, is for overtaking only, within the allowed speed. An overtaking vehicle does not have right-of-way and must return to its own lane once clear.',
+      'RA 2000 (Limited Access Highway Act) and expressway rules: The innermost lane (Lane 1), nearest the median barrier, is for overtaking only, within the allowed speed. An overtaking vehicle does not have right-of-way and must return to its own lane once clear.',
     competency: 'lane_discipline',
     severity: 'major',
     npc: {
@@ -402,7 +402,7 @@ const expresswayExitSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Into the exit lane in good time, down to the posted 60, and onto the ramp under control.',
     duration: 200,
     lawCitation:
-      'A posted sign always overrides the default speed table. Check Brakes, Reduce Speed Now is posted in conjunction with a merge or descent on the expressway: test your brakes and slow down before the situation demands it. Special signs appear as early as 200 meters before an exit to give you time to move into the correct lane.',
+      'Road sign standard (DPWH DO 41, s. 2012): A posted sign always overrides the default speed table. Check Brakes, Reduce Speed Now is posted in conjunction with a merge or descent on the expressway: test your brakes and slow down before the situation demands it. Special signs appear as early as 200 meters before an exit to give you time to move into the correct lane.',
     competency: 'speed_control',
     severity: 'major',
     maneuver: {
@@ -462,7 +462,7 @@ const tollPlazaClosedGatesSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Open gate picked out early, across in good time, and slowed to a walking pace for the booth.',
     duration: 200,
     lawCitation:
-      'Toll gate lane indicators: a red X means the lane is closed and you cannot drive through it. Special signs appear as early as 200 meters before a toll exit to give you time to move into the correct lane. Slow down at the entry and exit tolls.',
+      'RA 2000 (Limited Access Highway Act) and expressway rules: Toll gate lane indicators: a red X means the lane is closed and you cannot drive through it. Special signs appear as early as 200 meters before a toll exit to give you time to move into the correct lane. Slow down at the entry and exit tolls.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {

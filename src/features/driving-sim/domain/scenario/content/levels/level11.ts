@@ -100,7 +100,7 @@ const ridersInTheirLaneSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You held your line past the riders and left them their lane.',
     duration: 200,
     lawCitation:
-      'Motorcycle lanes are allotted to motorcycle riders and can be shared with other vehicles; a rider may not stay in another lane unless an enforcer directs it or the rider is turning into an intersection, signaling within 100 meters. When you pass motorcyclists, check what is in front of them, behind them and to each side, leave enough space when overtaking, and give way to their designated lane. Every rider and back rider wears a standard protective motorcycle helmet at all times, on any type of road, and a motorcycle carries no passenger other than its one back rider.',
+      'Pavement marking standard (DPWH DO 41, s. 2012): Motorcycle lanes are allotted to motorcycle riders and can be shared with other vehicles; a rider may not stay in another lane unless an enforcer directs it or the rider is turning into an intersection, signaling within 100 meters. When you pass motorcyclists, check what is in front of them, behind them and to each side, leave enough space when overtaking, and give way to their designated lane. Every rider and back rider wears a standard protective motorcycle helmet at all times, on any type of road, and a motorcycle carries no passenger other than its one back rider.',
     competency: 'lane_discipline',
     severity: 'major',
     // The room between a car centred in the inner lane and a rider in the curb
@@ -190,7 +190,7 @@ const cyclistSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You were in your own lane, with your speed down, where the cyclist was riding.',
     duration: 200,
     lawCitation:
-      "The LTO's guidelines for drivers of motorcycles, cars, trucks and other motorized vehicles: do not travel or park in a bicycle or pedestrian lane; give a cyclist sufficient clearance and watch your speed when passing; be extra careful turning at intersections; open doors with care; and check blind spots. A bicycle lane is painted with a solid line along the side of the road, and motor vehicles are not allowed to use it. Give courtesy and respect to active transport users.",
+      "Guidelines for drivers of motorcycles, cars, trucks and other motorized vehicles: do not travel or park in a bicycle or pedestrian lane; give a cyclist sufficient clearance and watch your speed when passing; be extra careful turning at intersections; open doors with care; and check blind spots. A bicycle lane is painted with a solid line along the side of the road, and motor vehicles are not allowed to use it. Give courtesy and respect to active transport users.",
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -232,7 +232,7 @@ const deliveryBoxSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You kept your distance behind the delivery rider.',
     duration: 200,
     lawCitation:
-      "A custom-made top box, such as a fast-food delivery box, is subject to inspection and registration. It must be securely attached, must not exceed two feet by two feet by two feet, and must not impede or obstruct the rider's view of the road from the side mirrors; an unregistered one is apprehended with a Php 5,000 penalty under DOTC JAO 2014-01. A top box designed for motorcycles and approved by the DTI may not be subject to inspection, registration or apprehension if it is securely attached and holds at most two full-faced helmets. The box is the rider's to answer for. Yours is to keep at least two or three seconds back from a rider who cannot see behind.",
+      "JAO 2014-01: A custom-made top box, such as a fast-food delivery box, is subject to inspection and registration. It must be securely attached, must not exceed two feet by two feet by two feet, and must not impede or obstruct the rider's view of the road from the side mirrors; an unregistered one is apprehended with a Php 5,000 penalty under DOTC JAO 2014-01. A top box designed for motorcycles and approved by the DTI may not be subject to inspection, registration or apprehension if it is securely attached and holds at most two full-faced helmets. The box is the rider's to answer for. Yours is to keep at least two or three seconds back from a rider who cannot see behind.",
     competency: 'hazard_awareness',
     severity: 'major',
     following: {
@@ -311,7 +311,7 @@ const jeepneyStopSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You had your speed down going past the jeepney stop.',
     duration: 200,
     lawCitation:
-      "A bus or jeepney driver picks up and drops off passengers only at the correct loading and unloading zone, never on a curve or at an intersection, and stops out of traffic or the traveled lane; stopping outside the stopping zone and ignoring other motorists' right-of-way is one of the PUV violations that cause heavy traffic. A PUV conveys no more passengers than its sitting capacity and accommodates PWDs, pregnant women and senior citizens in designated seats. Going past, yours is the pedestrians' side of it: give way to pedestrians, and slow down where there is a high volume of them. A bus or PUJ stop zone is no place to park.",
+      "RA 4136, Sec. 54: A bus or jeepney driver picks up and drops off passengers only at the correct loading and unloading zone, never on a curve or at an intersection, and stops out of traffic or the traveled lane; stopping outside the stopping zone and ignoring other motorists' right-of-way is one of the PUV violations that cause heavy traffic. A PUV conveys no more passengers than its sitting capacity and accommodates PWDs, pregnant women and senior citizens in designated seats. Going past, yours is the pedestrians' side of it: give way to pedestrians, and slow down where there is a high volume of them. A bus or PUJ stop zone is no place to park.",
     competency: 'general_rules',
     severity: 'major',
   },
@@ -347,7 +347,7 @@ const tricycleInTheBoxSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stopped short of the box and kept it clear.',
     duration: 220,
     lawCitation:
-      "A yellow box marks the part of a junction no vehicle should stay inside, so that it does not obstruct other motorists. The tricycle is breaking its own rules twice: waiting within six meters of an intersection, and stopping on a yellow box, one of the violations of public utility drivers that cause heavy traffic. A tricycle is registered with the LTO and renewed every year like any other motor vehicle; its franchise comes from the local government unit, not the LTFRB; and it displays its authorized fare matrix and identification card.",
+      "RA 4136, Secs. 46(c) and 54: A yellow box marks the part of a junction no vehicle should stay inside, so that it does not obstruct other motorists. The tricycle is breaking its own rules twice: waiting within six meters of an intersection, and stopping on a yellow box, one of the violations of public utility drivers that cause heavy traffic. A tricycle is registered and renewed every year like any other motor vehicle; its franchise comes from the local government unit, not the LTFRB; and it displays its authorized fare matrix and identification card.",
     competency: 'lane_discipline',
     severity: 'major',
   },
@@ -381,7 +381,7 @@ const crossingAtTheStopSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stopped before the crossing for the woman on it.',
     duration: 220,
     lawCitation:
-      'Give way to pedestrians at crossings, pavements and intersections, slow down where there is a high volume of pedestrians, and exercise extreme caution approaching the pedestrian lane; those with disabilities may need extra time to cross. The same people have protections on board: a jeepney keeps at least two seats for PWDs, every PUV accommodates PWDs, pregnant women and senior citizens in designated seats, and senior citizens, PWDs and students from preschool to college ride at a 20% fare discount.',
+      'RA 4136, Sec. 42(c): Give way to pedestrians at crossings, pavements and intersections, slow down where there is a high volume of pedestrians, and exercise extreme caution approaching the pedestrian lane; those with disabilities may need extra time to cross. The same people have protections on board: a jeepney keeps at least two seats for PWDs, every PUV accommodates PWDs, pregnant women and senior citizens in designated seats, and senior citizens, PWDs and students from preschool to college ride at a 20% fare discount.',
     competency: 'pedestrians',
     severity: 'critical',
   },
@@ -417,7 +417,7 @@ const overloadedJeepneySlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stayed well back from the jeepney and its load.',
     duration: 200,
     lawCitation:
-      'A load that extends more than one meter beyond the body of the vehicle is marked with a red flag, or a red light at night. Permitting a passenger to ride on the running board, step board or mudguard while the vehicle is moving is a violation, and so is allowing passengers on top of a vehicle. A PUV conveys no more passengers than its sitting capacity; overloading passengers is fined Php 5,000, then Php 10,000, then Php 15,000 with the cancellation of the CPC. None of it is yours to enforce. Yours is the space: keep adequate room behind a long or loaded vehicle, at least two or three seconds.',
+      'RA 4136, Secs. 32 and 34(i): A load that extends more than one meter beyond the body of the vehicle is marked with a red flag, or a red light at night. Permitting a passenger to ride on the running board, step board or mudguard while the vehicle is moving is a violation, and so is allowing passengers on top of a vehicle. A PUV conveys no more passengers than its sitting capacity; overloading passengers is fined Php 5,000, then Php 10,000, then Php 15,000 with the cancellation of the CPC. None of it is yours to enforce. Yours is the space: keep adequate room behind a long or loaded vehicle, at least two or three seconds.',
     competency: 'hazard_awareness',
     severity: 'major',
     following: {

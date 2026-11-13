@@ -41,6 +41,9 @@ interface MarkingSpec extends MarkingPlate {
  * so a catalogue of thirty-odd stays readable — and so the deduction quoted in
  * the penalty text is always the one the rule engine will really take.
  */
+/** The standard every marking's rule comes from (DPWH Highway Safety Design Standards, Part 2). */
+const MARKING_STANDARD = 'Pavement marking standard (DPWH DO 41, s. 2012)';
+
 const marking = (spec: MarkingSpec): SlotVariant => {
   const points = spec.points ?? 20;
   const severity = spec.severity ?? 'major';
@@ -54,7 +57,7 @@ const marking = (spec: MarkingSpec): SlotVariant => {
     duration: 200,
     penaltyMessage: `${spec.penalty}`,
     rewardMessage: `${spec.reward}`,
-    lawCitation: spec.law,
+    lawCitation: `${MARKING_STANDARD}${spec.id === 'level4.junction-space.yellow-box' ? '; RA 4136, Sec. 54' : ''}: ${spec.law}`,
     competency: spec.competency ?? 'lane_discipline',
     severity,
     ...(spec.scene ? { scene: spec.scene } : {}),

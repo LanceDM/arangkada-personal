@@ -53,7 +53,7 @@ const drawCheckpointScene = (
   drawCheckpointOfficer(ctx, roadX - 34, screenY + 4, 0.95);
   drawTrafficCone(ctx, roadX + 16, screenY + 40, 0.5);
   drawTrafficCone(ctx, roadX + ROAD_WIDTH - 16, screenY + 40, 0.5);
-  drawRoadsideSign(ctx, roadX + ROAD_WIDTH + 44, screenY - 26, 'LTO', 'CHECKPOINT', '#1d4ed8');
+  drawRoadsideSign(ctx, roadX + ROAD_WIDTH + 44, screenY - 26, 'TRAFFIC', 'CHECKPOINT', '#1d4ed8');
 };
 
 /**

@@ -334,7 +334,7 @@ const bothAtOnceSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stopped for the child and let the car behind wait.',
     duration: 200,
     lawCitation:
-      "A school service stopped with its hazard lights on means students may cross: slow down and prepare to stop, and give way to it (Level 2 module, right-of-way). Give extra care and right-of-way to children. The car closing up behind does not change that duty: don't be a victim of road rage; keep your distance and put away your pride, because driving is not a contest.",
+      "A school service stopped with its hazard lights on means students may cross: slow down and prepare to stop, and give way to it. Give extra care and right-of-way to children. The car closing up behind does not change that duty: don't be a victim of road rage; keep your distance and put away your pride, because driving is not a contest.",
     competency: 'pedestrians',
     severity: 'critical',
     // Sounding the horn fails this outright. It is the one place in the level

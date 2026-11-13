@@ -13,14 +13,21 @@
  *   post-test sitting under it can be told apart and set aside.
  * - `irtDesign`: once the pre-tests are in. Each item's Rasch difficulty is
  *   b = ln((1 − p) / p) from the share who got it right on the pre-test (the
- *   change plan's first estimate). The routing block takes items spread across
- *   the whole range; the other 45, in order of difficulty, fill easy, medium
- *   and hard. The cuts are the routing scores at the 1/3 and 2/3 points of the
- *   pre-test takers' own routing scores, so about a third goes to each block.
+ *   change plan's first estimate). The routing block is 15 items drawn at
+ *   random (2026-11-13, the team's plan: "15 random, 15 by ability"), one from
+ *   each band of four items in order of difficulty, so a random draw still
+ *   spans the whole range; the draw is seeded by the design's id, so the
+ *   published design can be rebuilt. The other 45, in order of difficulty,
+ *   fill easy, medium and hard: the 15 a player gets by their ability. The cuts
+ *   are the routing scores at the 1/3 and 2/3 points of the pre-test takers'
+ *   own routing scores, so about a third goes to each block. Everyone takes
+ *   the same routing items, so the routing score orders players exactly as
+ *   their Rasch ability does.
  *
  * Both are pure and seeded; the script (scripts/db/postTestDesign.ts) writes
  * the result to `test_designs/post`.
  */
+import { createRng } from '@/shared/lib/rng';
 import { difficultyFromProportion } from './rasch';
 import { twoStageDesignProblems, type RoutingCuts, type TwoStageDesign } from './twoStageDesign';
 
@@ -85,6 +92,13 @@ export const itemDifficulties = (items: readonly DesignItem[], pretests: readonl
     return { ...item, correct, total, b: total > 0 ? difficultyFromProportion(correct, total) : 0 };
   });
 
+/** A stable 32-bit seed from a design id (FNV-1a). */
+const seedOf = (text: string): number => {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
+  return h >>> 0;
+};
+
 const quantile = (sorted: readonly number[], q: number) => sorted[Math.min(sorted.length - 1, Math.max(0, Math.floor(q * sorted.length)))];
 
 export const irtDesign = (
@@ -95,15 +109,19 @@ export const irtDesign = (
 ): { design: TwoStageDesign; difficulties: ItemDifficulty[] } => {
   assertSize(items);
   const difficulties = itemDifficulties(items, pretests).sort((a, b) => a.b - b.b || byId(a, b));
-  // Every fourth item, from the easiest, is routing: it spans the whole range.
-  const routing = difficulties.filter((_, i) => i % 4 === 1).map(item => item.id);
-  const rest = difficulties.filter((_, i) => i % 4 !== 1);
+  // Routing: one item at random from each band of four, easiest band first.
+  const random = createRng(seedOf(designId));
+  const routingSet = new Set<string>();
+  for (let band = 0; band < difficulties.length; band += 4) {
+    routingSet.add(difficulties[band + Math.floor(random() * 4)].id);
+  }
+  const routing = difficulties.filter(item => routingSet.has(item.id)).map(item => item.id);
+  const rest = difficulties.filter(item => !routingSet.has(item.id));
   const easy = rest.slice(0, BLOCK_SIZE).map(item => item.id);
   const medium = rest.slice(BLOCK_SIZE, 2 * BLOCK_SIZE).map(item => item.id);
   const hard = rest.slice(2 * BLOCK_SIZE).map(item => item.id);
 
   // The pre-test takers' scores on the routing block, for the cuts.
-  const routingSet = new Set(routing);
   const scores = pretests.map(p => [...p.correct].filter(id => routingSet.has(id)).length).sort((a, b) => a - b);
   let c1 = scores.length ? quantile(scores, 1 / 3) : PLACEHOLDER_CUTS[0];
   let c2 = scores.length ? quantile(scores, 2 / 3) : PLACEHOLDER_CUTS[1];

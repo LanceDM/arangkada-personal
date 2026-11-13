@@ -321,7 +321,7 @@ export const level10Module = {
         },
         {
           type: 'paragraph',
-          text: 'Test results must be presented to the LTO within 60 days of testing, as a prerequisite for registration or renewal.',
+          text: 'Test results must be presented within 60 days of testing (RA 8749, Sec. 21), as a prerequisite for registration or renewal.',
         },
         {
           type: 'heading',
@@ -329,7 +329,7 @@ export const level10Module = {
         },
         {
           type: 'paragraph',
-          text: 'A vehicle found emitting excessive smoke while operating on any public highway is subject to an emission test by DOTr, LTO, or their deputized enforcement units.',
+          text: 'A vehicle found emitting excessive smoke while operating on any public highway is subject to a roadside emission test by the DOTr or its deputized enforcement units (RA 8749, Sec. 46).',
         },
         {
           type: 'heading',

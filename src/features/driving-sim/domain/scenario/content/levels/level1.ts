@@ -15,7 +15,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.passenger-car',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -28,7 +28,7 @@ const codeMatchSlot: SlotVariant[] = [
       { label: 'No-Go — every passenger car requires a professional license', action: 'brake' },
     ],
     lawCitation:
-      'An NPDL authorizes operation of a private motor vehicle when the DL code, clutch code, conditions, and validity all match the trip.',
+      'RA 4136, Sec. 24: An NPDL authorizes operation of a private motor vehicle when the DL code, clutch code, conditions, and validity all match the trip.',
     competency: 'driver_legality',
     severity: 'minor',
     inspection: {
@@ -49,7 +49,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.motorcycle-code-a',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This rider was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -61,7 +61,7 @@ const codeMatchSlot: SlotVariant[] = [
       { label: 'No-Go — only Code B may be used for any road trip', action: 'stop' },
       { label: 'No-Go — a motorcycle always needs a separate permit besides the DL', action: 'brake' },
     ],
-    lawCitation: 'Drivers must operate only vehicles allowed by their driver license code; Code A authorizes motorcycles.',
+    lawCitation: 'RA 4136, Sec. 24: Drivers must operate only vehicles allowed by their driver license code; Code A authorizes motorcycles.',
     competency: 'driver_legality',
     severity: 'minor',
     inspection: {
@@ -82,7 +82,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.at-only-automatic',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -95,7 +95,7 @@ const codeMatchSlot: SlotVariant[] = [
       { label: 'No-Go — Code B requires a professional license for any sedan', action: 'brake' },
     ],
     lawCitation:
-      'An NPDL authorizes operation of a private motor vehicle when the DL code, clutch code, conditions, and validity all match the trip.',
+      'RA 4136, Sec. 24: An NPDL authorizes operation of a private motor vehicle when the DL code, clutch code, conditions, and validity all match the trip.',
     competency: 'driver_legality',
     severity: 'minor',
     inspection: {
@@ -116,7 +116,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.pickup-manual',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -129,7 +129,7 @@ const codeMatchSlot: SlotVariant[] = [
       { label: 'No-Go — MT/AT only covers sedans, not pickups', action: 'brake' },
     ],
     lawCitation:
-      'An NPDL authorizes operation of a private motor vehicle when the DL code, clutch code, conditions, and validity all match the trip.',
+      'RA 4136, Sec. 24: An NPDL authorizes operation of a private motor vehicle when the DL code, clutch code, conditions, and validity all match the trip.',
     competency: 'driver_legality',
     severity: 'minor',
     inspection: {
@@ -154,7 +154,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.at-only-manual-car',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Clutch code violation: automatic-only authority does not cover a manual-transmission trip.',
@@ -167,7 +167,7 @@ const clutchCodeSlot: SlotVariant[] = [
       { label: 'No-Go — automatic-only authority does not cover a manual vehicle', action: 'brake' },
     ],
     lawCitation:
-      'A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test.',
+      'RA 4136, Sec. 24: A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -188,7 +188,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.mt-at-manual-car',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: "This driver's authority already covered a manual-transmission trip. Refusing a compliant trip is also a wrong call.",
@@ -201,7 +201,7 @@ const clutchCodeSlot: SlotVariant[] = [
       { label: 'No-Go — automatic-trained drivers may never use a manual vehicle', action: 'stop' },
     ],
     lawCitation:
-      'A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test; MT/AT authority already covers both.',
+      'RA 4136, Sec. 24: A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test; MT/AT authority already covers both.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -222,7 +222,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.at-only-automatic-suv',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -235,7 +235,7 @@ const clutchCodeSlot: SlotVariant[] = [
       { label: 'No-Go — only MT/AT authority may legally drive', action: 'brake' },
     ],
     lawCitation:
-      'A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test.',
+      'RA 4136, Sec. 24: A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -256,7 +256,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.at-only-manual-van',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Clutch code violation: automatic-only authority does not cover a manual-transmission trip.',
@@ -269,7 +269,7 @@ const clutchCodeSlot: SlotVariant[] = [
       { label: 'No-Go — automatic-only authority does not cover a manual vehicle', action: 'brake' },
     ],
     lawCitation:
-      'A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test.',
+      'RA 4136, Sec. 24: A DL holder with automatic transmission authority who intends to operate manual transmission must take and pass the required practical driving test.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -294,7 +294,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-a-passenger-car-mt-at',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code A is for motorcycles, not this passenger-car trip.',
@@ -306,7 +306,7 @@ const categoryMatchSlot: SlotVariant[] = [
       { label: 'Go — any valid license is enough for a private trip', action: 'accelerate' },
       { label: 'Go — Code A also covers light four-wheeled vehicles', action: 'honk' },
     ],
-    lawCitation: 'Drivers must operate only vehicles allowed by their driver license code.',
+    lawCitation: 'RA 4136, Sec. 24: Drivers must operate only vehicles allowed by their driver license code.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -327,7 +327,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-b-motorcycle-aquino',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code B does not cover a motorcycle trip.',
@@ -339,7 +339,7 @@ const categoryMatchSlot: SlotVariant[] = [
       { label: 'Go — any valid license is enough for a private trip', action: 'accelerate' },
       { label: 'Go — Code B also covers two-wheeled vehicles', action: 'honk' },
     ],
-    lawCitation: 'Drivers must operate only vehicles allowed by their driver license code.',
+    lawCitation: 'RA 4136, Sec. 24: Drivers must operate only vehicles allowed by their driver license code.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -360,7 +360,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-a-passenger-car-mt',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code A is for motorcycles, not this passenger-car trip.',
@@ -372,7 +372,7 @@ const categoryMatchSlot: SlotVariant[] = [
       { label: 'Go — Code A upgrades automatically after five years', action: 'accelerate' },
       { label: 'Go — any two-wheel-rated license also covers small cars', action: 'honk' },
     ],
-    lawCitation: 'Drivers must operate only vehicles allowed by their driver license code.',
+    lawCitation: 'RA 4136, Sec. 24: Drivers must operate only vehicles allowed by their driver license code.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -393,7 +393,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-b-motorcycle-pascual',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code B does not cover a motorcycle trip.',
@@ -405,7 +405,7 @@ const categoryMatchSlot: SlotVariant[] = [
       { label: 'Go — Code B covers every vehicle under 8 seats', action: 'accelerate' },
       { label: 'Go — a four-wheel license also allows two wheels', action: 'honk' },
     ],
-    lawCitation: 'Drivers must operate only vehicles allowed by their driver license code.',
+    lawCitation: 'RA 4136, Sec. 24: Drivers must operate only vehicles allowed by their driver license code.',
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -430,7 +430,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.conductors-license',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: "A Conductor's License does not authorize driving. This trip must not start.",
@@ -442,7 +442,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
       { label: 'Go — allowed as long as a licensed driver is on board', action: 'brake' },
       { label: "No-Go — a Conductor's License is not driving authority", action: 'stop' },
     ],
-    lawCitation: "A Conductor's License authorizes conductor work, not operation of a motor vehicle.",
+    lawCitation: "RA 4136, Sec. 24: A Conductor's License authorizes conductor work, not operation of a motor vehicle.",
     competency: 'driver_legality',
     severity: 'critical',
     inspection: {
@@ -463,7 +463,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.student-permit-unsupervised',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A Student Permit does not authorize unsupervised driving. This trip must not start.',
@@ -475,7 +475,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
       { label: 'Go — allowed as long as the trip stays within the city', action: 'brake' },
       { label: 'No-Go — a Student Permit requires a licensed driver seated beside the holder', action: 'stop' },
     ],
-    lawCitation: 'A Student Permit holder may only drive under the direct supervision of a licensed driver occupying the seat beside them.',
+    lawCitation: 'RA 4136, Sec. 30, as amended by BP 398: A Student Permit holder may only drive under the direct supervision of a licensed driver occupying the seat beside them.',
     competency: 'driver_legality',
     severity: 'critical',
     inspection: {
@@ -496,7 +496,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.barangay-id',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A Barangay ID does not authorize driving. This trip must not start.',
@@ -509,7 +509,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
       { label: 'No-Go — a Barangay ID is not driving authority', action: 'stop' },
     ],
     lawCitation:
-      "Only a valid driver's license, student permit, or equivalent LTO-issued authority may be used to operate a motor vehicle.",
+      "RA 4136, Sec. 19: only a valid driver's license, or a student-driver's permit used under its conditions (Sec. 30), authorizes operating a motor vehicle.",
     competency: 'driver_legality',
     severity: 'critical',
     inspection: {
@@ -530,7 +530,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.student-permit-expired',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'An expired Student Permit is not valid authority, supervised or not. This trip must not start.',
@@ -543,7 +543,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
       { label: 'No-Go — an expired Student Permit is not valid authority at all', action: 'stop' },
     ],
     lawCitation:
-      'A Student Permit holder may only drive under the direct supervision of a licensed driver occupying the seat beside them, and only while the permit itself remains valid.',
+      'RA 4136, Sec. 30, as amended by BP 398: A Student Permit holder may only drive under the direct supervision of a licensed driver occupying the seat beside them, and only while the permit itself remains valid.',
     // Who may drive is driver legality, like the other permit variants in this
     // slot (catalogue review 2026-10-28).
     competency: 'driver_legality',
@@ -570,7 +570,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.expired-license',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'An expired license is not valid authority to drive; proceeding is a violation.',
@@ -582,7 +582,7 @@ const validitySlot: SlotVariant[] = [
       { label: 'No-Go — expired authority is not valid to drive', action: 'stop' },
       { label: 'Go — the condition code is met, so the trip may continue', action: 'accelerate' },
     ],
-    lawCitation: "A driver's license must be valid and unexpired to serve as legal authority to drive.",
+    lawCitation: "RA 4136, Secs. 19 and 26: A driver's license must be valid and unexpired to serve as legal authority to drive.",
     competency: 'document_awareness',
     severity: 'major',
     inspection: {
@@ -603,7 +603,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.valid-license-ramos',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'This license was still valid. Refusing a properly valid document is also a wrong call.',
@@ -636,7 +636,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.lenses-condition-not-met',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A required condition was not met; driving without the corrective lenses on file is a violation.',
@@ -649,7 +649,7 @@ const validitySlot: SlotVariant[] = [
       { label: 'Go — corrective lenses are only required for night driving', action: 'brake' },
     ],
     lawCitation:
-      "A condition noted on a driver's license, such as required corrective lenses, must be complied with whenever the vehicle is operated.",
+      "RA 4136, Sec. 24: A condition noted on a driver's license, such as required corrective lenses, must be complied with whenever the vehicle is operated.",
     competency: 'document_awareness',
     severity: 'major',
     inspection: {
@@ -670,7 +670,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.valid-license-cruz',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'This license was still valid. Refusing a properly valid document is also a wrong call.',
@@ -680,7 +680,7 @@ const validitySlot: SlotVariant[] = [
     choices: [
       { label: 'Go — the license is valid and unexpired', action: 'accelerate' },
       { label: 'No-Go — a license issued more than three years ago is stale', action: 'stop' },
-      { label: 'No-Go — validity must be confirmed with the LTO hotline first', action: 'brake' },
+      { label: 'No-Go — validity must be confirmed by phone first', action: 'brake' },
     ],
     lawCitation: "A driver's license must be valid and unexpired to serve as legal authority to drive.",
     competency: 'document_awareness',

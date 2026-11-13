@@ -5,7 +5,7 @@ import { Button } from '@/shared/ui/button';
 
 const features = [
   { icon: Car, title: 'Realistic Filipino Roads', desc: 'Jeepneys, tricycles, EDSA traffic — survive real Philippine driving scenarios.' },
-  { icon: Brain, title: 'LTO Exam Ready', desc: 'Every scenario maps to actual LTO exam questions and Philippine traffic laws.' },
+  { icon: Brain, title: 'License Exam Ready', desc: 'Every scenario rests on Philippine traffic laws and the topics of the license exam.' },
   { icon: Shield, title: 'Learn From Mistakes', desc: 'Wrong decisions show the exact law citation — learn rules in context.' },
   { icon: Trophy, title: '3 Game Modes', desc: 'Story Mode, Mock Exam, and Daily Challenges keep you engaged and learning.' },
 ];
@@ -41,7 +41,7 @@ const Landing = () => {
 
             <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
               Master Philippine traffic rules and sharpen your driving instincts — 
-              built for Filipino drivers preparing for LTO examinations.
+              built for Filipino drivers preparing for the driver's license exam.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -108,7 +108,7 @@ const Landing = () => {
               READY NA BA <span className="text-primary">IKAW</span>?
             </h2>
             <p className="text-muted-foreground">
-              3 game modes. Real LTO questions. Filipino road chaos included.
+              3 game modes. Questions grounded in Philippine traffic law. Filipino road chaos included.
             </p>
             <Button
               size="lg"

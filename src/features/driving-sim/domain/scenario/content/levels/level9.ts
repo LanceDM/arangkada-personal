@@ -295,7 +295,7 @@ const tireBlowoutSlot: SlotVariant[] = [
       'Correct. Straight and gradual, then a soft brake and off the road into the bay.',
     duration: 200,
     lawCitation:
-      'Tire blowout: take your foot off the accelerator pedal, do not slam on the brakes, hold on to your steering wheel firmly, slow down gradually, apply the brake softly once the vehicle is under control, and pull the vehicle to the safe side of the road. Then switch on hazard lights and place your Early Warning Devices 4 meters in front of and 4 meters behind the vehicle (FDM Vol. 1 p. 160). Always carry an emergency kit: a first aid kit, a flashlight and an Early Warning Device.',
+      'Tire blowout: take your foot off the accelerator pedal, do not slam on the brakes, hold on to your steering wheel firmly, slow down gradually, apply the brake softly once the vehicle is under control, and pull the vehicle to the safe side of the road. Then switch on hazard lights and place your Early Warning Devices 4 meters in front of and 4 meters behind the vehicle (LOI 229, 1974). Always carry an emergency kit: a first aid kit, a flashlight and an Early Warning Device.',
     competency: 'hazard_awareness',
     severity: 'critical',
     // 20 is the speed the rest of the game already treats as "slowed for this"
@@ -434,7 +434,7 @@ const crashAtTheBottomSlot: SlotVariant[] = [
       'Correct. Stopped clear of the wreck, hazards on, and out to see who needs what.',
     duration: 220,
     lawCitation:
-      "Duty of the driver in case of a crash: the driver present must show their driver's license and give their true name and address, along with the true name and address of the vehicle's owner. No driver involved in a road crash may leave the scene without aiding the victim, except if the driver is in imminent danger of serious harm because of the crash, if the driver reports the crash to the nearest law officer, or if the driver has to summon a physician or nurse to aid the victim.",
+      "RA 4136, Sec. 55: Duty of the driver in case of a crash: the driver present must show their driver's license and give their true name and address, along with the true name and address of the vehicle's owner. No driver involved in a road crash may leave the scene without aiding the victim, except if the driver is in imminent danger of serious harm because of the crash, if the driver reports the crash to the nearest law officer, or if the driver has to summon a physician or nurse to aid the victim.",
     competency: 'general_rules',
     severity: 'critical',
   },

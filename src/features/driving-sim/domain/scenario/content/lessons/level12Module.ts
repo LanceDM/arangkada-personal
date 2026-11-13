@@ -80,7 +80,7 @@ export const level12Module = {
         },
         {
           type: 'paragraph',
-          text: 'The LTO deputizes expressway traffic regulation officers (covering NLEX, SCTEX, SFEX, TPLEX, SLEX, Skyway, Star Tollway, CAVITEX, MCEX, CALAEX, and the C5 Extension Expressway) to enforce RA 4136 and related regulations. Only LTO-deputized traffic enforcers are authorized to confiscate a driver\'s license.',
+          text: 'Deputized expressway traffic regulation officers (covering NLEX, SCTEX, SFEX, TPLEX, SLEX, Skyway, Star Tollway, CAVITEX, MCEX, CALAEX, and the C5 Extension Expressway) enforce RA 4136 and related regulations. Only deputized traffic enforcers are authorized to confiscate a driver\'s license.',
         },
         {
           type: 'heading',
@@ -90,7 +90,7 @@ export const level12Module = {
           type: 'table',
           headers: ['Document', 'Meaning'],
           rows: [
-            ['Temporary Operator\'s Permit (TOP)', 'Issued by LTO-deputized enforcers for traffic and administrative violations.'],
+            ['Temporary Operator\'s Permit (TOP)', 'Issued by deputized enforcers for traffic and administrative violations (JAO 2014-01).'],
             ['Traffic Violation Receipt (TVR)', 'Issued as a receipt acknowledging a recorded traffic violation.'],
             ['Traffic Citation Ticket (TCT)', 'Issued by an LGU under PD 1605.'],
             ['Ordinance Violation Receipt (OVR)', 'Issued for a violation of a local traffic ordinance.'],
@@ -144,7 +144,7 @@ export const level12Module = {
             'All apprehensions are deemed admitted unless contested in writing within 5 days of the apprehension.',
             'The driver has 15 days from the date of apprehension to settle the fine.',
             'Failure to settle within 15 days causes an automatic 30-day suspension of the driver\'s license, in addition to the fine itself.',
-            'The LTO resolves a contested case within 5 days of receiving the written contest.',
+            'A contested case is resolved within 5 days of receiving the written contest (JAO 2014-01).',
           ],
         },
         {

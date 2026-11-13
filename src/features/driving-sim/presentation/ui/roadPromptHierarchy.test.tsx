@@ -337,7 +337,7 @@ describe('the prompt at each support level', () => {
  * A checkpoint grades the full stop at its line, so the
  * stop is its move. A play-test found: the prompt said "Brake to a full stop
  * at the line" with the brake's keys and a "Full stop" banner, and the road
- * read "LTO CHECKPOINT — FULL STOP", at every support level - Level 12, always
+ * read "ROADSIDE CHECKPOINT — FULL STOP", at every support level - Level 12, always
  * at none, included.
  */
 describe('a checkpoint on the road', () => {
@@ -359,7 +359,7 @@ describe('a checkpoint on the road', () => {
       expect(full, event.id).toContain(KEYCAP);
       for (const support of ['cue', 'none'] as const) {
         const markup = promptFor(event, level, { support });
-        expect(visible(markup), `${support} ${event.id}`).toContain('LTO checkpoint');
+        expect(visible(markup), `${support} ${event.id}`).toContain('Roadside checkpoint');
         expect(visible(markup), `${support} ${event.id}`).not.toMatch(MOVE);
         expect(markup, `${support} ${event.id}`).not.toContain(KEYCAP);
       }
@@ -381,7 +381,7 @@ describe('a checkpoint on the road', () => {
         node.kind === 'checkpoint' && node.label !== null ? [node.label] : []
       );
       expect(labels.length, event.id).toBeGreaterThan(0);
-      expect(new Set(labels), event.id).toEqual(new Set(['LTO CHECKPOINT']));
+      expect(new Set(labels), event.id).toEqual(new Set(['ROADSIDE CHECKPOINT']));
     }
   });
 });
@@ -404,7 +404,7 @@ describe('a traffic stop on the road', () => {
   });
 
   it('leaves the roadside check its checkpoint prompt', () => {
-    expect(promptFor(checkpoint, level12)).toContain('LTO checkpoint');
+    expect(promptFor(checkpoint, level12)).toContain('Roadside checkpoint');
   });
 
   it('opens a panel titled a traffic stop, and the roadside check one titled a checkpoint', () => {
@@ -413,6 +413,6 @@ describe('a traffic stop on the road', () => {
         /id="checkpoint-title"[^>]*>([^<]*)</
       )?.[1];
     expect(title(stop)).toBe('Traffic stop');
-    expect(title(checkpoint)).toBe('LTO checkpoint');
+    expect(title(checkpoint)).toBe('Roadside checkpoint');
   });
 });

@@ -11,7 +11,7 @@
   "answer": 0,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 2"
+  "source": "RA 4136, Sec. 30, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 2"
  },
  {
   "id": "L1-DL-02",
@@ -25,7 +25,7 @@
   "answer": 2,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 3; Ch. VI, p. 159"
+  "source": "RA 4136, Sec. 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 3; Ch. VI, p. 159"
  },
  {
   "id": "L1-DL-03",
@@ -39,7 +39,7 @@
   "answer": 3,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 4"
+  "source": "RA 4136, Sec. 24, as amended by BP 398 (owners may hire only licensed professional drivers); ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 4"
  },
  {
   "id": "L1-DL-04",
@@ -53,7 +53,7 @@
   "answer": 1,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 5"
+  "source": "RA 4136, Sec. 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 5"
  },
  {
   "id": "L1-DL-05",
@@ -67,7 +67,7 @@
   "answer": 0,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 5"
+  "source": "RA 4136, Sec. 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 5"
  },
  {
   "id": "L1-DL-06",
@@ -81,7 +81,7 @@
   "answer": 2,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, pp. 5, 16"
+  "source": "RA 4136, Sec. 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, pp. 5, 16"
  },
  {
   "id": "L1-DL-07",
@@ -95,7 +95,7 @@
   "answer": 1,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 9"
+  "source": "RA 4136, Sec. 30, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 9"
  },
  {
   "id": "L1-DL-08",
@@ -109,7 +109,7 @@
   "answer": 3,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 5 (note c)"
+  "source": "RA 4136, Secs. 22 and 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 5 (note c)"
  },
  {
   "id": "L1-DL-09",
@@ -123,7 +123,7 @@
   "answer": 2,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 24; FDM Vol. 2 (2021), Ch. III, p. 72"
+  "source": "RA 4136, Sec. 21; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 24; Driver's Manual Vol. 2 (2021), Ch. III, p. 72"
  },
  {
   "id": "L1-DL-10",
@@ -137,7 +137,7 @@
   "answer": 0,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 2; adapted from app L1 lesson quiz"
+  "source": "RA 4136, Sec. 30, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 2"
  },
  {
   "id": "L1-DL-11",
@@ -151,7 +151,7 @@
   "answer": 0,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I/VI, pp. 3, 159; adapted from app L1 lesson quiz"
+  "source": "RA 4136, Secs. 19 and 24; ref. Driver's Manual Vol. 1 (2021), Ch. I/VI, pp. 3, 159"
  },
  {
   "id": "L1-DL-12",
@@ -165,7 +165,7 @@
   "answer": 1,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 5; adapted from app L1 lesson quiz"
+  "source": "RA 4136, Sec. 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 5"
  },
  {
   "id": "L1-DL-13",
@@ -179,7 +179,7 @@
   "answer": 1,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, pp. 5, 16; adapted from app L1 lesson quiz"
+  "source": "RA 4136, Sec. 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, pp. 5, 16"
  },
  {
   "id": "L1-DL-14",
@@ -193,7 +193,7 @@
   "answer": 0,
   "competency": "driver_legality",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 4; adapted from app L1 lesson quiz"
+  "source": "RA 4136, Sec. 24, as amended by BP 398 (owners may hire only licensed professional drivers); ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 4"
  },
  {
   "id": "L1-DA-01",
@@ -207,7 +207,7 @@
   "answer": 1,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 105; Ch. VI, p. 162; FDM Vol. 2 (2021), Ch. III, p. 75"
+  "source": "RA 4136, Secs. 15 and 19; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 105; Ch. VI, p. 162; Driver's Manual Vol. 2 (2021), Ch. III, p. 75"
  },
  {
   "id": "L1-DA-02",
@@ -221,7 +221,7 @@
   "answer": 2,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 13; FDM Vol. 2 (2021), Ch. II, p. 56 (RA 10930)"
+  "source": "RA 10930, Sec. 2 (amending RA 4136, Sec. 23); ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 13; Driver's Manual Vol. 2 (2021), Ch. II, p. 56"
  },
  {
   "id": "L1-DA-03",
@@ -235,7 +235,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 13; FDM Vol. 2 (2021), Ch. II, p. 56 (RA 10930)"
+  "source": "RA 10930, Sec. 2 (amending RA 4136, Sec. 23); ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 13; Driver's Manual Vol. 2 (2021), Ch. II, p. 56"
  },
  {
   "id": "L1-DA-04",
@@ -249,7 +249,7 @@
   "answer": 0,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 8"
+  "source": "RA 4136, Secs. 22 and 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 8"
  },
  {
   "id": "L1-DA-05",
@@ -263,7 +263,7 @@
   "answer": 1,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 8"
+  "source": "RA 4136, Secs. 22 and 24, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 8"
  },
  {
   "id": "L1-DA-06",
@@ -277,7 +277,7 @@
   "answer": 1,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 2"
+  "source": "RA 4136, Sec. 30, as amended by BP 398; LTO AO 92-010; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 2"
  },
  {
   "id": "L1-DA-07",
@@ -291,7 +291,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 15"
+  "source": "RA 4136, Sec. 26, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 15"
  },
  {
   "id": "L1-DA-08",
@@ -305,7 +305,7 @@
   "answer": 0,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 1 (2021), Ch. I, p. 27"
+  "source": "RA 4136, Sec. 26, as amended by BP 398; ref. Driver's Manual Vol. 1 (2021), Ch. I, p. 27"
  },
  {
   "id": "L1-DA-09",
@@ -319,7 +319,7 @@
   "answer": 2,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 2 (2021), Ch. III, p. 72 (JAO 2014-01)"
+  "source": "RA 4136, Sec. 19; JAO 2014-01; ref. Driver's Manual Vol. 2 (2021), Ch. III, p. 72"
  },
  {
   "id": "L1-DA-10",
@@ -333,7 +333,7 @@
   "answer": 2,
   "competency": "document_awareness",
   "stage": 1,
-  "source": "FDM Vol. 2 (2021), Ch. III, p. 72 (JAO 2014-01); adapted from app L1 lesson quiz"
+  "source": "RA 4136, Sec. 19; JAO 2014-01; ref. Driver's Manual Vol. 2 (2021), Ch. III, p. 72"
  },
  {
   "id": "L2-DA-01",
@@ -347,7 +347,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. I, pp. 17, 18"
+  "source": "RA 4136, Secs. 5 and 6; ref. Driver's Manual Vol. 2 (2021), Ch. I, pp. 17, 18"
  },
  {
   "id": "L2-DA-02",
@@ -361,7 +361,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. I, pp. 17, 18"
+  "source": "RA 4136, Secs. 5 and 6; ref. Driver's Manual Vol. 2 (2021), Ch. I, pp. 17, 18"
  },
  {
   "id": "L2-DA-03",
@@ -375,7 +375,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. I, p. 17"
+  "source": "RA 4136, Secs. 5 and 6; ref. Driver's Manual Vol. 2 (2021), Ch. I, p. 17"
  },
  {
   "id": "L2-DA-04",
@@ -389,7 +389,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. I, p. 17"
+  "source": "RA 4136, Secs. 5 and 6; ref. Driver's Manual Vol. 2 (2021), Ch. I, p. 17"
  },
  {
   "id": "L2-DA-05",
@@ -403,7 +403,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. I, p. 4"
+  "source": "RA 8749 (Clean Air Act), Sec. 21; ref. Driver's Manual Vol. 2 (2021), Ch. I, p. 4"
  },
  {
   "id": "L2-DA-06",
@@ -417,7 +417,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. I, pp. 2, 4"
+  "source": "Insurance Code (PD 612, as amended by RA 10607), compulsory motor vehicle liability insurance; ref. Driver's Manual Vol. 2 (2021), Ch. I, pp. 2, 4"
  },
  {
   "id": "L2-DA-07",
@@ -431,7 +431,7 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. III, p. 80 (JAO 2014-01)"
+  "source": "JAO 2014-01; ref. Driver's Manual Vol. 2 (2021), Ch. III, p. 80"
  },
  {
   "id": "L2-DA-08",
@@ -445,11 +445,11 @@
   "answer": 3,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 105, 162"
+  "source": "RA 4136, Secs. 14 and 15; ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 105, 162"
  },
  {
   "id": "L2-DA-09",
-  "question": "Under the Motorcycle Crime Prevention Act, how soon must a newly bought motorcycle be registered with the LTO?",
+  "question": "Under the Motorcycle Crime Prevention Act, how soon must a newly bought motorcycle be registered?",
   "choices": [
    "Within 3 days",
    "Within 5 days",
@@ -459,7 +459,7 @@
   "answer": 1,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 64 (RA 11235)"
+  "source": "RA 11235 (Motorcycle Crime Prevention Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 64"
  },
  {
   "id": "L2-DA-10",
@@ -473,7 +473,7 @@
   "answer": 0,
   "competency": "document_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 105, 162; adapted from app L2 lesson quiz"
+  "source": "RA 4136, Secs. 14 and 15; ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 105, 162"
  },
  {
   "id": "L2-RW-01",
@@ -487,7 +487,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 115"
+  "source": "RA 4136, Sec. 43(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 115"
  },
  {
   "id": "L2-RW-02",
@@ -501,7 +501,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 115"
+  "source": "RA 4136, Sec. 43(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 115"
  },
  {
   "id": "L2-RW-03",
@@ -515,7 +515,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 114"
+  "source": "RA 4136, Sec. 42(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 114"
  },
  {
   "id": "L2-RW-04",
@@ -529,7 +529,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 179"
+  "source": "RA 4136, Sec. 48; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 179"
  },
  {
   "id": "L2-RW-05",
@@ -543,7 +543,7 @@
   "answer": 2,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 137"
  },
  {
   "id": "L2-RW-06",
@@ -557,7 +557,7 @@
   "answer": 0,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 115"
+  "source": "RA 4136, Sec. 43(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 115"
  },
  {
   "id": "L2-RW-07",
@@ -571,7 +571,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 137"
  },
  {
   "id": "L2-RW-08",
@@ -585,7 +585,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 115 (RA 4136)"
+  "source": "RA 4136, Sec. 42(d); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 115"
  },
  {
   "id": "L2-RW-09",
@@ -599,7 +599,7 @@
   "answer": 0,
   "competency": "right_of_way",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 167"
+  "source": "RA 4136, Secs. 42 and 43; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 167"
  },
  {
   "id": "L2-PD-01",
@@ -613,7 +613,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 120"
+  "source": "RA 4136, Sec. 44(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 120"
  },
  {
   "id": "L2-PD-02",
@@ -627,7 +627,7 @@
   "answer": 3,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 108"
+  "source": "RA 4136, Sec. 44(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 108"
  },
  {
   "id": "L2-PD-03",
@@ -641,7 +641,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 107"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 107"
  },
  {
   "id": "L2-PD-04",
@@ -655,7 +655,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 170"
  },
  {
   "id": "L2-PD-05",
@@ -669,7 +669,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 148"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 148"
  },
  {
   "id": "L2-PD-06",
@@ -683,7 +683,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 137"
  },
  {
   "id": "L2-PD-07",
@@ -697,7 +697,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 169"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 169"
  },
  {
   "id": "L2-PD-08",
@@ -711,7 +711,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "RA 4136, Sec. 35(a); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L2-PD-09",
@@ -725,7 +725,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L2-PD-10",
@@ -739,7 +739,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35); adapted from app mock exam #28"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L2-SC-01",
@@ -753,7 +753,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L2-SC-02",
@@ -767,7 +767,7 @@
   "answer": 0,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L2-SC-03",
@@ -781,7 +781,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L2-SC-04",
@@ -795,7 +795,8 @@
   "answer": 0,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 113"
+  "source": "DOTr-DPWH-DILG JMC 2018-001 (speed limits); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 113",
+  "reviewerNotes": "Check the barangay-road figure against the JMC 2018-001 road-class table."
  },
  {
   "id": "L2-SC-05",
@@ -809,7 +810,7 @@
   "answer": 0,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L2-SC-06",
@@ -823,7 +824,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112"
+  "source": "RA 4136, Secs. 35 and 38; DOTr-DPWH-DILG JMC 2018-001 (speed limits); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L2-SC-07",
@@ -837,7 +838,7 @@
   "answer": 0,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L2-SC-08",
@@ -851,7 +852,7 @@
   "answer": 3,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 113 (RA 4136)"
+  "source": "RA 4136, Sec. 35(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 113"
  },
  {
   "id": "L2-SC-09",
@@ -865,7 +866,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 113"
+  "source": "RA 4136, Sec. 35(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 113"
  },
  {
   "id": "L2-HA-01",
@@ -879,7 +880,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 103"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 103"
  },
  {
   "id": "L2-HA-02",
@@ -893,7 +894,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 103"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 103"
  },
  {
   "id": "L2-HA-03",
@@ -907,7 +908,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 101"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 101"
  },
  {
   "id": "L2-HA-04",
@@ -921,7 +922,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 133"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 133"
  },
  {
   "id": "L2-HA-05",
@@ -935,7 +936,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 133"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 133"
  },
  {
   "id": "L2-HA-06",
@@ -949,7 +950,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 101, 171"
+  "source": "RA 4136, Sec. 34(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 101, 171"
  },
  {
   "id": "L2-HA-07",
@@ -963,21 +964,21 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 101, 180"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 101, 180"
  },
  {
   "id": "L2-HA-08",
-  "question": "When should a car's headlights be switched on?",
+  "question": "When must a car's headlights be on?",
   "choices": [
    "Only on expressways",
    "Only when it is completely dark",
-   "Before sunset",
+   "From half an hour after sunset to half an hour before sunrise, and in poor visibility",
    "Only when it rains"
   ],
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 100"
+  "source": "RA 4136, Sec. 34(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 100"
  },
  {
   "id": "L2-HA-09",
@@ -991,7 +992,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 132"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 132"
  },
  {
   "id": "L2-HA-10",
@@ -1005,7 +1006,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 101, 171; adapted from app L2 lesson quiz"
+  "source": "RA 4136, Sec. 34(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 101, 171"
  },
  {
   "id": "L2-GR-01",
@@ -1019,7 +1020,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 106"
  },
  {
   "id": "L2-GR-02",
@@ -1033,7 +1034,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 106"
  },
  {
   "id": "L2-GR-03",
@@ -1047,7 +1048,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+  "source": "RA 8750 (Seat Belts Use Act), Sec. 4; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 106"
  },
  {
   "id": "L2-GR-04",
@@ -1061,7 +1062,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 107"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 107"
  },
  {
   "id": "L2-GR-05",
@@ -1075,7 +1076,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 106"
  },
  {
   "id": "L2-GR-06",
@@ -1089,7 +1090,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 106"
  },
  {
   "id": "L2-GR-07",
@@ -1103,7 +1104,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 106"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 106"
  },
  {
   "id": "L2-GR-08",
@@ -1117,7 +1118,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 129"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 129"
  },
  {
   "id": "L2-GR-09",
@@ -1131,7 +1132,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 2,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 171"
+  "source": "RA 4136, Sec. 47; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 171"
  },
  {
   "id": "L3-TS-01",
@@ -1145,7 +1146,7 @@
   "answer": 2,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 109"
  },
  {
   "id": "L3-TS-02",
@@ -1159,7 +1160,7 @@
   "answer": 2,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 109"
  },
  {
   "id": "L3-TS-03",
@@ -1173,7 +1174,7 @@
   "answer": 1,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 109, 178"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 109, 178"
  },
  {
   "id": "L3-TS-04",
@@ -1187,7 +1188,7 @@
   "answer": 1,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 109"
  },
  {
   "id": "L3-TS-05",
@@ -1201,7 +1202,7 @@
   "answer": 3,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 109"
  },
  {
   "id": "L3-TS-06",
@@ -1215,7 +1216,7 @@
   "answer": 3,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 109"
  },
  {
   "id": "L3-TS-07",
@@ -1229,7 +1230,7 @@
   "answer": 3,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 170"
  },
  {
   "id": "L3-TS-08",
@@ -1243,11 +1244,11 @@
   "answer": 0,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 181"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 181"
  },
  {
   "id": "L3-TS-09",
-  "question": "Under the FDM, disregarding a yellow light to rush through an intersection is treated as what?",
+  "question": "Rushing through an intersection on a yellow light to beat the red is treated as what?",
   "choices": [
    "Allowed if no vehicle is coming",
    "Beating the red light, which amounts to reckless driving",
@@ -1257,7 +1258,7 @@
   "answer": 1,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 178"
+  "source": "RA 4136, Sec. 48; PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 178"
  },
  {
   "id": "L3-TS-10",
@@ -1271,7 +1272,7 @@
   "answer": 2,
   "competency": "traffic_signals",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 109, 178; adapted from app mock exam #7"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 109, 178"
  },
  {
   "id": "L3-RS-01",
@@ -1286,7 +1287,7 @@
   "answer": 1,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 60"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 60"
  },
  {
   "id": "L3-RS-02",
@@ -1301,7 +1302,7 @@
   "answer": 1,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 60, 177"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 60, 177"
  },
  {
   "id": "L3-RS-03",
@@ -1316,7 +1317,7 @@
   "answer": 0,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 62, 184"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 62, 184"
  },
  {
   "id": "L3-RS-04",
@@ -1331,7 +1332,7 @@
   "answer": 1,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 63, 186"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 63, 186"
  },
  {
   "id": "L3-RS-05",
@@ -1346,7 +1347,7 @@
   "answer": 3,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 67"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 67"
  },
  {
   "id": "L3-RS-06",
@@ -1360,7 +1361,7 @@
   "answer": 3,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 60, 162"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 60, 162"
  },
  {
   "id": "L3-RS-07",
@@ -1374,7 +1375,7 @@
   "answer": 3,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 67, 162"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 67, 162"
  },
  {
   "id": "L3-RS-08",
@@ -1388,7 +1389,7 @@
   "answer": 1,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 181"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 181"
  },
  {
   "id": "L3-RS-09",
@@ -1402,7 +1403,7 @@
   "answer": 1,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 176"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 176"
  },
  {
   "id": "L3-RS-10",
@@ -1416,7 +1417,7 @@
   "answer": 2,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, pp. 62, 63; adapted from app mock exam #12",
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, pp. 62, 63",
   "reviewerNotes": "The FDM shows these signs but does not state the shape rule in words; please confirm against the DPWH sign manual."
  },
  {
@@ -1431,7 +1432,7 @@
   "answer": 0,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 63, 186; adapted from app mock exam #13"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 63, 186"
  },
  {
   "id": "L3-RS-12",
@@ -1445,7 +1446,7 @@
   "answer": 2,
   "competency": "road_signs",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, pp. 67, 68, 69, 70; adapted from app mock exam #11"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, pp. 67, 68, 69, 70"
  },
  {
   "id": "L3-PD-01",
@@ -1460,7 +1461,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, pp. 66, 71"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, pp. 66, 71"
  },
  {
   "id": "L3-PD-02",
@@ -1475,7 +1476,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, pp. 66, 71"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, pp. 66, 71"
  },
  {
   "id": "L3-PD-03",
@@ -1490,7 +1491,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, pp. 66, 71"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, pp. 66, 71"
  },
  {
   "id": "L3-PD-04",
@@ -1504,7 +1505,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 83"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 83"
  },
  {
   "id": "L3-PD-05",
@@ -1518,7 +1519,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 63"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 63"
  },
  {
   "id": "L3-PD-06",
@@ -1532,7 +1533,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 63"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 63"
  },
  {
   "id": "L3-PD-07",
@@ -1546,7 +1547,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 167"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 167"
  },
  {
   "id": "L3-PD-08",
@@ -1560,7 +1561,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 124, 180 (RA 4136)"
+  "source": "RA 4136, Sec. 46(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 124, 180"
  },
  {
   "id": "L3-PD-09",
@@ -1574,7 +1575,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+  "source": "RA 4136, Secs. 46(b) and 54; ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 156"
  },
  {
   "id": "L3-LD-01",
@@ -1588,7 +1589,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 83"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 83"
  },
  {
   "id": "L3-LD-02",
@@ -1602,7 +1603,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 82"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 82"
  },
  {
   "id": "L3-LD-03",
@@ -1616,7 +1617,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 180"
  },
  {
   "id": "L3-LD-04",
@@ -1630,7 +1631,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 79"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 79"
  },
  {
   "id": "L3-LD-05",
@@ -1644,7 +1645,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 65"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 65"
  },
  {
   "id": "L3-LD-06",
@@ -1658,7 +1659,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 84"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 84"
  },
  {
   "id": "L3-LD-07",
@@ -1672,7 +1673,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 85"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 85"
  },
  {
   "id": "L3-LD-08",
@@ -1686,7 +1687,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 85"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 85"
  },
  {
   "id": "L3-LD-09",
@@ -1700,7 +1701,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 3,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 61"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 61"
  },
  {
   "id": "L4-LD-01",
@@ -1714,7 +1715,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 89, 163"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 89, 163"
  },
  {
   "id": "L4-LD-02",
@@ -1728,7 +1729,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 89"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 89"
  },
  {
   "id": "L4-LD-03",
@@ -1742,7 +1743,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 89"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 89"
  },
  {
   "id": "L4-LD-04",
@@ -1756,7 +1757,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 90, 175"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 90, 175"
  },
  {
   "id": "L4-LD-05",
@@ -1770,7 +1771,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 88, 181"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 88, 181"
  },
  {
   "id": "L4-LD-06",
@@ -1784,7 +1785,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 88"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 88"
  },
  {
   "id": "L4-LD-07",
@@ -1798,7 +1799,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 90"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 90"
  },
  {
   "id": "L4-LD-08",
@@ -1812,7 +1813,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. II, pp. 65, 94"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); RA 4136, Sec. 54; ref. Driver's Manual Vol. 1 (2021), Ch. II, pp. 65, 94"
  },
  {
   "id": "L4-LD-09",
@@ -1826,7 +1827,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 4,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 180"
  },
  {
   "id": "L5-TS-01",
@@ -1840,7 +1841,7 @@
   "answer": 3,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 109, 147"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; RA 4136, Sec. 42(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/IV, pp. 109, 147"
  },
  {
   "id": "L5-TS-02",
@@ -1854,7 +1855,7 @@
   "answer": 2,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 109, 147"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; RA 4136, Sec. 42(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/IV, pp. 109, 147"
  },
  {
   "id": "L5-TS-03",
@@ -1868,7 +1869,7 @@
   "answer": 0,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; RA 4136, Sec. 45(a); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 147"
  },
  {
   "id": "L5-TS-04",
@@ -1882,7 +1883,7 @@
   "answer": 3,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 118"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; RA 4136, Sec. 45(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 118"
  },
  {
   "id": "L5-TS-05",
@@ -1896,7 +1897,7 @@
   "answer": 0,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 118"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; RA 4136, Sec. 45(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 118"
  },
  {
   "id": "L5-TS-06",
@@ -1910,7 +1911,7 @@
   "answer": 2,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 69"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 69"
  },
  {
   "id": "L5-TS-07",
@@ -1924,7 +1925,7 @@
   "answer": 1,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+  "source": "RA 4136, Sec. 54; ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 156"
  },
  {
   "id": "L5-TS-08",
@@ -1938,7 +1939,7 @@
   "answer": 0,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 182"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 182"
  },
  {
   "id": "L5-TS-09",
@@ -1952,7 +1953,7 @@
   "answer": 0,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 83"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 83"
  },
  {
   "id": "L5-TS-10",
@@ -1966,8 +1967,7 @@
   "answer": 0,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 114, 141; adapted from app mock exam #8",
-  "reviewerNotes": "The FDM refers to directions from a peace officer (pp. 114, 141) but does not state this rule outright; please confirm the basis."
+  "source": "PD 207 (1968 Vienna Convention on Road Traffic), Art. 6 (an official's directions take precedence over signals); ref. Driver's Manual Vol. 1 (2021), Ch. III/IV, pp. 114, 141"
  },
  {
   "id": "L5-TS-11",
@@ -1981,7 +1981,7 @@
   "answer": 1,
   "competency": "traffic_signals",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 118, 147; adapted from app mock exam #10"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; RA 4136, Sec. 45(a); ref. Driver's Manual Vol. 1 (2021), Ch. III/IV, pp. 118, 147"
  },
  {
   "id": "L5-RW-01",
@@ -1995,7 +1995,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 114, 178 (RA 4136 Sec. 42)"
+  "source": "RA 4136, Sec. 42(a); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 114, 178"
  },
  {
   "id": "L5-RW-02",
@@ -2009,7 +2009,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+  "source": "RA 4136, Secs. 42(a) and 43(c); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 147"
  },
  {
   "id": "L5-RW-03",
@@ -2023,7 +2023,7 @@
   "answer": 1,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+  "source": "RA 4136, Sec. 43(c); DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 147"
  },
  {
   "id": "L5-RW-04",
@@ -2037,7 +2037,7 @@
   "answer": 0,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+  "source": "RA 4136, Sec. 42(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 114"
  },
  {
   "id": "L5-RW-05",
@@ -2051,7 +2051,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 141"
+  "source": "RA 4136, Sec. 49; ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 141"
  },
  {
   "id": "L5-RW-06",
@@ -2065,7 +2065,7 @@
   "answer": 1,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. II/III/VI, pp. 92, 120, 170"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II/III/VI, pp. 92, 120, 170"
  },
  {
   "id": "L5-RW-07",
@@ -2079,7 +2079,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 172"
+  "source": "RA 4136, Secs. 42(b), 42(c) and 45; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 172"
  },
  {
   "id": "L5-RW-08",
@@ -2093,7 +2093,7 @@
   "answer": 3,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+  "source": "RA 4136, Sec. 42(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 114"
  },
  {
   "id": "L5-RW-09",
@@ -2107,7 +2107,7 @@
   "answer": 0,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+  "source": "RA 4136, Sec. 43(c); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 147"
  },
  {
   "id": "L5-RW-10",
@@ -2121,7 +2121,7 @@
   "answer": 2,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 114, 147 (RA 4136 Sec. 42); adapted from app L5 lesson quiz"
+  "source": "RA 4136, Sec. 42(a); ref. Driver's Manual Vol. 1 (2021), Ch. III/IV, pp. 114, 147"
  },
  {
   "id": "L5-RW-11",
@@ -2135,7 +2135,7 @@
   "answer": 1,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147; adapted from app L5 lesson quiz"
+  "source": "RA 4136, Sec. 43(c); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 147"
  },
  {
   "id": "L5-RW-12",
@@ -2149,7 +2149,7 @@
   "answer": 0,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 141; adapted from app L5 lesson quiz"
+  "source": "RA 4136, Sec. 49; ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 141"
  },
  {
   "id": "L5-RW-13",
@@ -2163,7 +2163,7 @@
   "answer": 1,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. II/III, pp. 92, 120; adapted from app L5 lesson quiz"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II/III, pp. 92, 120"
  },
  {
   "id": "L5-RW-14",
@@ -2177,7 +2177,7 @@
   "answer": 2,
   "competency": "right_of_way",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. II/IV, pp. 94, 137; adapted from app L5 lesson quiz"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); RA 4136, Sec. 54; ref. Driver's Manual Vol. 1 (2021), Ch. II/IV, pp. 94, 137"
  },
  {
   "id": "L5-PD-01",
@@ -2191,7 +2191,7 @@
   "answer": 3,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 114"
  },
  {
   "id": "L5-PD-02",
@@ -2205,7 +2205,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 114"
  },
  {
   "id": "L5-PD-03",
@@ -2219,7 +2219,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42)"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 114"
  },
  {
   "id": "L5-PD-04",
@@ -2233,7 +2233,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 117"
+  "source": "RA 4136, Secs. 44(a) and 45(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 117"
  },
  {
   "id": "L5-PD-05",
@@ -2247,7 +2247,7 @@
   "answer": 3,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 182"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 182"
  },
  {
   "id": "L5-PD-06",
@@ -2261,7 +2261,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 147"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 147"
  },
  {
   "id": "L5-PD-07",
@@ -2275,7 +2275,7 @@
   "answer": 3,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L5-PD-08",
@@ -2289,7 +2289,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 109"
+  "source": "PD 207 (1968 Vienna Convention on Road Signs and Signals), Art. 23; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 109"
  },
  {
   "id": "L5-PD-09",
@@ -2303,7 +2303,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L5-PD-10",
@@ -2317,7 +2317,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 114 (RA 4136 Sec. 42); adapted from app L5 lesson quiz"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 114"
  },
  {
   "id": "L5-PD-11",
@@ -2331,7 +2331,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 114, 139; adapted from app L5 lesson quiz"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. III/IV, pp. 114, 139"
  },
  {
   "id": "L5-PD-12",
@@ -2345,7 +2345,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 5,
-  "source": "FDM Vol. 1 (2021), Ch. IV, pp. 137, 139; adapted from app mock exam #29",
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. IV, pp. 137, 139",
   "reviewerNotes": "The FDM covers yielding to PWDs (pp. 137, 139) but does not mention white canes; please confirm."
  },
  {
@@ -2360,7 +2360,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 117"
+  "source": "RA 4136, Sec. 45(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 117"
  },
  {
   "id": "L6-LD-02",
@@ -2374,7 +2374,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 117"
+  "source": "RA 4136, Sec. 45(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 117"
  },
  {
   "id": "L6-LD-03",
@@ -2388,7 +2388,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 119"
  },
  {
   "id": "L6-LD-04",
@@ -2402,7 +2402,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+  "source": "RA 4136, Sec. 44(a); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 119"
  },
  {
   "id": "L6-LD-05",
@@ -2416,7 +2416,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 162"
+  "source": "RA 4136, Sec. 44(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 120, 162"
  },
  {
   "id": "L6-LD-06",
@@ -2430,7 +2430,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 168"
+  "source": "RA 4136, Sec. 44(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 120, 168"
  },
  {
   "id": "L6-LD-07",
@@ -2444,7 +2444,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 162"
+  "source": "RA 4136, Sec. 44(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 120, 162"
  },
  {
   "id": "L6-LD-08",
@@ -2458,7 +2458,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 121 (RA 4136 Sec. 41)"
+  "source": "RA 4136, Sec. 41(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 121"
  },
  {
   "id": "L6-LD-09",
@@ -2472,7 +2472,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 121 (RA 4136 Sec. 41)"
+  "source": "RA 4136, Sec. 39; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 121"
  },
  {
   "id": "L6-LD-10",
@@ -2486,7 +2486,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, pp. 116, 117 (RA 4136); adapted from app L6 lesson quiz"
+  "source": "RA 4136, Secs. 37 and 45(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, pp. 116, 117"
  },
  {
   "id": "L6-LD-11",
@@ -2500,7 +2500,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 120, 168; adapted from app L6 lesson quiz"
+  "source": "RA 4136, Sec. 44(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 120, 168"
  },
  {
   "id": "L6-LD-12",
@@ -2514,7 +2514,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 121 (RA 4136 Sec. 41); adapted from app L6 lesson quiz"
+  "source": "RA 4136, Sec. 39; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 121"
  },
  {
   "id": "L6-LD-13",
@@ -2528,7 +2528,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 121, 122, 169; adapted from app L6 lesson quiz"
+  "source": "RA 4136, Sec. 41(b) and (c); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 121, 122, 169"
  },
  {
   "id": "L6-LD-14",
@@ -2542,7 +2542,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 164; adapted from app L6 lesson quiz"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 164"
  },
  {
   "id": "L6-LD-15",
@@ -2556,7 +2556,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 122 (RA 4136 Sec. 41); adapted from app mock exam #19"
+  "source": "RA 4136, Sec. 39; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 122"
  },
  {
   "id": "L6-PK-01",
@@ -2570,7 +2570,7 @@
   "answer": 2,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. II/III/VI, pp. 64, 124, 178 (RA 4136 Sec. 46)"
+  "source": "RA 4136, Sec. 46(e); ref. Driver's Manual Vol. 1 (2021), Ch. II/III/VI, pp. 64, 124, 178"
  },
  {
   "id": "L6-PK-02",
@@ -2584,7 +2584,7 @@
   "answer": 2,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 124 (RA 4136 Sec. 46)"
+  "source": "RA 4136, Sec. 46(c); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 124"
  },
  {
   "id": "L6-PK-03",
@@ -2598,7 +2598,7 @@
   "answer": 0,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 124 (RA 4136 Sec. 46)"
+  "source": "RA 4136, Sec. 46(g); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 124"
  },
  {
   "id": "L6-PK-04",
@@ -2612,7 +2612,7 @@
   "answer": 2,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 123"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 123"
  },
  {
   "id": "L6-PK-05",
@@ -2626,7 +2626,7 @@
   "answer": 1,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 123, 168"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 123, 168"
  },
  {
   "id": "L6-PK-06",
@@ -2640,8 +2640,8 @@
   "answer": 0,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 168, 182",
-  "reviewerNotes": "FDM Vol. 1 p. 123 says to turn the wheels into the curb for both uphill and downhill; the reviewer (pp. 168, 182) says away from the curb uphill. Please confirm the correct rule."
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, pp. 168, 182",
+  "reviewerNotes": "The manual is inconsistent (p. 123 says toward the curb both ways; pp. 168, 182 say away uphill). Kept the standard rule: uphill with a curb, wheels away from the curb. No statute covers it."
  },
  {
   "id": "L6-PK-07",
@@ -2655,7 +2655,7 @@
   "answer": 3,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 123, 168"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 123, 168"
  },
  {
   "id": "L6-PK-08",
@@ -2669,7 +2669,7 @@
   "answer": 3,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 123"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 123"
  },
  {
   "id": "L6-PK-09",
@@ -2683,7 +2683,7 @@
   "answer": 2,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 172"
+  "source": "BP 344 (Accessibility Law) and its IRR; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 172"
  },
  {
   "id": "L6-PK-10",
@@ -2697,7 +2697,7 @@
   "answer": 3,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 123; adapted from app L6 lesson quiz"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 123"
  },
  {
   "id": "L6-PK-11",
@@ -2711,7 +2711,7 @@
   "answer": 2,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 124 (RA 4136 Sec. 46); adapted from app mock exam #26"
+  "source": "RA 4136, Sec. 46(g); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 124"
  },
  {
   "id": "L6-PK-12",
@@ -2725,7 +2725,7 @@
   "answer": 3,
   "competency": "parking",
   "stage": 6,
-  "source": "FDM Vol. 1 (2021), Ch. II, pp. 64, 96; adapted from app daily challenge 'loading-zone'"
+  "source": "RA 4136, Sec. 54; ref. Driver's Manual Vol. 1 (2021), Ch. II, pp. 64, 96"
  },
  {
   "id": "L7-SC-01",
@@ -2739,7 +2739,7 @@
   "answer": 2,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 112, 165 (RA 4136 Sec. 35)"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 112, 165"
  },
  {
   "id": "L7-SC-02",
@@ -2753,7 +2753,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112 (RA 4136 Sec. 35)"
+  "source": "RA 4136, Sec. 35(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L7-SC-03",
@@ -2767,7 +2767,8 @@
   "answer": 2,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 126, 181"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 126, 181",
+  "reviewerNotes": "Expressway maximum and minimum speeds are set by the operating rules; check the current figures."
  },
  {
   "id": "L7-SC-04",
@@ -2781,7 +2782,8 @@
   "answer": 2,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 126",
+  "reviewerNotes": "Expressway maximum and minimum speeds are set by the operating rules; check the current figures."
  },
  {
   "id": "L7-SC-05",
@@ -2795,7 +2797,7 @@
   "answer": 3,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 110"
  },
  {
   "id": "L7-SC-06",
@@ -2809,7 +2811,7 @@
   "answer": 3,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 128, 169"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 128, 169"
  },
  {
   "id": "L7-SC-07",
@@ -2823,7 +2825,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 180"
  },
  {
   "id": "L7-SC-08",
@@ -2837,7 +2839,7 @@
   "answer": 2,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 112"
+  "source": "DOTr-DPWH-DILG JMC 2018-001 (speed limits); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 112"
  },
  {
   "id": "L7-SC-09",
@@ -2851,7 +2853,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 128"
  },
  {
   "id": "L7-SC-10",
@@ -2865,7 +2867,7 @@
   "answer": 2,
   "competency": "speed_control",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, pp. 111, 112; adapted from app daily challenge 'provincial-bus'"
+  "source": "RA 4136, Sec. 35; ref. Driver's Manual Vol. 1 (2021), Ch. III, pp. 111, 112"
  },
  {
   "id": "L7-LD-01",
@@ -2879,7 +2881,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 126"
  },
  {
   "id": "L7-LD-02",
@@ -2893,7 +2895,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 126"
  },
  {
   "id": "L7-LD-03",
@@ -2907,7 +2909,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+  "source": "RA 4136, Sec. 39; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 126"
  },
  {
   "id": "L7-LD-04",
@@ -2921,7 +2923,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 126"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 126"
  },
  {
   "id": "L7-LD-05",
@@ -2935,7 +2937,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 125, 175"
+  "source": "DOTC DO 2007-38 (motorcycles on limited access facilities); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 125, 175"
  },
  {
   "id": "L7-LD-06",
@@ -2949,7 +2951,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 168"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 168"
  },
  {
   "id": "L7-LD-07",
@@ -2963,7 +2965,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 128"
  },
  {
   "id": "L7-LD-08",
@@ -2977,7 +2979,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 166"
+  "source": "RA 4136, Sec. 40; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 166"
  },
  {
   "id": "L7-LD-09",
@@ -2991,7 +2993,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 2 (2021), Ch. III, p. 76 (JAO 2014-01)"
+  "source": "RA 4136, Sec. 39; ref. Driver's Manual Vol. 2 (2021), Ch. III, p. 76"
  },
  {
   "id": "L7-LD-10",
@@ -3005,7 +3007,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 7,
-  "source": "FDM Vol. 2 (2021), Ch. III, p. 76 (JAO 2014-01); adapted from app mock exam #22"
+  "source": "RA 4136, Sec. 40; ref. Driver's Manual Vol. 2 (2021), Ch. III, p. 76"
  },
  {
   "id": "L7-HA-01",
@@ -3019,7 +3021,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 111"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 111"
  },
  {
   "id": "L7-HA-02",
@@ -3033,7 +3035,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 111"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 111"
  },
  {
   "id": "L7-HA-03",
@@ -3047,7 +3049,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 110"
  },
  {
   "id": "L7-HA-04",
@@ -3061,7 +3063,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 110"
  },
  {
   "id": "L7-HA-05",
@@ -3075,7 +3077,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III/IV, pp. 128, 143"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III/IV, pp. 128, 143"
  },
  {
   "id": "L7-HA-06",
@@ -3089,7 +3091,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 128"
  },
  {
   "id": "L7-HA-07",
@@ -3103,7 +3105,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 128"
  },
  {
   "id": "L7-HA-08",
@@ -3117,7 +3119,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 128"
  },
  {
   "id": "L7-HA-09",
@@ -3131,7 +3133,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 7,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 177"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 177"
  },
  {
   "id": "L8-PD-01",
@@ -3145,7 +3147,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139",
+  "source": "Doctrine of last clear chance (Picart v. Smith, G.R. No. L-12219, 1918); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139",
   "reviewerNotes": "FDM Vol. 1 p. 139 contradicts itself: the definition says the driver with the last clear chance is solely responsible, but the worked example says jointly liable. The answer avoids both words; please confirm the wording with the LTO reviewers."
  },
  {
@@ -3160,7 +3162,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139",
+  "source": "Doctrine of last clear chance (Picart v. Smith, G.R. No. L-12219, 1918); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139",
   "reviewerNotes": "FDM Vol. 1 p. 139 contradicts itself: the definition says the driver with the last clear chance is solely responsible, but the worked example says jointly liable. The answer avoids both words; please confirm the wording with the LTO reviewers."
  },
  {
@@ -3175,7 +3177,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L8-PD-04",
@@ -3189,7 +3191,7 @@
   "answer": 3,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L8-PD-05",
@@ -3203,7 +3205,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L8-PD-06",
@@ -3217,7 +3219,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 137"
  },
  {
   "id": "L8-PD-07",
@@ -3231,7 +3233,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 71"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 71"
  },
  {
   "id": "L8-PD-08",
@@ -3245,7 +3247,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L8-PD-09",
@@ -3259,7 +3261,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139"
+  "source": "RA 4136, Sec. 42(c); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L8-PD-10",
@@ -3273,7 +3275,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 139; adapted from app L8 lesson quiz"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 139"
  },
  {
   "id": "L8-LD-01",
@@ -3287,7 +3289,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+  "source": "RA 4136, Sec. 37; ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 138"
  },
  {
   "id": "L8-LD-02",
@@ -3301,7 +3303,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+  "source": "RA 4136, Sec. 37; ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 138"
  },
  {
   "id": "L8-LD-03",
@@ -3315,7 +3317,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 140"
+  "source": "RA 4136, Sec. 41(a); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 140"
  },
  {
   "id": "L8-LD-04",
@@ -3329,7 +3331,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 140"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 140"
  },
  {
   "id": "L8-LD-05",
@@ -3343,7 +3345,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 140"
+  "source": "RA 4136, Sec. 41(a); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 140"
  },
  {
   "id": "L8-LD-06",
@@ -3357,7 +3359,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+  "source": "RA 4136, Sec. 48; ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 156"
  },
  {
   "id": "L8-LD-07",
@@ -3371,7 +3373,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 110"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 110"
  },
  {
   "id": "L8-LD-08",
@@ -3385,7 +3387,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. II/III, pp. 89, 121"
+  "source": "RA 4136, Sec. 41(b); DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. II/III, pp. 89, 121"
  },
  {
   "id": "L8-LD-09",
@@ -3399,7 +3401,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+  "source": "RA 4136, Sec. 48; ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 156"
  },
  {
   "id": "L8-HA-01",
@@ -3413,7 +3415,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 145"
  },
  {
   "id": "L8-HA-02",
@@ -3427,7 +3429,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 145"
  },
  {
   "id": "L8-HA-03",
@@ -3441,7 +3443,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 137"
  },
  {
   "id": "L8-HA-04",
@@ -3455,7 +3457,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 148"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 148"
  },
  {
   "id": "L8-HA-05",
@@ -3469,7 +3471,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 146"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 146"
  },
  {
   "id": "L8-HA-06",
@@ -3483,7 +3485,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+  "source": "RA 4136, Sec. 37; ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 138"
  },
  {
   "id": "L8-HA-07",
@@ -3497,7 +3499,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 138"
  },
  {
   "id": "L8-HA-08",
@@ -3511,7 +3513,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 119"
  },
  {
   "id": "L8-HA-09",
@@ -3525,7 +3527,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 145"
  },
  {
   "id": "L8-HA-10",
@@ -3539,7 +3541,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 145; adapted from app L8 lesson quiz"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 145"
  },
  {
   "id": "L8-GR-01",
@@ -3553,7 +3555,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 136"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 136"
  },
  {
   "id": "L8-GR-02",
@@ -3567,7 +3569,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 136"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 136"
  },
  {
   "id": "L8-GR-03",
@@ -3581,7 +3583,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 162"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 162"
  },
  {
   "id": "L8-GR-04",
@@ -3595,7 +3597,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 169"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 169"
  },
  {
   "id": "L8-GR-05",
@@ -3609,7 +3611,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 172"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 172"
  },
  {
   "id": "L8-GR-06",
@@ -3623,7 +3625,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170"
+  "source": "RA 4136, Sec. 34(b-1); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 170"
  },
  {
   "id": "L8-GR-07",
@@ -3637,11 +3639,11 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 138"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 138"
  },
  {
   "id": "L8-GR-08",
-  "question": "Another driver gives way to you. What does the FDM suggest?",
+  "question": "Another driver gives way to you. What is the courteous response?",
   "choices": [
    "Flash your high beams",
    "Speed up without acknowledging",
@@ -3651,7 +3653,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 128"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 128"
  },
  {
   "id": "L8-GR-09",
@@ -3665,7 +3667,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 151"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 151"
  },
  {
   "id": "L8-GR-10",
@@ -3679,7 +3681,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. III/V, pp. 103, 151; adapted from app L8 lesson quiz"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III/V, pp. 103, 151"
  },
  {
   "id": "L8-GR-11",
@@ -3693,7 +3695,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. IV, pp. 136, 148; adapted from app L8 lesson quiz",
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, pp. 136, 148",
   "reviewerNotes": "Based on the module's stress-management lesson; the FDM lists stress management as a course topic (p. 48) without detail."
  },
  {
@@ -3708,7 +3710,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 8,
-  "source": "FDM Vol. 1 (2021), Ch. II/IV, pp. 42, 137; adapted from app L8 lesson quiz"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II/IV, pp. 42, 137"
  },
  {
   "id": "L9-HA-01",
@@ -3722,7 +3724,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 142"
  },
  {
   "id": "L9-HA-02",
@@ -3736,7 +3738,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 142"
  },
  {
   "id": "L9-HA-03",
@@ -3750,7 +3752,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 143"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 143"
  },
  {
   "id": "L9-HA-04",
@@ -3764,7 +3766,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 143"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 143"
  },
  {
   "id": "L9-HA-05",
@@ -3778,7 +3780,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 143"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 143"
  },
  {
   "id": "L9-HA-06",
@@ -3792,7 +3794,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 144"
  },
  {
   "id": "L9-HA-07",
@@ -3806,7 +3808,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 142"
  },
  {
   "id": "L9-HA-08",
@@ -3820,7 +3822,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 142"
  },
  {
   "id": "L9-HA-09",
@@ -3834,7 +3836,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 144"
  },
  {
   "id": "L9-HA-10",
@@ -3848,7 +3850,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 142; adapted from app daily challenge 'flooded-road'"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 142"
  },
  {
   "id": "L9-HA-11",
@@ -3862,7 +3864,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. II/III, pp. 47, 100; adapted from app daily challenge 'foggy-mountain'"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II/III, pp. 47, 100"
  },
  {
   "id": "L9-GR-01",
@@ -3876,7 +3878,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+  "source": "RA 4136, Sec. 55; ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 144"
  },
  {
   "id": "L9-GR-02",
@@ -3890,7 +3892,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+  "source": "RA 4136, Sec. 34(g); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 144"
  },
  {
   "id": "L9-GR-03",
@@ -3904,7 +3906,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 144"
  },
  {
   "id": "L9-GR-04",
@@ -3918,7 +3920,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 144"
+  "source": "RA 4136, Sec. 55; ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 144"
  },
  {
   "id": "L9-GR-05",
@@ -3932,11 +3934,11 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 178"
+  "source": "RA 4136, Sec. 55; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 178"
  },
  {
   "id": "L9-GR-06",
-  "question": "A person is lying unconscious after a crash involving a pedestrian. What does the FDM advise?",
+  "question": "A person is lying unconscious after a crash involving a pedestrian. What should you do?",
   "choices": [
    "Lift the person into your car",
    "Do not attempt to touch the unconscious or injured person; get help",
@@ -3946,7 +3948,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 164"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 164"
  },
  {
   "id": "L9-GR-07",
@@ -3960,7 +3962,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 160"
+  "source": "LOI 229 (1974), early warning devices; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 160"
  },
  {
   "id": "L9-GR-08",
@@ -3974,7 +3976,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 44 (RA 10586)"
+  "source": "RA 10586 (Anti-Drunk and Drugged Driving Act), Sec. 6; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 44"
  },
  {
   "id": "L9-GR-09",
@@ -3988,7 +3990,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 9,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 125"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 125"
  },
  {
   "id": "L10-SC-01",
@@ -4002,7 +4004,7 @@
   "answer": 3,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, pp. 51, 52 (RA 10916)"
+  "source": "RA 10916 (Road Speed Limiter Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, pp. 51, 52"
  },
  {
   "id": "L10-SC-02",
@@ -4016,7 +4018,7 @@
   "answer": 1,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 51 (RA 10916)"
+  "source": "RA 10916 (Road Speed Limiter Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 51"
  },
  {
   "id": "L10-SC-03",
@@ -4030,7 +4032,7 @@
   "answer": 0,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 52 (RA 10916)"
+  "source": "RA 10916 (Road Speed Limiter Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 52"
  },
  {
   "id": "L10-SC-04",
@@ -4044,7 +4046,7 @@
   "answer": 3,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 53 (RA 10916)"
+  "source": "RA 10916 (Road Speed Limiter Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 53"
  },
  {
   "id": "L10-SC-05",
@@ -4058,7 +4060,7 @@
   "answer": 0,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 53 (RA 10916)"
+  "source": "RA 10916 (Road Speed Limiter Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 53"
  },
  {
   "id": "L10-SC-06",
@@ -4072,7 +4074,7 @@
   "answer": 0,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 164"
+  "source": "RA 4136, Sec. 35(a); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 164"
  },
  {
   "id": "L10-SC-07",
@@ -4086,7 +4088,7 @@
   "answer": 2,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. IV, p. 137"
+  "source": "RA 4136, Sec. 35(a); ref. Driver's Manual Vol. 1 (2021), Ch. IV, p. 137"
  },
  {
   "id": "L10-SC-08",
@@ -4100,7 +4102,7 @@
   "answer": 2,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 102"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 102"
  },
  {
   "id": "L10-SC-09",
@@ -4114,7 +4116,7 @@
   "answer": 3,
   "competency": "speed_control",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. III/VI, pp. 111, 180"
+  "source": "RA 4136, Sec. 35(a); ref. Driver's Manual Vol. 1 (2021), Ch. III/VI, pp. 111, 180"
  },
  {
   "id": "L10-HA-01",
@@ -4128,7 +4130,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 134"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 134"
  },
  {
   "id": "L10-HA-02",
@@ -4142,7 +4144,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 134"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 134"
  },
  {
   "id": "L10-HA-03",
@@ -4156,7 +4158,7 @@
   "answer": 2,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 134"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 134"
  },
  {
   "id": "L10-HA-04",
@@ -4170,7 +4172,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 168, 180 (RA 4136)"
+  "source": "RA 4136, Sec. 34(i); ref. Driver's Manual Vol. 1 (2021), Ch. VI, pp. 168, 180"
  },
  {
   "id": "L10-HA-05",
@@ -4184,7 +4186,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 180 (RA 4136)"
+  "source": "RA 4136, Sec. 34(i); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 180"
  },
  {
   "id": "L10-HA-06",
@@ -4198,7 +4200,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 31 (RA 8749)"
+  "source": "RA 8749 (Clean Air Act), Sec. 46; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 31"
  },
  {
   "id": "L10-HA-07",
@@ -4212,7 +4214,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 125"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 125"
  },
  {
   "id": "L10-HA-08",
@@ -4226,7 +4228,7 @@
   "answer": 0,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 125"
+  "source": "RA 2000 (Limited Access Highway Act) and expressway operating rules; ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 125"
  },
  {
   "id": "L10-HA-09",
@@ -4240,7 +4242,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 31 (RA 8749)"
+  "source": "RA 8749 (Clean Air Act), Sec. 46; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 31"
  },
  {
   "id": "L10-GR-01",
@@ -4254,7 +4256,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 48 (RA 10913)"
+  "source": "RA 10913 (Anti-Distracted Driving Act), Sec. 4; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 48"
  },
  {
   "id": "L10-GR-02",
@@ -4268,7 +4270,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 166 (RA 10913)"
+  "source": "RA 10913 (Anti-Distracted Driving Act), Sec. 4; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 166"
  },
  {
   "id": "L10-GR-03",
@@ -4282,7 +4284,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 39 (RA 10586)"
+  "source": "RA 10586 (Anti-Drunk and Drugged Driving Act) and its IRR; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 39"
  },
  {
   "id": "L10-GR-04",
@@ -4296,7 +4298,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 39 (RA 10586)"
+  "source": "RA 10586 (Anti-Drunk and Drugged Driving Act) and its IRR; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 39"
  },
  {
   "id": "L10-GR-05",
@@ -4310,7 +4312,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 44 (RA 10586)"
+  "source": "RA 10586 (Anti-Drunk and Drugged Driving Act), Sec. 15; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 44"
  },
  {
   "id": "L10-GR-06",
@@ -4324,7 +4326,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 41 (RA 10586)"
+  "source": "RA 10586 (Anti-Drunk and Drugged Driving Act) and its IRR; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 41"
  },
  {
   "id": "L10-GR-07",
@@ -4338,21 +4340,21 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 61 (RA 11229)"
+  "source": "RA 11229 (Child Safety in Motor Vehicles Act), Secs. 4 and 5; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 61"
  },
  {
   "id": "L10-GR-08",
-  "question": "Under the Seat Belts Use Act, what is prohibited for children six years old and below?",
+  "question": "Under the Child Safety in Motor Vehicles Act (RA 11229), when may a child 12 years old or below sit in the front seat?",
   "choices": [
-   "Sitting in the front passenger seat",
-   "Wearing a seat belt",
-   "Riding in a private car",
-   "Riding in the back seat"
+   "Only if the child is at least 150 cm tall and properly secured with the seat belt",
+   "Whenever an adult holds the child on their lap",
+   "Only on trips shorter than 5 km",
+   "Never, even if the child is 150 cm or taller"
   ],
   "answer": 0,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 34 (RA 8750)"
+  "source": "RA 11229 (Child Safety in Motor Vehicles Act), Secs. 4 and 5; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 61"
  },
  {
   "id": "L10-GR-09",
@@ -4366,7 +4368,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 34 (RA 8750)"
+  "source": "RA 8750 (Seat Belts Use Act), Sec. 11; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 34"
  },
  {
   "id": "L10-GR-10",
@@ -4380,7 +4382,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 61 (RA 11229); adapted from app mock exam #38"
+  "source": "RA 11229 (Child Safety in Motor Vehicles Act), Secs. 4 and 5; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 61"
  },
  {
   "id": "L10-GR-11",
@@ -4394,7 +4396,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, pp. 38, 39 (RA 10586); adapted from app daily challenge 'drunk-driving'"
+  "source": "RA 10586 (Anti-Drunk and Drugged Driving Act) and its IRR; ref. Driver's Manual Vol. 2 (2021), Ch. II, pp. 38, 39"
  },
  {
   "id": "L10-GR-12",
@@ -4408,7 +4410,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 61 (RA 11229); adapted from app daily challenge 'child-seat'"
+  "source": "RA 11229 (Child Safety in Motor Vehicles Act), Secs. 4 and 5; ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 61"
  },
  {
   "id": "L10-GR-13",
@@ -4422,7 +4424,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 10,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 170; adapted from app daily challenge 'distracted-driving'"
+  "source": "RA 10913 (Anti-Distracted Driving Act), Sec. 4; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 170"
  },
  {
   "id": "L11-PD-01",
@@ -4436,7 +4438,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. IV/VI, pp. 139, 169"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV/VI, pp. 139, 169"
  },
  {
   "id": "L11-PD-02",
@@ -4450,7 +4452,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V/VI, pp. 152, 161"
+  "source": "RA 4136, Sec. 54; ref. Driver's Manual Vol. 1 (2021), Ch. V/VI, pp. 152, 161"
  },
  {
   "id": "L11-PD-03",
@@ -4464,7 +4466,7 @@
   "answer": 0,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+  "source": "RA 4136, Sec. 46(b); ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 156"
  },
  {
   "id": "L11-PD-04",
@@ -4478,7 +4480,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 152"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 152"
  },
  {
   "id": "L11-PD-05",
@@ -4492,7 +4494,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 160"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 160"
  },
  {
   "id": "L11-PD-06",
@@ -4506,7 +4508,7 @@
   "answer": 1,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 156"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 156"
  },
  {
   "id": "L11-PD-07",
@@ -4520,7 +4522,7 @@
   "answer": 3,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 154"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 154"
  },
  {
   "id": "L11-PD-08",
@@ -4534,7 +4536,7 @@
   "answer": 2,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 154"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 154"
  },
  {
   "id": "L11-PD-09",
@@ -4548,7 +4550,7 @@
   "answer": 3,
   "competency": "pedestrians",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. IV, pp. 139, 148"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. IV, pp. 139, 148"
  },
  {
   "id": "L11-LD-01",
@@ -4562,7 +4564,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 97"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 97"
  },
  {
   "id": "L11-LD-02",
@@ -4576,7 +4578,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 97"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 97"
  },
  {
   "id": "L11-LD-03",
@@ -4590,7 +4592,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. II, p. 98"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II, p. 98"
  },
  {
   "id": "L11-LD-04",
@@ -4604,7 +4606,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 119"
  },
  {
   "id": "L11-LD-05",
@@ -4618,7 +4620,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 119"
  },
  {
   "id": "L11-LD-06",
@@ -4632,7 +4634,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 119"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 119"
  },
  {
   "id": "L11-LD-07",
@@ -4646,7 +4648,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 176"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 176"
  },
  {
   "id": "L11-LD-08",
@@ -4660,7 +4662,7 @@
   "answer": 1,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 174 (RA 4136)"
+  "source": "RA 4136, Sec. 52; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 174"
  },
  {
   "id": "L11-LD-09",
@@ -4674,7 +4676,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 175"
+  "source": "DPWH Highway Safety Design Standards, Part 2: Road Signs and Pavement Markings (DO 41, s. 2012); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 175"
  },
  {
   "id": "L11-LD-10",
@@ -4688,7 +4690,7 @@
   "answer": 3,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. III, pp. 117, 119; adapted from app daily challenge 'tricycle-blind-spot'"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, pp. 117, 119"
  },
  {
   "id": "L11-LD-11",
@@ -4702,7 +4704,7 @@
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. II/VI, pp. 97, 180; adapted from app daily challenge 'edsa-bus-lane'",
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. II/VI, pp. 97, 180",
   "reviewerNotes": "The EDSA Busway follows DOTr/MMDA rules; the FDM covers bus lanes generally (pp. 97, 180)."
  },
  {
@@ -4717,7 +4719,7 @@
   "answer": 2,
   "competency": "lane_discipline",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 119; adapted from app daily challenge 'motorcycle-lane'"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 119"
  },
  {
   "id": "L11-HA-01",
@@ -4731,7 +4733,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 163, 173"
+  "source": "RA 10054 (Motorcycle Helmet Act); ref. Driver's Manual Vol. 1 (2021), Ch. VI, pp. 163, 173"
  },
  {
   "id": "L11-HA-02",
@@ -4745,7 +4747,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 173"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 173"
  },
  {
   "id": "L11-HA-03",
@@ -4759,7 +4761,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 173"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 173"
  },
  {
   "id": "L11-HA-04",
@@ -4773,7 +4775,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 176"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 176"
  },
  {
   "id": "L11-HA-05",
@@ -4787,7 +4789,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 175 (JAO 2014-01)"
+  "source": "RA 4136, Sec. 34; JAO 2014-01; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 175"
  },
  {
   "id": "L11-HA-06",
@@ -4801,7 +4803,7 @@
   "answer": 1,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 153"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 153"
  },
  {
   "id": "L11-HA-07",
@@ -4815,7 +4817,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V, p. 155"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V, p. 155"
  },
  {
   "id": "L11-HA-08",
@@ -4829,7 +4831,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 174"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 174"
  },
  {
   "id": "L11-HA-09",
@@ -4843,7 +4845,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. III, p. 122"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 122"
  },
  {
   "id": "L11-HA-10",
@@ -4857,7 +4859,7 @@
   "answer": 3,
   "competency": "hazard_awareness",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. III, pp. 119, 121; adapted from app daily challenge 'jeepney-stop'"
+  "source": "RA 4136, Sec. 54; ref. Driver's Manual Vol. 1 (2021), Ch. III, pp. 119, 121"
  },
  {
   "id": "L11-GR-01",
@@ -4871,7 +4873,7 @@
   "answer": 3,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 46 (RA 10666)"
+  "source": "RA 10666 (Children's Safety on Motorcycles Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 46"
  },
  {
   "id": "L11-GR-02",
@@ -4885,7 +4887,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 166 (RA 10666)"
+  "source": "RA 10666 (Children's Safety on Motorcycles Act); ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 166"
  },
  {
   "id": "L11-GR-03",
@@ -4899,7 +4901,7 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, p. 177"
+  "source": "RA 4136, Sec. 32; ref. Driver's Manual Vol. 1 (2021), Ch. VI, p. 177"
  },
  {
   "id": "L11-GR-04",
@@ -4913,7 +4915,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. VI, pp. 173, 175"
+  "source": "RA 7160 (Local Government Code), Sec. 458; ref. Driver's Manual Vol. 1 (2021), Ch. VI, pp. 173, 175"
  },
  {
   "id": "L11-GR-05",
@@ -4927,7 +4929,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 37 (RA 10054)"
+  "source": "RA 10054 (Motorcycle Helmet Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 37"
  },
  {
   "id": "L11-GR-06",
@@ -4941,7 +4943,7 @@
   "answer": 1,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 37 (RA 10054)"
+  "source": "RA 10054 (Motorcycle Helmet Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 37"
  },
  {
   "id": "L11-GR-07",
@@ -4955,7 +4957,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V/VI, pp. 153, 165"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V/VI, pp. 153, 165"
  },
  {
   "id": "L11-GR-08",
@@ -4969,7 +4971,7 @@
   "answer": 2,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 1 (2021), Ch. V/VI, pp. 153, 177"
+  "source": "Ref. Driver's Manual Vol. 1 (2021), Ch. V/VI, pp. 153, 177"
  },
  {
   "id": "L11-GR-09",
@@ -4983,6 +4985,6 @@
   "answer": 0,
   "competency": "general_rules",
   "stage": 11,
-  "source": "FDM Vol. 2 (2021), Ch. II, p. 46 (RA 10666)"
+  "source": "RA 10666 (Children's Safety on Motorcycles Act); ref. Driver's Manual Vol. 2 (2021), Ch. II, p. 46"
  }
 ]

@@ -99,7 +99,7 @@ const priorityStopSlot: SlotVariant[] = [
     penaltyMessage: 'A STOP sign requires a complete stop at the line, even when the cross street looks clear.',
     rewardMessage: 'Correct. You stopped fully behind the line before entering the intersection.',
     duration: 200,
-    lawCitation: 'A STOP sign requires a full stop at the marked stop line before proceeding when safe.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A STOP sign requires a full stop at the marked stop line before proceeding when safe.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -121,7 +121,7 @@ const priorityStopSlot: SlotVariant[] = [
     penaltyMessage: 'The instruction sign names the exact place to stop. Creeping past the line is still a failure to stop.',
     rewardMessage: 'Correct. You stopped exactly at the designated line.',
     duration: 200,
-    lawCitation: 'A Stop On Designated Stop Line sign instructs the driver to come to a full stop exactly at the marked line.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Stop On Designated Stop Line sign instructs the driver to come to a full stop exactly at the marked line.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -143,7 +143,7 @@ const priorityStopSlot: SlotVariant[] = [
     penaltyMessage: 'A crossing with no barrier or light is not a clear crossing. Stop and check the track both ways first.',
     rewardMessage: 'Correct. You stopped and checked both directions before crossing the tracks.',
     duration: 200,
-    lawCitation: 'RA 4136, as taught in Levels 2 and 5: a driver about to traverse a railroad crossing shall bring the vehicle to a full stop, unless no hazard is apparent, in which case it may be slowed instead to about 8 kph. A crossing with no barrier or warning light gives no sign the way is clear, so stop, check both directions, and proceed only when it is clearly safe.',
+    lawCitation: 'RA 4136, Sec. 42(d): a driver about to traverse a railroad crossing shall bring the vehicle to a full stop, unless no hazard is apparent, in which case it may be slowed instead to about 8 kph. A crossing with no barrier or warning light gives no sign the way is clear, so stop, check both directions, and proceed only when it is clearly safe.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -168,7 +168,7 @@ const priorityYieldSlot: SlotVariant[] = [
     penaltyMessage: 'At a Give Way sign, you must slow down and yield before entering the intersection.',
     rewardMessage: 'Correct. You slowed, checked cross traffic, and yielded before proceeding.',
     duration: 200,
-    lawCitation: 'A Give Way sign requires the driver to slow down and yield to traffic that has priority at the intersection.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Give Way sign requires the driver to slow down and yield to traffic that has priority at the intersection.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -190,7 +190,7 @@ const priorityYieldSlot: SlotVariant[] = [
     penaltyMessage: 'An advance warning is your cue to start slowing now, not at the line itself.',
     rewardMessage: 'Correct. You began slowing as soon as the advance warning appeared.',
     duration: 200,
-    lawCitation: 'A Give Way Sign Ahead warning tells the driver a Give Way sign is coming up and to begin slowing now.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Give Way Sign Ahead warning tells the driver a Give Way sign is coming up and to begin slowing now.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -212,7 +212,7 @@ const priorityYieldSlot: SlotVariant[] = [
     penaltyMessage: 'You drove straight past the turn. Move into the lane nearest the center line on the approach, then turn once the way is clear.',
     rewardMessage: 'Correct. You took the lane nearest the center line and turned only once the oncoming stream was clear.',
     duration: 200,
-    lawCitation: 'A Left Turner Must Give Way sign requires a left-turning vehicle to yield to opposing traffic, and a turn must be made from the lane marked for it.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Left Turner Must Give Way sign requires a left-turning vehicle to yield to opposing traffic, and a turn must be made from the lane marked for it.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {
@@ -240,7 +240,7 @@ const priorityYieldSlot: SlotVariant[] = [
     penaltyMessage: 'Merging traffic joins your lane. Holding your speed leaves no room for it.',
     rewardMessage: 'Correct. You eased off and left a gap for the merging traffic.',
     duration: 200,
-    lawCitation: 'An Approach To Intersection, Merging Traffic sign warns that traffic from another road merges into your lane ahead.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): An Approach To Intersection, Merging Traffic sign warns that traffic from another road merges into your lane ahead.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -281,7 +281,7 @@ const VEHICLE_RESTRICTIONS: SlotVariant[] = [
     duration: 200,
     penaltyMessage: 'You turned into a street closed to cars. The restriction covers the vehicle you are driving.',
     rewardMessage: 'Correct. The sign covers cars, so you left that street alone and carried on.',
-    lawCitation: 'Cars may not enter this road or lane.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): Cars may not enter this road or lane.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -332,7 +332,7 @@ const JUNCTION_WARNINGS: SlotVariant[] = [
     duration: 200,
     penaltyMessage: 'The road ends here. You drove at the end of it instead of turning out of it.',
     rewardMessage: 'Correct. You took the turning lane and turned out of the road that ended.',
-    lawCitation: 'A T-Junction Ahead sign warns that the road ends ahead in a T-shaped junction, where the driver must turn.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A T-Junction Ahead sign warns that the road ends ahead in a T-shaped junction, where the driver must turn.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {
@@ -400,7 +400,7 @@ const routeRestrictionSlot: SlotVariant[] = [
     penaltyMessage: 'You turned into a street marked No Entry. The sign removes that route completely.',
     rewardMessage: 'Correct. You stayed on the open through road and left the closed street alone.',
     duration: 200,
-    lawCitation: 'A No Entry sign prohibits a vehicle from entering the marked road or lane.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A No Entry sign prohibits a vehicle from entering the marked road or lane.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -422,7 +422,7 @@ const routeRestrictionSlot: SlotVariant[] = [
     penaltyMessage: 'You made a left turn where it is prohibited. The sign forbids the movement outright, however clear the road looks.',
     rewardMessage: 'Correct. You gave up the turn and stayed on the through road.',
     duration: 200,
-    lawCitation: 'A No Left Turn sign means a left turn is not allowed at that point.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A No Left Turn sign means a left turn is not allowed at that point.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -445,7 +445,7 @@ const routeRestrictionSlot: SlotVariant[] = [
     penaltyMessage: 'You made a right turn where it is prohibited. The sign forbids the movement outright.',
     rewardMessage: 'Correct. You gave up the turn and stayed on the through road.',
     duration: 200,
-    lawCitation: 'A No Right Turn sign means a right turn is not allowed at that point.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A No Right Turn sign means a right turn is not allowed at that point.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -472,7 +472,7 @@ const routeRestrictionSlot: SlotVariant[] = [
     penaltyMessage: 'You swung across where a U-turn is prohibited. A No U-Turn sign is a separate restriction from a no-left-turn.',
     rewardMessage: 'Correct. You passed the median opening without attempting the U-turn.',
     duration: 200,
-    lawCitation: 'A No U-Turn sign means a U-turn is not allowed at that point.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A No U-Turn sign means a U-turn is not allowed at that point.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -494,7 +494,7 @@ const routeRestrictionSlot: SlotVariant[] = [
     penaltyMessage: 'You drove straight past the turn. Move into the right lane on the approach, then turn once the intersection is clear.',
     rewardMessage: 'Correct. You took the right lane and turned once the intersection was clear.',
     duration: 200,
-    lawCitation: 'A Vehicle May Turn Left Or Right If Intersection Is Clear sign allows the turn only once the intersection is clear of conflicting traffic.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Vehicle May Turn Left Or Right If Intersection Is Clear sign allows the turn only once the intersection is clear of conflicting traffic.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {
@@ -528,7 +528,7 @@ const routeRestrictionSlot: SlotVariant[] = [
     penaltyMessage: 'A work zone has people and equipment in it. Speed through it and you endanger both.',
     rewardMessage: 'Correct. You slowed for the work zone and watched for workers.',
     duration: 200,
-    lawCitation: 'A Roadwork sign warns of construction or maintenance activity ahead; slow down and follow any temporary detour.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Roadwork sign warns of construction or maintenance activity ahead; slow down and follow any temporary detour.',
     competency: 'road_signs',
     severity: 'major',
     // Closes exactly the curb lane, which is what a quarter of a four-lane
@@ -571,7 +571,7 @@ const routeRestrictionSlot: SlotVariant[] = [
     penaltyMessage: 'A hazard marker is placed exactly where the road is closed off. Driving at it is driving at the obstruction.',
     rewardMessage: 'Correct. You read the marker, slowed, and kept to the open part of the road.',
     duration: 200,
-    lawCitation: 'An Obstruction Marker marks a road closure or obstruction ahead.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): An Obstruction Marker marks a road closure or obstruction ahead.',
     competency: 'road_signs',
     severity: 'major',
     // Closes exactly the curb lane, which is what a quarter of a four-lane
@@ -631,7 +631,7 @@ const speedSlot: SlotVariant[] = [
     penaltyMessage: 'A posted maximum speed is a limit, not a suggestion. Reduce speed before the crowded area.',
     rewardMessage: 'Correct. You kept within the posted 20 km/h limit.',
     duration: 200,
-    lawCitation: 'Vehicles must not exceed the speed posted by a Maximum Speed Restriction sign.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): Vehicles must not exceed the speed posted by a Maximum Speed Restriction sign.',
     // Tagged speed_control with the other two posted restrictions in this slot
     // (catalogue review 2026-10-28); the advisory signs stay road_signs.
     competency: 'speed_control',
@@ -660,7 +660,7 @@ const speedSlot: SlotVariant[] = [
     penaltyMessage: 'You were below the posted minimum. A minimum speed is as binding as a maximum, and dawdling here obstructs the traffic behind you.',
     rewardMessage: 'Correct. You kept up to the posted minimum speed.',
     duration: 200,
-    lawCitation: 'Vehicles must not travel slower than the speed posted by a Minimum Speed Restriction sign.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): Vehicles must not travel slower than the speed posted by a Minimum Speed Restriction sign.',
     competency: 'speed_control',
     severity: 'major',
     sign: {
@@ -683,7 +683,7 @@ const speedSlot: SlotVariant[] = [
     penaltyMessage: 'The restriction has ended, so there is no reason to keep crawling. Resume normal speed for the road.',
     rewardMessage: 'Correct. You resumed normal speed once the restriction ended.',
     duration: 200,
-    lawCitation: 'An End Of Speed Restriction sign means the posted speed limit no longer applies past that point.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): An End Of Speed Restriction sign means the posted speed limit no longer applies past that point.',
     competency: 'speed_control',
     severity: 'major',
     sign: {
@@ -708,7 +708,7 @@ const speedSlot: SlotVariant[] = [
     penaltyMessage: 'The advisory speed is what the road can safely take. Ignoring it leaves you with no margin.',
     rewardMessage: 'Correct. You settled to the advised speed for the conditions.',
     duration: 200,
-    lawCitation: 'A Preferred Maximum Speed sign suggests a safe speed for normal weather and traffic conditions.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Preferred Maximum Speed sign suggests a safe speed for normal weather and traffic conditions.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -735,7 +735,7 @@ const speedSlot: SlotVariant[] = [
     penaltyMessage: 'The sign names the action directly: reduce speed immediately.',
     rewardMessage: 'Correct. You reduced speed as soon as the instruction appeared.',
     duration: 200,
-    lawCitation: 'A Driver Must Slow Down sign instructs the driver to reduce speed immediately.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Driver Must Slow Down sign instructs the driver to reduce speed immediately.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -768,7 +768,7 @@ const laneGuidanceSlot: SlotVariant[] = [
     penaltyMessage: 'You passed the sign in the wrong lane. An advance direction sign is placed early precisely so there is room to move across.',
     rewardMessage: 'Correct. You read the sign early and were in the lane for your route.',
     duration: 200,
-    lawCitation: 'An Advance Direction Sign is placed well before an intersection, previewing the routes and directions available further ahead.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): An Advance Direction Sign is placed well before an intersection, previewing the routes and directions available further ahead.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -795,7 +795,7 @@ const laneGuidanceSlot: SlotVariant[] = [
     penaltyMessage: 'You were not in the lane the interchange is served by. A lane direction sign exists to position you before the ramp.',
     rewardMessage: 'Correct. You moved into the lane that leads to the interchange.',
     duration: 200,
-    lawCitation: 'A Lane Direction sign guides motorists into the correct lane leading to an interchange.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Lane Direction sign guides motorists into the correct lane leading to an interchange.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -822,7 +822,7 @@ const laneGuidanceSlot: SlotVariant[] = [
     penaltyMessage: 'You were not keeping to the right lane, and you were not overtaking. Cruising in the other lanes obstructs faster traffic.',
     rewardMessage: 'Correct. You kept to the right lane, as the sign requires when not overtaking.',
     duration: 200,
-    lawCitation: 'A Stay On Right Lane Unless Passing sign requires the driver to keep to the right lane except when overtaking another vehicle.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Stay On Right Lane Unless Passing sign requires the driver to keep to the right lane except when overtaking another vehicle.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -849,7 +849,7 @@ const laneGuidanceSlot: SlotVariant[] = [
     penaltyMessage: 'You passed the turn-off in the wrong lane. A service sign is only useful if you act on it before the exit.',
     rewardMessage: 'Correct. You moved into the lane for the hospital turn-off.',
     duration: 200,
-    lawCitation: 'A Hospital service sign indicates that medical help is available in the direction shown.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Hospital service sign indicates that medical help is available in the direction shown.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -880,7 +880,7 @@ const bendWarningSlot: SlotVariant[] = [
     penaltyMessage: 'A sharp-turn warning means reduce speed before the bend, not while already committed to it.',
     rewardMessage: 'Correct. You reduced speed early for the sharp bend.',
     duration: 200,
-    lawCitation: 'A warning sign gives the driver time to reduce speed and prepare for the hazard ahead.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A warning sign gives the driver time to reduce speed and prepare for the hazard ahead.',
     competency: 'road_signs',
     severity: 'minor',
     // The road genuinely bends here, and the outside of a bend grips less,
@@ -910,7 +910,7 @@ const bendWarningSlot: SlotVariant[] = [
     penaltyMessage: 'A hairpin almost doubles back on itself. Arriving at speed leaves nowhere to go.',
     rewardMessage: 'Correct. You slowed well before the hairpin.',
     duration: 200,
-    lawCitation: 'A Hairpin Bend sign warns of a very sharp, near-reversal turn ahead; slow down significantly.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Hairpin Bend sign warns of a very sharp, near-reversal turn ahead; slow down significantly.',
     competency: 'road_signs',
     severity: 'minor',
     // The road genuinely bends here, and the outside of a bend grips less,
@@ -940,7 +940,7 @@ const bendWarningSlot: SlotVariant[] = [
     penaltyMessage: 'A winding road keeps turning. One straight glance is not enough to judge it.',
     rewardMessage: 'Correct. You settled to a speed you can hold through the whole series of curves.',
     duration: 200,
-    lawCitation: 'A Winding Road sign warns that a series of curves continues for some distance.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Winding Road sign warns that a series of curves continues for some distance.',
     competency: 'road_signs',
     severity: 'minor',
     // The road genuinely bends here, and the outside of a bend grips less,
@@ -970,7 +970,7 @@ const bendWarningSlot: SlotVariant[] = [
     penaltyMessage: 'An S-curve turns twice, in opposite directions. Carrying speed into the first ruins the second.',
     rewardMessage: 'Correct. You slowed before the first curve so the second was under control.',
     duration: 200,
-    lawCitation: 'A Double Curve sign warns that two curves in opposite directions follow one another, forming an S-curve.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Double Curve sign warns that two curves in opposite directions follow one another, forming an S-curve.',
     competency: 'road_signs',
     severity: 'minor',
     // The road genuinely bends here, and the outside of a bend grips less,
@@ -1000,7 +1000,7 @@ const bendWarningSlot: SlotVariant[] = [
     penaltyMessage: 'Chevrons are placed on the outside of a bend precisely because vehicles run wide there.',
     rewardMessage: 'Correct. You slowed and followed the line the chevrons mark out.',
     duration: 200,
-    lawCitation: 'A Chevron Sign guides drivers through a change in the horizontal alignment of the road.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Chevron Sign guides drivers through a change in the horizontal alignment of the road.',
     competency: 'road_signs',
     severity: 'minor',
     // The road genuinely bends here, and the outside of a bend grips less,
@@ -1033,7 +1033,7 @@ const pedestrianSlot: SlotVariant[] = [
     penaltyMessage: 'The warning sign is your cue to slow down before the zebra crossing and be ready to yield.',
     rewardMessage: 'Correct. You slowed early and prepared to yield at the crossing.',
     duration: 200,
-    lawCitation: 'A pedestrian-crossing warning sign tells drivers to reduce speed and prepare to yield before the crossing.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A pedestrian-crossing warning sign tells drivers to reduce speed and prepare to yield before the crossing.',
     competency: 'pedestrians',
     severity: 'major',
     sign: {
@@ -1056,7 +1056,7 @@ const pedestrianSlot: SlotVariant[] = [
     penaltyMessage: 'Children step off a curb without checking. This sign exists because that is predictable.',
     rewardMessage: 'Correct. You slowed right down and were ready to stop for the children.',
     duration: 200,
-    lawCitation: 'A children-crossing sign warns of a school or area with frequent child pedestrians ahead.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A children-crossing sign warns of a school or area with frequent child pedestrians ahead.',
     competency: 'pedestrians',
     severity: 'major',
     sign: {
@@ -1079,7 +1079,7 @@ const pedestrianSlot: SlotVariant[] = [
     penaltyMessage: 'A person with a disability may need far longer to clear the crossing than you allowed.',
     rewardMessage: 'Correct. You slowed and gave the crossing all the time it needed.',
     duration: 200,
-    lawCitation: 'A PWD Crossing Ahead sign warns that persons with disabilities may be crossing ahead.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A PWD Crossing Ahead sign warns that persons with disabilities may be crossing ahead.',
     competency: 'pedestrians',
     severity: 'major',
     sign: {
@@ -1101,7 +1101,7 @@ const pedestrianSlot: SlotVariant[] = [
     penaltyMessage: 'This sign gives pedestrians priority outright. There is nothing to weigh up.',
     rewardMessage: 'Correct. You slowed and gave the crossing to the pedestrians.',
     duration: 200,
-    lawCitation: 'A Driver Must Give Way To Pedestrians sign means pedestrians have priority at that point.',
+    lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): A Driver Must Give Way To Pedestrians sign means pedestrians have priority at that point.',
     competency: 'pedestrians',
     severity: 'major',
     sign: {
@@ -1129,7 +1129,7 @@ const signalSlot: SlotVariant[] = [
     penaltyMessage: 'A solid red signal requires a full stop before the stop line and crosswalk.',
     rewardMessage: 'Correct. You stopped before the line at the red signal.',
     duration: 220,
-    lawCitation: 'A solid red traffic signal means stop before the marked stop line or crosswalk.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A solid red traffic signal means stop before the marked stop line or crosswalk.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {
@@ -1150,7 +1150,7 @@ const signalSlot: SlotVariant[] = [
     penaltyMessage: 'A flashing red is a stop sign in light form. Rolling through it is not a stop.',
     rewardMessage: 'Correct. You came to a full stop, then judged the junction before moving.',
     duration: 220,
-    lawCitation: 'A flashing red signal means stop completely, then proceed only when it is safe, similar to a stop sign.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A flashing red signal means stop completely, then proceed only when it is safe, similar to a stop sign.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {
@@ -1171,7 +1171,7 @@ const signalSlot: SlotVariant[] = [
     penaltyMessage: 'Yellow means the red is about to appear, not that there is time left to beat it.',
     rewardMessage: 'Correct. You prepared to stop instead of racing the signal.',
     duration: 220,
-    lawCitation: 'A solid yellow signal means the red signal is about to appear; prepare to stop if it is safe to do so.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A solid yellow signal means the red signal is about to appear; prepare to stop if it is safe to do so.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {
@@ -1192,7 +1192,7 @@ const signalSlot: SlotVariant[] = [
     penaltyMessage: 'A flashing yellow hands the judgment back to you, and that judgment starts with slowing down.',
     rewardMessage: 'Correct. You slowed and read the junction before crossing it.',
     duration: 220,
-    lawCitation: 'A flashing yellow signal means slow down and proceed with caution.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A flashing yellow signal means slow down and proceed with caution.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {

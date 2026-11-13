@@ -20,6 +20,7 @@ import {
   type TaggingReviewDoc,
 } from '@/features/admin/domain/contentValidity';
 import { readTestProgress, type ParticipantTests } from '@/features/admin/domain/irtPanel';
+import { bankCalibration, type BankCalibration } from '@/features/admin/domain/bankCalibration';
 import { adminDeps } from './dependencies';
 
 export interface IrtData {
@@ -29,6 +30,8 @@ export interface IrtData {
   participants: ParticipantTests[];
   tagging: TaggingReviewDoc | null;
   experts: ExpertReviewDoc | null;
+  /** The rest of the bank, from Mock Exam answers. */
+  bank: BankCalibration;
   readAt: number;
 }
 
@@ -42,8 +45,8 @@ const sittingOf = (v: unknown) => {
 
 export const loadIrtData = async (): Promise<IrtData> => {
   const repo = adminDeps().irt;
-  const [items, report, design, tests, reviews] = await Promise.all([
-    repo.testItems(), repo.report(), repo.design(), repo.participantTests(), repo.reviews(),
+  const [items, report, design, tests, reviews, exams] = await Promise.all([
+    repo.testItems(), repo.report(), repo.design(), repo.participantTests(), repo.reviews(), repo.examResponses(),
   ]);
   return {
     items: [...items].sort((a, b) => a.id.localeCompare(b.id, 'en', { numeric: true })),
@@ -59,6 +62,7 @@ export const loadIrtData = async (): Promise<IrtData> => {
     })),
     tagging: readTaggingReview(reviews.tagging),
     experts: readExpertReview(reviews.experts),
+    bank: bankCalibration(exams),
     readAt: Date.now(),
   };
 };

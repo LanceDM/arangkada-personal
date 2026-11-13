@@ -108,7 +108,7 @@ export const level0Module = {
     {
       "id": "lto_level_0-lesson-5",
       "title": "4. How To Answer the Short Quiz",
-      "text": "The short quiz checks if you understood the lesson. Each question has choices. Read the question first, then read all choices before selecting your answer.\n\nDo not guess too quickly. Some choices may look similar. Choose the answer that best matches the module.\n\nThe quiz is timed, like the LTO written exam: you have one minute for each question, and the time left is shown at the top. When the time runs out, any question you have not answered counts as wrong.\n\nIf you make a mistake, that is okay. Mistakes are part of learning. Review the module again and try the quiz again.",
+      "text": "The short quiz checks if you understood the lesson. Each question has choices. Read the question first, then read all choices before selecting your answer.\n\nDo not guess too quickly. Some choices may look similar. Choose the answer that best matches the module.\n\nThe quiz is timed, like the written licensing exam: you have one minute for each question, and the time left is shown at the top. When the time runs out, any question you have not answered counts as wrong.\n\nIf you make a mistake, that is okay. Mistakes are part of learning. Review the module again and try the quiz again.",
       "blocks": [
         {
           "type": "paragraph",
@@ -120,7 +120,7 @@ export const level0Module = {
         },
         {
           "type": "paragraph",
-          "text": "The quiz is timed, like the LTO written exam: you have one minute for each question, and the time left is shown at the top. When the time runs out, any question you have not answered counts as wrong."
+          "text": "The quiz is timed, like the written licensing exam: you have one minute for each question, and the time left is shown at the top. When the time runs out, any question you have not answered counts as wrong."
         },
         {
           "type": "paragraph",
@@ -350,11 +350,11 @@ export const level0Module = {
     {
       "id": "lto_level_0-lesson-11",
       "title": "10. Final Reminder Before Level 1",
-      "text": "Level 1 will begin the actual LTO-based lesson about permits, driver's licenses, license codes, vehicle categories, and clutch codes.\n\nBefore continuing, remember this flow:\n\nRead the module -> Answer the quiz -> Pass the quiz -> Start the simulation -> Complete the level.\n\nTake your time. Learn step by step. Arangkada is here to help you practice safely before facing real road responsibilities.",
+      "text": "Level 1 begins the first lesson, on RA 4136 (the Land Transportation and Traffic Code): permits, driver's licenses, license codes, vehicle categories, and clutch codes.\n\nBefore continuing, remember this flow:\n\nRead the module -> Answer the quiz -> Pass the quiz -> Start the simulation -> Complete the level.\n\nTake your time. Learn step by step. Arangkada is here to help you practice safely before facing real road responsibilities.",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Level 1 will begin the actual LTO-based lesson about permits, driver's licenses, license codes, vehicle categories, and clutch codes."
+          "text": "Level 1 begins the first lesson, on RA 4136 (the Land Transportation and Traffic Code): permits, driver's licenses, license codes, vehicle categories, and clutch codes."
         },
         {
           "type": "paragraph",

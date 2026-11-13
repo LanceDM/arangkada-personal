@@ -233,8 +233,8 @@ export const level11Module = {
           type: 'list',
           ordered: false,
           items: [
-            'The owner must register a motorcycle with the LTO within five days of acquiring ownership.',
-            'Any subsequent sale or disposal must be reported to the LTO within three days, with the notarized deed of sale.',
+            'The owner must register a motorcycle within five days of acquiring ownership (RA 11235).',
+            'Any subsequent sale or disposal must be reported within three days (RA 11235), with the notarized deed of sale.',
             'The metal plate is 235mm wide by 135mm tall, made of durable reflectorized aluminum, with 60mm-tall alphanumeric characters.',
             'A decal plate is 135mm wide by 85mm tall, with 40mm-tall reflectorized alphanumeric characters.',
           ],
@@ -275,7 +275,7 @@ export const level11Module = {
           type: 'list',
           ordered: false,
           items: [
-            'All tricycles must be registered with the LTO and renewed yearly, like any other motor vehicle.',
+            'All tricycles must be registered and renewed yearly (RA 4136, Sec. 5), like any other motor vehicle.',
             'A brand new motorcycle with more than 200cc engine displacement has an initial registration validity of three years.',
             'A tricycle does not need a Certificate of Public Convenience (CPC) from the LTFRB; the concerned Local Government Unit regulates tricycle operation and grants franchises within its own territory.',
             'A Motorized Tricycle Operator\'s Permit (MTOP) with official receipt, an identification card, and the fare matrix must all be visible.',
@@ -540,7 +540,7 @@ export const level11Module = {
           type: 'list',
           ordered: false,
           items: [
-            'Most rider crashes come from habitual and unnecessary lane changing, which the FDM treats as tantamount to reckless driving.',
+            'Most rider crashes come from habitual and unnecessary lane changing, which can amount to reckless driving (RA 4136, Sec. 48).',
             'Do not overtake a turning vehicle, especially in its blind spots.',
             'Avoid overtaking on a curve: the motorcycle may skid, especially with inferior rear tires.',
             'Stop using the front and rear brakes at the same time.',

@@ -2,21 +2,15 @@
  * One sitting of the mock exam: where the questions came from, what has been
  * answered, how long is left, and what the finished paper is worth.
  *
- * The exam is deliberately not adaptive — items are shuffled uniformly and the
- * finished paper is worth its raw score.
+ * The exam is deliberately not adaptive: 40 items drawn from the question
+ * bank, spread over the levels (drawExam), and the finished paper is worth its
+ * raw score. Every answer is saved per item, which is what the bank's wider
+ * calibration counts.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthSession } from '@/features/auth';
-import { EXAM_QUESTIONS, type ExamQuestion } from '../domain/questionBank';
-import {
-  EXAM_TIME_SECONDS,
-  getWeakAreas,
-  passingScoreFor,
-  scoreExam,
-  wrongQuestionIds,
-  type WeakArea,
-} from '../domain/grading';
-import { fisherYatesShuffle } from '../domain/shuffle';
+import { BUNDLED_EXAM_POOL, drawExam, type ExamQuestion } from '../domain/examItems';
+import { EXAM_TIME_SECONDS, getWeakAreas, passingScoreFor, scoreExam, wrongQuestionIds, type WeakArea } from '../domain/grading';
 import { mockExamDeps } from './dependencies';
 
 export type ExamPhase = 'intro' | 'exam' | 'results';
@@ -45,12 +39,10 @@ export interface MockExamState {
 export const useMockExam = (): MockExamState => {
   const { user, isLoggedIn } = useAuthSession();
   const [phase, setPhase] = useState<ExamPhase>('intro');
-  const [bank, setBank] = useState<ExamQuestion[]>(EXAM_QUESTIONS);
+  const [bank, setBank] = useState<readonly ExamQuestion[]>(BUNDLED_EXAM_POOL);
   const [bankStatus, setBankStatus] = useState<QuestionBankStatus>('loading');
-  const [questions, setQuestions] = useState(() => fisherYatesShuffle(EXAM_QUESTIONS));
-  const [answers, setAnswers] = useState<(number | null)[]>(
-    new Array(EXAM_QUESTIONS.length).fill(null)
-  );
+  const [questions, setQuestions] = useState(() => drawExam(BUNDLED_EXAM_POOL, Math.random));
+  const [answers, setAnswers] = useState<(number | null)[]>(() => new Array(questions.length).fill(null));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(EXAM_TIME_SECONDS);
 
@@ -58,7 +50,7 @@ export const useMockExam = (): MockExamState => {
     let live = true;
 
     const loadBank = async () => {
-      let next = EXAM_QUESTIONS;
+      let next: readonly ExamQuestion[] = BUNDLED_EXAM_POOL;
       let status: QuestionBankStatus = 'fallback';
       try {
         const remote = await mockExamDeps().exam.getQuestions();
@@ -68,12 +60,13 @@ export const useMockExam = (): MockExamState => {
         }
       } catch {
         // An unreadable collection is not an error the learner needs to see:
-        // the local bank is a complete exam on its own.
+        // the bundled bank is a complete exam on its own.
       }
       if (!live) return;
+      const drawn = drawExam(next, Math.random);
       setBank(next);
-      setQuestions(fisherYatesShuffle(next));
-      setAnswers(new Array(next.length).fill(null));
+      setQuestions(drawn);
+      setAnswers(new Array(drawn.length).fill(null));
       setBankStatus(status);
     };
 
@@ -124,6 +117,8 @@ export const useMockExam = (): MockExamState => {
           passed,
           wrongIds,
           questionIds: questions.map(q => q.id),
+          responses: questions.map((q, i) => ({ itemId: q.id, level: q.level, chosen: answers[i], correct: answers[i] === q.correctIndex })),
+          bank: bankStatus === 'firebase' ? 'served' : 'bundled',
           timestamp: Date.now(),
         });
         if (score > (await exam.getBestScore(user.uid))) await exam.saveBestScore(user.uid, score);
@@ -138,9 +133,9 @@ export const useMockExam = (): MockExamState => {
 
   const reset = useCallback(
     (next: ExamPhase) => {
-      const shuffled = fisherYatesShuffle(bank);
-      setQuestions(shuffled);
-      setAnswers(new Array(shuffled.length).fill(null));
+      const drawn = drawExam(bank, Math.random);
+      setQuestions(drawn);
+      setAnswers(new Array(drawn.length).fill(null));
       setCurrentIndex(0);
       setTimeLeft(EXAM_TIME_SECONDS);
       setPhase(next);
@@ -151,7 +146,8 @@ export const useMockExam = (): MockExamState => {
   return {
     phase,
     questions,
-    bankSize: bank.length,
+    // The sitting's length (40), which the intro card shows.
+    bankSize: questions.length,
     bankStatus,
     answers,
     currentIndex,
@@ -159,7 +155,7 @@ export const useMockExam = (): MockExamState => {
     score,
     passed,
     requiredScore,
-    weakAreas: getWeakAreas(wrongIds),
+    weakAreas: getWeakAreas(questions, answers),
     goTo: setCurrentIndex,
     answer: choiceIndex =>
       setAnswers(previous => previous.map((a, i) => (i === currentIndex ? choiceIndex : a))),

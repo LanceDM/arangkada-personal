@@ -79,7 +79,9 @@ describe('the scenarios written for the pools and the spread (DRAFT)', () => {
     for (const { variant } of allStageExtras()) {
       expect(isPortableRemediation(variant), variant.id).toBe(true);
       expect(variant.competency, variant.id).toBeTruthy();
-      expect(variant.lawCitation, variant.id).toMatch(/module/i);
+      // Cited by the rule itself, never by the LTO or its manual.
+      expect(variant.lawCitation, variant.id).toBeTruthy();
+      expect(variant.lawCitation, variant.id).not.toMatch(/\bLTO\b|\bFDM\b|module/i);
     }
   });
 });

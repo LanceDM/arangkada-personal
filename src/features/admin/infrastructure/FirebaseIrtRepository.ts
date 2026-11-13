@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { collection, collectionGroup, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
 import { IRT_REPORT_PATH } from '@/domain/assessment/irtReport';
 import { isStudyCohort } from '@/domain/study/participantCode';
@@ -43,6 +43,18 @@ export const firebaseIrtRepository: IrtRepository = {
   async reviews() {
     const [tagging, experts] = await Promise.all([dataAt('item_reviews/tagging'), dataAt('item_reviews/experts')]);
     return { tagging, experts };
+  },
+
+  async examResponses() {
+    const snap = await getDocs(collectionGroup(db, 'examAttempts'));
+    return snap.docs.map(d => {
+      const data = d.data() as { timestamp?: unknown; responses?: unknown };
+      return {
+        uid: d.ref.parent.parent!.id,
+        timestamp: typeof data.timestamp === 'number' ? data.timestamp : 0,
+        responses: data.responses,
+      };
+    });
   },
 
   async saveReview(kind, review) {

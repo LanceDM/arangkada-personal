@@ -97,6 +97,9 @@ const repository: IrtRepository = {
   testItems: async () => items,
   participantTests: async () => tests,
   reviews: async () => ({ tagging: stored.tagging, experts: stored.experts }),
+  examResponses: async () => [
+    { uid: 'u1', timestamp: 1, responses: [{ itemId: 'L5-RW-01', level: 5, chosen: 0, correct: true }] },
+  ],
   saveReview: vi.fn(async (kind: ItemReviewKind, review: { revision: number }) => {
     const before = stored[kind] as { revision: number } | null;
     if (review.revision !== (before ? before.revision + 1 : 1)) throw new Error('Missing or insufficient permissions.');

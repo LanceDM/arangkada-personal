@@ -30,7 +30,7 @@ const level7: SlotVariant[] = [
     rewardMessage: 'Correct. You came off the speed before the gusts reached you.',
     duration: 200,
     lawCitation:
-      'Level 7 module, Expressway Driving Tips: "Be aware of crosswinds, especially on bridges and open stretches." Level 7 module, Speed Limits Under RA 4136: drive at a careful and prudent speed, no greater than is reasonable for the conditions.',
+      'RA 4136, Sec. 35(a): drive at a careful and prudent speed. Be aware of crosswinds, especially on bridges and open stretches. Speed limits: drive at a careful and prudent speed, no greater than is reasonable for the conditions.',
     competency: 'hazard_awareness',
     severity: 'major',
   },
@@ -49,7 +49,7 @@ const level7: SlotVariant[] = [
     rewardMessage: 'Correct. You read the hazard lights as a stop coming and opened the gap early.',
     duration: 200,
     lawCitation:
-      'Level 7 module, Merging And Toll Exit Procedure: "On an expressway, switch on the hazard warning lights only when stopping for an emergency." Expressway Driving Tips: "Maintain a safe following distance at all times."',
+      'On an expressway, switch on the hazard warning lights only when stopping for an emergency, and keep a safe following distance at all times.',
     competency: 'hazard_awareness',
     severity: 'critical',
     npc: {
@@ -84,7 +84,7 @@ const level7: SlotVariant[] = [
     rewardMessage: 'Correct. You kept going: an expressway shoulder is not a place to stop for a view.',
     duration: 200,
     lawCitation:
-      'Level 7 module, Expressway Rules: "Standing, stopping, loading, unloading, or parking is not allowed except in designated places." Level 6 module, Before You Choose The Space: do not stop where official signs prohibit it.',
+      'RA 2000 (Limited Access Highway Act) and expressway rules: standing, stopping, loading, unloading or parking only in designated places. RA 4136, Sec. 46(h): do not stop where official signs prohibit it.',
     competency: 'parking',
     severity: 'major',
     sign: {
@@ -112,7 +112,7 @@ const level7: SlotVariant[] = [
     rewardMessage: 'Correct. You kept going and will let them out after the exit.',
     duration: 200,
     lawCitation:
-      'Level 7 module, Expressway Rules: "No person or vehicle may enter, exit, or cross the expressway except at designated entry, exit, or interchange points." "Standing, stopping, loading, unloading, or parking is not allowed except in designated places."',
+      'RA 2000 (Limited Access Highway Act): enter, exit or cross the expressway only at designated entry, exit or interchange points; stand, stop, load, unload or park only in designated places.',
     competency: 'parking',
     severity: 'major',
   },
@@ -129,7 +129,7 @@ const level7: SlotVariant[] = [
     penaltyMessage: 'The sign asks for the speed to come off now, before the descent demands it. You held your speed past it.',
     rewardMessage: 'Correct. You tested your brakes and slowed at the sign.',
     lawCitation:
-      'Level 7 module, Merge-Lane Warning Signage: "Check Brakes, Reduce Speed Now — posted in conjunction with a merge or descent on the expressway; test your brakes and slow down before the situation demands it."',
+      'Road sign standard (DPWH DO 41, s. 2012): Check Brakes, Reduce Speed Now is posted with a merge or descent on the expressway; test your brakes and slow down before the situation demands it.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -167,7 +167,7 @@ const level8: SlotVariant[] = [
     rewardMessage: 'Correct. Polite now, and the complaint goes where it can be heard.',
     duration: 220,
     lawCitation:
-      'Level 8 module, Managing Stress While Driving, unlawful or difficult traffic enforcers: "Be polite. Comply rather than argue at the roadside. Save formal complaints for the proper venue and time, not the driver\'s seat. Use a dashcam or phone to document an incident if needed." Courtesy And Road Discipline: be courteous to traffic enforcers.',
+      'Difficult traffic enforcers: be polite, comply rather than argue at the roadside, and save formal complaints for the proper venue (JAO 2014-01 sets the contest). Use a dashcam or phone to document an incident if needed, and be courteous to enforcers.',
     competency: 'general_rules',
     severity: 'major',
     inspection: {
@@ -202,7 +202,7 @@ const level8: SlotVariant[] = [
     rewardMessage: 'Correct. A driver who is not fit does not take the wheel.',
     duration: 220,
     lawCitation:
-      'Level 8 module, Driver Wellness And Human Factors In Crashes: fatigue — "Observe reasonable driving hours and plan rest stops beforehand"; partying — "Limit the time spent before a drive"; illness — "Avoid driving if not physically fit." Hazards Around You: "If you are taking medicine that can affect your driving, do not drive, or consult a doctor first."',
+      'Driver wellness: observe reasonable driving hours and plan rest stops; limit partying before a drive; avoid driving if not physically fit. "If you are taking medicine that can affect your driving, do not drive, or consult a doctor first."',
     competency: 'general_rules',
     severity: 'major',
     inspection: {
@@ -232,7 +232,7 @@ const level8: SlotVariant[] = [
       'A malfunctioning signal hands every driver the judgment, and some of them will get it wrong. Slow and read the junction before you cross it.',
     rewardMessage: 'Correct. You slowed and read the junction before crossing it.',
     lawCitation:
-      'Level 3 module: a flashing yellow signal means slow down and proceed with caution. Level 8 module, Managing Stress: malfunctioning traffic lights are a common cause of stress; stay calm and drive defensively.',
+      'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: a flashing yellow signal means slow down and proceed with caution. Managing stress: malfunctioning traffic lights are a common cause of stress; stay calm and drive defensively.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {
@@ -265,7 +265,7 @@ const level9: SlotVariant[] = [
     rewardMessage: 'Correct. You kept going to a place where a stop is both allowed and safe.',
     duration: 200,
     lawCitation:
-      'Level 9 module, Breakdown Procedure: "Move the vehicle to the safest available position, off the main travel lane if possible." Level 6 module, Before You Choose The Space: do not stop where official signs prohibit it.',
+      'Breakdown: move the vehicle to the safest available position, off the main travel lane if possible, and set the early warning devices (LOI 229, 1974). RA 4136, Sec. 46(h): do not stop where official signs prohibit it.',
     competency: 'parking',
     severity: 'major',
     sign: {
@@ -285,7 +285,7 @@ const level10: SlotVariant[] = [
   // driver_legality: spread to Level 10 (2026-10-28).
   {
     id: 'level10.extra.dui-license-consequence',
-    label: 'LTO checkpoint',
+    label: 'Roadside checkpoint',
     type: 'stop_sign',
     description: 'An enforcer at a checkpoint explains what a drunk-driving conviction would mean for your license.',
     correctAction: 'stop',
@@ -302,7 +302,7 @@ const level10: SlotVariant[] = [
     rewardMessage: 'Correct. Twelve months suspended on the first conviction, revoked on the second.',
     duration: 220,
     lawCitation:
-      "Level 10 module, Anti-Drunk And Drugged Driving Act (RA 10586): \"A professional driver's license is confiscated and perpetually revoked on the first conviction. A non-professional driver's license is confiscated and suspended for 12 months on the first conviction, and revoked on the second.\"",
+      "RA 10586 (Anti-Drunk and Drugged Driving Act), Sec. 12: \"A professional driver's license is confiscated and perpetually revoked on the first conviction. A non-professional driver's license is confiscated and suspended for 12 months on the first conviction, and revoked on the second.\"",
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -322,7 +322,7 @@ const level10: SlotVariant[] = [
     id: 'level10.extra.emission-test-date',
     label: 'Registration check',
     type: 'stop_sign',
-    description: 'You stop to check your papers before going to the LTO to renew the registration.',
+    description: 'You stop to check your papers before going to renew the registration.',
     correctAction: 'stop',
     points: 25,
     warningDistance: 560,
@@ -333,11 +333,11 @@ const level10: SlotVariant[] = [
       { label: 'Yes — the emission test is not needed for renewal', action: 'brake' },
     ],
     penaltyMessage:
-      'Emission test results must be presented to the LTO within 60 days of testing, as a prerequisite for registration or renewal. A 75-day-old test has to be redone.',
+      'Emission test results must be presented within 60 days of testing, as a prerequisite for registration or renewal. A 75-day-old test has to be redone.',
     rewardMessage: 'Correct. Past 60 days, the test has to be done again before renewal.',
     duration: 220,
     lawCitation:
-      'Level 10 module, Clean Air Act (RA 8749): "Test results must be presented to the LTO within 60 days of testing, as a prerequisite for registration or renewal."',
+      'RA 8749 (Clean Air Act), Sec. 21: an emission test is a prerequisite for registration or renewal, and its results must be presented within 60 days of testing.',
     competency: 'document_awareness',
     severity: 'major',
     inspection: {
@@ -378,7 +378,7 @@ const level11: SlotVariant[] = [
     rewardMessage: 'Correct. For hire means a professional license.',
     duration: 220,
     lawCitation:
-      "Level 11 module, Proper Tricycle Operation: \"Use a professional driver's license for a for-hire tricycle.\" Common Tricycle Violations: \"Driving with expired registration, or with an invalid license or no license.\"",
+      "RA 4136, Sec. 24: a vehicle for hire, a tricycle included, is driven on a professional driver's license. Driving with expired registration, or with an invalid license or none, is a violation (JAO 2014-01).",
     competency: 'driver_legality',
     severity: 'major',
     inspection: {
@@ -404,7 +404,7 @@ const level11: SlotVariant[] = [
     warningDistance: 560,
     question: 'Is this tricycle ready to carry passengers for hire?',
     choices: [
-      { label: 'Go — current LTO registration is all a tricycle needs', action: 'accelerate' },
+      { label: 'Go — current registration is all a tricycle needs', action: 'accelerate' },
       { label: 'No-Go — the MTOP with its receipt, the ID and the fare matrix must all be visible', action: 'stop' },
       { label: 'Go — a tricycle needs an LTFRB franchise, not an MTOP', action: 'brake' },
     ],
@@ -413,7 +413,7 @@ const level11: SlotVariant[] = [
     rewardMessage: 'Correct. Without the MTOP, ID and fare matrix on display, it does not carry passengers.',
     duration: 220,
     lawCitation:
-      "Level 11 module, Tricycle Registration, Franchise: \"A tricycle does not need a Certificate of Public Convenience (CPC) from the LTFRB; the concerned Local Government Unit regulates tricycle operation and grants franchises within its own territory.\" \"A Motorized Tricycle Operator's Permit (MTOP) with official receipt, an identification card, and the fare matrix must all be visible.\"",
+      "RA 7160 (Local Government Code), Sec. 458: \"A tricycle does not need a Certificate of Public Convenience (CPC) from the LTFRB; the concerned Local Government Unit regulates tricycle operation and grants franchises within its own territory.\" \"A Motorized Tricycle Operator's Permit (MTOP) with official receipt, an identification card, and the fare matrix must all be visible.\"",
     competency: 'document_awareness',
     severity: 'major',
     inspection: {
@@ -421,7 +421,7 @@ const level11: SlotVariant[] = [
       documentType: 'Tricycle — For Hire',
       holder: 'TODA unit 114',
       fields: [
-        { label: 'LTO registration', value: 'Current' },
+        { label: 'Registration', value: 'Current' },
         { label: 'MTOP and receipt', value: 'Not displayed' },
         { label: 'ID and fare matrix', value: 'Not displayed' },
       ],
@@ -447,7 +447,7 @@ const level11: SlotVariant[] = [
     rewardMessage: 'Correct. You did not wait at the corner itself.',
     duration: 200,
     lawCitation:
-      'Level 11 module, Common Tricycle Violations: "Parking or waiting within six meters of an intersection." Level 6 module, Before You Choose The Space: "Not within 6 meters of the intersection of curb lines."',
+      'RA 4136, Sec. 46(c): no parking or waiting within six meters of the intersection of curb lines; a tricycle waiting there is a common violation.',
     competency: 'parking',
     severity: 'major',
   },

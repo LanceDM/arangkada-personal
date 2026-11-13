@@ -40,4 +40,19 @@ describe('the post-test design', () => {
     const routed = pretests.map(p => routeByScore([...p.correct].filter(id => routing.has(id)).length, design.cuts));
     for (const block of ['easy', 'medium', 'hard'] as const) expect(routed.filter(r => r === block).length).toBeGreaterThanOrEqual(7);
   });
+
+  it('draws the routing block at random, one from each band of four by difficulty, the same draw for the same design id', () => {
+    const pretests: PreTestAnswers[] = Array.from({ length: 30 }, (_, person) => ({
+      answered: new Set(items.map(item => item.id)),
+      correct: new Set(items.filter((_, i) => i < person * 2).map(item => item.id)),
+    }));
+    const a = irtDesign(items, pretests, 'irt-a', 'cal');
+    const order = a.difficulties.map(item => item.id);
+    const bands = a.design.routing.map(id => Math.floor(order.indexOf(id) / 4));
+    expect(bands).toEqual(Array.from({ length: 15 }, (_, i) => i));
+    expect(irtDesign(items, pretests, 'irt-a', 'cal').design.routing).toEqual(a.design.routing);
+    // Not the old fixed pick (every fourth item from the second): a draw.
+    const draws = ['irt-a', 'irt-b', 'irt-c', 'irt-d'].map(id => irtDesign(items, pretests, id, 'cal').design.routing.join());
+    expect(new Set(draws).size).toBeGreaterThan(1);
+  });
 });

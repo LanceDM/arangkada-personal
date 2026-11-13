@@ -4,8 +4,8 @@ import type { QuestionBankStatus } from '../application/useMockExam';
 
 const BANK_LABEL: Record<QuestionBankStatus, string> = {
   loading: 'Loading...',
-  firebase: 'Firebase',
-  fallback: 'Local fallback',
+  firebase: 'Question bank (live)',
+  fallback: 'Question bank (offline copy)',
 };
 
 interface ExamIntroProps {
@@ -27,7 +27,7 @@ export const ExamIntro = ({
     <div className="max-w-md w-full text-center space-y-6">
       <div className="text-6xl mb-4">📝</div>
       <h1 className="font-display text-3xl font-bold">EKSAMEN MODE</h1>
-      <p className="text-muted-foreground">LTO Theoretical Exam Simulation</p>
+      <p className="text-muted-foreground">Theoretical Exam Practice</p>
       <div className="bg-card border border-border rounded-2xl p-6 text-left space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Questions</span>
