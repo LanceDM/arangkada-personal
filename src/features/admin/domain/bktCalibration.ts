@@ -30,6 +30,7 @@
 import { COMPETENCIES } from '@/domain/learner/profile';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import { DEFAULT_BKT_MODEL, priorFor, updateMastery, type BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
+import { masteryLevel } from '@/domain/competencyRouting/mastery';
 import { clusterBootstrap, predictionsFrom, predictiveMetrics, type Interval, type Prediction } from './modelEvaluation';
 
 /** TENTATIVE: the least data a value is fitted on; below it the current value is kept. */
@@ -444,5 +445,65 @@ export const calibrationProgress = (
     competenciesReady,
     competencies: COMPETENCIES.length,
     appliedOn: status.appliedOn,
+  };
+};
+
+export interface SensitivityRow {
+  label: string;
+  /** What was changed from the values in force. */
+  change: string;
+  fit: Fit;
+  /** Share of (player, competency) pairs whose final mastery level differs from the values in force. */
+  levelsChanged: number | null;
+}
+
+/**
+ * The sensitivity check (B7): the same logged answers replayed with nearby
+ * values, one change at a time: the start at 0.10 and 0.50, and the slip of
+ * every answer type down and up by 0.05 (the ceiling capping it). Every
+ * answer is used, the post-test included, since it reads how the final BKT
+ * depends on the values. Analysis only.
+ */
+export const sensitivityCheck = (
+  rows: readonly Record<string, unknown>[],
+  base: BKTModel = DEFAULT_BKT_MODEL,
+  slipCeiling = 0.3
+): { rows: SensitivityRow[]; pairs: number } => {
+  const { predictions } = predictionsFrom(rows);
+  const sequences = sequencesOf(predictions.filter(a => (COMPETENCIES as string[]).includes(a.competency)));
+  const finalLevels = (model: BKTModel): number[] =>
+    sequences.map(sequence => {
+      let p = priorFor(model, sequence[0].competency as DrivingCompetency);
+      let drive = 0;
+      for (const answer of sequence) {
+        p = updateMastery(p, answer.correct, model[answer.source]);
+        if (answer.source === 'drive') drive++;
+      }
+      return masteryLevel(p, drive);
+    });
+  const reference = finalLevels(base);
+  const withSlip = (delta: number): BKTModel => {
+    const slip = (params: BKTModel['drive']) => ({ ...params, pSlip: Math.min(slipCeiling, Math.max(0.01, Math.round((params.pSlip + delta) * 1000) / 1000)) });
+    return { ...base, drive: slip(base.drive), quiz: slip(base.quiz), diagnostic: slip(base.diagnostic), post_exam: slip(base.post_exam) };
+  };
+  const withStart = (start: number): BKTModel => ({ ...base, pInit: start, pInitBy: {} });
+  const variants: { label: string; change: string; model: BKTModel }[] = [
+    { label: 'Values in force', change: '–', model: base },
+    { label: 'Start 0.10', change: 'every competency starts at 0.10', model: withStart(0.1) },
+    { label: 'Start 0.50', change: 'every competency starts at 0.50', model: withStart(0.5) },
+    { label: 'Slip − 0.05', change: `every slip lowered by 0.05`, model: withSlip(-0.05) },
+    { label: 'Slip + 0.05', change: `every slip raised by 0.05 (at most ${slipCeiling})`, model: withSlip(0.05) },
+  ];
+  return {
+    pairs: sequences.length,
+    rows: variants.map(({ label, change, model }) => {
+      const levels = finalLevels(model);
+      return {
+        label,
+        change,
+        fit: fitOf(sequences, model),
+        levelsChanged: levels.length ? levels.filter((level, i) => level !== reference[i]).length / levels.length : null,
+      };
+    }),
   };
 };

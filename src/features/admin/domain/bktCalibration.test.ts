@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
-import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, calibrationProgress } from './bktCalibration';
+import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, calibrationProgress, sensitivityCheck } from './bktCalibration';
 
 /** A seeded generator, so the made-up answers below are the same on every run. These test the estimator only. */
 const seeded = (seed: number) => () => {
@@ -132,5 +132,24 @@ describe('the calibration stage', () => {
     const enough = [...Array.from({ length: CALIBRATION_MINIMUMS.playersPerCompetency }, () => player(5)), player(0)];
     expect(calibrationProgress(enough, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 2, preTestPlayers: CALIBRATION_MINIMUMS.playersPerCompetency, competenciesReady: 11 });
     expect(calibrationProgress(few, { stage: 'calibrated', appliedOn: '2026-12-01' })).toMatchObject({ step: 3, appliedOn: '2026-12-01' });
+  });
+});
+
+describe('the sensitivity check', () => {
+  it('replays the answers with nearby values and counts the mastery levels that move', () => {
+    const rows = answersFrom(20, () => 0.3);
+    const result = sensitivityCheck(rows);
+    expect(result.pairs).toBe(20 * 11);
+    expect(result.rows.map(r => r.label)).toEqual(['Values in force', 'Start 0.10', 'Start 0.50', 'Slip − 0.05', 'Slip + 0.05']);
+    expect(result.rows[0].levelsChanged).toBe(0);
+    expect(result.rows[0].fit.n).toBe(rows.length);
+    for (const row of result.rows.slice(1)) {
+      expect(row.levelsChanged!).toBeGreaterThanOrEqual(0);
+      expect(row.levelsChanged!).toBeLessThanOrEqual(1);
+    }
+    // The ceiling caps the raised slip: at 0.1 it cannot go above the value in force.
+    const capped = sensitivityCheck(rows, DEFAULT_BKT_MODEL, 0.1);
+    expect(capped.rows[4].levelsChanged).toBe(0);
+    expect(sensitivityCheck([]).rows[0].levelsChanged).toBeNull();
   });
 });

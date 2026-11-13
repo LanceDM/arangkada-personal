@@ -97,6 +97,8 @@ describe('the model evaluation section', () => {
     expect(text()).toContain('too few players');
     expect(text()).toContain('the value in force is kept');
     expect(text()).toContain('Held-out test of per-player T: not enough answers yet');
+    expect(text()).toContain('Sensitivity check');
+    expect(text()).toContain('Slip + 0.05');
     expect(text()).toContain('0 of 7 pilot player(s)');
     expect(text()).toContain('0.250 (fixed: 1 of 4)');
   });

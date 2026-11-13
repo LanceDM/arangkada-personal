@@ -11,7 +11,7 @@ import { getCompetencyLabel } from '@/domain/learner/profile';
 import { DEFAULT_BKT_MODEL, priorFor } from '@/domain/learner/mastery/buildBKTProfile';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { downloadFile } from '@/features/admin/domain/adminExport';
-import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, type BktCalibration, type Fit } from '@/features/admin/domain/bktCalibration';
+import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, sensitivityCheck, type BktCalibration, type Fit, type SensitivityRow } from '@/features/admin/domain/bktCalibration';
 import { EmptyState, Legend, Notice, Panel } from './adminUi';
 
 const fmt = (value: number | null | undefined, digits = 3) => (typeof value === 'number' ? value.toFixed(digits) : '–');
@@ -26,6 +26,7 @@ const LEGEND = [
   { term: 'Log-likelihood', meaning: 'Mean per answer, of each answer given the ones before it. Closer to 0 is better.' },
   { term: 'Same-data fit', meaning: 'The calibrated values are scored on the answers they were fitted on, so they look a little better than they will on new players.' },
   { term: 'Start rule', meaning: `A start per competency only when every competency has pre-tests from ${CALIBRATION_MINIMUMS.playersPerCompetency} players; otherwise one shared start from all pre-test answers pooled.` },
+  { term: 'Sensitivity check', meaning: 'The same answers replayed with the start at 0.10 or 0.50, or every slip 0.05 lower or higher, one change at a time; shows how many final mastery levels would move.' },
   { term: 'Per-player T', meaning: 'Comparison only: each player\'s own learn rate, shared across their competencies. Not used by the app.' },
   { term: 'Held-out test', meaning: `Each player's first ${HELD_OUT_TEST.trainShare * 100}% of quiz and drive answers fit their T; the rest are predicted with it and with the shared T. Per-player T passes only if RMSE improves by ${HELD_OUT_TEST.rmseMargin} and the 95% interval stays above zero.` },
 ] as const;
@@ -41,7 +42,7 @@ const FitRow = ({ label, fit }: { label: string; fit: Fit }) => (
   </TableRow>
 );
 
-const Result = ({ result }: { result: BktCalibration }) => {
+const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: { rows: SensitivityRow[]; pairs: number } }) => {
   const current = DEFAULT_BKT_MODEL;
   const exportResult = () =>
     downloadFile(
@@ -62,6 +63,7 @@ const Result = ({ result }: { result: BktCalibration }) => {
           starts: result.starts,
           heldOutTest: { rule: HELD_OUT_TEST, result: result.perPlayerLearn.heldOut },
           fit: { current: result.current, calibrated: result.calibrated, perPlayerLearn: result.perPlayerLearn.fit },
+          sensitivity,
           perPlayerLearn: result.perPlayerLearn.rates.map(({ label, answers, learn }) => ({ player: label, answers, learn })),
         },
         null,
@@ -200,6 +202,36 @@ const Result = ({ result }: { result: BktCalibration }) => {
         </Table>
       </Panel>
       <Panel
+        title="Sensitivity check"
+        description={`Every logged answer (post-test included) replayed with nearby values, one change at a time. "Levels changed" is the share of the ${sensitivity.pairs} player-competency pairs whose final mastery level differs from the values in force. If conclusions hold across these rows, they do not hinge on the exact values.`}
+        bodyClassName="p-0"
+      >
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Values</TableHead>
+              <TableHead>Change</TableHead>
+              <TableHead>Log-likelihood</TableHead>
+              <TableHead>AUC</TableHead>
+              <TableHead>RMSE</TableHead>
+              <TableHead>Levels changed</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sensitivity.rows.map(row => (
+              <TableRow key={row.label}>
+                <TableCell className="text-xs font-semibold">{row.label}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{row.change}</TableCell>
+                <TableCell className="text-xs">{fmt(row.fit.logLik)}</TableCell>
+                <TableCell className="text-xs">{fmt(row.fit.auc)}</TableCell>
+                <TableCell className="text-xs">{fmt(row.fit.rmse)}</TableCell>
+                <TableCell className="text-xs">{row.levelsChanged === null ? '–' : `${(row.levelsChanged * 100).toFixed(0)}%`}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Panel>
+      <Panel
         title={`Held-out test of per-player T: ${result.perPlayerLearn.heldOut.players === 0 ? 'not enough answers yet' : result.perPlayerLearn.heldOut.adopt ? 'passes' : 'does not pass (keep the shared T)'}`}
         description={`Rule set in advance (Tentative): adopt a learn rate per player only if held-out RMSE improves by at least ${HELD_OUT_TEST.rmseMargin} and the 95% interval of the improvement, players resampled, stays above zero. ${result.perPlayerLearn.heldOut.players} player(s), ${result.perPlayerLearn.heldOut.answers} held-out answers.`}
         bodyClassName="p-0"
@@ -262,7 +294,7 @@ const Result = ({ result }: { result: BktCalibration }) => {
 };
 
 export const BktCalibrationPanel = ({ rows, label }: { rows: readonly Record<string, unknown>[] | null; label: (uid: string) => string }) => {
-  const [result, setResult] = useState<{ rows: readonly Record<string, unknown>[]; value: BktCalibration } | null>(null);
+  const [result, setResult] = useState<{ rows: readonly Record<string, unknown>[]; value: BktCalibration; sensitivity: ReturnType<typeof sensitivityCheck> } | null>(null);
   if (!rows) {
     return (
       <EmptyState icon={SlidersHorizontal} title="The logs are not loaded">
@@ -271,7 +303,7 @@ export const BktCalibrationPanel = ({ rows, label }: { rows: readonly Record<str
     );
   }
   // A result belongs to the log it was computed from: reloading the logs clears it.
-  const shown = result && result.rows === rows ? result.value : null;
+  const shown = result && result.rows === rows ? result : null;
   return (
     <div className="space-y-4">
       <Legend title="Legend: BKT calibration" items={LEGEND} />
@@ -279,7 +311,7 @@ export const BktCalibrationPanel = ({ rows, label }: { rows: readonly Record<str
         title="Calibrate from the logged answers"
         description="Estimates the group start per competency, the slips, the drive guess and the learn rate from every player's logged answers. It takes a few seconds and changes nothing: the app keeps the values in force until they are set in the code under a new settings version."
         actions={
-          <Button size="sm" aria-label="Run the calibration" onClick={() => setResult({ rows, value: calibrateBkt(rows, label) })}>
+          <Button size="sm" aria-label="Run the calibration" onClick={() => setResult({ rows, value: calibrateBkt(rows, label), sensitivity: sensitivityCheck(rows) })}>
             <Play className="mr-2 h-4 w-4" />
             {shown ? 'Run again' : 'Run the calibration'}
           </Button>
@@ -289,7 +321,7 @@ export const BktCalibrationPanel = ({ rows, label }: { rows: readonly Record<str
           {rows.length} logged BKT update(s). Fitted on pilot players only (a player is marked pilot in the database when they start, and keeps the mark), on their pre-test, quiz and drive answers: post-test answers still update each player's final BKT but are not used here. Grid search inside the published bounds, by the likelihood of each answer given the answers before it. Real players only.
         </p>
       </Panel>
-      {shown && <Result result={shown} />}
+      {shown && <Result result={shown.value} sensitivity={shown.sensitivity} />}
     </div>
   );
 };
