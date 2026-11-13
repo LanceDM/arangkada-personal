@@ -127,6 +127,7 @@ describe('the admin frame', () => {
     expect(links.map(link => [link.textContent, link.getAttribute('href')])).toEqual([
       ['Overview', '/admin'],
       ['Participants', '/admin/pilot'],
+      ['Players', '/admin/players'],
       ['Replay', '/admin/replay'],
       ['Course flow', '/admin/routing'],
       ['Q-learning', '/admin/q-learning'],

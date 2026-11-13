@@ -61,6 +61,11 @@ export interface UserRow {
   longestStreak: number;
   bestExamScore: number;
   progress?: LegacyEmbeddedProgress;
+  /** The language the account chose. */
+  language?: string;
+  /** The Terms and Data Use agreed to at sign-up, and when (2026-11-13; absent on older accounts). */
+  termsVersion?: string;
+  termsAcceptedAt?: number;
 }
 
 /** One drive, flattened out of `users/{uid}/attempts` across every user. */

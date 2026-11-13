@@ -1,14 +1,21 @@
 /** `/study/sign-in`: a participant signs back in by username, and goes on to `/study`. */
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { signOut, useAuthSession } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 import { StudyCard, StudySignInForm } from '@/features/study';
 import { Say } from '@/shared/i18n/language';
 import { Button } from '@/shared/ui/button';
 import { studyPageMessages as m } from './messages';
 
+/** Logged first: once signed out, nothing more can be written for this account. */
+const signOutLogged = async (uid: string | null, from: string) => {
+  if (uid) await logUiAction(uid, 'signed_out', { from }).catch(() => {});
+  await signOut();
+};
+
 const StudySignInPage = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, studyAccount, loading } = useAuthSession();
+  const { user, isLoggedIn, studyAccount, loading } = useAuthSession();
 
   if (!loading && isLoggedIn && studyAccount) return <Navigate to="/study" replace />;
 
@@ -24,7 +31,7 @@ const StudySignInPage = () => {
           <p className="text-sm text-muted-foreground">
             <Say {...m.youAreSignedIn2} />
           </p>
-          <Button variant="outline" onClick={() => void signOut()}>
+          <Button variant="outline" onClick={() => void signOutLogged(user?.uid ?? null, 'study_sign_in')}>
             <Say {...m.signOut} />
           </Button>
         </div>

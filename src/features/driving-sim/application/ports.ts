@@ -21,6 +21,8 @@ import type { QTable } from '@/domain/competencyRouting/qLearning';
 import type { EvidenceSource } from '@/domain/learner/attempt';
 import type { StudyEvent } from '@/domain/study/studyEvent';
 import type { BKTProfileDoc, BKTUpdateRecord } from '@/domain/study/bktLog';
+import type { BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
+import type { BKTCalibrationState } from '@/domain/learner/mastery/bktValueSets';
 import type { QLogContext, QLogEntry } from '@/domain/study/qLog';
 import type { StudyEnvelope } from '@/domain/study/studyEvent';
 
@@ -274,6 +276,17 @@ export interface AssessmentRepository {
  */
 export interface StudyEventRepository {
   append(uid: string, events: readonly Omit<StudyEvent, 'seq'>[]): Promise<void>;
+}
+
+/**
+ * The BKT value sets (bktValueSets): which one new players get
+ * (`bktCalibration/state`), and a saved set's values (`bktSets/{setId}`), which
+ * never change once saved.
+ */
+export interface BKTValueSetRepository {
+  state(): Promise<BKTCalibrationState>;
+  /** A saved calibration's values; null when there is no such set. */
+  load(setId: string): Promise<BKTModel | null>;
 }
 
 /** `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates`: the participant's own BKT, written together. */

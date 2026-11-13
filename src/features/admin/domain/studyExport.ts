@@ -21,6 +21,7 @@ import { COMPETENCIES } from '@/domain/learner/profile';
 import {
   DEFAULT_BKT_MODEL,
   startingMastery,
+  type BKTModel,
   bktTrajectory,
   buildBKTEvidence,
   type BKTStep,
@@ -47,6 +48,10 @@ export interface ParticipantExport {
   status: 'active' | 'finished' | 'not_enrolled';
   background: Omit<BackgroundRow, 'userId'> | null;
   bkt: {
+    /** The value set this participant runs on (`default`, `cal-1`, ...), kept from their start to the end. */
+    valueSet: string;
+    /** Marked pilot: their answers feed the BKT calibrations. */
+    pilot: boolean;
     /** Every graded answer BKT read, in order, with P(L) before and after and the predicted P(correct). */
     trajectory: BKTStep[];
     /** P(L) per competency after the last answer. */
@@ -103,7 +108,13 @@ export const participantEvidence = (attempts: readonly AttemptRow[], sittings: r
 const num = (value: unknown) => (typeof value === 'number' ? value : Number.POSITIVE_INFINITY);
 
 export const buildStudyExport = (
-  data: StudyData & { attempts: readonly AttemptRow[]; logged?: LoggedData; records?: StudyRecords },
+  data: StudyData & {
+    attempts: readonly AttemptRow[];
+    logged?: LoggedData;
+    records?: StudyRecords;
+    /** Each participant's value set and its values, and who is pilot; the default values for everyone when absent. */
+    bktSets?: { setOf: (uid: string) => string; modelOf: (uid: string) => BKTModel; pilotIds: ReadonlySet<string> };
+  },
   exportedAt: number
 ): StudyExport => {
   const logged = data.logged ?? { bktUpdates: [], qUpdates: [], events: [] };
@@ -127,9 +138,10 @@ export const buildStudyExport = (
     const attempts = data.attempts.filter(row => row.userId === userId).sort((a, b) => a.timestamp - b.timestamp);
     const sittings = data.sittings.filter(row => row.userId === userId);
     const evidence = participantEvidence(attempts, sittings);
-    const trajectory = bktTrajectory(evidence);
+    const model = data.bktSets?.modelOf(userId) ?? DEFAULT_BKT_MODEL;
+    const trajectory = bktTrajectory(evidence, model);
     const counts = buildBKTEvidence(evidence);
-    const finalMastery = startingMastery(DEFAULT_BKT_MODEL);
+    const finalMastery = startingMastery(model);
     for (const step of trajectory) finalMastery[step.competency] = step.pAfter;
     const finalLevel = Object.fromEntries(
       COMPETENCIES.map(c => [c, masteryLevel(finalMastery[c], counts[c].drive)])
@@ -141,7 +153,7 @@ export const buildStudyExport = (
       participantCode: codeOf.get(userId) ?? null,
       status: statusOf.get(userId) ?? 'not_enrolled',
       background: background ? withoutUser(background) : null,
-      bkt: { trajectory, finalMastery, finalLevel, evidence: counts },
+      bkt: { valueSet: data.bktSets?.setOf(userId) ?? 'default', pilot: data.bktSets?.pilotIds.has(userId) ?? false, trajectory, finalMastery, finalLevel, evidence: counts },
       drives: attempts.map(attempt => {
         const copy: Partial<AttemptRow> = { ...attempt };
         delete copy.userId;
@@ -181,10 +193,10 @@ const stateKey = (state: { mastery: number; result: string } | null) => (state ?
 /** Long format, one row per graded answer: what next-answer AUC and RMSE are computed from. */
 export const buildBKTTrajectoryCSV = (study: StudyExport) =>
   csv(
-    ['userId', 'step', 'timestamp', 'competency', 'source', 'itemId', 'scenarioId', 'correct', 'pBefore', 'predictedCorrect', 'pAfter'],
+    ['userId', 'valueSet', 'pilot', 'step', 'timestamp', 'competency', 'source', 'itemId', 'scenarioId', 'correct', 'pBefore', 'predictedCorrect', 'pAfter'],
     study.participants.flatMap(p =>
       p.bkt.trajectory.map((s, i) => [
-        p.userId, i + 1, s.timestamp, s.competency, s.source, s.itemId ?? '', s.scenarioId ?? '', s.correct ? 1 : 0, s.pBefore, s.predictedCorrect, s.pAfter,
+        p.userId, p.bkt.valueSet, p.bkt.pilot ? 1 : 0, i + 1, s.timestamp, s.competency, s.source, s.itemId ?? '', s.scenarioId ?? '', s.correct ? 1 : 0, s.pBefore, s.predictedCorrect, s.pAfter,
       ])
     )
   );
@@ -245,7 +257,7 @@ export const buildQUpdatesCSV = (study: StudyExport) => {
 export const buildLoggedBKTCSV = (study: StudyExport) => {
   const columns = [
     'userSeq', 'at', 'configVersion', 'competency', 'source', 'origin.kind', 'origin.levelId', 'scenarioId', 'itemId', 'ruleId', 'correct', 'action', 'expectedAction',
-    'responseMs', 'timedOut', 'params.pTransit', 'params.pSlip', 'params.pGuess', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter', 'levelBefore', 'levelAfter', 'capApplied',
+    'responseMs', 'timedOut', 'params.pTransit', 'params.pSlip', 'params.pGuess', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter', 'levelBefore', 'levelAfter', 'capApplied', 'modelSet',
   ];
   return csv(
     ['userId', 'participantCode', ...columns],

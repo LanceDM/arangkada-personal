@@ -94,7 +94,7 @@ describe('the study data export', () => {
 
   it('writes the long CSVs: one row per answer, decision, reward and background form', () => {
     const bkt = buildBKTTrajectoryCSV(study).split('\n');
-    expect(bkt[0]).toBe('userId,step,timestamp,competency,source,itemId,scenarioId,correct,pBefore,predictedCorrect,pAfter');
+    expect(bkt[0]).toBe('userId,valueSet,pilot,step,timestamp,competency,source,itemId,scenarioId,correct,pBefore,predictedCorrect,pAfter');
     expect(bkt).toHaveLength(1 + 4 + 1);
     expect(buildDecisionsCSV(study).split('\n')[1]).toContain('"M2-passed"');
     expect(buildRewardsCSV(study).split('\n')[1]).toContain('"quiz"');

@@ -98,45 +98,6 @@ export const priorFor = (model: Pick<BKTModel, 'pInit' | 'pInitBy'>, competency:
 export const startingMastery = (model: Pick<BKTModel, 'pInit' | 'pInitBy'>): Record<DrivingCompetency, number> =>
   Object.fromEntries(COMPETENCIES.map(competency => [competency, priorFor(model, competency)])) as Record<DrivingCompetency, number>;
 
-/**
- * Where the BKT values stand (2026-11-13). `collecting`: the published
- * starting values are in force while pilot players' answers are gathered.
- * `calibrated`: values estimated from the pilot are in force (set here, with
- * `pInitBy` and the fitted T, S and G above, and a new settings version).
- * Values change between the pilot and the main study, never during one.
- */
-export type BKTCalibrationStage = 'collecting' | 'calibrated';
-export const BKT_CALIBRATION: { stage: BKTCalibrationStage; appliedOn: string | null; pilotPlayers: number | null } = {
-  stage: 'collecting',
-  appliedOn: null,
-  pilotPlayers: null,
-};
-
-/**
- * The set of values a player runs on, marked on their BKT record when they
- * start and never changed after (2026-11-13). A player who starts while the
- * stage is `collecting` is a pilot player: they stay on the pilot values for
- * their whole course, however many pilot players there are, and the
- * calibration is fitted on pilot players only. A record with no mark was
- * written before the mark existed, in the pilot stage: it reads as `pilot`.
- */
-export type BKTModelSet = 'pilot' | 'calibrated';
-
-/** The set a player starting now is marked with. */
-export const MODEL_SET_IN_FORCE: BKTModelSet = BKT_CALIBRATION.stage === 'calibrated' ? 'calibrated' : 'pilot';
-
-/**
- * Each set's values. `calibrated` is empty until the pilot is fitted; set it
- * (and the stage) when the values are applied. `pilot` must never change once
- * players have run on it.
- */
-export const BKT_MODEL_SETS: Record<BKTModelSet, BKTModel | null> = {
-  pilot: DEFAULT_BKT_MODEL,
-  calibrated: null,
-};
-
-export const modelOfSet = (set: BKTModelSet | null | undefined): BKTModel => BKT_MODEL_SETS[set ?? 'pilot'] ?? DEFAULT_BKT_MODEL;
-
 /** Where an answer came from; a log written before sources existed is a driving decision. */
 export const evidenceSourceOf = (log: Pick<ActionLog, 'source'>): EvidenceSource => log.source ?? 'drive';
 

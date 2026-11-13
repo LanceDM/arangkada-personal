@@ -22,6 +22,9 @@ rules_version = '2';
 //   users/{uid}/state/active                       the quiz or drive open now, with its seed
 //   users/{uid}/bkt/profile                        BKTProfileDoc: the participant's own BKT now
 //   users/{uid}/bktUpdates/{updateId}              BKTUpdateRecord: one per graded answer, append-only
+//   bktCalibration/state                           which BKT value set new players get (admin)
+//   bktSets/{setId}                                each applied calibration and its log, never edited (admin)
+//   bktPilots/{uid}, bktPilotLog/{id}              pilot players and every mark/unmark (admin)
 //   policy/competencyQ                             the shared Q-table, learned online by every participant
 //   policy/competencyQ/updates/{updateId}          QLogEntry: every table change, append-only
 //   policy/config                                  the settings version in force (written by db:init)
@@ -1139,6 +1142,11 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
+    // Every player's BKT profile, for the admin: which value set each runs on.
+    match /{path=**}/bkt/{docId} {
+      allow read: if isAdmin();
+    }
+
     // ── The shared Q-table ─────────────────────────────────
     // Learned online from the participants themselves: any signed-in player's
     // drive updates it, in a transaction. The rules check its shape only; a
@@ -1198,6 +1206,59 @@ service cloud.firestore {
     // Whether the site is open to players (2026-11-10). Everyone reads it, a
     // guest included, so the paused screen shows before sign-in; only an admin
     // writes it, naming themselves.
+    // ── BKT value sets (2026-11-13) ────────────────────────
+    // `bktCalibration/state` names the set new players get; `bktSets/cal-N` is
+    // each calibration an admin applied, with everything it was fitted from
+    // (its log). A saved set is never edited or removed: players who started
+    // on it keep it to the end of their course. Every signed-in player reads
+    // the state and the sets; only an admin writes them, in one transaction.
+    match /bktCalibration/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() && docId == 'state'
+        && request.resource.data.keys().hasOnly(['activeSetId', 'number', 'appliedAt', 'appliedBy'])
+        && request.resource.data.number is int && request.resource.data.number >= 1
+        && request.resource.data.number == (resource == null ? 1 : resource.data.number + 1)
+        && request.resource.data.activeSetId == 'cal-' + string(request.resource.data.number)
+        && request.resource.data.appliedAt is number
+        && request.resource.data.appliedBy == request.auth.uid
+        && existsAfter(/databases/$(database)/documents/bktSets/$(request.resource.data.activeSetId));
+    }
+
+    match /bktSets/{setId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin()
+        && request.resource.data.setId == setId
+        && request.resource.data.number is int
+        && setId == 'cal-' + string(request.resource.data.number)
+        && request.resource.data.model is map
+        && request.resource.data.pilots is list
+        && request.resource.data.appliedAt is number
+        && request.resource.data.appliedBy == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Which players are pilot (their answers feed the next calibration), set
+    // and removed by an admin; every mark and unmark is also logged.
+    match /bktPilots/{uid} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'label', 'markedAt', 'markedBy'])
+        && request.resource.data.uid == uid
+        && request.resource.data.markedAt is number
+        && request.resource.data.markedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /bktPilotLog/{entryId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'label', 'action', 'at', 'by'])
+        && request.resource.data.action in ['marked', 'unmarked']
+        && request.resource.data.at is number
+        && request.resource.data.by == request.auth.uid;
+      allow update, delete: if false;
+    }
+
     match /site/{docId} {
       allow read: if true;
       allow write: if isAdmin() && docId == 'status'

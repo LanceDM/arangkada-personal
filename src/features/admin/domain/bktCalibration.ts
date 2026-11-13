@@ -8,8 +8,10 @@
  *   the group-first, individual-on-top pattern of Eagle et al. (2016);
  * - one slip for 4-choice items (pre-test, quiz, post-test); their guess stays
  *   1/4, fixed by the format, and the tests keep T = 0 (no feedback);
+ * - every guess stays as it is in force (decided 2026-11-13): 0.25 for
+ *   4-choice items, 0.20 for drive scenarios;
  * - one learn rate T for quiz and drive answers;
- * - one slip and one guess for drive scenarios, when there are enough of them;
+ * - one slip for drive scenarios, when there are enough of them;
  * - as a comparison only, a learn rate per player shared across that player's
  *   competencies (Yudelson, Koedinger & Gordon, 2013; to verify), judged on
  *   answers held out by time, against a margin fixed in advance.
@@ -17,13 +19,14 @@
  * The start is one per competency only when every competency has pre-tests
  * from enough players; otherwise one shared start from all of them pooled.
  *
- * Fitted on pilot players only: a log entry marked with the `calibrated` set is
- * left out (an unmarked entry predates the mark and is a pilot one). Post-test
- * answers are left out too: they still update each player's final BKT, but
- * they are not used to set the values.
+ * Fitted on the players an admin marked pilot (`bktPilots`), whatever value
+ * set each of them ran on: the fit replays their raw answers. Post-test
+ * answers are left out: they still update each player's final BKT, but they
+ * are not used to set the values.
  *
  * Every value is searched on a grid inside the bounds of Zhang et al. (2025):
- * start 0.001-0.5, T 0.001-0.1, guess and slip 0.01-0.3, which also keeps
+ * start 0.001-0.5, T 0.001-0.1, slip 0.01-0.3 (the slip ceiling is still
+ * the group's to settle: 0.3 or 0.1), which with the fixed guesses keeps
  * G + S below 1. The fit is by likelihood of each answer given the answers
  * before it (test, then train). Real players only.
  */
@@ -31,13 +34,11 @@ import { COMPETENCIES } from '@/domain/learner/profile';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import { DEFAULT_BKT_MODEL, priorFor, updateMastery, type BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
 import { masteryLevel } from '@/domain/competencyRouting/mastery';
+import { MIN_PILOT_PLAYERS, setLabel, type BKTCalibrationState } from '@/domain/learner/mastery/bktValueSets';
 import { clusterBootstrap, predictionsFrom, predictiveMetrics, type Interval, type Prediction } from './modelEvaluation';
 
 /** TENTATIVE: the least data a value is fitted on; below it the current value is kept. */
-export const CALIBRATION_MINIMUMS = { playersPerCompetency: 7, driveAnswers: 100, learningAnswers: 100, answersPerPlayerT: 20 } as const;
-
-/** TENTATIVE: how many players the pilot (calibration group) is planned to have. */
-export const PILOT_PLAYERS = 7;
+export const CALIBRATION_MINIMUMS = { playersPerCompetency: MIN_PILOT_PLAYERS, driveAnswers: 100, learningAnswers: 100, answersPerPlayerT: 20 } as const;
 
 /**
  * The held-out test of a learn rate per player, fixed before the pilot data
@@ -56,7 +57,6 @@ const range = (from: number, to: number, step: number): number[] => {
 
 const START_GRID = [0.001, ...range(0.01, 0.5, 0.01)];
 const SLIP_GRID = range(0.01, 0.3, 0.01);
-const GUESS_GRID = range(0.01, 0.3, 0.01);
 const LEARN_GRID = [0.001, 0.005, ...range(0.01, 0.1, 0.01)];
 
 export interface Fit {
@@ -186,7 +186,7 @@ export interface BktCalibration {
   players: number;
   answers: number;
   /** Left out of the fit: post-test answers, and answers of players on the calibrated set. */
-  excluded: { postTest: number; calibratedSet: number };
+  excluded: { postTest: number; notPilot: number };
   bySource: Record<Prediction['source'], number>;
   starts: StartEstimate[];
   /** One start for every competency, from all pre-test answers pooled; null with too few players. */
@@ -197,7 +197,6 @@ export interface BktCalibration {
   slipChoice: number | null;
   learn: number | null;
   slipDrive: number | null;
-  guessDrive: number | null;
   /** The current model with every fitted value put in; unfitted values stay as they are. */
   model: BKTModel;
   current: Fit;
@@ -212,9 +211,11 @@ export interface BktCalibration {
 export const calibrateBkt = (
   rows: readonly Record<string, unknown>[],
   label: (uid: string) => string = uid => uid,
-  base: BKTModel = DEFAULT_BKT_MODEL
+  base: BKTModel = DEFAULT_BKT_MODEL,
+  /** The players marked pilot; every player when absent. */
+  pilots?: ReadonlySet<string>
 ): BktCalibration => {
-  const pilotRows = rows.filter(row => row.modelSet === undefined || row.modelSet === null || row.modelSet === 'pilot');
+  const pilotRows = pilots ? rows.filter(row => pilots.has(String(row.uid))) : [...rows];
   const { predictions: answers, skipped } = predictionsFrom(pilotRows);
   const postTest = answers.filter(a => a.source === 'post_exam').length;
   const known = answers.filter(a => (COMPETENCIES as string[]).includes(a.competency) && a.source !== 'post_exam');
@@ -296,32 +297,28 @@ export const calibrateBkt = (
   const fitDrive = bySource.drive >= min.driveAnswers;
   let learn: number | null = null;
   let slipDrive: number | null = null;
-  let guessDrive: number | null = null;
   if (learningAnswers >= min.learningAnswers) {
     let best = -Infinity;
     for (const t of LEARN_GRID) {
       for (const s of fitDrive ? SLIP_GRID : [base.drive.pSlip]) {
-        for (const g of fitDrive ? GUESS_GRID : [base.drive.pGuess]) {
-          const candidate: BKTModel = { ...model, quiz: { ...model.quiz, pTransit: t }, drive: { pTransit: t, pSlip: s, pGuess: g } };
-          const logLik = replay(sequences, candidate);
-          if (logLik > best) {
-            best = logLik;
-            learn = t;
-            slipDrive = fitDrive ? s : null;
-            guessDrive = fitDrive ? g : null;
-          }
+        const candidate: BKTModel = { ...model, quiz: { ...model.quiz, pTransit: t }, drive: { pTransit: t, pSlip: s, pGuess: base.drive.pGuess } };
+        const logLik = replay(sequences, candidate);
+        if (logLik > best) {
+          best = logLik;
+          learn = t;
+          slipDrive = fitDrive ? s : null;
         }
       }
     }
     model = {
       ...model,
       quiz: { ...model.quiz, pTransit: learn! },
-      drive: { pTransit: learn!, pSlip: slipDrive ?? base.drive.pSlip, pGuess: guessDrive ?? base.drive.pGuess },
+      drive: { pTransit: learn!, pSlip: slipDrive ?? base.drive.pSlip, pGuess: base.drive.pGuess },
     };
   } else {
     missing.push(`${learningAnswers} quiz and drive answers so far; the learn rate needs ${min.learningAnswers}`);
   }
-  if (!fitDrive) missing.push(`${bySource.drive} drive answers so far; the drive slip and guess need ${min.driveAnswers}`);
+  if (!fitDrive) missing.push(`${bySource.drive} drive answers so far; the drive slip needs ${min.driveAnswers}`);
 
   // 3. Comparison only: a learn rate per player, shared across that player's competencies.
   const byPlayer = new Map<string, Sequences>();
@@ -396,7 +393,7 @@ export const calibrateBkt = (
   return {
     players: players.size,
     answers: known.length,
-    excluded: { postTest, calibratedSet: rows.length - pilotRows.length },
+    excluded: { postTest, notPilot: rows.length - pilotRows.length },
     bySource,
     starts,
     sharedStart,
@@ -404,7 +401,6 @@ export const calibrateBkt = (
     slipChoice,
     learn,
     slipDrive,
-    guessDrive,
     model,
     current: fitOf(sequences, base),
     calibrated: fitOf(sequences, model),
@@ -416,35 +412,107 @@ export const calibrateBkt = (
 };
 
 export interface CalibrationProgress {
-  /** 1 collecting pilot data, 2 enough data to calibrate, 3 calibrated values in force. */
-  step: 1 | 2 | 3;
-  /** Players with at least one pre-test answer. */
-  preTestPlayers: number;
-  playersNeeded: number;
-  /** Competencies with pre-test answers from enough players. */
+  /** 1 mark pilot players, 2 enough to calibrate. */
+  step: 1 | 2;
+  /** Players marked pilot. */
+  marked: number;
+  /** Of those, with pre-test answers. */
+  markedWithPreTest: number;
+  needed: number;
+  /** Competencies with pre-tests from enough marked players (a start of their own; otherwise one shared start). */
   competenciesReady: number;
   competencies: number;
-  appliedOn: string | null;
+  /** The set new players get now. */
+  inForce: string;
+  number: number;
+  appliedAt: number | null;
 }
 
 /**
  * Where the calibration stands, from the evidence counts the admin already
- * holds (no log read): the stage set in the code, and whether the pilot has
- * enough pre-tests yet.
+ * holds (no log read) and the pilot marks: how many marked players have
+ * pre-tests, and which set new players get.
  */
 export const calibrationProgress = (
-  players: readonly { evidence: Record<string, { diagnostic: number }> }[],
-  status: { stage: 'collecting' | 'calibrated'; appliedOn: string | null }
+  players: readonly { uid: string; evidence: Record<string, { diagnostic: number }> }[],
+  pilots: ReadonlySet<string>,
+  state: BKTCalibrationState
 ): CalibrationProgress => {
-  const perCompetency = COMPETENCIES.map(c => players.filter(player => (player.evidence[c]?.diagnostic ?? 0) > 0).length);
-  const competenciesReady = perCompetency.filter(n => n >= CALIBRATION_MINIMUMS.playersPerCompetency).length;
+  const marked = players.filter(player => pilots.has(player.uid));
+  const perCompetency = COMPETENCIES.map(c => marked.filter(player => (player.evidence[c]?.diagnostic ?? 0) > 0).length);
+  const markedWithPreTest = marked.filter(player => COMPETENCIES.some(c => (player.evidence[c]?.diagnostic ?? 0) > 0)).length;
   return {
-    step: status.stage === 'calibrated' ? 3 : competenciesReady === COMPETENCIES.length ? 2 : 1,
-    preTestPlayers: players.filter(player => COMPETENCIES.some(c => (player.evidence[c]?.diagnostic ?? 0) > 0)).length,
-    playersNeeded: CALIBRATION_MINIMUMS.playersPerCompetency,
-    competenciesReady,
+    step: markedWithPreTest >= MIN_PILOT_PLAYERS ? 2 : 1,
+    marked: pilots.size,
+    markedWithPreTest,
+    needed: MIN_PILOT_PLAYERS,
+    competenciesReady: perCompetency.filter(n => n >= CALIBRATION_MINIMUMS.playersPerCompetency).length,
     competencies: COMPETENCIES.length,
-    appliedOn: status.appliedOn,
+    inForce: setLabel(state.activeSetId),
+    number: state.number,
+    appliedAt: state.appliedAt,
+  };
+};
+
+/** A calibration can be applied once enough marked players have pre-tests to set the starting values. */
+export const canApply = (result: BktCalibration): boolean => result.startRule !== 'kept';
+
+/** One player as a saved calibration names them. */
+export interface PilotRef {
+  uid: string;
+  label: string;
+}
+
+/**
+ * Everything saved with an applied calibration (`bktSets/cal-N`): the values,
+ * and the log of how they were reached, so the calibration can be reported
+ * and checked later without the admin page.
+ */
+export interface CalibrationRecord {
+  basedOn: string;
+  model: BKTModel;
+  startRule: BktCalibration['startRule'];
+  sharedStart: number | null;
+  starts: { competency: string; players: number; answers: number; shareRight: number | null; estimate: number | null; value: number }[];
+  fitted: { slipChoice: number | null; learn: number | null; slipDrive: number | null };
+  fixed: { guessChoice: number; guessDrive: number; learnTests: 0 };
+  pilots: PilotRef[];
+  data: { players: number; answers: number; bySource: BktCalibration['bySource']; excluded: BktCalibration['excluded'] };
+  fit: { before: Fit; after: Fit };
+  heldOut: HeldOutTest;
+  sensitivity: SensitivityRow[];
+  minimums: typeof CALIBRATION_MINIMUMS;
+  missing: string[];
+  note: string;
+  settingsVersion: string;
+}
+
+export const calibrationRecord = (input: {
+  result: BktCalibration;
+  sensitivity: readonly SensitivityRow[];
+  pilots: readonly PilotRef[];
+  state: BKTCalibrationState;
+  note: string;
+  settingsVersion: string;
+}): CalibrationRecord => {
+  const { result } = input;
+  return {
+    basedOn: input.state.activeSetId,
+    model: result.model,
+    startRule: result.startRule,
+    sharedStart: result.sharedStart,
+    starts: result.starts.map(({ competency, players, answers, shareRight, estimate, value }) => ({ competency, players, answers, shareRight, estimate, value })),
+    fitted: { slipChoice: result.slipChoice, learn: result.learn, slipDrive: result.slipDrive },
+    fixed: { guessChoice: result.model.diagnostic.pGuess, guessDrive: result.model.drive.pGuess, learnTests: 0 },
+    pilots: [...input.pilots],
+    data: { players: result.players, answers: result.answers, bySource: result.bySource, excluded: result.excluded },
+    fit: { before: result.current, after: result.calibrated },
+    heldOut: result.perPlayerLearn.heldOut,
+    sensitivity: [...input.sensitivity],
+    minimums: CALIBRATION_MINIMUMS,
+    missing: result.missing,
+    note: input.note.trim().slice(0, 500),
+    settingsVersion: input.settingsVersion,
   };
 };
 

@@ -20,6 +20,7 @@ import {
   Sigma,
   Users,
   LineChart,
+  UserSearch,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -41,6 +42,7 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
     items: [
       { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
       { to: '/admin/pilot', label: 'Participants', icon: ClipboardList },
+      { to: '/admin/players', label: 'Players', icon: UserSearch },
     ],
   },
   {

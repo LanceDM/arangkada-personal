@@ -1,4 +1,6 @@
 import type { SiteStatus } from '@/features/admin/domain/siteStatus';
+import type { BktSetsData, SavedValueSet } from '@/features/admin/domain/bktSetsAdmin';
+import type { CalibrationRecord, PilotRef } from '@/features/admin/domain/bktCalibration';
 /**
  * What Admin needs from the outside world, stated as an interface.
  *
@@ -58,6 +60,8 @@ export interface StudyLogRepository {
   qUpdates(): Promise<Record<string, unknown>[]>;
   /** Every participant's event stream. */
   events(): Promise<Record<string, unknown>[]>;
+  /** One player's event stream, oldest first. */
+  eventsOf(uid: string): Promise<Record<string, unknown>[]>;
 }
 
 
@@ -65,4 +69,19 @@ export interface StudyLogRepository {
 export interface SiteStatusRepository {
   watch(onChange: (status: SiteStatus) => void, onError: (error: Error) => void): () => void;
   set(status: { suspended: boolean; message: string }, uid: string): Promise<void>;
+}
+
+/**
+ * The BKT value sets and pilot marks (2026-11-13): read together for the
+ * admin; a pilot mark changes with its log entry; a calibration is applied in
+ * one transaction that saves the set and points new players at it.
+ */
+export interface BktSetsRepository {
+  load(): Promise<BktSetsData>;
+  setPilot(player: PilotRef, on: boolean, adminUid: string): Promise<void>;
+  /**
+   * Saves `record` as Calibration N + 1 and makes it the set new players get.
+   * Refused when another calibration was applied since `expectedNumber` was read.
+   */
+  apply(record: CalibrationRecord, expectedNumber: number, admin: { uid: string; email: string | null }): Promise<SavedValueSet>;
 }

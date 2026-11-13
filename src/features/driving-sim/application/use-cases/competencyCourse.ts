@@ -14,16 +14,8 @@
  */
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { DrivingCompetency } from '@/domain/learner/competency';
-import {
-  BKT_MODEL_SETS,
-  DEFAULT_BKT_MODEL,
-  MODEL_SET_IN_FORCE,
-  buildBKTEvidence,
-  buildBKTProfile,
-  modelOfSet,
-  type BKTModel,
-  type CompetencyEvidence,
-} from '@/domain/learner/mastery/buildBKTProfile';
+import { buildBKTEvidence, buildBKTProfile, type CompetencyEvidence } from '@/domain/learner/mastery/buildBKTProfile';
+import { valuesForPlayer } from '../bktValues';
 import { MASTERY_DESCRIPTORS, masteryLevel as masteryLevelOf, type MasteryLevel } from '@/domain/competencyRouting/mastery';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { DRIVE_PASS_CORRECT, QUIZ_PASS_CORRECT, STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
@@ -88,18 +80,6 @@ export interface CourseState {
   backgroundDone: boolean;
   sittings: AssessmentSitting[];
 }
-
-/**
- * The BKT values this account runs on: the set it was marked with when it
- * started (2026-11-13), so a pilot player keeps the pilot values for the
- * whole course. While no calibrated set exists every account runs on the
- * pilot values, and nothing is read.
- */
-const modelFor = async (uid: string): Promise<BKTModel> => {
-  if (BKT_MODEL_SETS.calibrated === null) return DEFAULT_BKT_MODEL;
-  const profile = await drivingSimDeps().bktLog.loadProfile(uid);
-  return modelOfSet(profile ? (profile.modelSet ?? 'pilot') : MODEL_SET_IN_FORCE);
-};
 
 export const loadCompetencyCourse = async (uid: string): Promise<CourseState> => {
   const { competencyCourse, assessments, background, backgroundFormEnabled, studyTests } = drivingSimDeps();
@@ -534,7 +514,7 @@ export const submitCourseQuiz = async (
   let measurements: CompetencyMeasurement[] = [];
   if (submitted.pending.some(p => competencies.includes(p.competency))) {
     const evidence = await evidenceWith(uid, { kind: 'quiz', levelId: level, attempt, timestamp: at, logs: answers });
-    const mastery = buildBKTProfile(evidence, await modelFor(uid));
+    const mastery = buildBKTProfile(evidence, await valuesForPlayer(uid));
     const counts = buildBKTEvidence(evidence);
     measurements = results.map(r => ({
       competency: r.competency,
@@ -784,7 +764,7 @@ export const completeCourseDrive = async ({
   // BKT with this drive's answers in it, before the drive is saved: the
   // drive, the decisions it leads to and their rewards are saved together.
   const history = await evidenceWith(uid, { kind: 'attempt', levelId: result.levelId, attempt: null, timestamp: now, logs: result.logs });
-  const mastery = buildBKTProfile(history, await modelFor(uid));
+  const mastery = buildBKTProfile(history, await valuesForPlayer(uid));
   const counts = buildBKTEvidence(history);
   const measurements = verdicts.map(v => ({
     competency: v.competency,
@@ -1256,7 +1236,7 @@ export interface MasteryRow {
  */
 export const loadMasteryReport = async (uid: string): Promise<MasteryRow[]> => {
   const evidence = await loadEvidence(uid);
-  const mastery = buildBKTProfile(evidence, await modelFor(uid));
+  const mastery = buildBKTProfile(evidence, await valuesForPlayer(uid));
   const counts = buildBKTEvidence(evidence);
   return COMPETENCIES.map(competency => {
     const level = masteryLevelOf(mastery[competency], counts[competency].drive);

@@ -16,7 +16,7 @@ import { orderEvidence } from '@/domain/study/evidence';
 import { memoryCourseStore, provideInMemoryDrivingSim, type MemoryCourseStore } from '../testDependencies';
 import { CourseConflictError, OutdatedAppError } from '../errors';
 import { recordBKT } from '../studyRecorder';
-import { BKT_MODEL_SETS, DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
+import { DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
 import {
   completeCourseDrive,
   diagnosticItems,
@@ -198,39 +198,48 @@ describe('two tabs bringing BKT up to date at once', () => {
   });
 });
 
-describe('the pilot mark', () => {
-  it('marks a player starting in the pilot stage, on the profile and every entry, and keeps it', async () => {
+describe('the value set a player starts on', () => {
+  it('marks a player who starts before any calibration with the default set, on the profile and every entry', async () => {
     await toQuiz();
     await recordBKT(UID);
-    expect(store.bktProfiles.get(UID)!.modelSet).toBe('pilot');
-    expect(store.bktUpdates.get(UID)!.every(u => u.modelSet === 'pilot')).toBe(true);
+    expect(store.bktProfiles.get(UID)!.modelSet).toBe('default');
+    expect(store.bktUpdates.get(UID)!.every(u => u.modelSet === 'default')).toBe(true);
   });
 
-  it('marks a profile written before the mark existed as pilot, once', async () => {
+  it('re-marks a profile written before sets had ids (no mark, or "pilot") as default, once', async () => {
     await toQuiz();
     await recordBKT(UID);
-    const profile = store.bktProfiles.get(UID)!;
-    delete profile.modelSet;
+    store.bktProfiles.get(UID)!.modelSet = 'pilot';
     await recordBKT(UID);
-    expect(store.bktProfiles.get(UID)!.modelSet).toBe('pilot');
+    expect(store.bktProfiles.get(UID)!.modelSet).toBe('default');
+    delete store.bktProfiles.get(UID)!.modelSet;
+    await recordBKT(UID);
+    expect(store.bktProfiles.get(UID)!.modelSet).toBe('default');
   });
-});
 
-describe('a player keeps the values they started on', () => {
-  it('reads the mastery with the set the player is marked with, once a calibrated set exists', async () => {
+  it('keeps a player on the set they started on after a calibration is applied', async () => {
     await toQuiz();
     await recordBKT(UID);
-    const pilot = await loadMasteryReport(UID);
-    try {
-      BKT_MODEL_SETS.calibrated = { ...DEFAULT_BKT_MODEL, pInit: 0.05 };
-      // Marked pilot: still the pilot values, though a calibrated set now exists.
-      expect(await loadMasteryReport(UID)).toEqual(pilot);
-      store.bktProfiles.get(UID)!.modelSet = 'calibrated';
-      const calibrated = await loadMasteryReport(UID);
-      expect(calibrated.map(row => row.p)).not.toEqual(pilot.map(row => row.p));
-    } finally {
-      BKT_MODEL_SETS.calibrated = null;
-    }
+    const before = await loadMasteryReport(UID);
+    store.bktSets.set('cal-1', { ...DEFAULT_BKT_MODEL, pInit: 0.05 });
+    store.bktState = { activeSetId: 'cal-1', number: 1, appliedAt: 1, appliedBy: 'admin' };
+    // Started before: still the default values, in the routing and in the log.
+    expect(await loadMasteryReport(UID)).toEqual(before);
+    await recordBKT(UID);
+    expect(store.bktProfiles.get(UID)!.modelSet).toBe('default');
+    // A player marked with the calibration reads its values.
+    store.bktProfiles.get(UID)!.modelSet = 'cal-1';
+    const after = await loadMasteryReport(UID);
+    expect(after.map(row => row.p)).not.toEqual(before.map(row => row.p));
+  });
+
+  it('starts a new player on the set in force', async () => {
+    store.bktSets.set('cal-1', { ...DEFAULT_BKT_MODEL, pInit: 0.05 });
+    store.bktState = { activeSetId: 'cal-1', number: 1, appliedAt: 1, appliedBy: 'admin' };
+    await toQuiz();
+    await recordBKT(UID);
+    expect(store.bktProfiles.get(UID)!.modelSet).toBe('cal-1');
+    expect(store.bktUpdates.get(UID)![0].pInit).toBe(0.05);
   });
 });
 

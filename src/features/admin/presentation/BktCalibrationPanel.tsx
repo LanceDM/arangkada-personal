@@ -1,28 +1,36 @@
 /**
- * Admin > Model evaluation > BKT calibration: the values the pilot's logged
- * answers support, beside the values in force. It estimates and shows; it
- * applies nothing.
+ * Admin > Model evaluation > BKT calibration (2026-11-13): the values the
+ * marked pilot players' logged answers support, beside the values new players
+ * get now; applying them as the next calibration; and the log of every
+ * calibration and every pilot mark.
  */
-import { useState } from 'react';
-import { Download, Play, SlidersHorizontal } from 'lucide-react';
+import { Fragment, useState } from 'react';
+import { CheckCircle2, Download, Play, SlidersHorizontal } from 'lucide-react';
+import { useAuthSession } from '@/features/auth';
+import { MIN_PILOT_PLAYERS, modelOfSet, setLabel } from '@/domain/learner/mastery/bktValueSets';
+import type { BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
+import type { BktSets } from '@/features/admin/application/useBktSets';
+import { toDateTime } from './formatDate';
 import { Button } from '@/shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import { getCompetencyLabel } from '@/domain/learner/profile';
-import { DEFAULT_BKT_MODEL, priorFor } from '@/domain/learner/mastery/buildBKTProfile';
+import { priorFor } from '@/domain/learner/mastery/buildBKTProfile';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { downloadFile } from '@/features/admin/domain/adminExport';
-import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, sensitivityCheck, type BktCalibration, type Fit, type SensitivityRow } from '@/features/admin/domain/bktCalibration';
+import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, calibrationRecord, canApply, sensitivityCheck, type BktCalibration, type Fit, type SensitivityRow } from '@/features/admin/domain/bktCalibration';
 import { EmptyState, Legend, Notice, Panel } from './adminUi';
 
 const fmt = (value: number | null | undefined, digits = 3) => (typeof value === 'number' ? value.toFixed(digits) : '–');
 const fitted = (value: number | null, current: number) => (value === null ? `${current.toFixed(3)} (kept: too little data)` : value.toFixed(3));
 
 const LEGEND = [
-  { term: 'Start', meaning: 'P(L) before any answer. Now 0.30 for every competency; calibrated, one group value per competency from the pilot pre-tests. Each player\'s own pre-test answers then update it.' },
+  { term: 'Start', meaning: 'P(L) before any answer: one group value per competency from the marked players\' pre-tests (or one shared value). Each player\'s own pre-test answers then update it.' },
   { term: 'T (learn)', meaning: 'Chance of learning at one quiz or drive answer. One value for everyone; 0 for the pre-test and post-test (no feedback).' },
   { term: 'S (slip)', meaning: 'Chance of a wrong answer despite knowing. Shared by all players: one for 4-choice items, one for drive scenarios.' },
-  { term: 'G (guess)', meaning: 'Chance of a right answer without knowing. Fixed at 0.25 for 4-choice items (1 of 4); one fitted value for drive scenarios.' },
-  { term: 'Search range', meaning: 'Start 0.001–0.5, T 0.001–0.1, slip and guess 0.01–0.3 (Zhang et al., 2025). "at the edge" marks an estimate on a limit: read it with care.' },
+  { term: 'G (guess)', meaning: 'Chance of a right answer without knowing. Not calibrated: 0.25 for 4-choice items (1 of 4), 0.20 for drive scenarios.' },
+  { term: 'Search range', meaning: 'Start 0.001–0.5, T 0.001–0.1, slip 0.01–0.3 (Zhang et al., 2025). "at the edge" marks an estimate on a limit: read it with care.' },
+  { term: 'Pilot players', meaning: `Only players ticked Pilot on BKT & export are used, whatever value set they run on. At least ${MIN_PILOT_PLAYERS} with pre-tests are needed to apply.` },
+  { term: 'Apply', meaning: 'Saves the calibrated values as the next numbered set, with this log, and gives it to every player who starts from then on. Players who already started keep their set. A saved set can never be edited.' },
   { term: 'Log-likelihood', meaning: 'Mean per answer, of each answer given the ones before it. Closer to 0 is better.' },
   { term: 'Same-data fit', meaning: 'The calibrated values are scored on the answers they were fitted on, so they look a little better than they will on new players.' },
   { term: 'Start rule', meaning: `A start per competency only when every competency has pre-tests from ${CALIBRATION_MINIMUMS.playersPerCompetency} players; otherwise one shared start from all pre-test answers pooled.` },
@@ -42,8 +50,8 @@ const FitRow = ({ label, fit }: { label: string; fit: Fit }) => (
   </TableRow>
 );
 
-const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: { rows: SensitivityRow[]; pairs: number } }) => {
-  const current = DEFAULT_BKT_MODEL;
+const Result = ({ result, sensitivity, base, baseLabel }: { result: BktCalibration; sensitivity: { rows: SensitivityRow[]; pairs: number }; base: BKTModel; baseLabel: string }) => {
+  const current = base;
   const exportResult = () =>
     downloadFile(
       `bkt-calibration-${new Date().toISOString().slice(0, 10)}.json`,
@@ -73,20 +81,20 @@ const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: 
     );
   return (
     <div className="space-y-4">
-      {(result.excluded.postTest > 0 || result.excluded.calibratedSet > 0) && (
+      {(result.excluded.postTest > 0 || result.excluded.notPilot > 0) && (
         <p className="text-xs text-muted-foreground">
-          Left out: {result.excluded.postTest} post-test answer(s); {result.excluded.calibratedSet} answer(s) of players on the calibrated set.
+          Left out: {result.excluded.notPilot} answer(s) of players not marked pilot; {result.excluded.postTest} post-test answer(s) of pilot players.
         </p>
       )}
       {result.ready ? (
-        <Notice>Every value could be fitted from {result.players} pilot player(s) and {result.answers} answers. Nothing is applied: review the values with the group first.</Notice>
+        <Notice>Every value could be fitted from {result.players} pilot player(s) and {result.answers} answers. Nothing is applied until you press Apply below.</Notice>
       ) : (
         <Notice>
           Not enough data yet for every value ({result.players} pilot player(s), {result.answers} answers). Still missing: {result.missing.join('; ')}. Values that could not be fitted are kept as they are.
         </Notice>
       )}
       <Panel
-        title="Values: in force and calibrated"
+        title={`Values: ${baseLabel} and calibrated`}
         description="Shared by all players and all competencies, except the start (next table)."
         actions={
           <Button variant="outline" size="sm" onClick={exportResult}>
@@ -100,7 +108,7 @@ const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: 
           <TableHeader>
             <TableRow>
               <TableHead>Value</TableHead>
-              <TableHead>In force</TableHead>
+              <TableHead>{baseLabel}</TableHead>
               <TableHead>Calibrated</TableHead>
             </TableRow>
           </TableHeader>
@@ -113,7 +121,7 @@ const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: 
             <TableRow>
               <TableCell className="text-xs font-semibold">Guess, 4-choice items</TableCell>
               <TableCell className="text-xs">{current.diagnostic.pGuess.toFixed(3)}</TableCell>
-              <TableCell className="text-xs">{current.diagnostic.pGuess.toFixed(3)} (fixed: 1 of 4)</TableCell>
+              <TableCell className="text-xs">{current.diagnostic.pGuess.toFixed(3)} (not calibrated: 1 of 4)</TableCell>
             </TableRow>
             <TableRow>
               <TableCell className="text-xs font-semibold">T, quiz and drive answers</TableCell>
@@ -133,7 +141,7 @@ const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: 
             <TableRow>
               <TableCell className="text-xs font-semibold">Guess, drive scenarios</TableCell>
               <TableCell className="text-xs">{current.drive.pGuess.toFixed(3)}</TableCell>
-              <TableCell className="text-xs">{fitted(result.guessDrive, current.drive.pGuess)}</TableCell>
+              <TableCell className="text-xs">{current.drive.pGuess.toFixed(3)} (not calibrated)</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -156,7 +164,7 @@ const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: 
               <TableHead>Players</TableHead>
               <TableHead>Pre-test answers</TableHead>
               <TableHead>Share right</TableHead>
-              <TableHead>In force</TableHead>
+              <TableHead>{baseLabel}</TableHead>
               <TableHead>Own estimate</TableHead>
               <TableHead>Calibrated (by the rule)</TableHead>
             </TableRow>
@@ -293,35 +301,251 @@ const Result = ({ result, sensitivity }: { result: BktCalibration; sensitivity: 
   );
 };
 
-export const BktCalibrationPanel = ({ rows, label }: { rows: readonly Record<string, unknown>[] | null; label: (uid: string) => string }) => {
-  const [result, setResult] = useState<{ rows: readonly Record<string, unknown>[]; value: BktCalibration; sensitivity: ReturnType<typeof sensitivityCheck> } | null>(null);
-  if (!rows) {
+const ApplyPanel = ({ result, sensitivity, bkt, label }: { result: BktCalibration; sensitivity: SensitivityRow[]; bkt: BktSets; label: (uid: string) => string }) => {
+  const { user } = useAuthSession();
+  const [note, setNote] = useState('');
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [applied, setApplied] = useState<string | null>(null);
+  const next = bkt.state.number + 1;
+  const allowed = canApply(result) && bkt.wired && !!user;
+  const pilots = [...bkt.pilotIds].map(uid => ({ uid, label: label(uid) })).sort((a, b) => a.label.localeCompare(b.label));
+
+  const apply = async () => {
+    if (!user) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const record = calibrationRecord({ result, sensitivity, pilots, state: bkt.state, note, settingsVersion: RUN_CONFIG_VERSION });
+      const saved = await bkt.apply(record, { uid: user.uid, email: user.email });
+      setApplied(setLabel(saved.setId));
+      setConfirming(false);
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : String(failure));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (applied) {
     return (
-      <EmptyState icon={SlidersHorizontal} title="The logs are not loaded">
-        The calibration reads the BKT update log. Press “Load the logs” first.
-      </EmptyState>
+      <Notice>
+        <CheckCircle2 className="mr-1 inline h-4 w-4" /> {applied} is saved and is now the set new players get. Players who already started keep theirs.
+      </Notice>
     );
   }
-  // A result belongs to the log it was computed from: reloading the logs clears it.
+  return (
+    <Panel
+      title={`Apply as Calibration ${next}`}
+      description={`Saves these values, with everything above as its log, and gives them to every player who starts from now on. Players who already started keep ${'their'} set to the end. A saved calibration can never be edited; a later calibration replaces it for new players only.`}
+    >
+      {!canApply(result) && (
+        <p className="mb-2 text-xs text-muted-foreground">Needs at least {MIN_PILOT_PLAYERS} players marked pilot with pre-test answers.</p>
+      )}
+      <label className="block text-xs font-medium text-foreground" htmlFor="calibration-note">
+        Note for the log (optional)
+      </label>
+      <textarea
+        id="calibration-note"
+        value={note}
+        maxLength={500}
+        onChange={event => setNote(event.target.value)}
+        className="mt-1 h-16 w-full rounded-md border border-input bg-background p-2 text-xs"
+        placeholder="e.g. pilot of 7, agreed by the group on ..."
+      />
+      <p className="mt-2 text-xs text-muted-foreground">
+        Pilot players used ({pilots.length}): {pilots.map(p => p.label).join(', ') || '–'}
+      </p>
+      {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {!confirming ? (
+          <Button size="sm" disabled={!allowed} onClick={() => setConfirming(true)}>
+            Apply as Calibration {next}
+          </Button>
+        ) : (
+          <>
+            <Button size="sm" variant="destructive" disabled={busy} aria-label="Confirm apply" onClick={() => void apply()}>
+              {busy ? 'Saving…' : `Yes, new players get Calibration ${next}`}
+            </Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => setConfirming(false)}>
+              Cancel
+            </Button>
+          </>
+        )}
+      </div>
+    </Panel>
+  );
+};
+
+const range = (values: number[]) => {
+  if (values.length === 0) return '–';
+  const low = Math.min(...values);
+  const high = Math.max(...values);
+  return low === high ? low.toFixed(3) : `${low.toFixed(3)}–${high.toFixed(3)}`;
+};
+
+/** Every applied calibration and every pilot mark, newest first. */
+export const CalibrationLog = ({ bkt }: { bkt: BktSets }) => {
+  const [open, setOpen] = useState<string | null>(null);
+  const sets = [...bkt.sets].reverse();
+  return (
+    <div className="space-y-4">
+      <Panel
+        title="Calibration log"
+        description={`Every calibration applied, newest first, with what it was fitted from. New players get: ${setLabel(bkt.state.activeSetId)}. Click a calibration for its starts, its pilot players and its note.`}
+        bodyClassName="p-0"
+      >
+        {sets.length === 0 ? (
+          <p className="p-4 text-xs text-muted-foreground">No calibration applied yet: every player runs on the default values.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Set</TableHead>
+                  <TableHead>Applied</TableHead>
+                  <TableHead>Pilot players</TableHead>
+                  <TableHead>Start</TableHead>
+                  <TableHead>T</TableHead>
+                  <TableHead>Slip (4-choice · drive)</TableHead>
+                  <TableHead>RMSE before → after</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sets.map(set => (
+                  <Fragment key={set.setId}>
+                    <TableRow className="cursor-pointer" onClick={() => setOpen(open === set.setId ? null : set.setId)}>
+                      <TableCell className="text-xs font-semibold">
+                        {setLabel(set.setId)}
+                        {set.setId === bkt.state.activeSetId && <span className="ml-1 text-muted-foreground">(new players)</span>}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-xs">
+                        {toDateTime(set.appliedAt)}
+                        <div className="text-muted-foreground">{set.appliedByEmail ?? set.appliedBy}</div>
+                      </TableCell>
+                      <TableCell className="text-xs">{set.pilots.length}</TableCell>
+                      <TableCell className="text-xs">
+                        {set.startRule === 'shared' ? `shared ${fmt(set.sharedStart)}` : range(set.starts.map(s => s.value))}
+                      </TableCell>
+                      <TableCell className="text-xs">{fmt(set.model.drive.pTransit)}</TableCell>
+                      <TableCell className="text-xs">
+                        {fmt(set.model.diagnostic.pSlip)} · {fmt(set.model.drive.pSlip)}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {fmt(set.fit.before.rmse)} → {fmt(set.fit.after.rmse)}
+                      </TableCell>
+                    </TableRow>
+                    {open === set.setId && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="bg-muted/30 text-xs">
+                          <p>
+                            <span className="font-semibold">Based on:</span> {setLabel(set.basedOn)} · settings version {set.settingsVersion} · {set.data.players} pilot player(s),{' '}
+                            {set.data.answers} answers ({set.data.bySource.diagnostic} pre-test, {set.data.bySource.quiz} quiz, {set.data.bySource.drive} drive)
+                          </p>
+                          <p className="mt-1">
+                            <span className="font-semibold">Starts:</span>{' '}
+                            {set.starts.map(s => `${getCompetencyLabel(s.competency)} ${s.value.toFixed(3)}`).join(' · ')}
+                          </p>
+                          <p className="mt-1">
+                            <span className="font-semibold">Pilot players:</span> {set.pilots.map(p => p.label).join(', ')}
+                          </p>
+                          <p className="mt-1">
+                            <span className="font-semibold">Held-out test of per-player T:</span>{' '}
+                            {set.heldOut.players === 0 ? 'not enough answers' : set.heldOut.adopt ? 'passed (not applied: the app uses the shared T)' : 'did not pass'}
+                          </p>
+                          {set.missing.length > 0 && (
+                            <p className="mt-1">
+                              <span className="font-semibold">Kept as before:</span> {set.missing.join('; ')}
+                            </p>
+                          )}
+                          {set.note && (
+                            <p className="mt-1">
+                              <span className="font-semibold">Note:</span> {set.note}
+                            </p>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </Fragment>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </Panel>
+      <Panel title="Pilot marks log" description="Every time a player was marked or unmarked pilot, newest first." bodyClassName="p-0">
+        {bkt.pilotLog.length === 0 ? (
+          <p className="p-4 text-xs text-muted-foreground">No player marked yet.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>When</TableHead>
+                <TableHead>Player</TableHead>
+                <TableHead>Change</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bkt.pilotLog.slice(0, 200).map((entry, i) => (
+                <TableRow key={i}>
+                  <TableCell className="whitespace-nowrap text-xs">{toDateTime(entry.at)}</TableCell>
+                  <TableCell className="font-mono text-xs">{entry.label}</TableCell>
+                  <TableCell className="text-xs">{entry.action}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Panel>
+    </div>
+  );
+};
+
+export const BktCalibrationPanel = ({ rows, label, bkt }: { rows: readonly Record<string, unknown>[] | null; label: (uid: string) => string; bkt: BktSets }) => {
+  const [result, setResult] = useState<{ rows: readonly Record<string, unknown>[]; value: BktCalibration; sensitivity: ReturnType<typeof sensitivityCheck> } | null>(null);
+  const base = modelOfSet(bkt.state.activeSetId, bkt.models);
+  const baseLabel = setLabel(bkt.state.activeSetId);
+  if (!rows) {
+    return (
+      <div className="space-y-4">
+        <EmptyState icon={SlidersHorizontal} title="The logs are not loaded">
+          The calibration reads the BKT update log. Press “Load the logs” first.
+        </EmptyState>
+        <CalibrationLog bkt={bkt} />
+      </div>
+    );
+  }
+  // A result belongs to the log and the marks it was computed from: reloading either clears it.
   const shown = result && result.rows === rows ? result : null;
   return (
     <div className="space-y-4">
       <Legend title="Legend: BKT calibration" items={LEGEND} />
       <Panel
-        title="Calibrate from the logged answers"
-        description="Estimates the group start per competency, the slips, the drive guess and the learn rate from every player's logged answers. It takes a few seconds and changes nothing: the app keeps the values in force until they are set in the code under a new settings version."
+        title="Calibrate from the pilot players"
+        description={`Fits the start per competency, T and the two slips on the answers of the ${bkt.pilotIds.size} player(s) marked pilot; the guesses stay as they are. It takes a few seconds and changes nothing until you apply it.`}
         actions={
-          <Button size="sm" aria-label="Run the calibration" onClick={() => setResult({ rows, value: calibrateBkt(rows, label), sensitivity: sensitivityCheck(rows) })}>
+          <Button
+            size="sm"
+            aria-label="Run the calibration"
+            onClick={() => setResult({ rows, value: calibrateBkt(rows, label, base, bkt.pilotIds), sensitivity: sensitivityCheck(rows.filter(row => bkt.pilotIds.has(String(row.uid))), base) })}
+          >
             <Play className="mr-2 h-4 w-4" />
             {shown ? 'Run again' : 'Run the calibration'}
           </Button>
         }
       >
         <p className="text-xs text-muted-foreground">
-          {rows.length} logged BKT update(s). Fitted on pilot players only (a player is marked pilot in the database when they start, and keeps the mark), on their pre-test, quiz and drive answers: post-test answers still update each player's final BKT but are not used here. Grid search inside the published bounds, by the likelihood of each answer given the answers before it. Real players only.
+          {rows.length} logged BKT update(s). Pilot players' pre-test, quiz and drive answers are used, whatever value set they run on; post-test answers still update each player's final BKT but are not used here. Grid search inside the published bounds, by the likelihood of each answer given the answers before it. Real players only.
         </p>
       </Panel>
-      {shown && <Result result={shown.value} sensitivity={shown.sensitivity} />}
+      {shown && (
+        <>
+          <Result result={shown.value} sensitivity={shown.sensitivity} base={base} baseLabel={baseLabel} />
+          <ApplyPanel key={bkt.state.number} result={shown.value} sensitivity={shown.sensitivity.rows} bkt={bkt} label={label} />
+        </>
+      )}
+      <CalibrationLog bkt={bkt} />
     </div>
   );
 };

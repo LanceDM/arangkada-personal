@@ -24,7 +24,7 @@ import {
   firebaseCompetencyCourseRepository,
 } from './infrastructure/FirebaseCompetencyCourseRepository';
 import {
-  firebaseBKTLogRepository,
+  firebaseBKTLogRepository, firebaseBKTValueSets,
   firebaseStudyEventRepository,
 } from './infrastructure/FirebaseStudyLogRepositories';
 import { sqlBackgroundFormRepository } from './infrastructure/SqlConnectStudyRecords';
@@ -89,6 +89,7 @@ export const composeDrivingSim = ({ learnerHistory, routing, databaseMode = 'fir
     background: databaseMode === 'firestore+sql' ? sqlBackgroundFormRepository : firebaseBackgroundFormRepository,
     studyEvents: firebaseStudyEventRepository,
     bktLog: firebaseBKTLogRepository,
+    bktSets: firebaseBKTValueSets,
     appBuild,
     latestBuild: fetchLatestBuild,
     studyTests,

@@ -17,6 +17,7 @@ import {
 } from '@/features/admin/domain/studyExport';
 import { adminDeps } from './dependencies';
 import { useAdminData } from './useAdminData';
+import { useBktSets } from './useBktSets';
 
 export type StudyExportKind = 'json' | 'bkt' | 'decisions' | 'rewards' | 'background' | 'qupdates' | 'bktlog';
 
@@ -32,6 +33,7 @@ export const STUDY_EXPORTS: ReadonlyArray<{ kind: StudyExportKind; label: string
 
 export const useStudyExport = (enabled: boolean) => {
   const report = useAdminData(enabled);
+  const bkt = useBktSets(enabled);
   const [busy, setBusy] = useState<StudyExportKind | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +52,13 @@ export const useStudyExport = (enabled: boolean) => {
         records.configVersions().catch(() => []),
       ]);
       const data = buildStudyExport(
-        { ...report.study, attempts: report.attempts, logged: { bktUpdates, qUpdates, events }, records: { participants, roleGrants, configVersions } },
+        {
+          ...report.study,
+          attempts: report.attempts,
+          logged: { bktUpdates, qUpdates, events },
+          records: { participants, roleGrants, configVersions },
+          bktSets: { setOf: bkt.setOf, modelOf: bkt.modelOf, pilotIds: bkt.pilotIds },
+        },
         now
       );
       const files: Record<StudyExportKind, () => void> = {

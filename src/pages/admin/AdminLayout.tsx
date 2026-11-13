@@ -7,6 +7,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 
 import { AdminShell } from '@/features/admin';
 import { signOut, useAuthSession } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 import { AdminGate } from './AdminGate';
 
 const AdminLayout = () => {
@@ -14,6 +15,8 @@ const AdminLayout = () => {
   const { user, profile } = useAuthSession();
 
   const handleSignOut = async () => {
+    // Logged first: once signed out, nothing more can be written for this account.
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'admin_menu' }).catch(() => {});
     await signOut();
     navigate('/');
   };

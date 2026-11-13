@@ -5,6 +5,7 @@
  */
 import { Navigate, useNavigate } from 'react-router-dom';
 import { signOut, useAuthSession } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 import { StudyCard, StudyHome, type NextStep } from '@/features/study';
 
 const StudyHomePage = () => {
@@ -15,6 +16,8 @@ const StudyHomePage = () => {
 
   const next = (step: NextStep) => navigate(step.to, step.continueCourse ? { state: { continueCourse: true } } : undefined);
   const leave = async () => {
+    // Logged first: once signed out, nothing more can be written for this participant.
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'study_home' }).catch(() => {});
     await signOut();
     navigate('/study/sign-in', { replace: true });
   };

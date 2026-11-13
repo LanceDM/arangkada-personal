@@ -1,7 +1,7 @@
 /** The bound implementations of Admin's ports. Provided by `app/dependencies`. */
 import type { IrtRepository } from './irtPorts';
 import type { PilotPoolRepository, PilotRecordsRepository, StudyInvitesRepository } from './pilotPorts';
-import type { AdminReportRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
+import type { AdminReportRepository, BktSetsRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
 import type { QuizEditorRepository } from './quizPorts';
 
 export interface AdminDependencies {
@@ -19,6 +19,8 @@ export interface AdminDependencies {
   logs: StudyLogRepository;
   /** Whether the site is open to players; absent in tests (always open). */
   site?: SiteStatusRepository;
+  /** The BKT value sets and pilot marks; absent in tests (no calibration, nobody marked). */
+  bktSets?: BktSetsRepository;
 }
 
 let bound: AdminDependencies | null = null;

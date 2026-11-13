@@ -13,8 +13,11 @@ import { db } from '@/shared/infrastructure/firebase/client';
 import type { BKTProfileDoc } from '@/domain/study/bktLog';
 import type {
   BKTLogRepository,
+  BKTValueSetRepository,
   StudyEventRepository,
 } from '@/features/driving-sim/application/ports';
+import type { BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
+import { NO_CALIBRATION, readCalibrationState, readModel, type BKTCalibrationState } from '@/domain/learner/mastery/bktValueSets';
 
 /** Firestore rejects `undefined`; every payload here is plain data, so a JSON round trip drops it. */
 const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
@@ -98,5 +101,46 @@ export const firebaseBKTLogRepository: BKTLogRepository = {
       if (!written) return 'skipped';
     }
     return 'written';
+  },
+};
+
+/**
+ * The BKT value sets (bktValueSets): `bktCalibration/state` names the set new
+ * players get, `bktSets/{setId}` holds each applied calibration. A saved set
+ * never changes, so it is read once per load of the app; the state is read
+ * again at most every 30 seconds.
+ */
+const STATE_TTL_MS = 30_000;
+let stateCache: { at: number; value: Promise<BKTCalibrationState> } | null = null;
+const setCache = new Map<string, Promise<BKTModel | null>>();
+
+export const firebaseBKTValueSets: BKTValueSetRepository = {
+  state() {
+    const now = Date.now();
+    if (!stateCache || now - stateCache.at > STATE_TTL_MS) {
+      const value = getDoc(doc(db, 'bktCalibration', 'state')).then(
+        snap => readCalibrationState(snap.data()),
+        // Before the rules for the value sets are deployed nothing can read
+        // them, and nothing can have been applied either: no calibration yet.
+        (failure: unknown) => {
+          if ((failure as { code?: string } | null)?.code === 'permission-denied') return NO_CALIBRATION;
+          throw failure;
+        }
+      );
+      stateCache = { at: now, value };
+      value.catch(() => {
+        stateCache = null;
+      });
+    }
+    return stateCache.value;
+  },
+  load(setId) {
+    let cached = setCache.get(setId);
+    if (!cached) {
+      cached = getDoc(doc(db, 'bktSets', setId)).then(snap => (snap.exists() ? readModel(snap.data().model) : null));
+      setCache.set(setId, cached);
+      cached.catch(() => setCache.delete(setId));
+    }
+    return cached;
   },
 };

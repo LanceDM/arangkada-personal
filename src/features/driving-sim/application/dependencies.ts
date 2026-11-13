@@ -12,6 +12,7 @@ import type {
   AssessmentRepository,
   BackgroundFormRepository,
   BKTLogRepository,
+  BKTValueSetRepository,
   StudyEventRepository,
   BriefingProgressRepository,
   CompetencyCourseRepository,
@@ -54,6 +55,8 @@ export interface DrivingSimDependencies {
   studyEvents: StudyEventRepository;
   /** The participant's own BKT profile and its update log. */
   bktLog: BKTLogRepository;
+  /** The BKT value sets; absent (tests): every player runs on the default values. */
+  bktSets?: BKTValueSetRepository;
   /**
    * Where the study's pre-test and post-test stand (the assessment feature,
    * through the composition root). Present: the pre-test is the initial exam.

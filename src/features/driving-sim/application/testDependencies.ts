@@ -2,6 +2,8 @@
  * In-memory stand-ins for the per-competency course's repositories, for tests
  * that provide Driving Sim's dependencies themselves.
  */
+import type { BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
+import { NO_CALIBRATION, type BKTCalibrationState } from '@/domain/learner/mastery/bktValueSets';
 import type {
   ActiveActivity,
   StudyTestStatusSource,
@@ -9,6 +11,7 @@ import type {
   AssessmentSitting,
   BackgroundFormRepository,
   BKTLogRepository,
+  BKTValueSetRepository,
   CompetencyCourseRepository,
   CourseLogEntry,
   EvidenceWrite,
@@ -39,6 +42,9 @@ export interface MemoryCourseStore {
   backgrounds: Map<string, BackgroundResponse>;
   events: Map<string, StudyEvent[]>;
   bktProfiles: Map<string, BKTProfileDoc>;
+  /** The BKT value sets: the state, and each saved calibration's values. */
+  bktState: BKTCalibrationState;
+  bktSets: Map<string, BKTModel>;
   bktUpdates: Map<string, BKTUpdateRecord[]>;
   /** Each participant's evidence counter: the next record's number. */
   evidenceCounters: Map<string, number>;
@@ -64,6 +70,8 @@ export const memoryCourseStore = (): MemoryCourseStore => ({
   backgrounds: new Map(),
   events: new Map(),
   bktProfiles: new Map(),
+  bktState: NO_CALIBRATION,
+  bktSets: new Map(),
   bktUpdates: new Map(),
   evidenceCounters: new Map(),
   recordIds: new Map(),
@@ -152,13 +160,17 @@ export const memoryBackground = (store: MemoryCourseStore): BackgroundFormReposi
 /** The event stream and the BKT log, in memory. */
 export const memoryStudyLogs = (
   store: MemoryCourseStore
-): { studyEvents: StudyEventRepository; bktLog: BKTLogRepository } => ({
+): { studyEvents: StudyEventRepository; bktLog: BKTLogRepository; bktSets: BKTValueSetRepository } => ({
   studyEvents: {
     append: async (uid, events) => {
       const mine = store.events.get(uid) ?? [];
       const next = mine.length + 1;
       store.events.set(uid, [...mine, ...events.map((event, i) => ({ ...structuredClone(event), seq: next + i }))]);
     },
+  },
+  bktSets: {
+    state: async () => store.bktState,
+    load: async setId => store.bktSets.get(setId) ?? null,
   },
   bktLog: {
     loadProfile: async uid => structuredClone(store.bktProfiles.get(uid) ?? null),

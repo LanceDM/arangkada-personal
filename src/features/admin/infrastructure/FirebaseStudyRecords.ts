@@ -69,4 +69,10 @@ export const firebaseStudyLogs: StudyLogRepository = {
     const snap = await getDocs(collectionGroup(db, 'events'));
     return snap.docs.map(d => ({ ...d.data(), uid: ownerIdOf(d.ref) }));
   },
+  async eventsOf(uid) {
+    const snap = await getDocs(collection(db, 'users', uid, 'events'));
+    return snap.docs
+      .map(d => ({ ...d.data(), uid }) as Record<string, unknown>)
+      .sort((a, b) => Number(a.seq ?? Infinity) - Number(b.seq ?? Infinity) || Number(a.at ?? 0) - Number(b.at ?? 0));
+  },
 };

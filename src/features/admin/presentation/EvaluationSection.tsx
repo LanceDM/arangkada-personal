@@ -435,8 +435,8 @@ export const EvaluationSection = ({ course, logs }: { course: CourseAdmin; logs:
       {view === 'players' && bktView(result => <PerPlayer bkt={result} />)}
       {view === 'calibration' && (
         <>
-          <BktStagePanel mastery={course.mastery} />
-          <BktCalibrationPanel rows={logs.data?.bktUpdates ?? null} label={uid => labels.get(uid) ?? uid.slice(0, 8)} />
+          <BktStagePanel mastery={course.mastery} bkt={course.bkt} />
+          <BktCalibrationPanel rows={logs.data?.bktUpdates ?? null} label={uid => labels.get(uid) ?? uid.slice(0, 8)} bkt={course.bkt} />
         </>
       )}
       {view === 'policy' && <Policy course={course} convergence={convergence} />}

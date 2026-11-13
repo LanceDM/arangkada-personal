@@ -6,7 +6,7 @@
  */
 import { COMPETENCIES } from '@/domain/learner/profile';
 import type { DrivingCompetency } from '@/domain/learner/competency';
-import { buildBKTEvidence, buildBKTProfile, type CompetencyEvidence } from '@/domain/learner/mastery/buildBKTProfile';
+import { buildBKTEvidence, buildBKTProfile, type BKTModel, type CompetencyEvidence } from '@/domain/learner/mastery/buildBKTProfile';
 import { masteryLevel, MASTERY_DESCRIPTORS, type MasteryLevel } from '@/domain/competencyRouting/mastery';
 import { COMPETENCY_ACTIONS, Q_STATES, stateKey, type CompetencyAction } from '@/domain/competencyRouting/qLearning';
 import type { DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
@@ -183,7 +183,9 @@ export const playerMastery = (
   sittings: readonly SittingRow[],
   codes: ReadonlyMap<string, string>,
   users: readonly UserRow[],
-  uids?: readonly string[]
+  uids?: readonly string[],
+  /** The values each player runs on (their value set); the default values when absent. */
+  modelOf?: (uid: string) => BKTModel
 ): PlayerMastery[] => {
   const ids = uids ?? [...new Set([...sittings.map(row => row.userId), ...attempts.map(row => row.userId)])];
   return ids
@@ -192,7 +194,7 @@ export const playerMastery = (
         attempts.filter(row => row.userId === uid),
         sittings.filter(row => row.userId === uid)
       );
-      const mastery = buildBKTProfile(evidence);
+      const mastery = buildBKTProfile(evidence, modelOf?.(uid));
       const counts = buildBKTEvidence(evidence);
       const level = Object.fromEntries(COMPETENCIES.map(c => [c, masteryLevel(mastery[c], counts[c].drive)])) as Record<DrivingCompetency, MasteryLevel>;
       return {

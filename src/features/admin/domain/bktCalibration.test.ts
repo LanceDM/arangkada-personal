@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
-import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, calibrationProgress, sensitivityCheck } from './bktCalibration';
+import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, calibrationProgress, calibrationRecord, canApply, sensitivityCheck } from './bktCalibration';
+import { NO_CALIBRATION } from '@/domain/learner/mastery/bktValueSets';
 
 /** A seeded generator, so the made-up answers below are the same on every run. These test the estimator only. */
 const seeded = (seed: number) => () => {
@@ -63,8 +64,9 @@ describe('the BKT calibration', () => {
     expect(result.slipChoice!).toBeGreaterThanOrEqual(0.01);
     expect(result.slipChoice!).toBeLessThanOrEqual(0.3);
     expect(result.learn!).toBeLessThanOrEqual(0.1);
-    // The drive answers were made with a higher slip and a lower guess than the 4-choice ones.
-    expect(result.slipDrive!).toBeGreaterThan(result.guessDrive!);
+    // The guesses are not fitted: they stay as in force.
+    expect(result.slipDrive!).toBeGreaterThanOrEqual(0.01);
+    expect(result.model.drive.pGuess).toBe(DEFAULT_BKT_MODEL.drive.pGuess);
     expect(result.model.pInitBy![high]).toBe(starts.get(high)!.estimate);
     expect(result.model.diagnostic.pGuess).toBe(0.25);
     expect(result.model.diagnostic.pTransit).toBe(0);
@@ -100,22 +102,44 @@ describe('the BKT calibration', () => {
     expect(result.missing.join(' ')).toContain('one shared start is used');
   }, 60_000);
 
-  it('fits on pilot players only, and leaves the post-test out', () => {
+  it('fits on the players marked pilot only, whatever set they ran on, and leaves the post-test out', () => {
     const rows = answersFrom(9, () => 0.3);
+    const pilots = new Set(rows.map(row => String(row.uid)));
     const withOthers = [
-      ...rows,
-      ...rows.map(row => ({ ...row, uid: `c${row.uid}`, modelSet: 'calibrated' })),
+      ...rows.map(row => ({ ...row, modelSet: 'cal-1' })),
+      // Test playthroughs, not marked.
+      ...rows.map(row => ({ ...row, uid: `t${row.uid}` })),
       ...rows.filter(row => row.source === 'diagnostic').map(row => ({ ...row, source: 'post_exam', userSeq: Number(row.userSeq) + 10_000 })),
     ];
-    const marked = rows.map(row => ({ ...row, modelSet: 'pilot' }));
     const plain = calibrateBkt(rows);
-    const result = calibrateBkt(withOthers);
+    const result = calibrateBkt(withOthers, undefined, undefined, pilots);
     expect(result.players).toBe(9);
     expect(result.answers).toBe(plain.answers);
     expect(result.bySource.post_exam).toBe(0);
-    expect(result.excluded).toEqual({ postTest: 9 * 11 * 5, calibratedSet: rows.length });
+    expect(result.excluded).toEqual({ postTest: 9 * 11 * 5, notPilot: rows.length });
     expect(result.model).toEqual(plain.model);
-    expect(calibrateBkt(marked).model).toEqual(plain.model);
+    expect(canApply(result)).toBe(true);
+    expect(canApply(calibrateBkt(withOthers, undefined, undefined, new Set(['u0'])))).toBe(false);
+  }, 60_000);
+
+  it('saves the values with the log of how they were reached', () => {
+    const rows = answersFrom(9, () => 0.3);
+    const result = calibrateBkt(rows);
+    const record = calibrationRecord({
+      result,
+      sensitivity: sensitivityCheck(rows).rows,
+      pilots: [{ uid: 'u0', label: 'P-0001' }],
+      state: NO_CALIBRATION,
+      note: '  first calibration  ',
+      settingsVersion: 'v',
+    });
+    expect(record.basedOn).toBe('default');
+    expect(record.model).toEqual(result.model);
+    expect(record.fixed).toEqual({ guessChoice: 0.25, guessDrive: DEFAULT_BKT_MODEL.drive.pGuess, learnTests: 0 });
+    expect(record.fit.before).toEqual(result.current);
+    expect(record.sensitivity).toHaveLength(5);
+    expect(record.note).toBe('first calibration');
+    expect(JSON.parse(JSON.stringify(record)).starts).toHaveLength(11);
   }, 60_000);
 
   it('gives the same result for the same answers', () => {
@@ -125,13 +149,14 @@ describe('the BKT calibration', () => {
 });
 
 describe('the calibration stage', () => {
-  const player = (diagnostic: number) => ({ evidence: Object.fromEntries(COMPETENCIES.map(c => [c, { diagnostic }])) });
-  it('moves from collecting to ready once every competency has enough pre-tests, and to calibrated only by the code', () => {
-    const few = Array.from({ length: 3 }, () => player(5));
-    expect(calibrationProgress(few, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 1, preTestPlayers: 3, competenciesReady: 0, competencies: 11 });
-    const enough = [...Array.from({ length: CALIBRATION_MINIMUMS.playersPerCompetency }, () => player(5)), player(0)];
-    expect(calibrationProgress(enough, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 2, preTestPlayers: CALIBRATION_MINIMUMS.playersPerCompetency, competenciesReady: 11 });
-    expect(calibrationProgress(few, { stage: 'calibrated', appliedOn: '2026-12-01' })).toMatchObject({ step: 3, appliedOn: '2026-12-01' });
+  const player = (uid: string, diagnostic: number) => ({ uid, evidence: Object.fromEntries(COMPETENCIES.map(c => [c, { diagnostic }])) });
+  it('counts only marked players, and is ready once enough of them have pre-tests', () => {
+    const players = Array.from({ length: 9 }, (_, i) => player(`u${i}`, i === 8 ? 0 : 5));
+    const few = new Set(['u0', 'u1', 'u2']);
+    expect(calibrationProgress(players, few, NO_CALIBRATION)).toMatchObject({ step: 1, marked: 3, markedWithPreTest: 3, competenciesReady: 0, inForce: 'Default values', number: 0 });
+    const enough = new Set(players.map(p => p.uid));
+    expect(calibrationProgress(players, enough, NO_CALIBRATION)).toMatchObject({ step: 2, marked: 9, markedWithPreTest: CALIBRATION_MINIMUMS.playersPerCompetency + 1, competenciesReady: 11 });
+    expect(calibrationProgress(players, few, { activeSetId: 'cal-2', number: 2, appliedAt: 5, appliedBy: 'a' })).toMatchObject({ inForce: 'Calibration 2', number: 2, appliedAt: 5 });
   });
 });
 

@@ -124,4 +124,38 @@ describe.skipIf(!host)('security rules for the study logs', () => {
     await assertFails(setDoc(doc(admin, 'participants/P01'), { uid: 'a' }));
     await assertFails(setDoc(doc(admin, 'policy/config'), { tag: 'x' }));
   });
+
+  it('lets only an admin save a value set, never edit it, and point new players at it in the same write', async () => {
+    const admin = env.authenticatedContext('ada', { admin: true }).firestore();
+    const alice = env.authenticatedContext('alice').firestore();
+    const set = { setId: 'cal-1', number: 1, model: { pInit: 0.2 }, pilots: [], appliedAt: 1, appliedBy: 'ada' };
+    const state = { activeSetId: 'cal-1', number: 1, appliedAt: 1, appliedBy: 'ada' };
+    // A player can do neither.
+    await assertFails(setDoc(doc(alice, 'bktSets/cal-1'), { ...set, appliedBy: 'alice' }));
+    // The state cannot name a set that does not exist.
+    await assertFails(setDoc(doc(admin, 'bktCalibration/state'), state));
+    const batch = writeBatch(admin);
+    batch.set(doc(admin, 'bktSets/cal-1'), set);
+    batch.set(doc(admin, 'bktCalibration/state'), state);
+    await assertSucceeds(batch.commit());
+    // Saved sets never change; numbers only move forward by one; players read both.
+    await assertFails(updateDoc(doc(admin, 'bktSets/cal-1'), { model: { pInit: 0.4 } }));
+    await assertFails(setDoc(doc(admin, 'bktSets/cal-3'), { ...set, setId: 'cal-3', number: 2 }));
+    await assertSucceeds(getDoc(doc(alice, 'bktSets/cal-1')));
+    await assertSucceeds(getDoc(doc(alice, 'bktCalibration/state')));
+    const second = writeBatch(admin);
+    second.set(doc(admin, 'bktSets/cal-3'), { ...set, setId: 'cal-3', number: 3 });
+    second.set(doc(admin, 'bktCalibration/state'), { ...state, activeSetId: 'cal-3', number: 3 });
+    await assertFails(second.commit());
+  });
+
+  it('lets only an admin mark pilot players, and keeps the log append-only', async () => {
+    const admin = env.authenticatedContext('ada', { admin: true }).firestore();
+    const alice = env.authenticatedContext('alice').firestore();
+    await assertFails(setDoc(doc(alice, 'bktPilots/alice'), { uid: 'alice', label: 'A', markedAt: 1, markedBy: 'alice' }));
+    await assertSucceeds(setDoc(doc(admin, 'bktPilots/alice'), { uid: 'alice', label: 'A', markedAt: 1, markedBy: 'ada' }));
+    await assertFails(getDoc(doc(alice, 'bktPilots/alice')));
+    await assertSucceeds(setDoc(doc(admin, 'bktPilotLog/l1'), { uid: 'alice', label: 'A', action: 'marked', at: 1, by: 'ada' }));
+    await assertFails(updateDoc(doc(admin, 'bktPilotLog/l1'), { action: 'unmarked' }));
+  });
 });

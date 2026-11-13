@@ -4,6 +4,8 @@
  * the study export. Every figure is from real players: nothing is simulated.
  */
 import { Fragment, useState } from 'react';
+import { useAuthSession } from '@/features/auth';
+import { setLabel } from '@/domain/learner/mastery/bktValueSets';
 import { Download, Gauge, RefreshCw } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
@@ -30,6 +32,21 @@ const short = (competency: string) =>
 
 const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => {
   const [open, setOpen] = useState<string | null>(null);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [markError, setMarkError] = useState<string | null>(null);
+  const { user } = useAuthSession();
+  const togglePilot = async (uid: string, label: string, on: boolean) => {
+    if (!user) return;
+    setSaving(uid);
+    setMarkError(null);
+    try {
+      await course.bkt.setPilot({ uid, label }, on, user.uid);
+    } catch (failure) {
+      setMarkError(failure instanceof Error ? failure.message : String(failure));
+    } finally {
+      setSaving(null);
+    }
+  };
   if (course.mastery.length === 0) {
     return <EmptyState icon={Gauge} title="No BKT evidence yet">A player appears once their pre-test, a short quiz or a drive is saved.</EmptyState>;
   }
@@ -45,12 +62,15 @@ const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => 
         { term: 'P(L)', meaning: 'The chance the player knows the competency, after every answer so far.' },
         { term: 'Columns', meaning: COMPETENCIES.map(c => `${short(c)} ${getCompetencyLabel(c)}`).join(' · ') },
         { term: 'Answers', meaning: 'Graded answers BKT has read (pre-test, quiz, drive, post-test).' },
-        { term: 'Start', meaning: 'Every competency starts at 0.30; the pre-test moves it before the course begins.' },
+        { term: 'Start', meaning: 'Every competency starts at the value set\'s start (0.30 for the default values); the pre-test moves it before the course begins.' },
+        { term: 'Pilot', meaning: 'Ticked: this player\'s answers feed the next BKT calibration. Leave test playthroughs unticked. Every tick and untick is logged.' },
+        { term: 'Values', meaning: 'The value set the player runs on, kept from when they started to the end of their course.' },
       ]}
     />
+    {markError && <Notice tone="error">Could not save the pilot mark: {markError}</Notice>}
     <Panel
       title="BKT per player"
-      description={`P(L) per competency now; the colour is its mastery level (${Object.values(MASTERY_DESCRIPTORS).join(', ')}). Click a player for each competency's evidence. Model (Tentative, to be fitted on the pilot): prior ${DEFAULT_BKT_MODEL.pInit}; pre-test and post-test T 0, S ${DEFAULT_BKT_MODEL.diagnostic.pSlip}, G ${DEFAULT_BKT_MODEL.diagnostic.pGuess}; quiz T ${DEFAULT_BKT_MODEL.quiz.pTransit}, S ${DEFAULT_BKT_MODEL.quiz.pSlip}, G ${DEFAULT_BKT_MODEL.quiz.pGuess}; drive T ${DEFAULT_BKT_MODEL.drive.pTransit}, S ${DEFAULT_BKT_MODEL.drive.pSlip}, G ${DEFAULT_BKT_MODEL.drive.pGuess}.`}
+      description={`P(L) per competency now; the colour is its mastery level (${Object.values(MASTERY_DESCRIPTORS).join(', ')}). Click a player for each competency's evidence. Each player is replayed with their own value set. Default values (Tentative): prior ${DEFAULT_BKT_MODEL.pInit}; pre-test and post-test T 0, S ${DEFAULT_BKT_MODEL.diagnostic.pSlip}, G ${DEFAULT_BKT_MODEL.diagnostic.pGuess}; quiz T ${DEFAULT_BKT_MODEL.quiz.pTransit}, S ${DEFAULT_BKT_MODEL.quiz.pSlip}, G ${DEFAULT_BKT_MODEL.quiz.pGuess}; drive T ${DEFAULT_BKT_MODEL.drive.pTransit}, S ${DEFAULT_BKT_MODEL.drive.pSlip}, G ${DEFAULT_BKT_MODEL.drive.pGuess}.`}
       bodyClassName="p-0"
     >
       <div className="overflow-x-auto">
@@ -58,6 +78,8 @@ const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => 
           <TableHeader>
             <TableRow>
               <TableHead>Player</TableHead>
+              <TableHead>Pilot</TableHead>
+              <TableHead>Values</TableHead>
               <TableHead>Answers</TableHead>
               {COMPETENCIES.map(c => (
                 <TableHead key={c} title={getCompetencyLabel(c)} className="text-center">
@@ -71,6 +93,16 @@ const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => 
               <Fragment key={row.uid}>
                 <TableRow className="cursor-pointer" onClick={() => setOpen(open === row.uid ? null : row.uid)}>
                   <TableCell className="font-mono text-xs">{row.label}</TableCell>
+                  <TableCell className="text-xs" onClick={event => event.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      aria-label={`Pilot: ${row.label}`}
+                      checked={course.bkt.pilotIds.has(row.uid)}
+                      disabled={!course.bkt.wired || saving !== null}
+                      onChange={event => void togglePilot(row.uid, row.label, event.target.checked)}
+                    />
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap text-xs">{setLabel(course.bkt.setOf(row.uid))}</TableCell>
                   <TableCell className="text-xs">{row.answers}</TableCell>
                   {COMPETENCIES.map(c => (
                     <TableCell key={c} className={`text-center font-mono text-xs ${LEVEL_CELL[row.level[c]]}`} title={`${getCompetencyLabel(c)}: ${MASTERY_DESCRIPTORS[row.level[c]]}`}>
@@ -80,7 +112,7 @@ const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => 
                 </TableRow>
                 {open === row.uid && (
                   <TableRow>
-                    <TableCell colSpan={COMPETENCIES.length + 2} className="bg-muted/30">
+                    <TableCell colSpan={COMPETENCIES.length + 4} className="bg-muted/30">
                       <div className="grid gap-1 text-xs sm:grid-cols-2 lg:grid-cols-3">
                         {COMPETENCIES.map(c => {
                           const e = row.evidence[c];
@@ -121,7 +153,7 @@ export const CourseSection = ({ enabled }: { enabled: boolean }) => {
         }
       />
       {course.error && <Notice tone="error">{course.error}</Notice>}
-      <BktStagePanel mastery={course.mastery} />
+      <BktStagePanel mastery={course.mastery} bkt={course.bkt} />
       <BktTable course={course} />
       <Panel
         title="Study export"

@@ -13,10 +13,8 @@ import { COMPETENCIES } from '@/domain/learner/profile';
 import {
   DEFAULT_BKT_MODEL,
   bktTrajectory,
-  modelOfSet,
   priorFor,
   startingMastery,
-  type BKTModelSet,
   type BKTEvidenceParams,
   type BKTModel,
 } from '@/domain/learner/mastery/buildBKTProfile';
@@ -59,11 +57,12 @@ export interface BKTProfileDoc {
   updatedAt: number;
   competencies: Record<DrivingCompetency, BKTCompetencyProfile>;
   /**
-   * The set of values this player runs on (`pilot` or `calibrated`): marked
-   * when they start and kept for their whole course. Absent on records written
-   * before the mark existed, which were all in the pilot stage.
+   * The id of the set of values this player runs on (`default`, `cal-1`, ...;
+   * see bktValueSets): marked when they start and kept for their whole course.
+   * Absent, or `pilot`, on records written before calibrations had numbers:
+   * those ran on the default values.
    */
-  modelSet?: BKTModelSet;
+  modelSet?: string;
 }
 
 export interface BKTUpdateRecord extends StudyEnvelope {
@@ -99,8 +98,8 @@ export interface BKTUpdateRecord extends StudyEnvelope {
   driveAnswersAfter: number;
   /** P(L) of all 11 competencies after this update. */
   allAfter: Record<DrivingCompetency, number>;
-  /** The set of values this update was made with; absent before the mark existed (pilot). */
-  modelSet?: BKTModelSet;
+  /** The id of the set of values this update was made with; absent or `pilot` means the default values. */
+  modelSet?: string;
 }
 
 const zeroCounts = (): CountsByClass => ({ drive: 0, quiz: 0, diagnostic: 0, post_exam: 0 });
@@ -139,10 +138,10 @@ export const buildBKTLog = (input: {
   now: number;
   configVersion: string;
   model?: BKTModel;
-  /** The player's set of values. With it, the profile and every entry carry the mark, and its values are used. */
-  modelSet?: BKTModelSet;
+  /** The id of the player's set of values (`default`, `cal-1`, ...); the profile and every entry carry it. Pass that set's values as `model`. */
+  modelSet?: string;
 }): { profile: BKTProfileDoc; entries: BKTUpdateRecord[] } => {
-  const model = input.model ?? (input.modelSet ? modelOfSet(input.modelSet) : DEFAULT_BKT_MODEL);
+  const model = input.model ?? DEFAULT_BKT_MODEL;
   const steps = bktTrajectory([...input.logs], model);
   const profile = emptyBKTProfile(input.uid, input.configVersion, input.now, model);
   if (input.modelSet) profile.modelSet = input.modelSet;
