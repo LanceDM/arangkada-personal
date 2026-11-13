@@ -123,6 +123,16 @@ describe('the BKT log', () => {
     expect(profile.updates).toBe(3);
   });
 
+  it('marks the profile and every entry with the player\'s set of values, when given one', () => {
+    const marked = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 0, envelope, now: 10, configVersion: 'c', modelSet: 'pilot' });
+    expect(marked.profile.modelSet).toBe('pilot');
+    expect(marked.entries.every(e => e.modelSet === 'pilot')).toBe(true);
+    // The pilot set is today's values: the mark changes nothing else.
+    const plain = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 0, envelope, now: 10, configVersion: 'c' });
+    expect(plain.profile.modelSet).toBeUndefined();
+    expect(marked.entries.map(e => e.pAfter)).toEqual(plain.entries.map(e => e.pAfter));
+  });
+
   it('writes only the answers not yet logged', () => {
     const { entries } = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 2, envelope, now: 10, configVersion: 'c' });
     expect(entries.map(e => e.userSeq)).toEqual([3]);

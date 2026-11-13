@@ -196,6 +196,24 @@ describe('two tabs bringing BKT up to date at once', () => {
   });
 });
 
+describe('the pilot mark', () => {
+  it('marks a player starting in the pilot stage, on the profile and every entry, and keeps it', async () => {
+    await toQuiz();
+    await recordBKT(UID);
+    expect(store.bktProfiles.get(UID)!.modelSet).toBe('pilot');
+    expect(store.bktUpdates.get(UID)!.every(u => u.modelSet === 'pilot')).toBe(true);
+  });
+
+  it('marks a profile written before the mark existed as pilot, once', async () => {
+    await toQuiz();
+    await recordBKT(UID);
+    const profile = store.bktProfiles.get(UID)!;
+    delete profile.modelSet;
+    await recordBKT(UID);
+    expect(store.bktProfiles.get(UID)!.modelSet).toBe('pilot');
+  });
+});
+
 describe('a device clock that jumps back', () => {
   it('leaves BKT reading the answers in the order they were saved', async () => {
     const items = diagnosticItems();

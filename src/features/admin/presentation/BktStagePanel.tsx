@@ -6,7 +6,7 @@ import { Check } from 'lucide-react';
 import { Badge } from '@/shared/ui/badge';
 import { BKT_CALIBRATION } from '@/domain/learner/mastery/buildBKTProfile';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
-import { calibrationProgress } from '@/features/admin/domain/bktCalibration';
+import { PILOT_PLAYERS, calibrationProgress } from '@/features/admin/domain/bktCalibration';
 import type { PlayerMastery } from '@/features/admin/domain/courseAdmin';
 import { Panel } from './adminUi';
 
@@ -15,7 +15,7 @@ export const BktStagePanel = ({ mastery }: { mastery: readonly PlayerMastery[] }
   const steps = [
     {
       title: 'Collecting pilot data',
-      detail: `The published starting values are in force (start 0.30). ${progress.preTestPlayers} player(s) have pre-test answers; ${progress.competenciesReady} of ${progress.competencies} competencies have them from ${progress.playersNeeded} or more players.`,
+      detail: `The published starting values are in force (start 0.30). ${progress.preTestPlayers} of ${PILOT_PLAYERS} pilot player(s) have pre-test answers; ${progress.competenciesReady} of ${progress.competencies} competencies have them from ${progress.playersNeeded} or more players.`,
     },
     {
       title: 'Ready to calibrate',

@@ -441,7 +441,7 @@ export const EvaluationSection = ({ course, logs }: { course: CourseAdmin; logs:
       )}
       {view === 'policy' && <Policy course={course} convergence={convergence} />}
       <p className="text-xs text-muted-foreground">
-        The pre-test and post-test items are evaluated on the <Link to="/admin/irt" className="underline">IRT page</Link>. Not here yet, as they need the post-test of the main study: BKT against the post-test per competency, and the slip sensitivity check.
+        Item difficulty for the pre-test and post-test is on the <Link to="/admin/irt" className="underline">IRT page</Link>. Post-test answers update each player's final BKT and are scored here like any other answer; they are not used to calibrate the values (BKT: calibration).
       </p>
     </div>
   );

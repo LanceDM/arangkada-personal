@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
-import { CALIBRATION_MINIMUMS, calibrateBkt, calibrationProgress } from './bktCalibration';
+import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, calibrationProgress } from './bktCalibration';
 
 /** A seeded generator, so the made-up answers below are the same on every run. These test the estimator only. */
 const seeded = (seed: number) => () => {
@@ -40,9 +40,12 @@ describe('the BKT calibration', () => {
     expect(result.ready).toBe(false);
     expect(result.slipChoice).toBeNull();
     expect(result.starts.every(s => s.estimate === null && s.value === DEFAULT_BKT_MODEL.pInit)).toBe(true);
-    expect(result.missing[0]).toContain(`fewer than ${CALIBRATION_MINIMUMS.playersPerCompetency} players`);
+    expect(result.startRule).toBe('kept');
+    expect(result.sharedStart).toBeNull();
+    expect(result.missing[0]).toContain(`the starting value needs ${CALIBRATION_MINIMUMS.playersPerCompetency}`);
     // The learn rate has enough quiz and drive answers even here; the starts do not.
-    expect(result.model.pInitBy).toEqual({});
+    expect(result.model.pInitBy).toBeUndefined();
+    expect(result.model.pInit).toBe(DEFAULT_BKT_MODEL.pInit);
     expect(result.model.diagnostic).toEqual(DEFAULT_BKT_MODEL.diagnostic);
   });
 
@@ -50,6 +53,9 @@ describe('the BKT calibration', () => {
     const high = COMPETENCIES[0];
     const result = calibrateBkt(answersFrom(120, c => (c === high ? 0.45 : 0.1)), uid => uid.toUpperCase());
     expect(result.ready).toBe(true);
+    expect(result.startRule).toBe('per_competency');
+    expect(result.sharedStart!).toBeGreaterThan(0.05);
+    expect(result.sharedStart!).toBeLessThan(0.3);
     const starts = new Map(result.starts.map(s => [s.competency, s]));
     expect(starts.get(high)!.estimate!).toBeGreaterThan(0.3);
     expect(starts.get(COMPETENCIES[1])!.estimate!).toBeLessThan(0.25);
@@ -69,6 +75,47 @@ describe('the BKT calibration', () => {
     expect(result.perPlayerLearn.fitted).toBe(120);
     expect(result.perPlayerLearn.fit.logLik!).toBeGreaterThanOrEqual(result.calibrated.logLik! - 1e-9);
     expect(result.perPlayerLearn.rates[0].label).toMatch(/^U\d+$/);
+    // The held-out test: everyone learns at the same rate here, so a rate per player must not pass.
+    const held = result.perPlayerLearn.heldOut;
+    expect(held.players).toBe(120);
+    expect(held.answers).toBeGreaterThan(0);
+    expect(held.answers).toBeLessThan(result.bySource.quiz + result.bySource.drive);
+    expect(held.interval![0]).toBeLessThanOrEqual(held.improvement!);
+    expect(held.improvement!).toBeLessThan(HELD_OUT_TEST.rmseMargin);
+    expect(held.adopt).toBe(false);
+  }, 60_000);
+
+  it('falls back to one shared start when some competencies have too few pre-tests', () => {
+    const rows = answersFrom(9, () => 0.3).filter(
+      row => !(row.competency === COMPETENCIES[0] && row.source === 'diagnostic' && Number(String(row.uid).slice(1)) >= 4)
+    );
+    const result = calibrateBkt(rows);
+    expect(result.startRule).toBe('shared');
+    expect(result.sharedStart).not.toBeNull();
+    expect(result.model.pInit).toBe(result.sharedStart);
+    expect(result.model.pInitBy).toEqual({});
+    expect(result.starts.every(s => s.value === result.sharedStart)).toBe(true);
+    expect(result.starts[0].estimate).toBeNull();
+    expect(result.starts[1].estimate).not.toBeNull();
+    expect(result.missing.join(' ')).toContain('one shared start is used');
+  }, 60_000);
+
+  it('fits on pilot players only, and leaves the post-test out', () => {
+    const rows = answersFrom(9, () => 0.3);
+    const withOthers = [
+      ...rows,
+      ...rows.map(row => ({ ...row, uid: `c${row.uid}`, modelSet: 'calibrated' })),
+      ...rows.filter(row => row.source === 'diagnostic').map(row => ({ ...row, source: 'post_exam', userSeq: Number(row.userSeq) + 10_000 })),
+    ];
+    const marked = rows.map(row => ({ ...row, modelSet: 'pilot' }));
+    const plain = calibrateBkt(rows);
+    const result = calibrateBkt(withOthers);
+    expect(result.players).toBe(9);
+    expect(result.answers).toBe(plain.answers);
+    expect(result.bySource.post_exam).toBe(0);
+    expect(result.excluded).toEqual({ postTest: 9 * 11 * 5, calibratedSet: rows.length });
+    expect(result.model).toEqual(plain.model);
+    expect(calibrateBkt(marked).model).toEqual(plain.model);
   }, 60_000);
 
   it('gives the same result for the same answers', () => {
@@ -83,7 +130,7 @@ describe('the calibration stage', () => {
     const few = Array.from({ length: 3 }, () => player(5));
     expect(calibrationProgress(few, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 1, preTestPlayers: 3, competenciesReady: 0, competencies: 11 });
     const enough = [...Array.from({ length: CALIBRATION_MINIMUMS.playersPerCompetency }, () => player(5)), player(0)];
-    expect(calibrationProgress(enough, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 2, preTestPlayers: 10, competenciesReady: 11 });
+    expect(calibrationProgress(enough, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 2, preTestPlayers: CALIBRATION_MINIMUMS.playersPerCompetency, competenciesReady: 11 });
     expect(calibrationProgress(few, { stage: 'calibrated', appliedOn: '2026-12-01' })).toMatchObject({ step: 3, appliedOn: '2026-12-01' });
   });
 });

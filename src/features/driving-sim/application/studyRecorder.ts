@@ -9,6 +9,7 @@
  */
 import type { ActionLog } from '@/domain/learner/attempt';
 import { buildBKTLog, type EvidenceOrigin } from '@/domain/study/bktLog';
+import { MODEL_SET_IN_FORCE } from '@/domain/learner/mastery/buildBKTProfile';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { newEventId, type StudyEnvelope, type StudyEventDraft } from '@/domain/study/studyEvent';
 import { drivingSimDeps } from './dependencies';
@@ -91,6 +92,11 @@ export const recordBKT = async (uid: string): Promise<void> => {
     const { bktLog } = drivingSimDeps();
     const [{ logs, origins }, previous] = await Promise.all([loadTaggedEvidence(uid), bktLog.loadProfile(uid)]);
     const now = Date.now();
+    // The player's set of values is marked when they start and kept after: a
+    // profile without the mark was started in the pilot stage.
+    const modelSet = previous ? (previous.modelSet ?? 'pilot') : MODEL_SET_IN_FORCE;
+    // An unmarked profile is written again once, so the mark lands in the database.
+    const unmarked = !!previous && !previous.modelSet;
     const alreadyLogged = previous && previous.configVersion === RUN_CONFIG_VERSION ? Math.min(previous.updates, logs.length) : 0;
     const { profile, entries } = buildBKTLog({
       uid,
@@ -104,8 +110,9 @@ export const recordBKT = async (uid: string): Promise<void> => {
       },
       now,
       configVersion: RUN_CONFIG_VERSION,
+      modelSet,
     });
-    if (entries.length === 0 && previous) return;
+    if (entries.length === 0 && previous && !unmarked) return;
     await bktLog.record(uid, { ...profile, lastUpdateId: profile.lastUpdateId ?? previous?.lastUpdateId ?? null }, entries);
   } catch (failure) {
     console.error('Could not write the BKT log:', failure);

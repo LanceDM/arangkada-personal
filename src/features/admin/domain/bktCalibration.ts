@@ -11,7 +11,16 @@
  * - one learn rate T for quiz and drive answers;
  * - one slip and one guess for drive scenarios, when there are enough of them;
  * - as a comparison only, a learn rate per player shared across that player's
- *   competencies (Yudelson, Koedinger & Gordon, 2013; to verify).
+ *   competencies (Yudelson, Koedinger & Gordon, 2013; to verify), judged on
+ *   answers held out by time, against a margin fixed in advance.
+ *
+ * The start is one per competency only when every competency has pre-tests
+ * from enough players; otherwise one shared start from all of them pooled.
+ *
+ * Fitted on pilot players only: a log entry marked with the `calibrated` set is
+ * left out (an unmarked entry predates the mark and is a pilot one). Post-test
+ * answers are left out too: they still update each player's final BKT, but
+ * they are not used to set the values.
  *
  * Every value is searched on a grid inside the bounds of Zhang et al. (2025):
  * start 0.001-0.5, T 0.001-0.1, guess and slip 0.01-0.3, which also keeps
@@ -21,10 +30,22 @@
 import { COMPETENCIES } from '@/domain/learner/profile';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import { DEFAULT_BKT_MODEL, priorFor, updateMastery, type BKTModel } from '@/domain/learner/mastery/buildBKTProfile';
-import { predictionsFrom, predictiveMetrics, type Prediction } from './modelEvaluation';
+import { clusterBootstrap, predictionsFrom, predictiveMetrics, type Interval, type Prediction } from './modelEvaluation';
 
 /** TENTATIVE: the least data a value is fitted on; below it the current value is kept. */
-export const CALIBRATION_MINIMUMS = { playersPerCompetency: 10, driveAnswers: 100, learningAnswers: 100, answersPerPlayerT: 20 } as const;
+export const CALIBRATION_MINIMUMS = { playersPerCompetency: 7, driveAnswers: 100, learningAnswers: 100, answersPerPlayerT: 20 } as const;
+
+/** TENTATIVE: how many players the pilot (calibration group) is planned to have. */
+export const PILOT_PLAYERS = 7;
+
+/**
+ * The held-out test of a learn rate per player, fixed before the pilot data
+ * is looked at (TENTATIVE): each player's first 70% of quiz and drive answers
+ * fit their T, the rest are predicted. It is adopted only if held-out RMSE
+ * improves by the margin and the 95% interval of the improvement (players
+ * resampled) stays above zero. For scale, Eagle et al. (2016) gained 0.014.
+ */
+export const HELD_OUT_TEST = { trainShare: 0.7, rmseMargin: 0.01 } as const;
 
 const range = (from: number, to: number, step: number): number[] => {
   const values: number[] = [];
@@ -65,7 +86,9 @@ const replay = (
   sequences: Sequences,
   model: BKTModel,
   learnOf: (uid: string) => number | null = () => null,
-  collect?: { predicted: number; correct: boolean }[]
+  collect?: { predicted: number; correct: boolean }[],
+  /** Which answers to score and collect; every answer still updates the model. */
+  scored: (answer: Prediction) => boolean = () => true
 ): number => {
   let logLik = 0;
   for (const sequence of sequences) {
@@ -75,8 +98,10 @@ const replay = (
       const base = model[answer.source];
       const params = own !== null && base.pTransit > 0 ? { ...base, pTransit: own } : base;
       const predicted = p * (1 - params.pSlip) + (1 - p) * params.pGuess;
-      logLik += Math.log(Math.max(1e-12, answer.correct ? predicted : 1 - predicted));
-      collect?.push({ predicted, correct: answer.correct });
+      if (scored(answer)) {
+        logLik += Math.log(Math.max(1e-12, answer.correct ? predicted : 1 - predicted));
+        collect?.push({ predicted, correct: answer.correct });
+      }
       p = updateMastery(p, answer.correct, params);
     }
   }
@@ -134,6 +159,20 @@ export interface StartEstimate {
   atBound: boolean;
 }
 
+export interface HeldOutTest {
+  /** Players with enough quiz and drive answers to split. */
+  players: number;
+  /** Held-out answers predicted. */
+  answers: number;
+  shared: { rmse: number | null; auc: number | null };
+  perPlayer: { rmse: number | null; auc: number | null };
+  /** Held-out RMSE of the shared T minus that of the per-player T: above zero favours per-player. */
+  improvement: number | null;
+  interval: Interval | null;
+  /** The rule's verdict: adopt a learn rate per player, or keep the shared one. */
+  adopt: boolean;
+}
+
 export interface PlayerLearnRate {
   uid: string;
   label: string;
@@ -145,8 +184,14 @@ export interface PlayerLearnRate {
 export interface BktCalibration {
   players: number;
   answers: number;
+  /** Left out of the fit: post-test answers, and answers of players on the calibrated set. */
+  excluded: { postTest: number; calibratedSet: number };
   bySource: Record<Prediction['source'], number>;
   starts: StartEstimate[];
+  /** One start for every competency, from all pre-test answers pooled; null with too few players. */
+  sharedStart: number | null;
+  /** Which start the rule selects: one per competency, the shared one, or the value in force (too little data). */
+  startRule: 'per_competency' | 'shared' | 'kept';
   /** Fitted, or null when there was too little data to fit it. */
   slipChoice: number | null;
   learn: number | null;
@@ -156,7 +201,7 @@ export interface BktCalibration {
   model: BKTModel;
   current: Fit;
   calibrated: Fit;
-  perPlayerLearn: { rates: PlayerLearnRate[]; fit: Fit; fitted: number };
+  perPlayerLearn: { rates: PlayerLearnRate[]; fit: Fit; fitted: number; heldOut: HeldOutTest };
   /** What is still missing before every value can be fitted. */
   missing: string[];
   ready: boolean;
@@ -168,8 +213,10 @@ export const calibrateBkt = (
   label: (uid: string) => string = uid => uid,
   base: BKTModel = DEFAULT_BKT_MODEL
 ): BktCalibration => {
-  const { predictions: answers, skipped } = predictionsFrom(rows);
-  const known = answers.filter(a => (COMPETENCIES as string[]).includes(a.competency));
+  const pilotRows = rows.filter(row => row.modelSet === undefined || row.modelSet === null || row.modelSet === 'pilot');
+  const { predictions: answers, skipped } = predictionsFrom(pilotRows);
+  const postTest = answers.filter(a => a.source === 'post_exam').length;
+  const known = answers.filter(a => (COMPETENCIES as string[]).includes(a.competency) && a.source !== 'post_exam');
   const sequences = sequencesOf(known);
   const players = new Set(known.map(a => a.uid));
   const bySource = { diagnostic: 0, quiz: 0, drive: 0, post_exam: 0 };
@@ -189,19 +236,31 @@ export const calibrateBkt = (
     perPlayer.set(answer.uid, score);
   }
   const enough = COMPETENCIES.filter(c => scores.get(c)!.size >= min.playersPerCompetency);
+  const pooled = COMPETENCIES.flatMap(c => [...scores.get(c)!.values()]);
+  const preTestPlayers = new Set(known.filter(a => a.source === 'diagnostic').map(a => a.uid)).size;
+  // The rule, fixed in advance: a start per competency only when every competency has enough players;
+  // otherwise one shared start from all pre-test answers pooled; with too few players, the value in force.
+  const startRule: BktCalibration['startRule'] =
+    enough.length === COMPETENCIES.length ? 'per_competency' : preTestPlayers >= min.playersPerCompetency ? 'shared' : 'kept';
   let slipChoice: number | null = null;
-  if (enough.length > 0) {
+  if (startRule !== 'kept') {
     let best = -Infinity;
     for (const slip of SLIP_GRID) {
-      const total = enough.reduce((sum, c) => sum + bestStart([...scores.get(c)!.values()], slip, guessChoice).logLik, 0);
+      const total =
+        startRule === 'per_competency'
+          ? COMPETENCIES.reduce((sum, c) => sum + bestStart([...scores.get(c)!.values()], slip, guessChoice).logLik, 0)
+          : bestStart(pooled, slip, guessChoice).logLik;
       if (total > best) {
         best = total;
         slipChoice = slip;
       }
     }
   }
-  const short = COMPETENCIES.length - enough.length;
-  if (short > 0) missing.push(`${short} of ${COMPETENCIES.length} competencies have pre-test answers from fewer than ${min.playersPerCompetency} players`);
+  const sharedStart = slipChoice !== null ? bestStart(pooled, slipChoice, guessChoice).start : null;
+  if (startRule === 'kept') missing.push(`${preTestPlayers} player(s) have pre-test answers; the starting value needs ${min.playersPerCompetency}`);
+  else if (startRule === 'shared') {
+    missing.push(`${COMPETENCIES.length - enough.length} of ${COMPETENCIES.length} competencies have pre-test answers from fewer than ${min.playersPerCompetency} players, so one shared start is used`);
+  }
 
   const starts: StartEstimate[] = COMPETENCIES.map(competency => {
     const own = [...scores.get(competency)!.values()];
@@ -214,7 +273,7 @@ export const calibrateBkt = (
       answers: total,
       shareRight: total ? right / total : null,
       estimate,
-      value: estimate ?? priorFor(base, competency),
+      value: startRule === 'per_competency' ? estimate! : startRule === 'shared' ? sharedStart! : priorFor(base, competency),
       atBound: estimate !== null && (estimate <= START_GRID[0] || estimate >= START_GRID[START_GRID.length - 1]),
     };
   });
@@ -222,7 +281,10 @@ export const calibrateBkt = (
   const choice = (params: BKTModel['quiz']) => ({ ...params, pSlip: slipChoice ?? params.pSlip });
   let model: BKTModel = {
     ...base,
-    pInitBy: Object.fromEntries(starts.filter(s => s.estimate !== null).map(s => [s.competency, s.estimate])) as BKTModel['pInitBy'],
+    ...(startRule === 'shared' ? { pInit: sharedStart!, pInitBy: {} } : {}),
+    ...(startRule === 'per_competency'
+      ? { pInitBy: Object.fromEntries(starts.map(s => [s.competency, s.estimate])) as BKTModel['pInitBy'] }
+      : {}),
     diagnostic: choice(base.diagnostic),
     quiz: choice(base.quiz),
     post_exam: choice(base.post_exam),
@@ -285,11 +347,59 @@ export const calibrateBkt = (
   rates.sort((a, b) => b.answers - a.answers || a.label.localeCompare(b.label));
   const own = new Map(rates.map(rate => [rate.uid, rate.learn]));
 
+  // 4. The held-out test: each player's T from their earlier answers, scored on their later ones.
+  const isLearning = (answer: Prediction) => answer.source === 'quiz' || answer.source === 'drive';
+  const errors: { shared: number; own: number }[][] = [];
+  const heldShared: { predicted: number; correct: boolean }[] = [];
+  const heldOwn: { predicted: number; correct: boolean }[] = [];
+  for (const [, playerSequences] of byPlayer) {
+    const learning = playerSequences.flat().filter(isLearning).map(a => a.seq).sort((x, y) => x - y);
+    if (learning.length < min.answersPerPlayerT) continue;
+    const cut = learning[Math.floor(learning.length * HELD_OUT_TEST.trainShare) - 1];
+    const train = playerSequences.map(sequence => sequence.filter(a => a.seq <= cut)).filter(sequence => sequence.length > 0);
+    let rate = model.drive.pTransit;
+    let best = -Infinity;
+    for (const t of LEARN_GRID) {
+      const logLik = replay(train, model, () => t);
+      if (logLik > best) {
+        best = logLik;
+        rate = t;
+      }
+    }
+    const later = (answer: Prediction) => answer.seq > cut;
+    const withShared: { predicted: number; correct: boolean }[] = [];
+    const withOwn: { predicted: number; correct: boolean }[] = [];
+    replay(playerSequences, model, () => null, withShared, later);
+    replay(playerSequences, model, () => rate, withOwn, later);
+    if (withShared.length === 0) continue;
+    heldShared.push(...withShared);
+    heldOwn.push(...withOwn);
+    errors.push(withShared.map((item, i) => ({ shared: (item.predicted - (item.correct ? 1 : 0)) ** 2, own: (withOwn[i].predicted - (withOwn[i].correct ? 1 : 0)) ** 2 })));
+  }
+  const gain = (items: { shared: number; own: number }[]): number | null =>
+    items.length ? Math.sqrt(items.reduce((sum, e) => sum + e.shared, 0) / items.length) - Math.sqrt(items.reduce((sum, e) => sum + e.own, 0) / items.length) : null;
+  const improvement = gain(errors.flat());
+  const interval = clusterBootstrap(errors, gain);
+  const sharedHeld = predictiveMetrics(heldShared);
+  const ownHeld = predictiveMetrics(heldOwn);
+  const heldOut: HeldOutTest = {
+    players: errors.length,
+    answers: heldShared.length,
+    shared: { rmse: sharedHeld?.rmse ?? null, auc: sharedHeld?.auc ?? null },
+    perPlayer: { rmse: ownHeld?.rmse ?? null, auc: ownHeld?.auc ?? null },
+    improvement,
+    interval,
+    adopt: improvement !== null && improvement >= HELD_OUT_TEST.rmseMargin && interval !== null && interval[0] > 0,
+  };
+
   return {
     players: players.size,
     answers: known.length,
+    excluded: { postTest, calibratedSet: rows.length - pilotRows.length },
     bySource,
     starts,
+    sharedStart,
+    startRule,
     slipChoice,
     learn,
     slipDrive,
@@ -297,7 +407,7 @@ export const calibrateBkt = (
     model,
     current: fitOf(sequences, base),
     calibrated: fitOf(sequences, model),
-    perPlayerLearn: { rates, fit: fitOf(sequences, model, uid => own.get(uid) ?? null), fitted: rates.filter(r => r.learn !== null).length },
+    perPlayerLearn: { rates, fit: fitOf(sequences, model, uid => own.get(uid) ?? null), fitted: rates.filter(r => r.learn !== null).length, heldOut },
     missing,
     ready: missing.length === 0,
     skipped,

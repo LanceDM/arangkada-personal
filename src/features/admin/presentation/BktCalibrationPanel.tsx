@@ -11,7 +11,7 @@ import { getCompetencyLabel } from '@/domain/learner/profile';
 import { DEFAULT_BKT_MODEL, priorFor } from '@/domain/learner/mastery/buildBKTProfile';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { downloadFile } from '@/features/admin/domain/adminExport';
-import { CALIBRATION_MINIMUMS, calibrateBkt, type BktCalibration, type Fit } from '@/features/admin/domain/bktCalibration';
+import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, type BktCalibration, type Fit } from '@/features/admin/domain/bktCalibration';
 import { EmptyState, Legend, Notice, Panel } from './adminUi';
 
 const fmt = (value: number | null | undefined, digits = 3) => (typeof value === 'number' ? value.toFixed(digits) : '–');
@@ -25,7 +25,9 @@ const LEGEND = [
   { term: 'Search range', meaning: 'Start 0.001–0.5, T 0.001–0.1, slip and guess 0.01–0.3 (Zhang et al., 2025). "at the edge" marks an estimate on a limit: read it with care.' },
   { term: 'Log-likelihood', meaning: 'Mean per answer, of each answer given the ones before it. Closer to 0 is better.' },
   { term: 'Same-data fit', meaning: 'The calibrated values are scored on the answers they were fitted on, so they look a little better than they will on new players.' },
+  { term: 'Start rule', meaning: `A start per competency only when every competency has pre-tests from ${CALIBRATION_MINIMUMS.playersPerCompetency} players; otherwise one shared start from all pre-test answers pooled.` },
   { term: 'Per-player T', meaning: 'Comparison only: each player\'s own learn rate, shared across their competencies. Not used by the app.' },
+  { term: 'Held-out test', meaning: `Each player's first ${HELD_OUT_TEST.trainShare * 100}% of quiz and drive answers fit their T; the rest are predicted with it and with the shared T. Per-player T passes only if RMSE improves by ${HELD_OUT_TEST.rmseMargin} and the 95% interval stays above zero.` },
 ] as const;
 
 const FitRow = ({ label, fit }: { label: string; fit: Fit }) => (
@@ -50,11 +52,15 @@ const Result = ({ result }: { result: BktCalibration }) => {
           settingsVersionInForce: RUN_CONFIG_VERSION,
           players: result.players,
           answers: result.answers,
+          excluded: result.excluded,
           bySource: result.bySource,
           minimums: CALIBRATION_MINIMUMS,
           missing: result.missing,
           model: result.model,
+          startRule: result.startRule,
+          sharedStart: result.sharedStart,
           starts: result.starts,
+          heldOutTest: { rule: HELD_OUT_TEST, result: result.perPlayerLearn.heldOut },
           fit: { current: result.current, calibrated: result.calibrated, perPlayerLearn: result.perPlayerLearn.fit },
           perPlayerLearn: result.perPlayerLearn.rates.map(({ label, answers, learn }) => ({ player: label, answers, learn })),
         },
@@ -65,11 +71,16 @@ const Result = ({ result }: { result: BktCalibration }) => {
     );
   return (
     <div className="space-y-4">
+      {(result.excluded.postTest > 0 || result.excluded.calibratedSet > 0) && (
+        <p className="text-xs text-muted-foreground">
+          Left out: {result.excluded.postTest} post-test answer(s); {result.excluded.calibratedSet} answer(s) of players on the calibrated set.
+        </p>
+      )}
       {result.ready ? (
-        <Notice>Every value could be fitted from {result.players} player(s) and {result.answers} answers. Nothing is applied: review the values with the group first.</Notice>
+        <Notice>Every value could be fitted from {result.players} pilot player(s) and {result.answers} answers. Nothing is applied: review the values with the group first.</Notice>
       ) : (
         <Notice>
-          Not enough data yet for every value ({result.players} player(s), {result.answers} answers). Still missing: {result.missing.join('; ')}. Values that could not be fitted are kept as they are.
+          Not enough data yet for every value ({result.players} pilot player(s), {result.answers} answers). Still missing: {result.missing.join('; ')}. Values that could not be fitted are kept as they are.
         </Notice>
       )}
       <Panel
@@ -127,7 +138,13 @@ const Result = ({ result }: { result: BktCalibration }) => {
       </Panel>
       <Panel
         title="Starting value per competency"
-        description={`The group's start, from the pilot pre-tests. A competency needs pre-test answers from ${CALIBRATION_MINIMUMS.playersPerCompetency} players (Tentative); until then it keeps the value in force.`}
+        description={`The group's start, from the pilot pre-tests. Rule in use: ${
+          result.startRule === 'per_competency'
+            ? 'one start per competency (every competency has enough players)'
+            : result.startRule === 'shared'
+              ? `one shared start of ${fmt(result.sharedStart)} for all (some competencies have fewer than ${CALIBRATION_MINIMUMS.playersPerCompetency} players)`
+              : `the value in force is kept (fewer than ${CALIBRATION_MINIMUMS.playersPerCompetency} players with pre-test answers)`
+        }. Shared start from all pre-test answers pooled: ${fmt(result.sharedStart)}.`}
         bodyClassName="p-0"
       >
         <Table>
@@ -138,7 +155,8 @@ const Result = ({ result }: { result: BktCalibration }) => {
               <TableHead>Pre-test answers</TableHead>
               <TableHead>Share right</TableHead>
               <TableHead>In force</TableHead>
-              <TableHead>Calibrated</TableHead>
+              <TableHead>Own estimate</TableHead>
+              <TableHead>Calibrated (by the rule)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -150,8 +168,12 @@ const Result = ({ result }: { result: BktCalibration }) => {
                 <TableCell className="text-xs">{fmt(row.shareRight, 2)}</TableCell>
                 <TableCell className="text-xs">{priorFor(current, row.competency).toFixed(3)}</TableCell>
                 <TableCell className="text-xs">
-                  {row.estimate === null ? `${row.value.toFixed(3)} (kept: too few players)` : row.estimate.toFixed(3)}
+                  {row.estimate === null ? 'too few players' : row.estimate.toFixed(3)}
                   {row.atBound && <span className="ml-1 text-muted-foreground">at the edge</span>}
+                </TableCell>
+                <TableCell className="text-xs font-semibold">
+                  {row.value.toFixed(3)}
+                  {result.startRule === 'kept' && <span className="ml-1 font-normal text-muted-foreground">(kept)</span>}
                 </TableCell>
               </TableRow>
             ))}
@@ -174,6 +196,40 @@ const Result = ({ result }: { result: BktCalibration }) => {
             <FitRow label="In force" fit={result.current} />
             <FitRow label="Calibrated" fit={result.calibrated} />
             <FitRow label={`Calibrated + per-player T (${result.perPlayerLearn.fitted} player(s) fitted)`} fit={result.perPlayerLearn.fit} />
+          </TableBody>
+        </Table>
+      </Panel>
+      <Panel
+        title={`Held-out test of per-player T: ${result.perPlayerLearn.heldOut.players === 0 ? 'not enough answers yet' : result.perPlayerLearn.heldOut.adopt ? 'passes' : 'does not pass (keep the shared T)'}`}
+        description={`Rule set in advance (Tentative): adopt a learn rate per player only if held-out RMSE improves by at least ${HELD_OUT_TEST.rmseMargin} and the 95% interval of the improvement, players resampled, stays above zero. ${result.perPlayerLearn.heldOut.players} player(s), ${result.perPlayerLearn.heldOut.answers} held-out answers.`}
+        bodyClassName="p-0"
+      >
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>On the held-out answers</TableHead>
+              <TableHead>RMSE</TableHead>
+              <TableHead>AUC</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="text-xs font-semibold">Shared T</TableCell>
+              <TableCell className="text-xs">{fmt(result.perPlayerLearn.heldOut.shared.rmse)}</TableCell>
+              <TableCell className="text-xs">{fmt(result.perPlayerLearn.heldOut.shared.auc)}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="text-xs font-semibold">Per-player T (fitted on the earlier answers)</TableCell>
+              <TableCell className="text-xs">{fmt(result.perPlayerLearn.heldOut.perPlayer.rmse)}</TableCell>
+              <TableCell className="text-xs">{fmt(result.perPlayerLearn.heldOut.perPlayer.auc)}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="text-xs font-semibold">RMSE improvement (95% interval)</TableCell>
+              <TableCell className="text-xs" colSpan={2}>
+                {fmt(result.perPlayerLearn.heldOut.improvement, 4)}
+                {result.perPlayerLearn.heldOut.interval && ` (${result.perPlayerLearn.heldOut.interval[0].toFixed(4)} to ${result.perPlayerLearn.heldOut.interval[1].toFixed(4)})`}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </Panel>
@@ -230,7 +286,7 @@ export const BktCalibrationPanel = ({ rows, label }: { rows: readonly Record<str
         }
       >
         <p className="text-xs text-muted-foreground">
-          {rows.length} logged BKT update(s). Fitted on a grid inside the published bounds, by the likelihood of each answer given the answers before it. Real players only.
+          {rows.length} logged BKT update(s). Fitted on pilot players only (a player is marked pilot in the database when they start, and keeps the mark), on their pre-test, quiz and drive answers: post-test answers still update each player's final BKT but are not used here. Grid search inside the published bounds, by the likelihood of each answer given the answers before it. Real players only.
         </p>
       </Panel>
       {shown && <Result result={shown} />}

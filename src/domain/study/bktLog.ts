@@ -13,8 +13,10 @@ import { COMPETENCIES } from '@/domain/learner/profile';
 import {
   DEFAULT_BKT_MODEL,
   bktTrajectory,
+  modelOfSet,
   priorFor,
   startingMastery,
+  type BKTModelSet,
   type BKTEvidenceParams,
   type BKTModel,
 } from '@/domain/learner/mastery/buildBKTProfile';
@@ -56,6 +58,12 @@ export interface BKTProfileDoc {
   lastUpdateId: string | null;
   updatedAt: number;
   competencies: Record<DrivingCompetency, BKTCompetencyProfile>;
+  /**
+   * The set of values this player runs on (`pilot` or `calibrated`): marked
+   * when they start and kept for their whole course. Absent on records written
+   * before the mark existed, which were all in the pilot stage.
+   */
+  modelSet?: BKTModelSet;
 }
 
 export interface BKTUpdateRecord extends StudyEnvelope {
@@ -91,6 +99,8 @@ export interface BKTUpdateRecord extends StudyEnvelope {
   driveAnswersAfter: number;
   /** P(L) of all 11 competencies after this update. */
   allAfter: Record<DrivingCompetency, number>;
+  /** The set of values this update was made with; absent before the mark existed (pilot). */
+  modelSet?: BKTModelSet;
 }
 
 const zeroCounts = (): CountsByClass => ({ drive: 0, quiz: 0, diagnostic: 0, post_exam: 0 });
@@ -129,10 +139,13 @@ export const buildBKTLog = (input: {
   now: number;
   configVersion: string;
   model?: BKTModel;
+  /** The player's set of values. With it, the profile and every entry carry the mark, and its values are used. */
+  modelSet?: BKTModelSet;
 }): { profile: BKTProfileDoc; entries: BKTUpdateRecord[] } => {
-  const model = input.model ?? DEFAULT_BKT_MODEL;
+  const model = input.model ?? (input.modelSet ? modelOfSet(input.modelSet) : DEFAULT_BKT_MODEL);
   const steps = bktTrajectory([...input.logs], model);
   const profile = emptyBKTProfile(input.uid, input.configVersion, input.now, model);
+  if (input.modelSet) profile.modelSet = input.modelSet;
   const all = startingMastery(model);
   const seen = new Set<DrivingCompetency>();
   const entries: BKTUpdateRecord[] = [];
@@ -185,6 +198,7 @@ export const buildBKTLog = (input: {
       levelAfter,
       levelChanged: levelBefore !== levelAfter,
       capApplied: c.capped,
+      ...(input.modelSet ? { modelSet: input.modelSet } : {}),
       driveAnswersAfter: c.answers.drive,
       allAfter: { ...all },
     });
