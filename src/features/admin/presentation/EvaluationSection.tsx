@@ -26,6 +26,8 @@ import {
 } from '@/features/admin/domain/modelEvaluation';
 import { EmptyState, Legend, Notice, Panel, SectionHeader, SectionTabs } from './adminUi';
 import { toDateTime } from './formatDate';
+import { BktCalibrationPanel } from './BktCalibrationPanel';
+import { BktStagePanel } from './BktStagePanel';
 
 const fmt = (value: number | null | undefined, digits = 3) => (typeof value === 'number' ? value.toFixed(digits) : '–');
 const share = (part: number, whole: number) => (whole ? `${part} of ${whole} (${((100 * part) / whole).toFixed(0)}%)` : '–');
@@ -372,7 +374,7 @@ const Policy = ({ course, convergence }: { course: CourseAdmin; convergence: QCo
 };
 
 export const EvaluationSection = ({ course, logs }: { course: CourseAdmin; logs: EvaluationLogs }) => {
-  const [view, setView] = useState<'model' | 'players' | 'policy'>('model');
+  const [view, setView] = useState<'model' | 'players' | 'calibration' | 'policy'>('model');
   const labels = useMemo(
     () => new Map([...course.mastery.map(row => [row.uid, row.label] as const), ...course.players.map(row => [row.uid, row.label] as const)]),
     [course.mastery, course.players]
@@ -425,11 +427,18 @@ export const EvaluationSection = ({ course, logs }: { course: CourseAdmin; logs:
         options={[
           { value: 'model', label: 'BKT: whole model' },
           { value: 'players', label: 'BKT: per player' },
+          { value: 'calibration', label: 'BKT: calibration' },
           { value: 'policy', label: 'Q-learning' },
         ]}
       />
       {view === 'model' && bktView(result => <WholeModel bkt={result} />)}
       {view === 'players' && bktView(result => <PerPlayer bkt={result} />)}
+      {view === 'calibration' && (
+        <>
+          <BktStagePanel mastery={course.mastery} />
+          <BktCalibrationPanel rows={logs.data?.bktUpdates ?? null} label={uid => labels.get(uid) ?? uid.slice(0, 8)} />
+        </>
+      )}
       {view === 'policy' && <Policy course={course} convergence={convergence} />}
       <p className="text-xs text-muted-foreground">
         The pre-test and post-test items are evaluated on the <Link to="/admin/irt" className="underline">IRT page</Link>. Not here yet, as they need the post-test of the main study: BKT against the post-test per competency, and the slip sensitivity check.

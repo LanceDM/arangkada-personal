@@ -83,4 +83,18 @@ describe('the model evaluation section', () => {
     await pressTab('Q-learning');
     expect(text()).toContain('No decisions yet');
   });
+
+  it('tracks the calibration stage, and calibrates only on request', async () => {
+    const bktUpdates = [update('u1', 0.9, true, 'diagnostic'), update('u1', 0.2, false, 'diagnostic'), update('u2', 0.8, true, 'drive')];
+    await mount(<EvaluationSection course={course()} logs={logs({ data: { bktUpdates, qUpdates: [], loadedAt: 1 } })} />);
+    await pressTab('BKT: calibration');
+    expect(text()).toContain('BKT calibration stage: Collecting pilot data');
+    expect(text()).toContain('0 of 11 competencies');
+    expect(text()).not.toContain('Starting value per competency');
+    await clickLabel('Run the calibration');
+    expect(text()).toContain('Not enough data yet');
+    expect(text()).toContain('Starting value per competency');
+    expect(text()).toContain('0.300 (kept: too few players)');
+    expect(text()).toContain('0.250 (fixed: 1 of 4)');
+  });
 });

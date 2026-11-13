@@ -303,3 +303,36 @@ export const calibrateBkt = (
     skipped,
   };
 };
+
+export interface CalibrationProgress {
+  /** 1 collecting pilot data, 2 enough data to calibrate, 3 calibrated values in force. */
+  step: 1 | 2 | 3;
+  /** Players with at least one pre-test answer. */
+  preTestPlayers: number;
+  playersNeeded: number;
+  /** Competencies with pre-test answers from enough players. */
+  competenciesReady: number;
+  competencies: number;
+  appliedOn: string | null;
+}
+
+/**
+ * Where the calibration stands, from the evidence counts the admin already
+ * holds (no log read): the stage set in the code, and whether the pilot has
+ * enough pre-tests yet.
+ */
+export const calibrationProgress = (
+  players: readonly { evidence: Record<string, { diagnostic: number }> }[],
+  status: { stage: 'collecting' | 'calibrated'; appliedOn: string | null }
+): CalibrationProgress => {
+  const perCompetency = COMPETENCIES.map(c => players.filter(player => (player.evidence[c]?.diagnostic ?? 0) > 0).length);
+  const competenciesReady = perCompetency.filter(n => n >= CALIBRATION_MINIMUMS.playersPerCompetency).length;
+  return {
+    step: status.stage === 'calibrated' ? 3 : competenciesReady === COMPETENCIES.length ? 2 : 1,
+    preTestPlayers: players.filter(player => COMPETENCIES.some(c => (player.evidence[c]?.diagnostic ?? 0) > 0)).length,
+    playersNeeded: CALIBRATION_MINIMUMS.playersPerCompetency,
+    competenciesReady,
+    competencies: COMPETENCIES.length,
+    appliedOn: status.appliedOn,
+  };
+};

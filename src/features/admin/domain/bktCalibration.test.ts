@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
-import { CALIBRATION_MINIMUMS, calibrateBkt } from './bktCalibration';
+import { CALIBRATION_MINIMUMS, calibrateBkt, calibrationProgress } from './bktCalibration';
 
 /** A seeded generator, so the made-up answers below are the same on every run. These test the estimator only. */
 const seeded = (seed: number) => () => {
@@ -75,4 +75,15 @@ describe('the BKT calibration', () => {
     const rows = answersFrom(15, () => 0.3);
     expect(calibrateBkt(rows).model).toEqual(calibrateBkt(rows).model);
   }, 60_000);
+});
+
+describe('the calibration stage', () => {
+  const player = (diagnostic: number) => ({ evidence: Object.fromEntries(COMPETENCIES.map(c => [c, { diagnostic }])) });
+  it('moves from collecting to ready once every competency has enough pre-tests, and to calibrated only by the code', () => {
+    const few = Array.from({ length: 3 }, () => player(5));
+    expect(calibrationProgress(few, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 1, preTestPlayers: 3, competenciesReady: 0, competencies: 11 });
+    const enough = [...Array.from({ length: CALIBRATION_MINIMUMS.playersPerCompetency }, () => player(5)), player(0)];
+    expect(calibrationProgress(enough, { stage: 'collecting', appliedOn: null })).toMatchObject({ step: 2, preTestPlayers: 10, competenciesReady: 11 });
+    expect(calibrationProgress(few, { stage: 'calibrated', appliedOn: '2026-12-01' })).toMatchObject({ step: 3, appliedOn: '2026-12-01' });
+  });
 });

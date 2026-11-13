@@ -13,6 +13,7 @@ import { STUDY_EXPORTS, useStudyExport } from '@/features/admin/application/useS
 import { useCourseAdmin } from '@/features/admin/application/useCourseAdmin';
 import { MASTERY_DESCRIPTORS } from '@/features/admin/domain/courseAdmin';
 import { EmptyState, Legend, Notice, Panel, SectionHeader } from './adminUi';
+import { BktStagePanel } from './BktStagePanel';
 
 const LEVEL_CELL: Record<1 | 2 | 3 | 4, string> = {
   1: 'bg-red-500/15 text-red-700 dark:text-red-300',
@@ -120,6 +121,7 @@ export const CourseSection = ({ enabled }: { enabled: boolean }) => {
         }
       />
       {course.error && <Notice tone="error">{course.error}</Notice>}
+      <BktStagePanel mastery={course.mastery} />
       <BktTable course={course} />
       <Panel
         title="Study export"
