@@ -257,7 +257,7 @@ export const buildQUpdatesCSV = (study: StudyExport) => {
 export const buildLoggedBKTCSV = (study: StudyExport) => {
   const columns = [
     'userSeq', 'at', 'configVersion', 'competency', 'source', 'origin.kind', 'origin.levelId', 'scenarioId', 'itemId', 'ruleId', 'correct', 'action', 'expectedAction',
-    'responseMs', 'timedOut', 'params.pTransit', 'params.pSlip', 'params.pGuess', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter', 'levelBefore', 'levelAfter', 'capApplied', 'modelSet',
+    'responseMs', 'timedOut', 'chainSeq', 'prevUserSeq', 'pInit', 'params.pTransit', 'params.pSlip', 'params.pGuess', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter', 'levelBefore', 'levelAfter', 'capApplied', 'modelSet',
   ];
   return csv(
     ['userId', 'participantCode', ...columns],

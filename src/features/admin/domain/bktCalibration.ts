@@ -469,6 +469,8 @@ export interface PilotRef {
  * and checked later without the admin page.
  */
 export interface CalibrationRecord {
+  /** Absent on calibrations saved before edited starts existed. */
+  kind?: 'calibration';
   basedOn: string;
   model: BKTModel;
   startRule: BktCalibration['startRule'];
@@ -497,6 +499,7 @@ export const calibrationRecord = (input: {
 }): CalibrationRecord => {
   const { result } = input;
   return {
+    kind: 'calibration',
     basedOn: input.state.activeSetId,
     model: result.model,
     startRule: result.startRule,

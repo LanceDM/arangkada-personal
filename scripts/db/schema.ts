@@ -122,7 +122,13 @@ export const SCHEMA: SchemaEntry[] = [
     check: all(envelope, (data, id) => (typeof data.configVersion === 'string' && typeof data.userSeq === 'number' && id === bktUpdateId(data.configVersion, data.userSeq) ? [] : ['id is not {settings version}_{userSeq}']), fields({
       userSeq: is.int, competency: is.string, source: is.oneOf(...SOURCES), correct: is.bool, action: is.string, params: is.map,
       pBefore: is.number, predictedCorrect: is.number, posterior: is.number, pAfter: is.number, levelBefore: is.int, levelAfter: is.int,
-    })),
+    }), data => {
+      // The chain links (2026-11-14) are absent on older entries; present, they are whole numbers.
+      const bad: string[] = [];
+      if (data.chainSeq !== undefined && !(Number.isInteger(data.chainSeq) && (data.chainSeq as number) >= 1)) bad.push('chainSeq: expected an integer from 1');
+      if (data.prevUserSeq !== undefined && data.prevUserSeq !== null && !Number.isInteger(data.prevUserSeq)) bad.push('prevUserSeq: expected an integer or null');
+      return bad;
+    }),
   },
   {
     path: 'users/{uid}/attempts/{id}',

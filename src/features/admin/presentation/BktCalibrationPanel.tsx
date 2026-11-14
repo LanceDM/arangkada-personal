@@ -17,6 +17,7 @@ import { getCompetencyLabel } from '@/domain/learner/profile';
 import { priorFor } from '@/domain/learner/mastery/buildBKTProfile';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { downloadFile } from '@/features/admin/domain/adminExport';
+import { isStartEdit } from '@/features/admin/domain/bktSetsAdmin';
 import { CALIBRATION_MINIMUMS, HELD_OUT_TEST, calibrateBkt, calibrationRecord, canApply, sensitivityCheck, type BktCalibration, type Fit, type SensitivityRow } from '@/features/admin/domain/bktCalibration';
 import { EmptyState, Legend, Notice, Panel } from './adminUi';
 
@@ -383,12 +384,12 @@ export const CalibrationLog = ({ bkt }: { bkt: BktSets }) => {
   return (
     <div className="space-y-4">
       <Panel
-        title="Calibration log"
-        description={`Every calibration applied, newest first, with what it was fitted from. New players get: ${setLabel(bkt.state.activeSetId)}. Click a calibration for its starts, its pilot players and its note.`}
+        title="Value set log"
+        description={`Every calibration applied and every edited start, newest first. New players get: ${setLabel(bkt.state.activeSetId)}. Click a row for its starts, its pilot players and its note.`}
         bodyClassName="p-0"
       >
         {sets.length === 0 ? (
-          <p className="p-4 text-xs text-muted-foreground">No calibration applied yet: every player runs on the default values.</p>
+          <p className="p-4 text-xs text-muted-foreground">No set saved yet: every player runs on the default values.</p>
         ) : (
           <div className="overflow-x-auto">
             <Table>
@@ -415,19 +416,36 @@ export const CalibrationLog = ({ bkt }: { bkt: BktSets }) => {
                         {toDateTime(set.appliedAt)}
                         <div className="text-muted-foreground">{set.appliedByEmail ?? set.appliedBy}</div>
                       </TableCell>
-                      <TableCell className="text-xs">{set.pilots.length}</TableCell>
+                      <TableCell className="text-xs">{isStartEdit(set) ? '–' : set.pilots.length}</TableCell>
                       <TableCell className="text-xs">
-                        {set.startRule === 'shared' ? `shared ${fmt(set.sharedStart)}` : range(set.starts.map(s => s.value))}
+                        {isStartEdit(set)
+                          ? `${fmt(set.previousStart)} → ${fmt(set.start)} (edited)`
+                          : set.startRule === 'shared'
+                            ? `shared ${fmt(set.sharedStart)}`
+                            : range(set.starts.map(s => s.value))}
                       </TableCell>
                       <TableCell className="text-xs">{fmt(set.model.drive.pTransit)}</TableCell>
                       <TableCell className="text-xs">
                         {fmt(set.model.diagnostic.pSlip)} · {fmt(set.model.drive.pSlip)}
                       </TableCell>
-                      <TableCell className="text-xs">
-                        {fmt(set.fit.before.rmse)} → {fmt(set.fit.after.rmse)}
-                      </TableCell>
+                      <TableCell className="text-xs">{isStartEdit(set) ? 'not refitted' : `${fmt(set.fit.before.rmse)} → ${fmt(set.fit.after.rmse)}`}</TableCell>
                     </TableRow>
-                    {open === set.setId && (
+                    {open === set.setId && isStartEdit(set) && (
+                      <TableRow>
+                        <TableCell colSpan={7} className="bg-muted/30 text-xs">
+                          <p>
+                            <span className="font-semibold">Start before the pre-test changed:</span> {fmt(set.previousStart)} → {fmt(set.start)}, for every competency.
+                            Everything else is as in {setLabel(set.basedOn)} · settings version {set.settingsVersion}.
+                          </p>
+                          {set.note && (
+                            <p className="mt-1">
+                              <span className="font-semibold">Note:</span> {set.note}
+                            </p>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {open === set.setId && !isStartEdit(set) && (
                       <TableRow>
                         <TableCell colSpan={7} className="bg-muted/30 text-xs">
                           <p>

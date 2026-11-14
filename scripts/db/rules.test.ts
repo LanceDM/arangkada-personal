@@ -157,6 +157,19 @@ describe.skipIf(!host)('security rules for the study logs', () => {
     skip.set(doc(admin, 'bktSetLogs/cal-3'), { ...log, setId: 'cal-3', number: 3 });
     skip.set(doc(admin, 'bktCalibration/state'), { ...state, activeSetId: 'cal-3', number: 3 });
     await assertFails(skip.commit());
+    // An edited start (set-N) is the next number, with a start strictly between 0 and 1.
+    const edited = { setId: 'set-2', number: 2, model: { pInit: 0.4 }, appliedAt: 2 };
+    const editedLog = { ...edited, kind: 'start', pilots: [], appliedBy: 'ada', appliedByEmail: null };
+    const outOfRange = writeBatch(admin);
+    outOfRange.set(doc(admin, 'bktSets/set-2'), { ...edited, model: { pInit: 1 } });
+    outOfRange.set(doc(admin, 'bktSetLogs/set-2'), { ...editedLog, model: { pInit: 1 } });
+    outOfRange.set(doc(admin, 'bktCalibration/state'), { ...state, activeSetId: 'set-2', number: 2 });
+    await assertFails(outOfRange.commit());
+    const start = writeBatch(admin);
+    start.set(doc(admin, 'bktSets/set-2'), edited);
+    start.set(doc(admin, 'bktSetLogs/set-2'), editedLog);
+    start.set(doc(admin, 'bktCalibration/state'), { ...state, activeSetId: 'set-2', number: 2 });
+    await assertSucceeds(start.commit());
   });
 
   it('lets only an admin mark pilot players, and keeps the log append-only', async () => {

@@ -33,6 +33,10 @@ const bkt = (over: Partial<BktSets> = {}): BktSets => ({
   apply: async () => {
     throw new Error('not in this test');
   },
+  startForNew: DEFAULT_BKT_MODEL.pInit,
+  editStart: async () => {
+    throw new Error('not in this test');
+  },
   ...over,
 });
 
@@ -121,13 +125,40 @@ describe('the model evaluation section', () => {
     expect(text()).toContain('No decisions yet');
   });
 
+  it('lets an admin set the start before the pre-test, with the published value as the placeholder', async () => {
+    const editStart = vi.fn(async () => ({ setId: 'set-1' }) as unknown as SavedValueSet);
+    await mount(<EvaluationSection course={course({ bkt: bkt({ editStart }) })} logs={logs({ data: { bktUpdates: [], qUpdates: [], loadedAt: 1 } })} />);
+    await pressTab('BKT: calibration');
+    expect(text()).toContain('New players start every competency at 0.30');
+    const input = view().querySelector<HTMLInputElement>('#bkt-start')!;
+    expect(input.placeholder).toBe('0.30');
+    const type = async (value: string) => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+      act(() => {
+        setter.call(input, value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      await flush();
+    };
+    await type('1.5');
+    expect(text()).toContain('The start must be from 0.01 to 0.99.');
+    await type('0.68');
+    expect(text()).toContain('Outside the range published BKT fits use');
+    const save = [...view().querySelectorAll('button')].find(b => b.textContent === 'Save start')!;
+    act(() => save.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    await clickLabel('Confirm start');
+    await flush();
+    expect(editStart).toHaveBeenCalledWith(0.68, '', { uid: 'admin-1', email: 'admin@example.com' });
+    expect(text()).toContain('Saved as Edited start 1');
+  });
+
   it('tracks the calibration stage, and calibrates only on request', async () => {
     const bktUpdates = [update('u1', 0.9, true, 'diagnostic'), update('u1', 0.2, false, 'diagnostic'), update('u2', 0.8, true, 'drive')];
     await mount(<EvaluationSection course={course({ bkt: bkt({ pilotIds: new Set(['u1']) }) })} logs={logs({ data: { bktUpdates, qUpdates: [], loadedAt: 1 } })} />);
     await pressTab('BKT: calibration');
     expect(text()).toContain('BKT values for new players: Default values');
     expect(text()).toContain('1 player(s) marked pilot');
-    expect(text()).toContain('No calibration applied yet');
+    expect(text()).toContain('No set saved yet');
     expect(text()).not.toContain('Starting value per competency');
     await clickLabel('Run the calibration');
     expect(text()).toContain('Not enough data yet');

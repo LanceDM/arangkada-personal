@@ -6,6 +6,12 @@
  * timing, the T, S and G used, P(L) before, the predicted P(correct), the
  * posterior and P(L) after, so the panel can change a value or a grading rule
  * and the log can be replayed; and AUC and RMSE come straight from it.
+ *
+ * Each competency is its own hidden Markov chain (2026-11-14): `chainSeq` is
+ * the entry's step in its competency's chain (1 on the competency's first
+ * answer, with `pInit` the chain's start), and `prevUserSeq` the `userSeq` of
+ * the entry before it in that chain, so each chain can be followed link by
+ * link: the previous entry's `pAfter` is this entry's `pBefore`.
  */
 import type { ActionLog, EvidenceSource } from '@/domain/learner/attempt';
 import type { DrivingCompetency } from '@/domain/learner/competency';
@@ -86,6 +92,10 @@ export interface BKTUpdateRecord extends StudyEnvelope {
   params: BKTEvidenceParams;
   /** pInit, written on a competency's first update only. */
   pInit: number | null;
+  /** This entry's step in its competency's chain: 1, 2, 3... (since 2026-11-14). */
+  chainSeq?: number;
+  /** The `userSeq` of the previous entry of the same competency; null on its first (since 2026-11-14). */
+  prevUserSeq?: number | null;
   pBefore: number;
   predictedCorrect: number;
   posterior: number;
@@ -147,6 +157,9 @@ export const buildBKTLog = (input: {
   if (input.modelSet) profile.modelSet = input.modelSet;
   const all = startingMastery(model);
   const seen = new Set<DrivingCompetency>();
+  // Each competency's chain: how many steps so far, and the userSeq of the last.
+  const chainLength = new Map<DrivingCompetency, number>();
+  const lastSeq = new Map<DrivingCompetency, number>();
   const entries: BKTUpdateRecord[] = [];
 
   steps.forEach((step, i) => {
@@ -166,6 +179,10 @@ export const buildBKTLog = (input: {
     all[step.competency] = step.pAfter;
     const first = !seen.has(step.competency);
     seen.add(step.competency);
+    const chainSeq = (chainLength.get(step.competency) ?? 0) + 1;
+    const prevUserSeq = lastSeq.get(step.competency) ?? null;
+    chainLength.set(step.competency, chainSeq);
+    lastSeq.set(step.competency, i + 1);
 
     if (i < input.alreadyLogged) return;
     const envelope = input.envelope(entries.length);
@@ -189,6 +206,8 @@ export const buildBKTLog = (input: {
       timedOut: log.reactionCensored === true,
       params: step.params,
       pInit: first ? priorFor(model, step.competency) : null,
+      chainSeq,
+      prevUserSeq,
       pBefore: step.pBefore,
       predictedCorrect: step.predictedCorrect,
       posterior: step.posterior,

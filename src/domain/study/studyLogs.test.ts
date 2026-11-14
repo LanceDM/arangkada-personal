@@ -136,5 +136,28 @@ describe('the BKT log', () => {
   it('writes only the answers not yet logged', () => {
     const { entries } = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 2, envelope, now: 10, configVersion: 'c' });
     expect(entries.map(e => e.userSeq)).toEqual([3]);
+    // Its chain links still count the answers before it.
+    expect(entries[0]).toMatchObject({ chainSeq: 3, prevUserSeq: 2 });
+  });
+
+  it('links each competency into its own chain, start to latest', () => {
+    const mixed = [
+      log(1, true, { source: 'diagnostic' }),
+      log(2, true, { source: 'diagnostic', competency: 'right_of_way' }),
+      log(3, false, { scenarioId: 's1' }),
+      log(4, true, { scenarioId: 's2', competency: 'right_of_way' }),
+    ];
+    const at = (levelId: number | null): EvidenceOrigin => ({ kind: levelId === null ? 'diagnostic' : 'attempt', levelId, ref: null, attempt: null });
+    const { entries } = buildBKTLog({ uid: 'u', logs: mixed, origins: [at(null), at(null), at(6), at(6)], alreadyLogged: 0, envelope, now: 10, configVersion: 'c' });
+    expect(entries.map(e => [e.competency, e.chainSeq, e.prevUserSeq, e.pInit])).toEqual([
+      ['parking', 1, null, 0.3],
+      ['right_of_way', 1, null, 0.3],
+      ['parking', 2, 1, null],
+      ['right_of_way', 2, 2, null],
+    ]);
+    // Each link carries the chain on: the previous entry's P(L) after is this one's P(L) before.
+    for (const entry of entries.filter(e => e.prevUserSeq !== null)) {
+      expect(entry.pBefore).toBe(entries[entry.prevUserSeq! - 1].pAfter);
+    }
   });
 });

@@ -1,5 +1,5 @@
 import type { SiteStatus } from '@/features/admin/domain/siteStatus';
-import type { BktSetsData, SavedValueSet } from '@/features/admin/domain/bktSetsAdmin';
+import type { BktSetsData, SavedValueSet, StartEditRecord } from '@/features/admin/domain/bktSetsAdmin';
 import type { CalibrationRecord, PilotRef } from '@/features/admin/domain/bktCalibration';
 /**
  * What Admin needs from the outside world, stated as an interface.
@@ -84,4 +84,9 @@ export interface BktSetsRepository {
    * Refused when another calibration was applied since `expectedNumber` was read.
    */
   apply(record: CalibrationRecord, expectedNumber: number, admin: { uid: string; email: string | null }): Promise<SavedValueSet>;
+  /**
+   * Saves `record` as Edited start N + 1 (`set-N`) and makes it the set new
+   * players get. Refused, like `apply`, when another set was saved since.
+   */
+  editStart(record: StartEditRecord, expectedNumber: number, admin: { uid: string; email: string | null }): Promise<SavedValueSet>;
 }

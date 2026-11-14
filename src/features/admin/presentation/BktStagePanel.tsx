@@ -9,6 +9,7 @@ import { calibrationProgress } from '@/features/admin/domain/bktCalibration';
 import type { PlayerMastery } from '@/features/admin/domain/courseAdmin';
 import type { BktSets } from '@/features/admin/application/useBktSets';
 import { Panel } from './adminUi';
+import { BktStartSetting } from './BktStartSetting';
 import { toDateTime } from './formatDate';
 
 export const BktStagePanel = ({ mastery, bkt }: { mastery: readonly PlayerMastery[]; bkt: BktSets }) => {
@@ -26,7 +27,7 @@ export const BktStagePanel = ({ mastery, bkt }: { mastery: readonly PlayerMaster
   return (
     <Panel
       title={`BKT values for new players: ${progress.inForce}`}
-      description={`${progress.number === 0 ? 'The published values (start 0.30). ' : `Applied ${toDateTime(progress.appliedAt)}. `}Every player keeps the set they started on to the end of their course; a new calibration only changes the set for players who start after it. Settings version ${RUN_CONFIG_VERSION}.`}
+      description={`${progress.number === 0 ? 'The published values. ' : `Saved ${toDateTime(progress.appliedAt)}. `}Start before the pre-test for new players: ${bkt.startForNew.toFixed(2)}. Every player keeps the set they started on to the end of their course; a new calibration or edited start only changes the set for players who start after it. Settings version ${RUN_CONFIG_VERSION}.`}
     >
       <ol className="grid gap-3 text-xs md:grid-cols-2">
         {steps.map((step, i) => {
@@ -43,6 +44,7 @@ export const BktStagePanel = ({ mastery, bkt }: { mastery: readonly PlayerMaster
           );
         })}
       </ol>
+      <BktStartSetting bkt={bkt} />
       {bkt.error && <p className="mt-2 text-xs text-destructive">Could not read the value sets: {bkt.error}</p>}
     </Panel>
   );

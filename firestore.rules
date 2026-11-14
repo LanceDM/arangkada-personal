@@ -23,8 +23,8 @@ rules_version = '2';
 //   users/{uid}/bkt/profile                        BKTProfileDoc: the participant's own BKT now
 //   users/{uid}/bktUpdates/{updateId}              BKTUpdateRecord: one per graded answer, append-only
 //   bktCalibration/state                           which BKT value set new players get (admin)
-//   bktSets/{setId}                                each applied calibration's values, never edited (admin writes)
-//   bktSetLogs/{setId}                             its log: pilot players, fit, who applied it (admin only)
+//   bktSets/{setId}                                each applied calibration (cal-N) or edited start (set-N): its values, never edited (admin writes)
+//   bktSetLogs/{setId}                             its log: pilot players, fit or the start changed, who applied it (admin only)
 //   bktPilots/{uid}, bktPilotLog/{id}              pilot players and every mark/unmark (admin)
 //   policy/competencyQ                             the shared Q-table, learned online by every participant
 //   policy/competencyQ/updates/{updateId}          QLogEntry: every table change, append-only
@@ -1213,7 +1213,9 @@ service cloud.firestore {
     // ── BKT value sets (2026-11-13) ────────────────────────
     // `bktCalibration/state` names the set new players get; `bktSets/cal-N` is
     // each calibration an admin applied (its values), and `bktSetLogs/cal-N`
-    // everything it was fitted from. A saved set is never edited or removed: players who started
+    // everything it was fitted from. `set-N` (2026-11-14) is an edited start:
+    // the set in force with only P(L0) changed by an admin; the two kinds share
+    // one count. A saved set is never edited or removed: players who started
     // on it keep it to the end of their course. Every signed-in player reads
     // the state and the sets; only an admin writes them, in one transaction.
     match /bktCalibration/{docId} {
@@ -1222,7 +1224,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['activeSetId', 'number', 'appliedAt', 'appliedBy'])
         && request.resource.data.number is int && request.resource.data.number >= 1
         && request.resource.data.number == (resource == null ? 1 : resource.data.number + 1)
-        && request.resource.data.activeSetId == 'cal-' + string(request.resource.data.number)
+        && request.resource.data.activeSetId in ['cal-' + string(request.resource.data.number), 'set-' + string(request.resource.data.number)]
         && request.resource.data.appliedAt is number
         && request.resource.data.appliedBy == request.auth.uid
         && existsAfter(/databases/$(database)/documents/bktSets/$(request.resource.data.activeSetId));
@@ -1235,8 +1237,10 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['setId', 'number', 'model', 'appliedAt'])
         && request.resource.data.setId == setId
         && request.resource.data.number is int
-        && setId == 'cal-' + string(request.resource.data.number)
+        && setId in ['cal-' + string(request.resource.data.number), 'set-' + string(request.resource.data.number)]
         && request.resource.data.model is map
+        && request.resource.data.model.pInit is number
+        && request.resource.data.model.pInit > 0 && request.resource.data.model.pInit < 1
         && request.resource.data.appliedAt is number
         && existsAfter(/databases/$(database)/documents/bktSetLogs/$(setId));
       allow update, delete: if false;
