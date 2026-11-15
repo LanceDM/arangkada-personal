@@ -208,7 +208,7 @@ export const level2Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'BLOWBAGETS is a simple do-it-yourself motor vehicle inspection used to avoid road crashes and breakdowns. The extracted source also reminds drivers that regular preventive maintenance is cheaper than corrective maintenance.',
+          text: 'BLOWBAGETS is a simple do-it-yourself motor vehicle inspection used to avoid road crashes and breakdowns. The Driver\'s Manual also reminds drivers that regular preventive maintenance is cheaper than corrective maintenance.',
         },
         {
           type: 'table',
@@ -239,11 +239,11 @@ export const level2Module = {
     {
       id: 'level-2-unsafe-conditions',
       title: '6. Unsafe Conditions And No-Go Decisions',
-      text: 'The extracted source says motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
+      text: 'Under RA 4136, Sec. 16, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'The extracted source says motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
+          text: 'Under RA 4136, Sec. 16, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
         },
         {
           type: 'table',

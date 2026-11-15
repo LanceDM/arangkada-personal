@@ -1,3 +1,4 @@
+import { STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
 import { useLanguage, useText } from '@/shared/i18n/useText';
 import { playableModule } from '@/features/driving-sim/application/use-cases/playableLevel';
 import {
@@ -149,6 +150,9 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
   // A blocked quiz still shows its step: that is where the retry is.
   const hasQuiz = gate ? gate.hasQuiz : quizGate !== 'open';
   const quizSize = levelQuiz?.itemsPerSitting ?? 0;
+  // The course's quiz: 3 items for each competency the stage teaches (the open
+  // attempt's own count when there is one; a retake asks only the ones left).
+  const courseQuizSize = gate?.quiz?.items.length ?? (isCompetencyStage(level.id) ? STAGE_COMPETENCIES[level.id].length * 3 : 0);
   const readMinutes = moduleReadMinutes(levelModule);
   const subtitle = moduleSubtitle(level, hasQuiz, t);
   const checkpoint = gate
@@ -351,7 +355,7 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
     return (
       <LessonReader
         module={levelModule}
-        quizSize={gate ? (gate.hasQuiz ? gate.quiz?.items.length ?? 3 : 0) : levelQuiz ? quizSize : quizGate === 'open' ? 0 : undefined}
+        quizSize={gate ? (gate.hasQuiz ? courseQuizSize : 0) : levelQuiz ? quizSize : quizGate === 'open' ? 0 : undefined}
         onReadEvent={gate?.log ? event => gate.log?.(`lesson_${event.action}`, { ...event, module: levelModule.id }) : undefined}
         onClose={() => {
           gate?.log?.('module_closed', { module: levelModule.id });
@@ -594,7 +598,7 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
                 </div>
                 {hasQuiz && (
                   <div className="rounded-lg bg-secondary/50 p-3">
-                    <p className="font-display text-lg font-black">{levelQuiz ? quizSize : '–'}</p>
+                    <p className="font-display text-lg font-black">{gate ? (gate.hasQuiz ? courseQuizSize : '–') : levelQuiz ? quizSize : '–'}</p>
                     <p className="text-[10px] uppercase text-muted-foreground">{t(m.quiz)}</p>
                   </div>
                 )}

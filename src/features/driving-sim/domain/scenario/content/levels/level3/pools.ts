@@ -1050,7 +1050,7 @@ const pedestrianSlot: SlotVariant[] = [
     pedestrians: [{ kind: 'child' }],
     type: 'pedestrian_crossing',
     scene: 'crosswalk',
-    description: 'School crossing: a CHILDREN CROSSING AHEAD sign precedes a crossing with schoolchildren waiting.',
+    description: 'School crossing: a CHILDREN CROSSING AHEAD sign precedes a crossing with a schoolchild waiting at the curb.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Children step off a curb without checking. This sign exists because that is predictable.',

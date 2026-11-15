@@ -526,7 +526,7 @@ const engineBayPool: HotspotContent[] = [
   },
 ];
 
-const trunkShell: HotspotShell = { id: 'trunk', label: 'Trunk — EWD, Spare & Tools', area: 'BLOWBAGETS — A, T (Tools)', x: 0.5, y: 0.74, detail: 'trunk' };
+const trunkShell: HotspotShell = { id: 'trunk', label: 'Trunk — EWD, Spare & Tools', area: 'BLOWBAGETS — A (Accessories)', x: 0.5, y: 0.74, detail: 'trunk' };
 const trunkPool: HotspotContent[] = [
   {
     observation:
