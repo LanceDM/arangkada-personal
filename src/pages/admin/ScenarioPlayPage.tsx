@@ -39,6 +39,8 @@ const ScenarioPlayPage = () => {
           initialDistance={drive.initialDistance}
           // The scenario alone: no route changes toward a weak area mid-drive.
           liveReroll={false}
+          // Checking takes as long as it takes: no clock, no running out of time.
+          noTimeLimit
           onComplete={finished => {
             setResult(finished);
             setPlaying(false);

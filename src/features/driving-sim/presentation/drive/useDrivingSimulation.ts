@@ -109,6 +109,8 @@ interface UseDrivingSimulationOptions {
    * per mounted drive.
    */
   liveReroll?: boolean;
+  /** No time limit and no clock (Admin > Scenarios > Play). */
+  noTimeLimit?: boolean;
 }
 
 export interface DrivingSimulation {
@@ -152,12 +154,20 @@ export const useDrivingSimulation = ({
   priorLogs,
   support,
   liveReroll = true,
+  noTimeLimit = false,
 }: UseDrivingSimulationOptions): DrivingSimulation => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // One session per mounted drive. `GameScreen` is keyed per attempt, so a
   // retry mounts a fresh one rather than reusing this.
   const [session] = useState(() =>
-    createDrivingSession({ level, fsm, initialDistance, signCoverage: loadSignCoverage(), support })
+    createDrivingSession({
+      level,
+      fsm,
+      initialDistance,
+      signCoverage: loadSignCoverage(),
+      support,
+      ...(noTimeLimit ? { timeLimitSteps: Number.POSITIVE_INFINITY } : {}),
+    })
   );
   const [history] = useState(() => priorLogs ?? []);
   const [rerollsLive] = useState(liveReroll);

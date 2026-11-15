@@ -96,6 +96,8 @@ interface GameScreenProps {
    *.
    */
   liveReroll?: boolean;
+  /** No time limit and no clock: for checking a scenario (Admin > Scenarios > Play). */
+  noTimeLimit?: boolean;
 }
 
 /** The lane strip's markers where the support level withholds the response. */
@@ -144,6 +146,7 @@ const GameScreen = ({
   attemptSeed,
   priorLogs,
   liveReroll,
+  noTimeLimit,
 }: GameScreenProps) => {
   const say = useText();
   // Levels carrying a garage stage start there; the road only opens once every
@@ -312,6 +315,7 @@ const GameScreen = ({
     priorLogs,
     support,
     liveReroll,
+    noTimeLimit,
   });
 
   // The drive's view model. Everything the screen shows comes from here; the
