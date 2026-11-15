@@ -37,6 +37,8 @@ const ScenarioPlayPage = () => {
           key={run}
           level={drive.level}
           initialDistance={drive.initialDistance}
+          // The scenario alone: no route changes toward a weak area mid-drive.
+          liveReroll={false}
           onComplete={finished => {
             setResult(finished);
             setPlaying(false);
