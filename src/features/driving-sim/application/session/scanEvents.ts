@@ -110,6 +110,11 @@ const RAMP_COMMIT_TOLERANCE = CAR_LENGTH;
  */
 const MAX_SHOWN_GAP = 9.9;
 
+
+/** What a checkpoint driven through without stopping is told. */
+export const CHECKPOINT_MISSED_MESSAGE =
+  'You drove through the checkpoint without stopping. Stop at the line so the officer can check you; the question is asked once you have stopped.';
+
 export interface ScanEventsContext {
   world: DrivingWorld;
   level: LevelConfig;
@@ -783,15 +788,16 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
       world.activeEvent === event
     ) {
       world.playerActed = true;
-      // A traffic stop driven through is told what it missed - the pull-over -
-      // rather than the penalty for a question the driver was never asked.
-      const missed = event.inspection?.pullOver?.missedMessage;
-      decide(
-        events,
-        missed ? { ...event, penaltyMessage: missed } : event,
-        event.correctAction === 'accelerate' ? 'brake' : 'accelerate',
-        isTutorialLevel ? 'guided' : 'expired'
-      );
+      if (isCheckpoint) {
+        // A checkpoint driven through is told what it missed - the stop (or,
+        // flagged down, the pull-over) - rather than the go/no-go answer to a
+        // question the driver was never asked: "you slowed down, this one
+        // wanted you to carry on" read as if stopping at the barrier was wrong.
+        const missed = event.inspection?.pullOver?.missedMessage ?? CHECKPOINT_MISSED_MESSAGE;
+        decide(events, { ...event, correctAction: 'stop', penaltyMessage: missed }, 'no_stop', 'expired');
+      } else {
+        decide(events, event, event.correctAction === 'accelerate' ? 'brake' : 'accelerate', 'guided');
+      }
     }
   }
 

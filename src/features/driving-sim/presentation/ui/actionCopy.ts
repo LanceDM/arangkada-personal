@@ -49,6 +49,8 @@ const HAPPENED: Record<string, Localized> = {
   braked_hard: { en: 'stood on the brake' },
   too_fast: { en: 'carried too much speed' },
   wrong_lane: { en: 'was in the wrong lane' },
+  // A checkpoint driven through: the stop that opens its question never came.
+  no_stop: { en: 'drove through without stopping' },
 };
 
 /**

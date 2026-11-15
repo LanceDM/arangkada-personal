@@ -391,7 +391,7 @@ const renderNode = (ctx: CanvasRenderingContext2D, node: SceneNode, roadAt: Road
       paintSituation(ctx, node.situation, roadAt);
       break;
     case 'checkpoint':
-      drawCheckpointScene(ctx, node.roadX, node.screenY);
+      drawCheckpointScene(ctx, node.roadX, node.screenY, node.open);
       if (node.label) paintCheckpointLabel(ctx, node.label, node.screenY);
       break;
     case 'traffic-stop':

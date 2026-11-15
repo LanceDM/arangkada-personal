@@ -223,7 +223,9 @@ export const eventSceneNodes = (
     // to. Neither puts anything solid on the road.
     if (event.inspection.pullOver) return [{ kind: 'traffic-stop', roadX, screenY }];
     const readable = screenY > 60 && screenY < CANVAS_HEIGHT - 120 && !handled;
-    return [{ kind: 'checkpoint', roadX, screenY, label: readable ? CHECKPOINT_LABEL : null }];
+    // Once answered the boom is raised: a barrier left across the road after the
+    // driver was cleared reads as "still stopped here" while they drive through it.
+    return [{ kind: 'checkpoint', roadX, screenY, label: readable ? CHECKPOINT_LABEL : null, open: handled }];
   }
 
   if (event.marking) {

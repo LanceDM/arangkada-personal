@@ -302,7 +302,8 @@ type SceneNodeShape =
    * suppressed once the stop has been made, and while the scene is at the very
    * top or bottom of the frame.
    */
-  | { kind: 'checkpoint'; roadX: number; screenY: number; label: string | null }
+  /** `open`: the check is answered and the boom is raised, so the road ahead is visibly clear. */
+  | { kind: 'checkpoint'; roadX: number; screenY: number; label: string | null; open: boolean }
   /**
    * An enforcer at the right curb flagging the car down (`inspection.pullOver`):
    * a traffic stop, not a checkpoint, so no barrier across the road and no
