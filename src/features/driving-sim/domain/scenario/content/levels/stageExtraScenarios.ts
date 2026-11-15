@@ -252,7 +252,8 @@ const level9: SlotVariant[] = [
   {
     id: 'level9.extra.no-stopping-at-the-bridge',
     type: 'scenario_trigger',
-    scene: 'open_road',
+    // The bridge the text names is drawn (2026-11-16): it was open road.
+    scene: 'bridge',
     description:
       'Your engine has started to knock and you want to stop and look. A NO STOPPING ANYTIME sign stands at the narrow bridge just ahead; there is a wide shoulder past it.',
     correctAction: 'accelerate',
