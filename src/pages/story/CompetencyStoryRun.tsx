@@ -169,8 +169,11 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
       if (!state) return;
       const { cursor: at } = state;
       // The initial exam (and the background form, when asked) is taken from
-      // the main menu; the course does not start without it.
-      if ((state.backgroundRequired && !state.backgroundDone) || !state.diagnosticDone) {
+      // the main menu; the course does not start without it. An admin's own
+      // account (`openAll`: never a study account) is not held by it, as
+      // everywhere else (useInitialExam): its pre-test is a preview that saves
+      // nothing, so it would otherwise never reach the course or its quiz.
+      if (!routing.openAll && ((state.backgroundRequired && !state.backgroundDone) || !state.diagnosticDone)) {
         void logUiAction(uid, 'continue_blocked', { reason: 'initial_exam_not_taken' });
         navigate(routing.participant ? '/study' : '/play/pre-test');
         return;
