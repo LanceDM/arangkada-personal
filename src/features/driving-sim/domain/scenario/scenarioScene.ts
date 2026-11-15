@@ -326,7 +326,11 @@ export type ScenePrefab =
   | { kind: 'lane_arrow'; direction: 'left' | 'right' }
   | { kind: 'compliance'; check: ComplianceCheck }
   | { kind: 'checkpoint_officer' }
-  | { kind: 'main_road_junction' }
+  /**
+   * `crossing`: the vehicle the scenario names on the main road (2026-11-16),
+   * drawn as that vehicle coming from that side; ordinary cars otherwise.
+   */
+  | { kind: 'main_road_junction'; crossing?: { kind: MainRoadVehicleKind; from: 'left' | 'right' } }
   /**
    * A road crash that has already happened: the wreck across the lane, the
    * vehicle that left the road, the debris between them.
@@ -693,6 +697,9 @@ export interface NpcVehicleSpec {
  * `pedestrians` on `ScenarioEvent`.
  */
 /** `dog`: an animal walked on a lead beside its owner (2026-11-16), drawn and never solid on its own. */
+/** What crosses a main-road junction a driver is waiting to join. */
+export type MainRoadVehicleKind = 'car' | 'jeepney' | 'tricycle' | 'motorcycle';
+
 export type PedestrianKind = 'adult' | 'child' | 'elderly' | 'pwd' | 'dog';
 
 /**

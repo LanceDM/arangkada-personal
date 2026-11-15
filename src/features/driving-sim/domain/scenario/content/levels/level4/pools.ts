@@ -28,6 +28,8 @@ interface MarkingSpec extends MarkingPlate {
   postedSpeed?: ScenarioEvent['postedSpeed'];
   neutral?: ScenarioEvent['neutral'];
   warningDistance?: ScenarioEvent['warningDistance'];
+  /** Who is using the lane the marking reserves, drawn travelling in it (never solid). */
+  npc?: ScenarioEvent['npc'];
   /**
    * The competency the marking is graded under, where it is not lane
    * discipline: a crossing is about pedestrians, a painted limit about speed
@@ -69,6 +71,7 @@ const marking = (spec: MarkingSpec): SlotVariant => {
     ...(spec.postedSpeed ? { postedSpeed: spec.postedSpeed } : {}),
     ...(spec.neutral ? { neutral: spec.neutral } : {}),
     ...(spec.warningDistance ? { warningDistance: spec.warningDistance } : {}),
+    ...(spec.npc ? { npc: spec.npc } : {}),
     marking: {
       name: spec.name,
       ...(spec.image ? { image: spec.image } : {}),
@@ -544,7 +547,8 @@ const reservedLaneSlot: SlotVariant[] = [
     art: 'bicycle_lane',
     side: 'right',
     correctAction: 'brake',
-    description: 'Bicycle lane: a solid line marks the curb-side lane for bicycles, and cyclists are riding in it.',
+    description: 'Bicycle lane: a solid line marks the curb-side lane for bicycles, and a cyclist is riding in it.',
+    npc: { path: 'travelling_ahead', vehicleKind: 'bicycle', lane: 'curb', label: 'a cyclist in the bike lane' },
     law: 'Do not travel or park in a bicycle lane; give cyclists sufficient clearance and watch your speed when passing.',
     penalty: 'Passing a cyclist fast and close is dangerous even from your own lane. The rule is clearance and speed, not just staying out of the paint.',
     reward: 'Correct. You kept out of the bike lane and eased off to pass with room.',
@@ -563,10 +567,11 @@ const reservedLaneSlot: SlotVariant[] = [
     art: 'motorcycle_lane',
     side: 'right',
     correctAction: 'brake',
-    description: 'Motorcycle lane: the curb-side lane is marked for riders, and it crosses your path at the junction ahead.',
-    law: 'Be extra careful when turning at intersections where a bike or motorcycle lane crosses your path.',
-    penalty: 'A motorcycle lane crossing your path at a junction is where riders and turning cars actually collide.',
-    reward: 'Correct. You slowed for the point where the motorcycle lane crosses.',
+    description: 'Motorcycle lane: the curb-side lane is marked for riders, and a rider is traveling in it.',
+    npc: { path: 'travelling_ahead', vehicleKind: 'motorcycle', lane: 'curb', label: 'a rider in the motorcycle lane' },
+    law: 'A motorcycle lane is allotted to riders: other vehicles keep out of it, and take extra care where it crosses a junction.',
+    penalty: 'Riders in a motorcycle lane are right beside you. Drifting into it, or passing fast, puts you into them.',
+    reward: 'Correct. You stayed out of the motorcycle lane and eased off past the rider.',
     requiredLane: {
       lane: 'inner',
       hint: 'Leave the motorcycle lane to the riders and watch where it crosses.',

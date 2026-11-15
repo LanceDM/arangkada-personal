@@ -31,6 +31,7 @@ import { ROAD_ACTORS } from '@/features/driving-sim/domain/world/roadActors';
 import {
   DRIVEWAY_GROUP_GAP,
   drivewayPedestrianX,
+  MAIN_ROAD_BODY,
   mainRoadTraffic,
 } from '@/features/driving-sim/domain/world/sceneGeometry';
 import { junctionCentreY } from '@/features/driving-sim/domain/world/junctionGeometry';
@@ -499,15 +500,16 @@ export const resolvedSceneNodes = (
       // slides past after the call has been made and you drive through.
       // Yielding earns clear passage, so a correct call is never punished by
       // traffic that reappears while you are still crossing.
-      const traffic = mainRoadTraffic(screenY, handled, now);
+      const traffic = mainRoadTraffic(screenY, handled, now, scene.crossing);
       nodes.push({
         kind: 'main-road-junction',
         roadX,
         screenY,
         traffic,
-        solids: traffic.cars.map(car =>
-          bodyAt(car.x, car.y, 50, 24, 'vehicle', 'a vehicle crossing on the main road')
-        ),
+        solids: traffic.cars.map(car => {
+          const body = MAIN_ROAD_BODY[car.kind ?? 'car'];
+          return bodyAt(car.x, car.y, body.width, body.height, 'vehicle', 'a vehicle crossing on the main road');
+        }),
       });
       break;
     }

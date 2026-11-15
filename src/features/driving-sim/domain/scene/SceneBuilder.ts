@@ -234,6 +234,10 @@ export const eventSceneNodes = (
     if (event.marking.art === 'yellow_box') {
       nodes.push(...yellowBoxTraffic(placement, poseVehicle));
       nodes.push(...vehicleInTheBox(placement, oncomingLanes));
+    } else {
+      // Whoever the reserved lane is for, travelling in it (a cyclist in the
+      // bike lane, a rider in the motorcycle lane), where the scenario says so.
+      nodes.push(...ownRoadVehicle(placement, poseVehicle));
     }
     return nodes;
   }

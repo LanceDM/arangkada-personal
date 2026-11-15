@@ -865,7 +865,7 @@ const mergeSlot: SlotVariant[] = [
   },
   {
     id: 'level2.merge.jeepney',
-    scenePrefab: { kind: 'main_road_junction' },
+    scenePrefab: { kind: 'main_road_junction', crossing: { kind: 'jeepney', from: 'right' } },
     type: 'scenario_trigger',
     description: 'Main road junction ahead: a jeepney is approaching from the right.',
     correctAction: 'brake',
@@ -880,7 +880,7 @@ const mergeSlot: SlotVariant[] = [
   },
   {
     id: 'level2.merge.tricycle',
-    scenePrefab: { kind: 'main_road_junction' },
+    scenePrefab: { kind: 'main_road_junction', crossing: { kind: 'tricycle', from: 'left' } },
     type: 'scenario_trigger',
     description: 'Main road junction ahead: a tricycle is approaching from the left.',
     correctAction: 'brake',
@@ -895,7 +895,7 @@ const mergeSlot: SlotVariant[] = [
   },
   {
     id: 'level2.merge.delivery-motorcycle',
-    scenePrefab: { kind: 'main_road_junction' },
+    scenePrefab: { kind: 'main_road_junction', crossing: { kind: 'motorcycle', from: 'left' } },
     type: 'scenario_trigger',
     description: 'Main road junction ahead: a delivery motorcycle is weaving through the traffic.',
     correctAction: 'brake',

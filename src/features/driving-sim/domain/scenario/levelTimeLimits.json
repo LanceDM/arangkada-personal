@@ -1,7 +1,7 @@
 {
   "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level, every practice item the level can take on its longest roll, and every whole-stage course drive (composeDrive) over the roll seeds.",
   "measuredOn": "2026-11-15",
-  "commit": "0f06edd+dirty",
+  "commit": "8354558+dirty",
   "factor": 2,
   "roundingSeconds": 30,
   "rollSeeds": [
@@ -57,7 +57,7 @@
       "longestRoll": 1,
       "longestItem": "composed",
       "drives": 69,
-      "fingerprint": "0ca20a20",
+      "fingerprint": "c714b61a",
       "unpassed": []
     },
     {
@@ -68,7 +68,7 @@
       "longestRoll": 9,
       "longestItem": "composed",
       "drives": 116,
-      "fingerprint": "10b7c177",
+      "fingerprint": "0d2bf9f7",
       "unpassed": []
     },
     {
@@ -79,7 +79,7 @@
       "longestRoll": 4,
       "longestItem": "composed",
       "drives": 142,
-      "fingerprint": "d77df842",
+      "fingerprint": "6205e8d0",
       "unpassed": []
     },
     {
@@ -90,7 +90,7 @@
       "longestRoll": 2,
       "longestItem": "composed",
       "drives": 168,
-      "fingerprint": "5b514f1f",
+      "fingerprint": "bbbd44a1",
       "unpassed": []
     },
     {
@@ -101,7 +101,7 @@
       "longestRoll": 14,
       "longestItem": "composed",
       "drives": 156,
-      "fingerprint": "819da011",
+      "fingerprint": "b70c989d",
       "unpassed": []
     },
     {
@@ -112,7 +112,7 @@
       "longestRoll": 17,
       "longestItem": "composed",
       "drives": 160,
-      "fingerprint": "561901e7",
+      "fingerprint": "516d2803",
       "unpassed": [
         {
           "item": "level3.speed.preferred-max-30",
@@ -192,7 +192,7 @@
       "longestRoll": 1,
       "longestItem": "composed",
       "drives": 161,
-      "fingerprint": "d922577d",
+      "fingerprint": "88ab6fe9",
       "unpassed": []
     },
     {
@@ -203,7 +203,7 @@
       "longestRoll": 10,
       "longestItem": "composed",
       "drives": 167,
-      "fingerprint": "270a2391",
+      "fingerprint": "577b06b5",
       "unpassed": []
     },
     {
@@ -214,7 +214,7 @@
       "longestRoll": 12,
       "longestItem": "composed",
       "drives": 171,
-      "fingerprint": "93a0c885",
+      "fingerprint": "cf919b9d",
       "unpassed": []
     },
     {
@@ -225,7 +225,7 @@
       "longestRoll": 3,
       "longestItem": "composed",
       "drives": 176,
-      "fingerprint": "e15114af",
+      "fingerprint": "07b8fb7f",
       "unpassed": []
     },
     {
@@ -236,7 +236,7 @@
       "longestRoll": 16,
       "longestItem": null,
       "drives": 20,
-      "fingerprint": "3ad62179",
+      "fingerprint": "0ade71cd",
       "unpassed": []
     }
   ]
