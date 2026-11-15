@@ -1,7 +1,7 @@
 {
   "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level, every practice item the level can take on its longest roll, and every whole-stage course drive (composeDrive) over the roll seeds.",
   "measuredOn": "2026-11-15",
-  "commit": "8354558+dirty",
+  "commit": "23e1568+dirty",
   "factor": 2,
   "roundingSeconds": 30,
   "rollSeeds": [
@@ -108,11 +108,11 @@
       "levelId": 7,
       "limitSeconds": 1290,
       "limitSteps": 77400,
-      "longestSteps": 37856,
-      "longestRoll": 17,
+      "longestSteps": 38245,
+      "longestRoll": 6,
       "longestItem": "composed",
       "drives": 160,
-      "fingerprint": "516d2803",
+      "fingerprint": "68ca4107",
       "unpassed": [
         {
           "item": "level3.speed.preferred-max-30",
@@ -141,46 +141,6 @@
         {
           "item": "level4.traverse.painted-speed-limit",
           "why": "3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens"
-        },
-        {
-          "item": "composed",
-          "why": "3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
-        },
-        {
-          "item": "composed",
-          "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens; 3 standing penalties"
         }
       ]
     },

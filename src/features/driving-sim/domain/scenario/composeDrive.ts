@@ -21,7 +21,7 @@ import { COMPETENCIES } from '@/domain/learner/profile';
 import { DRIVE_ITEMS_PER_COMPETENCY } from '@/domain/learner/stageCompetencies';
 import type { GarageHotspot, GarageStage, LevelConfig, ScenarioEvent } from './scenarioDefinition';
 import type { SlotVariant } from './pooling';
-import { isPortableRemediation, remediationCandidates } from './remediationPool';
+import { fitsTheRoad, isPortableRemediation, remediationCandidates } from './remediationPool';
 import { declaredLineSpans } from './roadLine';
 import { stageContent, type StageContent } from './stageContent';
 import { STAGE_EXTRAS, extrasBefore } from './content/levels/stageExtras';
@@ -92,17 +92,19 @@ const candidatesFor = (content: StageContent, competency: DrivingCompetency): Ca
     )
   );
   (STAGE_EXTRAS[content.levelId] ?? [])
-    .filter(variant => variant.competency === competency && isPortableRemediation(variant))
+    .filter(variant => variant.competency === competency && isPortableRemediation(variant) && fitsTheRoad(variant, content.base))
     .forEach(variant => own.push({ kind: 'append', variant, sourceLevelId: content.levelId, own: true }));
 
   // Taught in an earlier stage: portable variants only, from the levels'
   // slots and the scenarios written for earlier stages.
   const borrowed: Candidate[] = [
-    ...remediationCandidates(competency, content.levelId - 1).map(({ levelId, variant }): Candidate => ({
+    ...remediationCandidates(competency, content.levelId - 1)
+      .filter(({ variant }) => fitsTheRoad(variant, content.base))
+      .map(({ levelId, variant }): Candidate => ({
       kind: 'append', variant, sourceLevelId: levelId, own: false,
     })),
     ...extrasBefore(content.levelId)
-      .filter(({ variant }) => variant.competency === competency && isPortableRemediation(variant))
+      .filter(({ variant }) => variant.competency === competency && isPortableRemediation(variant) && fitsTheRoad(variant, content.base))
       .map(({ levelId, variant }): Candidate => ({ kind: 'append', variant, sourceLevelId: levelId, own: false })),
   ];
   return [...own, ...borrowed];

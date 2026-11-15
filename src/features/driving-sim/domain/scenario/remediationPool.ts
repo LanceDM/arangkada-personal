@@ -124,6 +124,25 @@ export const isPortableRemediation = (variant: SlotVariant): boolean =>
   variant.scene !== 'route' &&
   variant.requiredLane?.lane !== 'middle';
 
+/** The lowest speed an expressway allows; a slower posting belongs on another road. */
+export const EXPRESSWAY_MINIMUM_SPEED = 60;
+
+/**
+ * Whether a scenario written for another road still makes sense appended to
+ * this one (2026-11-16). On an expressway two kinds do not: a posted speed
+ * below the expressway's own minimum (a school zone, a 20 or 30 km/h sign),
+ * which a driver who obeys it is then charged with crawling for; and an
+ * ambulance closing from behind, whose move-over is laid out for an ordinary
+ * road and which the correct driver could only be hit by on four lanes. The
+ * reference drive found both (levelTimeLimits.json, Level 7, `unpassed`).
+ */
+export const fitsTheRoad = (variant: SlotVariant, road: { roadClass: string }): boolean => {
+  if (road.roadClass !== 'expressway') return true;
+  if (variant.postedSpeed !== undefined && variant.postedSpeed < EXPRESSWAY_MINIMUM_SPEED) return false;
+  if (variant.npc?.path === 'closing_from_behind' && variant.npc.vehicleKind === 'ambulance') return false;
+  return true;
+};
+
 export interface RemediationCandidate {
   /** The level this variant was written for, which is what gates its use. */
   levelId: number;
