@@ -62,5 +62,31 @@ export const scenarioInstruction = (event: ScenarioEvent, say: TextOf = englishT
   if (lane) return lane;
   const bay = event.bay?.hint?.trim();
   if (bay) return bay;
+  if (event.correctAction === 'stop') return say(stopInstruction(event));
   return say(DEFAULT_INSTRUCTION[event.correctAction]);
+};
+
+/**
+ * The scenes a stop is made at a painted line in: a signal, a Stop sign, a
+ * pedestrian lane, a box junction. Elsewhere there is no line to stop before
+ * (2026-11-16): a traffic stop is a pull-over to the extreme right, a
+ * checkpoint is stopped at, and a driveway, a vehicle pulling out or a brake
+ * failure is simply a stop.
+ */
+const STOPS_AT_A_LINE: ReadonlySet<ScenarioEvent['type']> = new Set([
+  'red_light',
+  'stop_sign',
+  'pedestrian_crossing',
+  'road_marking',
+]);
+
+const PULL_OVER: Localized = { en: 'Pull over to the extreme right and stop.' };
+const STOP_AT_CHECKPOINT: Localized = { en: 'Stop at the checkpoint.' };
+const STOP_PLAIN: Localized = { en: 'Come to a full stop.' };
+
+const stopInstruction = (event: ScenarioEvent): Localized => {
+  if (event.inspection?.pullOver) return PULL_OVER;
+  if (event.inspection) return STOP_AT_CHECKPOINT;
+  if (event.scenePrefab?.kind === 'driveway_crossing') return STOP_PLAIN;
+  return STOPS_AT_A_LINE.has(event.type) ? DEFAULT_INSTRUCTION.stop : STOP_PLAIN;
 };

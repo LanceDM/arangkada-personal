@@ -96,7 +96,7 @@ interface GameScreenProps {
    *.
    */
   liveReroll?: boolean;
-  /** No time limit and no clock: for checking a scenario (Admin > Scenarios > Play). */
+  /** No time limit, no clock and no answer countdown: for checking a scenario (Admin > Scenarios > Play). */
   noTimeLimit?: boolean;
 }
 

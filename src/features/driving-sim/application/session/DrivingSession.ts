@@ -107,6 +107,12 @@ export interface DrivingSessionOptions {
    * infinity, so the limit never cuts short the drive it is measured from.
    */
   timeLimitSteps?: number;
+  /**
+   * How many world steps a panel may hold the drive before it closes
+   * unanswered. Omitted means `PANEL_STEPS`; the admin's scenario check passes
+   * infinity (2026-11-16), so a panel waits for its answer.
+   */
+  panelSteps?: number;
 }
 
 /**
@@ -270,6 +276,7 @@ export class DrivingSession {
   private readonly support: SupportLevel;
   /** World steps of driving the run may spend. */
   private readonly timeLimitSteps: number;
+  private readonly panelSteps: number;
   private signCoverage: SignCoverage;
 
   private world: DrivingWorld;
@@ -281,6 +288,7 @@ export class DrivingSession {
     this.fsm = options.fsm;
     this.support = options.support ?? 'full';
     this.timeLimitSteps = options.timeLimitSteps ?? timeLimitStepsFor(options.level.id);
+    this.panelSteps = options.panelSteps ?? PANEL_STEPS;
     this.curves = curvesForLevel(options.level);
     this.speedProfile = speedProfileFor(options.level.speedLimit);
     this.isTutorialLevel = isTutorial(options.level);
@@ -304,7 +312,7 @@ export class DrivingSession {
     this.fsm.reset();
     this.world = createDrivingWorld(options.level, this.initialDistance);
     this.world.envObjects = generateEnvObjects(options.level.roadLength, Math.random, options.level.route);
-    this.snapshot = project(this.world, options.level, this.curves, this.timeLimitSteps);
+    this.snapshot = project(this.world, options.level, this.curves, this.timeLimitSteps, this.panelSteps);
   }
 
   /** Starts the drive over, on the same level. */
@@ -313,12 +321,12 @@ export class DrivingSession {
     this.world = createDrivingWorld(this.level, this.initialDistance);
     this.world.envObjects = generateEnvObjects(this.level.roadLength, Math.random, this.level.route);
     this.frame = null;
-    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps);
+    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps, this.panelSteps);
   }
 
   /** What the screen should show. A fresh object each frame; compare with `snapshotChanged`. */
   getSnapshot(): DrivingSnapshot {
-    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps);
+    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps, this.panelSteps);
     return this.snapshot;
   }
 
@@ -889,9 +897,9 @@ export class DrivingSession {
           veil: 1 - (visibilityAt(world.events, car.distance) ?? 1),
         }
       );
-      // No panel holds the drive for longer than `PANEL_STEPS`.
+      // No panel holds the drive for longer than `panelSteps`.
       world.heldSteps += 1;
-      if (world.heldSteps >= PANEL_STEPS) events.push(...this.closeHold());
+      if (world.heldSteps >= this.panelSteps) events.push(...this.closeHold());
       return events;
     }
 
@@ -1017,11 +1025,13 @@ const project = (
   world: DrivingWorld,
   level: LevelConfig,
   curves: CurveSpan[],
-  timeLimitSteps: number
+  timeLimitSteps: number,
+  panelSteps: number = PANEL_STEPS
 ): DrivingSnapshot => ({
-  panelSecondsLeft: world.paused
-    ? Math.max(0, Math.ceil((PANEL_STEPS - world.heldSteps) / DRIVING_STEPS_PER_SECOND))
-    : null,
+  panelSecondsLeft:
+    world.paused && Number.isFinite(panelSteps)
+      ? Math.max(0, Math.ceil((panelSteps - world.heldSteps) / DRIVING_STEPS_PER_SECOND))
+      : null,
   drivingSecondsLeft: Number.isFinite(timeLimitSteps)
     ? Math.max(0, Math.ceil((timeLimitSteps - world.drivenSteps) / DRIVING_STEPS_PER_SECOND))
     : null,

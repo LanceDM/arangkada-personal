@@ -109,7 +109,7 @@ interface UseDrivingSimulationOptions {
    * per mounted drive.
    */
   liveReroll?: boolean;
-  /** No time limit and no clock (Admin > Scenarios > Play). */
+  /** No time limit, no clock and no answer countdown (Admin > Scenarios > Play). */
   noTimeLimit?: boolean;
 }
 
@@ -166,7 +166,7 @@ export const useDrivingSimulation = ({
       initialDistance,
       signCoverage: loadSignCoverage(),
       support,
-      ...(noTimeLimit ? { timeLimitSteps: Number.POSITIVE_INFINITY } : {}),
+      ...(noTimeLimit ? { timeLimitSteps: Number.POSITIVE_INFINITY, panelSteps: Number.POSITIVE_INFINITY } : {}),
     })
   );
   const [history] = useState(() => priorLogs ?? []);

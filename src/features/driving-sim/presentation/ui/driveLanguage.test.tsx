@@ -60,12 +60,12 @@ describe('the words the domain builds', () => {
 
   it('read as they always did with no language in hand', () => {
     expect(supportCue({ ...event, sign: undefined, actor: { kind: 'jeepney' } } as unknown as ScenarioEvent)).toBe('Watch the jeepney.');
-    expect(scenarioInstruction({ ...event, recommendedMove: undefined })).toBe('Come to a full stop before the line.');
+    expect(scenarioInstruction({ ...event, type: 'stop_sign', recommendedMove: undefined })).toBe('Come to a full stop before the line.');
     expect(speedTargetText({ at: 'most', speed: 20 })).toBe('20 km/h or less');
   });
 
   it('put the instruction, the target and the composition through it', () => {
-    expect(scenarioInstruction({ ...event, recommendedMove: undefined }, say)).toBe('<Come to a full stop before the line.>');
+    expect(scenarioInstruction({ ...event, type: 'stop_sign', recommendedMove: undefined }, say)).toBe('<Come to a full stop before the line.>');
     expect(speedTargetText({ at: 'least', speed: 40 }, say)).toBe('<40 km/h or more>');
     expect(compositionParts({ road: 2, garage: 1, aftermath: 0, practice: 1, maxScore: 0 } as never, say)).toEqual([
       '<1 garage check>',
