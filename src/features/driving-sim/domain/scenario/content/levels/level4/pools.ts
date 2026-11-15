@@ -574,7 +574,7 @@ const reservedLaneSlot: SlotVariant[] = [
     reward: 'Correct. You stayed out of the motorcycle lane and eased off past the rider.',
     requiredLane: {
       lane: 'inner',
-      hint: 'Leave the motorcycle lane to the riders and watch where it crosses.',
+      hint: 'Leave the motorcycle lane to the riders and ease off past them.',
       wrongLaneMessage: 'You drove in the motorcycle lane. It is allotted to riders.',
     },
   }),

@@ -154,6 +154,12 @@ export interface DrivingWorld {
    * they keep walking while the car waits rather than only as it moves.
    */
   handledAt: Map<number, number>;
+  /**
+   * A full stop made short of a stop scenario's graded zone: when the car came
+   * to rest there (performance.now), and whether it had moved since the
+   * approach opened. See EARLY_STOP_HOLD_MS in scanEvents.
+   */
+  earlyStop: { since: number | null; moved: boolean };
   roadOffset: number;
   envObjects: EnvObject[];
 
@@ -406,6 +412,7 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
     events: level.events,
     handled: new Set<number>(),
     handledAt: new Map<number, number>(),
+    earlyStop: { since: null, moved: false },
     roadOffset: 0,
     envObjects: [],
 

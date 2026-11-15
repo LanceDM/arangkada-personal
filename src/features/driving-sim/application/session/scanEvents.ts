@@ -111,6 +111,9 @@ const RAMP_COMMIT_TOLERANCE = CAR_LENGTH;
 const MAX_SHOWN_GAP = 9.9;
 
 
+/** How long a car must stand still short of a stop scenario's zone for that to be its stop. */
+export const EARLY_STOP_HOLD_MS = 1200;
+
 /** What a checkpoint driven through without stopping is told. */
 export const CHECKPOINT_MISSED_MESSAGE =
   'You drove through the checkpoint without stopping. Stop at the line so the officer can check you; the question is asked once you have stopped.';
@@ -273,6 +276,7 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
     ) {
       world.activeEvent = event;
       world.playerActed = false;
+      world.earlyStop = { since: null, moved: false };
       // Opening the approach decides whose zone is being measured, not when the
       // measuring starts (below). Anything still measured for an event that
       // never became active is dropped rather than graded against this one.
@@ -534,6 +538,30 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
       if (action) {
         world.playerActed = true;
         decide(events, event, action, 'guided');
+      }
+    }
+
+    // A full stop before the line is the stop (2026-11-16). A stop scenario was
+    // graded only when the car left its zone, so a driver who stopped as told
+    // and waited saw nothing happen: the pedestrian waiting on the answer never
+    // walked, and the drive waited on the car moving off first. Standing still
+    // for EARLY_STOP_HOLD_MS with the approach open and the line still ahead,
+    // after moving in it, is graded as the stop there and then.
+    if (
+      event.correctAction === 'stop' &&
+      !isTutorialLevel &&
+      !isCheckpoint &&
+      !isParking &&
+      !event.cutscene &&
+      world.activeEvent === event &&
+      !world.playerActed &&
+      diff < 0
+    ) {
+      if (car.speed > 0) world.earlyStop = { since: null, moved: true };
+      else if (world.earlyStop.moved) {
+        const now = performance.now();
+        world.earlyStop.since ??= now;
+        if (now - world.earlyStop.since >= EARLY_STOP_HOLD_MS) gradeNow(event, 'response');
       }
     }
 
