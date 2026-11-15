@@ -1,4 +1,5 @@
 /**
+ * ADMIN_PASSWORD='...' npm run db:role -- create <email> [--name "..."] [--reason "..."]
  * npm run db:role -- grant <email> [--reason "..."]
  * npm run db:role -- revoke <email> [--reason "..."]
  * npm run db:role -- list
@@ -10,11 +11,40 @@
  *
  * The person must sign out and in again (or wait up to an hour) for a new
  * claim to reach their token.
+ *
+ * `create` makes a new email-and-password account that is an Admin from the
+ * start: the sign-in account, its `users/{uid}` document (as sign-up makes
+ * it) and the grant. The password comes from ADMIN_PASSWORD, never from the
+ * arguments, so it is not written into the audit record. It refuses an email
+ * that already has an account: use `grant` for that.
  */
 import { databaseMode, fail, firestore, auth, flag, operator, sql } from './admin';
 
+const createAccount = async (email: string) => {
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) fail("create needs the password in ADMIN_PASSWORD, e.g. ADMIN_PASSWORD='...' npm run db:role -- create <email>");
+  if (password!.length < 6) fail('Firebase needs a password of at least 6 characters.');
+  const existing = await auth().getUserByEmail(email).catch(() => null);
+  if (existing) fail(`${email} already has an account (${existing.uid}). Use: npm run db:role -- grant ${email}`);
+  const user = await auth().createUser({ email, password, emailVerified: false, disabled: false });
+  await firestore()
+    .collection('users')
+    .doc(user.uid)
+    .set({ email: user.email ?? email, username: flag('name') ?? 'Admin', createdAt: Date.now(), totalScore: 0, longestStreak: 0, bestExamScore: 0 });
+  console.log(`Created ${user.email} (${user.uid}).`);
+  return user.email ?? email;
+};
+
 const main = async () => {
-  const [command, email] = process.argv.slice(2).filter(arg => !arg.startsWith('--') && arg !== flag('reason'));
+  const values = new Set([flag('reason'), flag('name')]);
+  const positional = process.argv.slice(2).filter(arg => !arg.startsWith('--') && !values.has(arg));
+  let [command, email] = positional;
+
+  if (command === 'create') {
+    if (!email) fail("Usage: ADMIN_PASSWORD='...' npm run db:role -- create <email> [--name \"...\"]");
+    email = await createAccount(email);
+    command = 'grant';
+  }
 
   if (command === 'list') {
     const snap = await firestore().collection('roleGrants').orderBy('at').get();
@@ -26,7 +56,7 @@ const main = async () => {
     console.log(`\nAdmins now: ${admins.map(u => u.email ?? u.uid).join(', ') || 'none'}`);
     return;
   }
-  if ((command !== 'grant' && command !== 'revoke') || !email) fail('Usage: npm run db:role -- grant|revoke <email> [--reason "..."] | list');
+  if ((command !== 'grant' && command !== 'revoke') || !email) fail('Usage: npm run db:role -- create|grant|revoke <email> [--reason "..."] | list');
 
   const user = await auth().getUserByEmail(email!);
   const claims = { ...(user.customClaims ?? {}) };
