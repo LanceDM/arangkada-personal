@@ -56,6 +56,7 @@ const AdminEvaluation = lazy(() => import('@/pages/admin/EvaluationPage'));
 const AdminPlayers = lazy(() => import('@/pages/admin/PlayersPage'));
 const AdminCourse = lazy(() => import('@/pages/admin/CoursePage'));
 const AdminScenarios = lazy(() => import('@/pages/admin/ScenariosPage'));
+const AdminScenarioPlay = lazy(() => import('@/pages/admin/ScenarioPlayPage'));
 // The study's own pages: a participant joins and signs in by username.
 const StudyHome = lazy(() => import('@/pages/study/StudyHomePage'));
 const StudyJoin = lazy(() => import('@/pages/study/StudyJoinPage'));
@@ -129,6 +130,7 @@ export const AppRouter = () => (
       <Route path="evaluation" element={<AdminEvaluation />} />
       <Route path="players" element={<AdminPlayers />} />
       <Route path="scenarios" element={<AdminScenarios />} />
+      <Route path="scenarios/play/:levelId/:scenarioId" element={<AdminScenarioPlay />} />
       <Route path="report" element={<AdminReport />} />
       <Route path="quiz" element={<AdminQuiz />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />

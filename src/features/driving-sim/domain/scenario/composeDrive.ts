@@ -17,6 +17,7 @@
 // 'route'`), which shapes the road itself: it stays, is graded and logged as
 // always, and does not count toward any competency's verdict in this drive.
 import type { DrivingCompetency } from '@/domain/learner/competency';
+import { COMPETENCIES } from '@/domain/learner/profile';
 import { DRIVE_ITEMS_PER_COMPETENCY } from '@/domain/learner/stageCompetencies';
 import type { GarageHotspot, GarageStage, LevelConfig, ScenarioEvent } from './scenarioDefinition';
 import type { SlotVariant } from './pooling';
@@ -191,10 +192,7 @@ export const composeDrive = ({
   const shortfall: ComposedDrive['shortfall'] = {};
 
   // Route-bound events shape the road, so they stay whatever is chosen.
-  const structuralSlots = new Set<number>();
-  content.slots.forEach((pool, slot) => {
-    if (pool.some(variant => variant.scene === 'route')) structuralSlots.add(slot);
-  });
+  const structuralSlots = structuralSlotsOf(content);
 
   // The competency with the fewest candidates picks first, so a contested
   // slot goes to whoever has nowhere else to stand.
@@ -251,7 +249,23 @@ export const composeDrive = ({
     if (count < perCompetency) shortfall[competency] = perCompetency - count;
   }
 
-  // Unchosen route-bound slots keep their first variant, as the static level has it.
+  const { level, structural } = assembleDrive(content, slotTaken, pointTaken, appended, structuralSlots);
+  return { level, items, structural, shortfall };
+};
+
+/**
+ * The road for the chosen scenarios: each slot's choice at its distance, the
+ * points chosen at the garage and the crash scene, portable scenarios appended
+ * after the authored road. Unchosen route-bound slots keep their first variant,
+ * as the static level has it.
+ */
+const assembleDrive = (
+  content: StageContent,
+  slotTaken: Map<number, SlotVariant>,
+  pointTaken: { garage: Map<number, GarageHotspot>; aftermath: Map<number, GarageHotspot> },
+  appended: SlotVariant[],
+  structuralSlots: ReadonlySet<number>
+): { level: LevelConfig; structural: string[] } => {
   const structural: string[] = [];
   for (const slot of structuralSlots) {
     if (!slotTaken.has(slot)) {
@@ -286,8 +300,60 @@ export const composeDrive = ({
   };
   if (!level.garage) delete level.garage;
   if (!level.aftermath) delete level.aftermath;
+  return { level, structural };
+};
 
-  return { level, items, structural, shortfall };
+/** Route-bound slots: they shape the road itself, so they stay whatever is chosen. */
+const structuralSlotsOf = (content: StageContent): Set<number> => {
+  const slots = new Set<number>();
+  content.slots.forEach((pool, slot) => {
+    if (pool.some(variant => variant.scene === 'route')) slots.add(slot);
+  });
+  return slots;
+};
+
+/**
+ * One scenario on its stage's road, alone (Admin > Scenarios > Play,
+ * 2026-11-16): at its own slot, its own garage or crash-scene point, or
+ * appended after the road as a course drive would place it. Route-bound slots
+ * stay, because they shape the road. Null when the stage cannot place it.
+ */
+export const composeSingleScenario = (levelId: number, scenarioId: string): { level: LevelConfig; placement: Placement } | null => {
+  const content = stageContent(levelId);
+  if (!content) return null;
+  const slotTaken = new Map<number, SlotVariant>();
+  const pointTaken = { garage: new Map<number, GarageHotspot>(), aftermath: new Map<number, GarageHotspot>() };
+  const appended: SlotVariant[] = [];
+  let placement = null as Placement | null;
+
+  content.slots.forEach((pool, slot) => {
+    const variant = pool.find(v => v.id === scenarioId);
+    if (variant && !placement) {
+      slotTaken.set(slot, variant);
+      placement = 'slot';
+    }
+  });
+  for (const scene of ['garage', 'aftermath'] as const) {
+    content[scene].forEach((point, index) => {
+      const hotspot = point.variants.find(h => (h.scenarioId ?? h.id) === scenarioId);
+      if (hotspot && !placement) {
+        pointTaken[scene].set(index, hotspot);
+        placement = scene;
+      }
+    });
+  }
+  if (!placement) {
+    for (const competency of COMPETENCIES) {
+      const candidate = candidatesFor(content, competency).find(c => candidateId(c) === scenarioId);
+      if (candidate && candidate.kind === 'append') {
+        appended.push(candidate.variant);
+        placement = 'appended';
+        break;
+      }
+    }
+  }
+  if (!placement) return null;
+  return { level: assembleDrive(content, slotTaken, pointTaken, appended, structuralSlotsOf(content)).level, placement };
 };
 
 /** The scenario ids of one composed drive, per competency: what the verdict is read over. */

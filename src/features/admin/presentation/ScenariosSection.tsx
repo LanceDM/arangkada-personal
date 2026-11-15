@@ -6,6 +6,7 @@
  * level content, so it is always the configuration this build plays.
  */
 import { Fragment, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { LevelConfigRow, ScenarioConfigRow } from '@/features/driving-sim';
 import { Badge } from '@/shared/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
@@ -147,6 +148,13 @@ export const ScenariosSection = ({ levels, scenarios }: { levels: readonly Level
                       <TableCell className="text-xs">L{row.levelId}</TableCell>
                       <TableCell className="text-xs">
                         <div className="font-semibold">{row.label}</div>
+                        <Link
+                          to={`/admin/scenarios/play/${row.levelId}/${encodeURIComponent(row.id)}`}
+                          onClick={event => event.stopPropagation()}
+                          className="text-[11px] font-semibold text-primary underline"
+                        >
+                          Play
+                        </Link>
                         <div className="font-mono text-[10px] text-muted-foreground">{row.id}</div>
                       </TableCell>
                       <TableCell className="text-xs">{row.competency ? getCompetencyLabel(row.competency) : '–'}</TableCell>
@@ -184,6 +192,15 @@ export const ScenariosSection = ({ levels, scenarios }: { levels: readonly Level
                               <span className="font-semibold">Rule:</span> {row.lawCitation}
                             </p>
                           )}
+                          <p className="mt-2">
+                            <Link
+                              to={`/admin/scenarios/play/${row.levelId}/${encodeURIComponent(row.id)}`}
+                              className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-xs font-semibold text-primary-foreground hover:opacity-90"
+                            >
+                              Play this scenario
+                            </Link>
+                            <span className="ml-2 text-muted-foreground">Drives it alone, starting just before it. Nothing is saved.</span>
+                          </p>
                           <p className="mt-1 text-muted-foreground">
                             Type {row.type}
                             {row.atUnits !== null ? ` · trigger at ${row.atUnits} route units` : ''} · applies {row.appliesSpeed} km/h
