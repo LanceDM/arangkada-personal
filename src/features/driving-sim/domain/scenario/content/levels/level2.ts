@@ -797,6 +797,7 @@ const driveOutSlot: SlotVariant[] = [
   {
     id: 'level2.drive-out.schoolchildren',
     scenePrefab: { kind: 'driveway_crossing' },
+    pedestrians: [{ kind: 'child', solid: true }, { kind: 'child' }, { kind: 'child' }],
     type: 'pedestrian_crossing',
     description: 'Driveway mouth: a group of schoolchildren is crossing the footpath ahead.',
     correctAction: 'stop',
@@ -813,6 +814,7 @@ const driveOutSlot: SlotVariant[] = [
   {
     id: 'level2.drive-out.elderly',
     scenePrefab: { kind: 'driveway_crossing' },
+    pedestrians: [{ kind: 'elderly', solid: true }],
     type: 'pedestrian_crossing',
     description: 'Driveway mouth: an elderly pedestrian is crossing the footpath ahead.',
     correctAction: 'stop',
@@ -829,6 +831,7 @@ const driveOutSlot: SlotVariant[] = [
   {
     id: 'level2.drive-out.dog-walker',
     scenePrefab: { kind: 'driveway_crossing' },
+    pedestrians: [{ kind: 'adult', solid: true }, { kind: 'dog' }],
     type: 'pedestrian_crossing',
     description: 'Driveway mouth: someone walking a dog is crossing the footpath ahead.',
     correctAction: 'stop',

@@ -692,7 +692,8 @@ export interface NpcVehicleSpec {
  * can hold a group rather than whichever single person a sentence named. See
  * `pedestrians` on `ScenarioEvent`.
  */
-export type PedestrianKind = 'adult' | 'child' | 'elderly' | 'pwd';
+/** `dog`: an animal walked on a lead beside its owner (2026-11-16), drawn and never solid on its own. */
+export type PedestrianKind = 'adult' | 'child' | 'elderly' | 'pwd' | 'dog';
 
 /**
  * One person on a crossing. `position` is a share of the carriageway's width

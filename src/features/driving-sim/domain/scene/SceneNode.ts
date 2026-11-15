@@ -323,7 +323,8 @@ type SceneNodeShape =
   /** The zebra band with dropped curbs that every crossing in the game uses. */
   | { kind: 'crossing-approach'; roadX: number; y: number; height: number }
   /** A footpath across a driveway mouth, with whoever is still on it. */
-  | { kind: 'driveway-mouth'; roadX: number; screenY: number; walkedOff: number }
+  /** `people`: who is crossing, the first in front; they walk clear together. */
+  | { kind: 'driveway-mouth'; roadX: number; screenY: number; walkedOff: number; people: CrossingPedestrian[] }
   /** A vehicle or animal standing in the carriageway. */
   | { kind: 'road-actor'; actor: RoadActorSpec; x: number; y: number }
   /** The flashing "something is there" glyph, when nothing more specific is known. */

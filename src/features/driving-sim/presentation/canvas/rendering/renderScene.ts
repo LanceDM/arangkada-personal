@@ -410,7 +410,7 @@ const renderNode = (ctx: CanvasRenderingContext2D, node: SceneNode, roadAt: Road
       drawCrossingApproach(ctx, node.roadX, node.y, node.height);
       break;
     case 'driveway-mouth':
-      drawDrivewayMouth(ctx, node.roadX, node.screenY, node.walkedOff);
+      drawDrivewayMouth(ctx, node.roadX, node.screenY, node.walkedOff, node.people);
       break;
     case 'road-actor': {
       const sprite = ROAD_ACTOR_SPRITES[node.actor.kind];

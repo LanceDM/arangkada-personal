@@ -24,8 +24,12 @@ export const drawPedestrian = (
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  type: 'student' | 'lola' | 'pwd' | 'regular' = 'regular'
+  type: 'student' | 'lola' | 'pwd' | 'regular' | 'dog' = 'regular'
 ) => {
+  if (type === 'dog') {
+    drawDog(ctx, x, y);
+    return;
+  }
   ctx.save();
   ctx.translate(x, y);
   // Contact shadow: what separates a figure from the road under it.
@@ -144,13 +148,37 @@ export const drawFlaggingEnforcer = (ctx: CanvasRenderingContext2D, x: number, y
 };
 
 /** Sprite variant `drawPedestrian` draws for each scenario-level kind. */
-type PedestrianSprite = 'student' | 'lola' | 'pwd' | 'regular';
+type PedestrianSprite = 'student' | 'lola' | 'pwd' | 'regular' | 'dog';
 
 export const SPRITE_FOR_KIND: Record<PedestrianKind, PedestrianSprite> = {
   child: 'student',
   elderly: 'lola',
   pwd: 'pwd',
   adult: 'regular',
+  dog: 'dog',
+};
+
+/** A dog on a lead, at a dog's size: low and long, beside whoever walks it. */
+const drawDog = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 17, 8, 2.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(8,10,16,0.85)';
+  ctx.fillRect(-8.2, 4.8, 15.4, 7.4);
+  ctx.fillStyle = '#a16207';
+  ctx.fillRect(-7, 6, 13, 5); // body
+  ctx.fillRect(5, 3, 5, 5); // head
+  ctx.fillRect(-7, 11, 2, 5); // legs
+  ctx.fillRect(-2, 11, 2, 5);
+  ctx.fillRect(2, 11, 2, 5);
+  ctx.fillRect(5, 11, 2, 5);
+  ctx.fillRect(-10, 4, 3, 2); // tail
+  ctx.fillStyle = '#1f2937';
+  ctx.fillRect(9, 4, 1.5, 1.5); // eye
+  ctx.restore();
 };
 
 

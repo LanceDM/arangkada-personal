@@ -158,6 +158,7 @@ const PEDESTRIAN: Record<PedestrianKind, Localized> = {
   child: { en: 'the child' },
   elderly: { en: 'the elderly pedestrian' },
   pwd: { en: 'the wheelchair user' },
+  dog: { en: 'the dog' },
 };
 
 const prefabPlace = (prefab: ScenePrefab, say: TextOf): string => {

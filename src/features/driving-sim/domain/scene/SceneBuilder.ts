@@ -152,7 +152,8 @@ const ownRoadVehicle = (placement: EventPlacement, poseVehicle: PoseVehicle): Sc
 const declaredPedestrians = (placement: EventPlacement, composed: SceneNode[]): SceneNode[] => {
   const people = placement.event.pedestrians;
   if (!people?.length) return [];
-  if (composed.some(node => node.kind === 'pedestrian-group' || node.kind === 'crossing')) return [];
+  // A driveway crossing draws its own people, walking clear together.
+  if (composed.some(node => node.kind === 'pedestrian-group' || node.kind === 'crossing' || node.kind === 'driveway-mouth')) return [];
   return [pedestrianGroupNode(placement.roadX, placement.screenY, people)];
 };
 

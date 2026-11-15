@@ -148,6 +148,12 @@ export interface DrivingWorld {
   events: ScenarioEvent[];
   /** Trigger distances already answered. */
   handled: Set<number>;
+  /**
+   * When each was answered, on the frame clock (`Date.now`, as the frame is
+   * composed): what a pedestrian who walks clear after the answer walks by, so
+   * they keep walking while the car waits rather than only as it moves.
+   */
+  handledAt: Map<number, number>;
   roadOffset: number;
   envObjects: EnvObject[];
 
@@ -399,6 +405,7 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
 
     events: level.events,
     handled: new Set<number>(),
+    handledAt: new Map<number, number>(),
     roadOffset: 0,
     envObjects: [],
 

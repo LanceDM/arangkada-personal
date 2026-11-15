@@ -632,6 +632,7 @@ export class DrivingSession {
   ): void {
     const { world } = this;
     world.handled.add(event.triggerAtDistance);
+    world.handledAt.set(event.triggerAtDistance, Date.now());
     world.activeEvent = null;
     world.playerActed = false;
     world.laneCue = null;
@@ -693,7 +694,7 @@ export class DrivingSession {
       overlay: { flash?: number; veil?: number } = {}
     ) => {
       const composed = composeWorldFrame(
-        { level: liveLevel, distance: car.distance, handled: world.handled, curves, support: this.support },
+        { level: liveLevel, distance: car.distance, handled: world.handled, handledAt: world.handledAt, curves, support: this.support },
         {
           chaseLane: world.chaseLane ?? undefined,
           playerLane: car.lane,

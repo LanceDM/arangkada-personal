@@ -1,7 +1,7 @@
 {
   "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level, every practice item the level can take on its longest roll, and every whole-stage course drive (composeDrive) over the roll seeds.",
-  "measuredOn": "2026-11-13",
-  "commit": "8f1ff5f+dirty",
+  "measuredOn": "2026-11-15",
+  "commit": "794212a+dirty",
   "factor": 2,
   "roundingSeconds": 30,
   "rollSeeds": [
@@ -53,11 +53,11 @@
       "levelId": 2,
       "limitSeconds": 510,
       "limitSteps": 30600,
-      "longestSteps": 15203,
+      "longestSteps": 14976,
       "longestRoll": 1,
       "longestItem": "composed",
       "drives": 69,
-      "fingerprint": "8dc97e87",
+      "fingerprint": "0ca20a20",
       "unpassed": []
     },
     {
@@ -68,7 +68,7 @@
       "longestRoll": 9,
       "longestItem": "composed",
       "drives": 116,
-      "fingerprint": "afc4c3ab",
+      "fingerprint": "10b7c177",
       "unpassed": []
     },
     {
@@ -79,7 +79,7 @@
       "longestRoll": 4,
       "longestItem": "composed",
       "drives": 142,
-      "fingerprint": "14ea294a",
+      "fingerprint": "d77df842",
       "unpassed": []
     },
     {
@@ -90,7 +90,7 @@
       "longestRoll": 2,
       "longestItem": "composed",
       "drives": 168,
-      "fingerprint": "d3cddf86",
+      "fingerprint": "bf70efa8",
       "unpassed": []
     },
     {
@@ -101,7 +101,7 @@
       "longestRoll": 14,
       "longestItem": "composed",
       "drives": 156,
-      "fingerprint": "1717a691",
+      "fingerprint": "81c79093",
       "unpassed": []
     },
     {
@@ -112,7 +112,7 @@
       "longestRoll": 17,
       "longestItem": "composed",
       "drives": 160,
-      "fingerprint": "6390a171",
+      "fingerprint": "fb85490d",
       "unpassed": [
         {
           "item": "level3.speed.preferred-max-30",
@@ -129,22 +129,6 @@
         {
           "item": "level5.emergency-yield.not-in-the-junction",
           "why": "did not reach the end; crashed: You drove into an ambulance responding with sirens"
-        },
-        {
-          "item": "level2.drive-out.neighbour",
-          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
-        },
-        {
-          "item": "level2.drive-out.schoolchildren",
-          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
-        },
-        {
-          "item": "level2.drive-out.elderly",
-          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
-        },
-        {
-          "item": "level2.drive-out.dog-walker",
-          "why": "did not reach the end; crashed: You drove into a pedestrian on the crossing"
         },
         {
           "item": "level2.settle.school-zone",
@@ -208,7 +192,7 @@
       "longestRoll": 1,
       "longestItem": "composed",
       "drives": 161,
-      "fingerprint": "16d15210",
+      "fingerprint": "0e5b8a06",
       "unpassed": []
     },
     {
@@ -219,7 +203,7 @@
       "longestRoll": 10,
       "longestItem": "composed",
       "drives": 167,
-      "fingerprint": "eb8ff975",
+      "fingerprint": "91e637f5",
       "unpassed": []
     },
     {
@@ -230,7 +214,7 @@
       "longestRoll": 12,
       "longestItem": "composed",
       "drives": 171,
-      "fingerprint": "2c7dbffb",
+      "fingerprint": "fe47a70d",
       "unpassed": []
     },
     {
@@ -241,7 +225,7 @@
       "longestRoll": 3,
       "longestItem": "composed",
       "drives": 176,
-      "fingerprint": "8b53cfe6",
+      "fingerprint": "b246e0c7",
       "unpassed": []
     },
     {

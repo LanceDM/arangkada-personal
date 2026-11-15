@@ -29,6 +29,7 @@ import {
 import { bodyAt } from '@/features/driving-sim/domain/world/WorldBody';
 import { ROAD_ACTORS } from '@/features/driving-sim/domain/world/roadActors';
 import {
+  DRIVEWAY_GROUP_GAP,
   drivewayPedestrianX,
   mainRoadTraffic,
 } from '@/features/driving-sim/domain/world/sceneGeometry';
@@ -180,15 +181,22 @@ export const resolvedSceneNodes = (
       break;
 
     case 'driveway-crossing': {
-      const walkedOff = pedestrianWalkOff(distance, event.triggerAtDistance, handled);
+      const walkedOff = pedestrianWalkOff(distance, event.triggerAtDistance, handled, placement.handledAt ?? null, now);
       nodes.push({
         kind: 'driveway-mouth',
         roadX,
         screenY,
         walkedOff,
+        people: scene.pedestrians,
         // Once they have walked clear they are out of the road, so a driver who
-        // already stopped for them cannot then be punished for it.
-        solids: walkedOff < 1 ? [pedestrianBody(drivewayPedestrianX(walkedOff), screenY - 3)] : [],
+        // already stopped for them cannot then be punished for it. Only the
+        // people marked solid can be hit; the rest walk with them as scenery.
+        solids:
+          walkedOff < 1
+            ? scene.pedestrians.flatMap((person, index) =>
+                person.solid ? [pedestrianBody(drivewayPedestrianX(walkedOff) - index * DRIVEWAY_GROUP_GAP, screenY - 3)] : []
+              )
+            : [],
       });
       break;
     }

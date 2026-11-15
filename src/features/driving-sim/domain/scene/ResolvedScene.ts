@@ -32,7 +32,7 @@ export type ResolvedScene =
   /** Stop sign over a junction; a declared `npc` crosses it. */
   | { kind: 'stop-sign-junction' }
   /** Footpath running across the mouth of a driveway. */
-  | { kind: 'driveway-crossing' }
+  | { kind: 'driveway-crossing'; pedestrians: CrossingPedestrian[] }
   /** Zebra crossing on open road, with whoever is using it. */
   | { kind: 'open-road-crossing'; pedestrians: CrossingPedestrian[] }
   | { kind: 'tutorial-cue'; cue: TutorialCue }
@@ -108,7 +108,7 @@ const prefabScene = (event: ScenarioEvent): ResolvedScene | null => {
 
   switch (declaration.kind) {
     case 'driveway_crossing':
-      return { kind: 'driveway-crossing' };
+      return { kind: 'driveway-crossing', pedestrians: pedestriansFor(event) };
     case 'bend_warning':
       return { kind: 'bend-warning' };
     case 'unknown_hazard':

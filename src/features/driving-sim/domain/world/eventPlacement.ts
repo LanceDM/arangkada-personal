@@ -53,6 +53,8 @@ export interface EventPlacement {
   roadAt: RoadAt;
   /** True once this event has been answered. */
   handled: boolean;
+  /** When it was answered, on the frame clock; null before, or where the frame does not know. */
+  handledAt?: number | null;
   /**
    * The scene is only still here because its traffic has not finished leaving.
    *
@@ -92,6 +94,8 @@ export interface FrameView {
   /** The player's road distance, which everything on screen is placed against. */
   distance: number;
   handled: ReadonlySet<number>;
+  /** When each answered event was answered (`Date.now`); absent in frames composed without a clock. */
+  handledAt?: ReadonlyMap<number, number>;
   curves: CurveSpan[];
   /**
    * The support level the level is played at, for the one thing a frame shows
@@ -185,15 +189,38 @@ export const placeVisibleEvents = (view: FrameView): EventPlacement[] => {
     const runOn = handled && past < -50;
     if (runOn && !(runsOn(event) && past >= -VEHICLE_RUN_ON)) continue;
 
-    placements.push({ event, index, screenY, roadAt, roadX: roadAt(screenY), handled, runOn });
+    const handledAt = handled ? view.handledAt?.get(event.triggerAtDistance) ?? null : null;
+    placements.push({ event, index, screenY, roadAt, roadX: roadAt(screenY), handled, handledAt, runOn });
   }
 
   return placements;
 };
 
-/** How far the pedestrian has walked clear, 0..1, once the event is answered. */
-export const pedestrianWalkOff = (distance: number, trigger: number, handled: boolean): number =>
-  handled ? Math.min(1, Math.max(0, (distance - trigger + 140) / 200)) : 0;
+/** How long a pedestrian takes to walk clear of the lane once the event is answered. */
+export const PEDESTRIAN_WALK_OFF_MS = 2400;
+
+/**
+ * How far the pedestrian has walked clear, 0..1, once the event is answered.
+ *
+ * Walked in time from the answer (2026-11-16), so a driver who stopped and
+ * waits sees them cross; it was read off the car's distance before, which froze
+ * them in the road while the car stood still and only moved them as it crept
+ * forward. Where the frame has no answer time, the old distance rule is the
+ * fallback.
+ */
+export const pedestrianWalkOff = (
+  distance: number,
+  trigger: number,
+  handled: boolean,
+  handledAt: number | null = null,
+  now: number = Date.now()
+): number => {
+  if (!handled) return 0;
+  const byDistance = Math.min(1, Math.max(0, (distance - trigger + 140) / 200));
+  if (handledAt === null) return byDistance;
+  // Whichever is further: waiting lets them walk, driving on never holds them back.
+  return Math.max(byDistance, Math.min(1, Math.max(0, (now - handledAt) / PEDESTRIAN_WALK_OFF_MS)));
+};
 
 /** The lane an oncoming vehicle uses on a two-way stretch. */
 /** The curb-side edge of the carriageway. */

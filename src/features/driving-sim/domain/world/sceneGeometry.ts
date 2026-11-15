@@ -365,6 +365,9 @@ export const crossingPedestrianPositions = (
  * Stood in the driving lane, not off to one side: a centred car has to stop
  * rather than roll past while answering.
  */
+/** How far behind the first person each further one in a driveway group walks. */
+export const DRIVEWAY_GROUP_GAP = 16;
+
 export const drivewayPedestrianX = (walkedOff = 0): number =>
   CANVAS_WIDTH / 2 + 6 + walkedOff * 150;
 
