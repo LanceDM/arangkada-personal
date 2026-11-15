@@ -113,6 +113,7 @@ const VEHICLE: Record<NpcVehicleSpec['vehicleKind'], Localized> = {
   van: { en: 'the van' },
   bus: { en: 'the bus' },
   bicycle: { en: 'the cyclist' },
+  tricycle: { en: 'the tricycle' },
 };
 
 const npcPlace = (path: NpcVehicleSpec['path'], say: TextOf): string => {

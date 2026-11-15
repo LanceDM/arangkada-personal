@@ -597,7 +597,7 @@ export interface NpcVehicleSpec {
    * still in the carriageway, which makes "hold back until there is room" a
    * lane change rather than a gap — the one manoeuvre the rule is not about.
    */
-  vehicleKind: 'car' | 'ambulance' | 'jeepney' | 'motorcycle' | 'truck' | 'van' | 'bus' | 'bicycle';
+  vehicleKind: 'car' | 'ambulance' | 'jeepney' | 'motorcycle' | 'truck' | 'van' | 'bus' | 'bicycle' | 'tricycle';
   /** Plain-language name used in the crash report if the player hits it. */
   label: string;
   /** Road-distance span its approach plays out over; a sensible default applies per path if omitted. */

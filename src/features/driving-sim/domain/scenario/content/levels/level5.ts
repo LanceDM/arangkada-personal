@@ -999,7 +999,7 @@ const drivewayJoinSlot: SlotVariant[] = [
     severity: 'major',
     npc: {
       path: 'crossing_from_left',
-      vehicleKind: 'car',
+      vehicleKind: 'van',
       label: 'a van pulling out of a driveway',
       color: '#64748b',
       // Noses out of the driveway into your lane and stays there, completing
@@ -1026,7 +1026,7 @@ const drivewayJoinSlot: SlotVariant[] = [
     severity: 'critical',
     npc: {
       path: 'crossing_from_left',
-      vehicleKind: 'motorcycle',
+      vehicleKind: 'tricycle',
       label: 'a tricycle pulling out of a gate',
       color: '#0ea5e9',
       // Pulls straight out into your lane and sits there in your path — you
@@ -1084,7 +1084,7 @@ const drivewayJoinSlot: SlotVariant[] = [
     severity: 'major',
     npc: {
       path: 'crossing_from_left',
-      vehicleKind: 'car',
+      vehicleKind: 'van',
       label: 'a van waiting at a driveway mouth',
       color: '#64748b',
       // Stopped at the mouth of the driveway, holding for the road to clear —

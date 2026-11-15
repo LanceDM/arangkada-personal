@@ -1,7 +1,7 @@
 {
   "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level, every practice item the level can take on its longest roll, and every whole-stage course drive (composeDrive) over the roll seeds.",
   "measuredOn": "2026-11-15",
-  "commit": "794212a+dirty",
+  "commit": "0f06edd+dirty",
   "factor": 2,
   "roundingSeconds": 30,
   "rollSeeds": [
@@ -90,7 +90,7 @@
       "longestRoll": 2,
       "longestItem": "composed",
       "drives": 168,
-      "fingerprint": "bf70efa8",
+      "fingerprint": "5b514f1f",
       "unpassed": []
     },
     {
@@ -101,7 +101,7 @@
       "longestRoll": 14,
       "longestItem": "composed",
       "drives": 156,
-      "fingerprint": "81c79093",
+      "fingerprint": "819da011",
       "unpassed": []
     },
     {
@@ -112,7 +112,7 @@
       "longestRoll": 17,
       "longestItem": "composed",
       "drives": 160,
-      "fingerprint": "fb85490d",
+      "fingerprint": "561901e7",
       "unpassed": [
         {
           "item": "level3.speed.preferred-max-30",
@@ -192,7 +192,7 @@
       "longestRoll": 1,
       "longestItem": "composed",
       "drives": 161,
-      "fingerprint": "0e5b8a06",
+      "fingerprint": "d922577d",
       "unpassed": []
     },
     {
@@ -203,7 +203,7 @@
       "longestRoll": 10,
       "longestItem": "composed",
       "drives": 167,
-      "fingerprint": "91e637f5",
+      "fingerprint": "270a2391",
       "unpassed": []
     },
     {
@@ -214,7 +214,7 @@
       "longestRoll": 12,
       "longestItem": "composed",
       "drives": 171,
-      "fingerprint": "fe47a70d",
+      "fingerprint": "93a0c885",
       "unpassed": []
     },
     {
@@ -225,7 +225,7 @@
       "longestRoll": 3,
       "longestItem": "composed",
       "drives": 176,
-      "fingerprint": "b246e0c7",
+      "fingerprint": "e15114af",
       "unpassed": []
     },
     {
@@ -236,7 +236,7 @@
       "longestRoll": 16,
       "longestItem": null,
       "drives": 20,
-      "fingerprint": "e89f0d4b",
+      "fingerprint": "3ad62179",
       "unpassed": []
     }
   ]

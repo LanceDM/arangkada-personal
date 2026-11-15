@@ -22,6 +22,7 @@ import {
   drawPassengerVan,
   drawProvincialBus,
   drawSmokePlume,
+  drawTricycle,
 } from './vehicleRenderer';
 
 /**
@@ -65,6 +66,9 @@ const drawAheadOfYou = (
       break;
     case 'car':
       drawLeadCar(ctx, x, y, npc.color ?? '#e2e8f0', braking);
+      break;
+    case 'tricycle':
+      drawTricycle(ctx, x, y, 1);
       break;
   }
 
@@ -113,6 +117,8 @@ export const drawScriptedVehicle = (
         ctx.rotate(at.heading + Math.PI / 2);
         if (npc.vehicleKind === 'jeepney') drawJeepney(ctx, 0, 0, 0.8);
         else if (npc.vehicleKind === 'ambulance') drawAmbulance(ctx, 0, 0, 0.8);
+        else if (npc.vehicleKind === 'van') drawPassengerVan(ctx, 0, 0);
+        else if (npc.vehicleKind === 'tricycle') drawTricycle(ctx, 0, 0, 1);
         else drawMotorcycle(ctx, 0, 0, 0.9, npc.rider);
         ctx.restore();
       }
@@ -139,6 +145,8 @@ export const drawScriptedVehicle = (
       if (npc.vehicleKind === 'jeepney') drawJeepney(ctx, 0, 0, 0.8);
       else if (npc.vehicleKind === 'ambulance') drawAmbulance(ctx, 0, 0, 0.8);
       else if (npc.vehicleKind === 'motorcycle') drawMotorcycle(ctx, 0, 0, 0.9, npc.rider);
+      else if (npc.vehicleKind === 'van') drawPassengerVan(ctx, 0, 0);
+      else if (npc.vehicleKind === 'tricycle') drawTricycle(ctx, 0, 0, 1);
       else drawFollowingVehicle(ctx, 0, 0, npc.color ?? '#64748b', 0.85);
       ctx.restore();
       break;
