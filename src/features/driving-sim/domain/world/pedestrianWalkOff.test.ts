@@ -8,7 +8,7 @@ describe('a pedestrian walking clear after the answer', () => {
 
   it('walks clear in time while the car waits', () => {
     const handledAt = 10_000;
-    const stopped = 900; // the car stands short of the crossing and does not move
+    const stopped = 800; // the car stands short of the crossing and does not move
     expect(pedestrianWalkOff(stopped, 1000, true, handledAt, handledAt)).toBe(0);
     expect(pedestrianWalkOff(stopped, 1000, true, handledAt, handledAt + PEDESTRIAN_WALK_OFF_MS / 2)).toBeCloseTo(0.5);
     expect(pedestrianWalkOff(stopped, 1000, true, handledAt, handledAt + PEDESTRIAN_WALK_OFF_MS)).toBe(1);
