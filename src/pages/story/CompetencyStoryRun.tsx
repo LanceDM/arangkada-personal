@@ -35,6 +35,8 @@ import {
   nextAttemptSeed,
   planCourseDrive,
   planFreeReplay,
+  drawPracticeQuiz,
+  submitPracticeQuiz,
   reviewLessons,
   submitCourseQuiz,
   type BriefingGate,
@@ -262,12 +264,36 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   }, [uid, quizKey, language]);
   const quizDraw = openQuiz && openQuiz.key === quizKey ? openQuiz.draw : null;
 
+  // The stage's short quiz as practice, outside the course: recorded, never evidence (drawPracticeQuiz).
+  const practiceFor = useCallback(
+    (levelId: number): NonNullable<BriefingGate['practice']> => ({
+      open: async () => {
+        const quiz = await drawPracticeQuiz(levelId, language);
+        return {
+          items: quiz.items,
+          onSubmit: async choices => {
+            const results = await submitPracticeQuiz(uid, quiz, choices, language);
+            void logUiAction(uid, 'practice_quiz_submitted', {
+              levelId,
+              items: quiz.items.map(item => item.id),
+              results: results.map(r => ({ competency: r.competency, correct: r.correct, total: r.total })),
+            });
+            return results;
+          },
+        };
+      },
+    }),
+    [uid, language]
+  );
+
   const gate: BriefingGate | null = useMemo(() => {
     if (!cursor || activeLevel === null) return null;
     if (planned?.free) {
+      const practising = isCompetencyStage(activeLevel);
       return {
         log: (action, detail = {}) => void logUiAction(uid, action, { levelId: activeLevel, phase: 'FREE_REPLAY', ...detail }),
-        lessonsRead: true, onLessonsRead: async () => {}, quiz: null, hasQuiz: false, quizPassed: true, review: null,
+        lessonsRead: true, onLessonsRead: async () => {}, quiz: null, hasQuiz: practising, quizPassed: false, review: null,
+        practice: practising ? practiceFor(activeLevel) : null,
         canDrive: true, driveDetail: 'A replay outside your course', notes: ['A replay of a finished stage: it does not move your course.'],
         preview: planned.run.plan.level
           ? drivePreview(planned.run.plan.level, planned.run.composed ? new Set(planned.run.composed.items.map(item => item.scenarioId)) : undefined)
@@ -343,6 +369,11 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
         }),
       hasQuiz: isCompetencyStage(activeLevel) && phase.kind !== 'FINAL',
       quizPassed: drivePhase || phase.kind === 'QUIZ_REVIEW',
+      // Once the stage's own quiz is behind the player, it can be practised as often as they like.
+      practice:
+        isCompetencyStage(activeLevel) && phase.kind !== 'FINAL' && (drivePhase || phase.kind === 'QUIZ_REVIEW')
+          ? practiceFor(activeLevel)
+          : null,
       quiz:
         phase.kind === 'QUIZ' && cursor.quiz && quizDraw
           ? {
@@ -386,7 +417,7 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
             : 'Preparing your drive…') + (review ? ' · opens once the review above is read' : ''),
       notes,
     };
-  }, [cursor, activeLevel, planned, quizDraw, uid, step, planDrive]);
+  }, [cursor, activeLevel, planned, quizDraw, uid, step, planDrive, practiceFor]);
 
   // A drive phase's briefing always has a plan for where the course is now:
   // after a reload, or once a drive has moved the cursor to a repeat drive,

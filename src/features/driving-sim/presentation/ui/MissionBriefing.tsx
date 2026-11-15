@@ -11,7 +11,7 @@ import {
   Route,
   Target,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { rollLeansToWeakArea, signNamesForLevel } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { getLevelModule, LEVEL_MODULES } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
@@ -62,6 +62,17 @@ export interface BriefingGate {
     /** Each answer as it is given, for the log. */
     onAnswer?: (position: number, item: BankItem, choice: number, responseMs: number) => void;
     onDone: () => void;
+  } | null;
+  /**
+   * The stage's short quiz as practice, outside the course: open whenever the
+   * course has no quiz to sit here (passed, or a free replay), as often as the
+   * player likes. Recorded, but never evidence for BKT, the Q-table or IRT.
+   */
+  practice?: {
+    open: () => Promise<{
+      items: readonly BankItem[];
+      onSubmit: (choices: (number | null)[], responseMs: (number | null)[]) => Promise<BankQuizResult[]>;
+    }>;
   } | null;
   /** Whether the stage has a quiz at all (the tutorial has none). */
   hasQuiz: boolean;
@@ -207,6 +218,25 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
   // The attempt being sat, held while it is open: submitting it moves the
   // cursor (and the gate's quiz) on before its results are shown.
   const [activeQuiz, setActiveQuiz] = useState<NonNullable<BriefingGate['quiz']> | null>(null);
+  // Practice sittings, numbered from 1 in this visit; a practice sitting is shown with cap 0.
+  const practiceCount = useRef(0);
+  const [practiceOpening, setPracticeOpening] = useState(false);
+  const [practiceError, setPracticeError] = useState<string | null>(null);
+  const openPractice = async (practice: NonNullable<BriefingGate['practice']>) => {
+    setPracticeOpening(true);
+    setPracticeError(null);
+    try {
+      const paper = await practice.open();
+      practiceCount.current += 1;
+      gate?.log?.('practice_quiz_opened', { practice: practiceCount.current, items: paper.items.map(item => item.id) });
+      setActiveQuiz({ items: paper.items, attempt: practiceCount.current, cap: 0, onSubmit: paper.onSubmit, onDone: () => {} });
+    } catch (failure) {
+      console.error('Failed to open the practice quiz:', failure);
+      setPracticeError('The practice quiz could not be opened. Check your connection and try again.');
+    } finally {
+      setPracticeOpening(false);
+    }
+  };
 
   const gatedSteps = gate && [
     {
@@ -228,17 +258,26 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
             title: 'Short Quiz',
             detail: gate.quiz
               ? `Attempt ${gate.quiz.attempt} of ${gate.quiz.cap} · ${gate.quiz.items.length} items, 3 per competency`
-              : gate.quizPassed
-                ? 'Passed: 2 of 3 per competency'
-                : '3 items per competency, 2 of 3 to pass',
+              : practiceError
+                ? practiceError
+                : gate.practice
+                  ? gate.quizPassed
+                    ? 'Passed. Practise again: new items, not counted in your course'
+                    : 'Practice: new items each time, not counted in your course'
+                  : gate.quizPassed
+                    ? 'Passed: 2 of 3 per competency'
+                    : '3 items per competency, 2 of 3 to pass',
             done: gate.quizPassed,
-            active: gate.lessonsRead && gate.quiz !== null,
-            disabled: !gate.lessonsRead || gate.quiz === null,
-            actionText: gate.quizPassed ? 'Passed' : 'Start',
+            active: gate.lessonsRead && (gate.quiz !== null || !!gate.practice),
+            disabled: !gate.lessonsRead || (gate.quiz === null && !gate.practice) || practiceOpening,
+            actionText: gate.quiz ? 'Start' : gate.practice ? (practiceOpening ? 'Drawing…' : 'Practice') : gate.quizPassed ? 'Passed' : 'Start',
             onClick: () => {
-              if (!gate.quiz) return;
-              gate.log?.('quiz_opened', { attempt: gate.quiz.attempt, items: gate.quiz.items.map(item => item.id) });
-              setActiveQuiz(gate.quiz);
+              if (gate.quiz) {
+                gate.log?.('quiz_opened', { attempt: gate.quiz.attempt, items: gate.quiz.items.map(item => item.id) });
+                setActiveQuiz(gate.quiz);
+                return;
+              }
+              if (gate.practice) void openPractice(gate.practice);
             },
             icon: BrainCircuit,
           },
@@ -625,11 +664,11 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
       {activeQuiz && (
         <BankQuiz
           // A new attempt is a new paper.
-          key={`attempt-${activeQuiz.attempt}`}
+          key={`${activeQuiz.cap === 0 ? 'practice' : 'attempt'}-${activeQuiz.attempt}`}
           items={activeQuiz.items}
           kind="quiz"
-          title="Short Quiz"
-          subtitle={`Attempt ${activeQuiz.attempt} of ${activeQuiz.cap}`}
+          title={activeQuiz.cap === 0 ? 'Short Quiz · Practice' : 'Short Quiz'}
+          subtitle={activeQuiz.cap === 0 ? 'Not counted in your course' : `Attempt ${activeQuiz.attempt} of ${activeQuiz.cap}`}
           onSubmit={activeQuiz.onSubmit}
           onAnswer={activeQuiz.onAnswer}
           onDone={() => {
@@ -637,7 +676,7 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
             activeQuiz.onDone();
           }}
           onClose={() => {
-            gate?.log?.('quiz_closed', { attempt: activeQuiz.attempt });
+            gate?.log?.(activeQuiz.cap === 0 ? 'practice_quiz_closed' : 'quiz_closed', { attempt: activeQuiz.attempt });
             setActiveQuiz(null);
           }}
         />

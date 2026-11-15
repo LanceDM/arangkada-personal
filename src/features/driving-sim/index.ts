@@ -125,6 +125,8 @@ export {
   markCourseReviewShown,
   planCourseDrive,
   planFreeReplay,
+  drawPracticeQuiz,
+  submitPracticeQuiz,
   postExamItems,
   saveDiagnostic,
   saveBackground,
@@ -140,7 +142,7 @@ export {
   initialExamRequired,
   submitCourseQuiz,
 } from './application/use-cases/competencyCourse';
-export type { CourseDriveRun, CourseState, FinishedStudyTest, InitialExamStatus, MasteryRow } from './application/use-cases/competencyCourse';
+export type { CourseDriveRun, PracticeQuiz, CourseState, FinishedStudyTest, InitialExamStatus, MasteryRow } from './application/use-cases/competencyCourse';
 export type { DriveExit } from './domain/telemetry/controlInputs';
 export { CourseConflictError, OutdatedAppError } from './application/errors';
 export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';

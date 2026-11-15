@@ -239,6 +239,11 @@ export interface QuizSittingDoc {
   finishedAt: number;
   /** The language chosen when the sitting began. */
   language?: Language;
+  /**
+   * A practice sitting, taken outside the course (2026-11-16). Recorded only:
+   * nothing reads it as evidence (BKT, Q-table, course, IRT).
+   */
+  practice?: true;
 }
 
 export const quizSittingRecord = (input: {

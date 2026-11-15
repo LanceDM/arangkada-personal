@@ -988,6 +988,77 @@ const completePostExamLogs = async (
 export const stageQuizCompetencies = (level: number): readonly DrivingCompetency[] =>
   isCompetencyStage(level) ? STAGE_COMPETENCIES[level] : [];
 
+// --- practice quiz ---------------------------------------------------------------------
+
+/**
+ * A stage's short quiz taken again outside the course (2026-11-16): as often
+ * as the player likes, once the stage's own quiz is behind them or from a free
+ * replay. 3 items per competency the stage teaches, drawn at random each time
+ * (items written for the stage first), in the player's language.
+ *
+ * Practice is recorded but is not evidence: it is saved in `quizSittings`
+ * with `practice: true`, which neither BKT, the Q-table, the course cursor nor
+ * the IRT analysis reads. Only the course's own quiz (`submitCourseQuiz`)
+ * reaches them.
+ */
+export interface PracticeQuiz {
+  levelId: number;
+  seed: number;
+  items: readonly BankItem[];
+  startedAt: number;
+}
+
+export const drawPracticeQuiz = async (levelId: number, language: Language = 'en', seed: number = nextAttemptSeed()): Promise<PracticeQuiz> => {
+  const competencies = stageQuizCompetencies(levelId);
+  if (competencies.length === 0) throw new Error(`stage ${levelId} has no short quiz`);
+  const pool = await quizPoolFor(language);
+  const { items } = drawQuiz(levelId, competencies, new Map(), createRng(seed), undefined, pool);
+  return { levelId, seed, items, startedAt: Date.now() };
+};
+
+/** Grades a practice sitting per competency, 2 of 3 to pass, as the course's quiz does. */
+export const gradePracticeQuiz = (items: readonly BankItem[], choices: readonly (number | null)[]): QuizCompetencyResult[] =>
+  [...new Set(items.map(item => item.competency))].map(competency => {
+    const mine = items.flatMap((item, i) => (item.competency === competency ? [choices[i] === item.answer] : []));
+    const correct = mine.filter(Boolean).length;
+    return { competency, correct, total: mine.length, passed: correct >= QUIZ_PASS_CORRECT };
+  });
+
+/** Saves a practice sitting (signed-in players only) and returns its results. */
+export const submitPracticeQuiz = async (
+  uid: string | null,
+  quiz: PracticeQuiz,
+  choices: readonly (number | null)[],
+  language: Language = 'en'
+): Promise<QuizCompetencyResult[]> => {
+  const results = gradePracticeQuiz(quiz.items, choices);
+  if (uid) {
+    const answers = quiz.items.map((item, i) => ({
+      itemId: item.id,
+      revision: item.revision ?? 1,
+      chosen: choices[i] ?? null,
+      correct: choices[i] === item.answer,
+    }));
+    await drivingSimDeps().quizSittings.save(uid, {
+      schemaVersion: 1,
+      moduleId: `lto_level_${quiz.levelId}`,
+      levelId: quiz.levelId,
+      seed: quiz.seed,
+      answers,
+      score: answers.filter(answer => answer.correct).length,
+      itemsPerSitting: quiz.items.length,
+      passingScore: QUIZ_PASS_CORRECT * results.length,
+      passed: results.every(result => result.passed),
+      timedOut: false,
+      startedAt: quiz.startedAt,
+      finishedAt: Date.now(),
+      language,
+      practice: true,
+    });
+  }
+  return results;
+};
+
 // --- free replay ----------------------------------------------------------------------
 
 /**

@@ -531,7 +531,9 @@ service cloud.firestore {
         && data.startedAt is number
         && data.finishedAt is number
         // The language chosen when the sitting began.
-        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil']);
+        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil'])
+        // A practice sitting, outside the course: recorded, never evidence.
+        && (!data.keys().hasAny(['practice']) || data.practice == true);
     }
 
     // The pre-test and post-test. Only a participant sits
