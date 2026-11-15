@@ -1,3 +1,4 @@
+import type { ProgressResetRecord } from '@/features/admin/domain/progressReset';
 import type { SiteStatus } from '@/features/admin/domain/siteStatus';
 import type { BktSetsData, SavedValueSet, StartEditRecord } from '@/features/admin/domain/bktSetsAdmin';
 import type { CalibrationRecord, PilotRef } from '@/features/admin/domain/bktCalibration';
@@ -69,6 +70,18 @@ export interface StudyLogRepository {
 export interface SiteStatusRepository {
   watch(onChange: (status: SiteStatus) => void, onError: (error: Error) => void): () => void;
   set(status: { suspended: boolean; message: string }, uid: string): Promise<void>;
+}
+
+/**
+ * Resets an account's course (domain/progressReset.ts): archives the course's
+ * records under `users/{uid}/archive/{resetId}` and removes the originals.
+ */
+export interface ProgressResetRepository {
+  /** Whether the account is enrolled in the study (its records are never reset). */
+  isEnrolled(uid: string): Promise<boolean>;
+  reset(uid: string, admin: { uid: string; email: string | null }, note: string): Promise<ProgressResetRecord & { resetId: string }>;
+  /** The account's past resets, newest first. */
+  history(uid: string): Promise<(ProgressResetRecord & { resetId: string })[]>;
 }
 
 /**

@@ -1,7 +1,7 @@
 /** The bound implementations of Admin's ports. Provided by `app/dependencies`. */
 import type { IrtRepository } from './irtPorts';
 import type { PilotPoolRepository, PilotRecordsRepository, StudyInvitesRepository } from './pilotPorts';
-import type { AdminReportRepository, BktSetsRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
+import type { AdminReportRepository, BktSetsRepository, ProgressResetRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
 import type { QuizEditorRepository } from './quizPorts';
 
 export interface AdminDependencies {
@@ -21,6 +21,8 @@ export interface AdminDependencies {
   site?: SiteStatusRepository;
   /** The BKT value sets and pilot marks; absent in tests (no calibration, nobody marked). */
   bktSets?: BktSetsRepository;
+  /** Resetting an account's course; absent in tests (the panel says it is not wired). */
+  progressReset?: ProgressResetRepository;
 }
 
 let bound: AdminDependencies | null = null;

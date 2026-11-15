@@ -18,6 +18,7 @@ import { MASTERY_DESCRIPTORS, playerLabel } from '@/features/admin/domain/course
 import { accountActivity, directoryPlayers, playerHistory, searchPlayers, type DirectoryPlayer, type EventKind } from '@/features/admin/domain/playerDirectory';
 import { EmptyState, Legend, Notice, Panel, SearchField, SectionHeader } from './adminUi';
 import { toDateTime } from './formatDate';
+import { ProgressResetPanel } from './ProgressResetPanel';
 
 const KIND_STYLE: Record<EventKind, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   account: 'default',
@@ -97,6 +98,8 @@ const PlayerDetail = ({ player, course }: { player: DirectoryPlayer; course: Cou
         </dl>
         {error && <p className="mt-2 text-xs text-destructive">Could not save the pilot mark: {error}</p>}
       </Panel>
+
+      <ProgressResetPanel target={{ uid: player.uid, label: player.label, code: player.code ?? null }} />
 
       <Panel title="BKT now" description={mastery ? `Replayed from ${mastery.answers} graded answers with the player's value set.` : 'No graded answers yet.'}>
         {mastery && (
