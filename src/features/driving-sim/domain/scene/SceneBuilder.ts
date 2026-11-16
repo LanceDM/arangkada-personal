@@ -156,7 +156,7 @@ const declaredPedestrians = (placement: EventPlacement, composed: SceneNode[], n
   if (composed.some(node => node.kind === 'pedestrian-group' || node.kind === 'crossing' || node.kind === 'driveway-mouth')) return [];
   // Beside the road rather than crossing it, so they move about where they
   // are instead of walking anywhere (2026-11-16).
-  return [{ ...pedestrianGroupNode(placement.roadX, placement.screenY, people), dys: millAbout(people.length, now) }];
+  return [pedestrianGroupNode(placement.roadX, placement.screenY, people, undefined, millAbout(people.length, now))];
 };
 
 /**

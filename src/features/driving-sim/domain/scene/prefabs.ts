@@ -90,7 +90,9 @@ export const pedestrianGroupNode = (
   y: number,
   people: CrossingPedestrian[],
   /** The crossing's walk this frame (`crossingWalk`); absent, they stand still beside the scene. */
-  walk?: { walkIn: number; walkedOff: number }
+  walk?: { walkIn: number; walkedOff: number },
+  /** Standing beside the road: each one's step along the footpath this frame (`millAbout`). */
+  dys?: number[]
 ): SceneNode => {
   if (!walk) {
     return {
@@ -98,6 +100,7 @@ export const pedestrianGroupNode = (
       roadX,
       y,
       people,
+      ...(dys ? { dys } : {}),
       solids: crossingPedestrianPositions(roadX, people)
         .filter((_, index) => people[index].solid)
         .map(x => bodyAt(x, y - 4, 18, 34, 'pedestrian', 'a pedestrian on the crossing')),
