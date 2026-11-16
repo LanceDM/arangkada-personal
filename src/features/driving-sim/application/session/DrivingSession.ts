@@ -1011,7 +1011,9 @@ export class DrivingSession {
           ? { en: `You drove into ${impact.label}. A pedestrian already crossing has the right of way, and striking one ends the run whatever your score.` }
           : impact.kind === 'obstruction'
             ? { en: `You drove into ${impact.label}. Slow down early, and stop or steer round anything blocking the road.` }
-            : { en: `You drove into ${impact.label}. Keep a safe gap, and give way to traffic that has the right of way.` }
+            : // A vehicle may be moving or stopped across the road (a wreck, a
+              // breakdown), so the advice covers both (2026-11-16).
+              { en: `You drove into ${impact.label}. Keep a safe gap, stop or steer round a vehicle stopped in the road, and give way to traffic that has the right of way.` }
       );
 
       events.push({ kind: 'crashed', reason: crashReason });

@@ -8,7 +8,8 @@
  */
 import { useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { GameScreen, wholeDriveForCheck } from '@/features/driving-sim';
+import { actionLabel, expectedLabel, GameScreen, wholeDriveForCheck } from '@/features/driving-sim';
+import { englishText } from '@/shared/lib/localized';
 import type { LevelResult } from '@/domain/learner/attempt';
 import { Button } from '@/shared/ui/button';
 
@@ -76,7 +77,9 @@ const LevelPlayPage = () => {
             {result.logs.map((log, i) => (
               <li key={i}>
                 <span className="font-mono text-xs">{log.scenarioId}</span>: <span className="font-semibold">{log.result}</span>
-                {log.result !== 'correct' && log.expectedAction ? ` (did ${log.action}, wanted ${log.expectedAction})` : ''}
+                {log.result !== 'correct' && log.expectedAction
+                  ? ` (you ${actionLabel(log.action, englishText)}; wanted ${expectedLabel(log.expectedAction, englishText)})`
+                  : ''}
               </li>
             ))}
           </ol>
