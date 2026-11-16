@@ -118,12 +118,26 @@ const copyFor = (isAdmin: boolean, t: TextOf) => isAdmin
     steps: [t(m.stepDid), t(m.stepJudged), t(m.stepNext), t(m.stepPractice)],
   };
 
+/**
+ * The answer given at a question (a checkpoint, a garage or crash-scene point),
+ * in its own words: "You chose Accelerate" says nothing about a license
+ * check (2026-11-16). Null for a scenario answered with the car.
+ */
+const answerGiven = (level: LevelConfig, log: ActionLog): string | null => {
+  const points = [...(level.garage?.hotspots ?? []), ...(level.aftermath?.hotspots ?? [])];
+  const choices =
+    level.events.find(event => event.id === log.scenarioId)?.choices ??
+    points.find(point => (point.scenarioId ?? point.id) === log.scenarioId)?.choices;
+  return choices?.find(choice => choice.action === log.action)?.label ?? null;
+};
+
 const buildAfterActionSteps = (
   logs: ActionLog[],
   weakestCompetency: string | null | undefined,
   labels: string[],
   isAdmin: boolean,
   t: TextOf,
+  level: LevelConfig,
 ) => {
   const evaluated = logs.filter(log => log.result === 'correct' || log.result === 'violation');
   const firstViolation = evaluated.find(log => log.result === 'violation');
@@ -136,7 +150,7 @@ const buildAfterActionSteps = (
   return [
     {
       label: labels[0],
-      value: t(m.youChose(formatValue(keyLog.action, t))),
+      value: answerGiven(level, keyLog) ? t(m.youAnswered(answerGiven(level, keyLog)!)) : t(m.youChose(formatValue(keyLog.action, t))),
     },
     {
       label: labels[1],
@@ -180,7 +194,13 @@ const LevelComplete = ({
   // The tutorial teaches the controls. Its steps carry a competency only because
   // their scenario type implies one, so naming skills after it would report as
   // knowledge what was a keypress: no breakdown, no focus, no practice.
+  // It is also practice: the course moves on whatever it scored, so it is never
+  // called a fail (2026-11-16). A crash or running out of time still is.
   const tutorial = isTutorial(level);
+  // In the course the verdict is per competency (2 of 3 scenarios each), said
+  // in the course note below. The level's pass mark decides nothing there, so
+  // the header does not call the drive a pass or a fail by it (2026-11-16).
+  const neutral = tutorial || Boolean(course);
   const competencyEntries = tutorial
     ? []
     : getPracticedCompetencies(result.logs, result.competencyScores ?? {}).slice(0, 6);
@@ -196,7 +216,7 @@ const LevelComplete = ({
 
   const { isAdmin } = useAuthSession();
   const copy = copyFor(isAdmin, t);
-  const afterActionSteps = buildAfterActionSteps(result.logs, weakest?.[0] ?? null, copy.steps, isAdmin, t);
+  const afterActionSteps = buildAfterActionSteps(result.logs, weakest?.[0] ?? null, copy.steps, isAdmin, t, level);
   const recentEvaluations = result.logs
     .filter(log => log.result === 'correct' || log.result === 'violation')
     .slice(-3)
@@ -223,16 +243,16 @@ const LevelComplete = ({
         >
           <span
             className={`mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.2em] ${
-              passed
+              passed || (neutral && !result.crashReason && !result.timedOut)
                 ? 'border-accent/40 bg-accent/10 text-accent'
                 : 'border-destructive/40 bg-destructive/10 text-destructive'
             }`}
           >
-            {t(result.crashReason ? m.crashed : result.timedOut ? m.timesUp : passed ? m.passed : m.failed)}
+            {t(result.crashReason ? m.crashed : result.timedOut ? m.timesUp : tutorial ? m.tutorialDone : neutral ? m.driveDone : passed ? m.passed : m.failed)}
           </span>
 
           <h2 className="mt-1 font-display text-xl text-foreground">
-            {t(result.crashReason || result.timedOut ? m.runEnded : passed ? m.levelComplete : m.tryAgain)}
+            {t(result.crashReason || result.timedOut ? m.runEnded : tutorial ? m.tutorialComplete : neutral ? m.driveComplete : passed ? m.levelComplete : m.tryAgain)}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">{level.name}</p>
 
@@ -284,9 +304,11 @@ const LevelComplete = ({
             </div>
           </div>
 
-          <p className="mt-3 text-[11px] text-muted-foreground">
-            {t(m.passMark)} <span className="font-display text-foreground">{level.requiredScore}</span>
-          </p>
+          {!neutral && (
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              {t(m.passMark)} <span className="font-display text-foreground">{level.requiredScore}</span>
+            </p>
+          )}
 
           {/* Buttons */}
           {course ? (

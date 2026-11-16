@@ -34,6 +34,7 @@ export const resultMessages = {
   stepNext: { en: 'What happened next' },
   stepPractice: { en: 'Practice next' },
   youChose: (action: string): Localized => ({ en: `You chose ${action}.` }),
+  youAnswered: (answer: string): Localized => ({ en: `You answered: ${answer}` }),
   violation: (severity: string, competency: string): Localized => ({ en: `${severity} ${competency} violation detected.` }),
   correctDecision: (competency: string): Localized => ({ en: `${competency} decision was correct.` }),
   shownCorrection: { en: 'You were shown a correction before driving on.' },
@@ -48,6 +49,10 @@ export const resultMessages = {
   runEnded: { en: 'RUN ENDED' },
   levelComplete: { en: 'LEVEL COMPLETE' },
   tryAgain: { en: 'TRY AGAIN' },
+  tutorialDone: { en: 'PRACTICE DONE' },
+  tutorialComplete: { en: 'TUTORIAL COMPLETE' },
+  driveDone: { en: 'DRIVE DONE' },
+  driveComplete: { en: 'DRIVE COMPLETE' },
   timesUpNote: {
     en: "Time's up. The level's driving time ran out before you reached the end of the road, so the run counts as a fail whatever you scored. Time spent reading a scenario or answering a question is never counted.",
   },

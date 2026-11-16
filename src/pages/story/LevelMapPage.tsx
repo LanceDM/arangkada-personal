@@ -42,7 +42,8 @@ const LevelMapPage = () => {
           (course?.error || course?.assessments) && (
             <div className="flex w-full max-w-md flex-col items-center gap-3">
               {course?.error && <p className="text-sm text-destructive"><Say {...course.error} /></p>}
-              {course?.assessments && !course.assessments.diagnosticDone && (
+              {/* An admin's course is not held by the pre-test (openAll), so it is not asked for. */}
+              {course?.assessments && !course.assessments.diagnosticDone && !course.openAll && (
                 <button
                   onClick={() => navigate(routing.participant ? '/study' : '/play')}
                   className="text-sm text-muted-foreground underline hover:text-foreground"

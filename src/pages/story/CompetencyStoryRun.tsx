@@ -414,7 +414,13 @@ const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
           ? `${planned.run.composed.items.length} scenarios: 3 per competency${phase.kind === 'FINAL' ? '' : ', 2 of 3 to pass each'}`
           : planned
             ? `${planned.run.plan.level?.events.length ?? 0} road events`
-            : 'Preparing your drive…') + (review ? ' · opens once the review above is read' : ''),
+            : // Said for what it waits on (2026-11-16): before the module or
+              // the quiz is done there is no drive to prepare yet.
+              inModule
+              ? 'Opens once the learning module is read'
+              : phase.kind === 'QUIZ'
+                ? 'Opens once the short quiz is passed'
+                : 'Preparing your drive…') + (review ? ' · opens once the review above is read' : ''),
       notes,
     };
   }, [cursor, activeLevel, planned, quizDraw, uid, step, planDrive, practiceFor]);
