@@ -47,6 +47,13 @@ const fmt = (value: unknown, digits = 3) => (typeof value === 'number' ? value.t
 export const QTablePanel = () => {
   const { table, updates, error } = useLiveQTable(true);
   const exploring = table ? Object.values(table.states ?? {}).filter(s => s.tag === 'exploring').length : 0;
+  // The log is never cleared and its numbering carries on through a reset
+  // (2026-11-16): what came before the last reset is kept, but it is not this
+  // table's, so it is counted and listed apart.
+  const fromSeq = table?.lastReset?.fromGlobalSeq ?? 1;
+  const sinceReset = table ? Math.max(0, table.updates - (fromSeq - 1)) : 0;
+  const current = updates.filter(row => row.globalSeq >= fromSeq);
+  const earlier = updates.length - current.length;
 
   return (
     <div className="space-y-4">
@@ -56,7 +63,9 @@ export const QTablePanel = () => {
           <CardTitle className="text-sm">Shared Q-table (live)</CardTitle>
           <p className="text-xs text-muted-foreground">
             {table
-              ? `${table.updates} updates · ${exploring} of 8 states exploring · last change ${toDateTime(table.updatedAt)}${
+              ? `${sinceReset} update${sinceReset === 1 ? '' : 's'}${
+                  table.lastReset ? ` since the reset of ${toDateTime(table.lastReset.at)} (${fromSeq - 1} before it, kept in the log)` : ''
+                } · ${exploring} of 8 states exploring · last change ${toDateTime(table.updatedAt)}${
                   table.lastUpdate ? ` by ${table.lastUpdate.participantCode ?? table.lastUpdate.uid} (${table.lastUpdate.kind})` : ''
                 }`
               : 'No table yet: it appears with the first participant decision.'}
@@ -115,7 +124,10 @@ export const QTablePanel = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-sm">Newest updates</CardTitle>
-          <p className="text-xs text-muted-foreground">Every entry is kept in policy/competencyQ/updates with its full detail; the export has them all.</p>
+          <p className="text-xs text-muted-foreground">
+            Every entry is kept in policy/competencyQ/updates with its full detail; the export has them all.
+            {table?.lastReset ? ' Listed here: only the updates since the last reset.' : ''}
+          </p>
         </CardHeader>
         <CardContent>
           <Table>
@@ -130,7 +142,14 @@ export const QTablePanel = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {updates.map(row => (
+              {current.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-xs text-muted-foreground">
+                    No updates since the reset{earlier > 0 ? ` (${earlier} earlier ${earlier === 1 ? 'entry' : 'entries'} kept in the log)` : ''}.
+                  </TableCell>
+                </TableRow>
+              )}
+              {current.map(row => (
                 <TableRow key={row.updateId}>
                   <TableCell>{row.globalSeq}</TableCell>
                   <TableCell>{toDateTime(row.at)}</TableCell>

@@ -242,6 +242,8 @@ export interface LiveQTable {
   updatedAt: number;
   states: Record<string, { phase: string; tag: 'exploring' | 'exploiting' | 'no_choice'; leader: string | null }>;
   lastUpdate: { updateId: string; globalSeq: number; kind: 'visit' | 'learn'; uid: string; participantCode: string | null; at: number } | null;
+  /** The table's last reset (2026-11-16): updates from `fromGlobalSeq` on belong to the table as it is now. */
+  lastReset?: { resetId: string; at: number; fromGlobalSeq: number; by: string } | null;
 }
 
 /** One entry of `policy/competencyQ/updates`, as the dashboard reads it. */
