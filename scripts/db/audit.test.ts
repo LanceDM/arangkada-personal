@@ -95,6 +95,36 @@ describe('db:audit', () => {
     const report = auditStudy(inputOf(store));
     expect(report.problems).toEqual([]);
     expect(report.summary).toHaveLength(3);
+    expect(report.adminNotes).toEqual([]);
+  });
+
+  it('after a reset, holds the table to the log since the reset only (2026-11-16)', () => {
+    const input = inputOf(store);
+    // Emptied by the reset; the log kept whole, its numbering carried on.
+    input.table = {};
+    input.lastReset = { fromGlobalSeq: input.qUpdates.length + 1 };
+    const report = auditStudy(input);
+    expect(report.problems.filter(p => /policy\/competencyQ/.test(p))).toEqual([]);
+    expect(report.summary[0]).toMatch(/before the last reset, 0 since/);
+    // Without the reset, the empty table is a table that differs from its log.
+    input.lastReset = null;
+    expect(auditStudy(input).problems.join('\n')).toMatch(/stored table differs from the replay/);
+  });
+
+  it("sets an admin's records apart, and skips course entries that never taught the table (2026-11-16)", () => {
+    const input = inputOf(store);
+    const [a] = input.users;
+    const decision = a.courseLogs.find(l => l.decisions.some(d => d.source !== 'cap'))!.decisions.find(d => d.source !== 'cap')!;
+    decision.action = decision.legal.find(action => action !== decision.action)!;
+    expect(auditStudy(input).problems.join('\n')).toMatch(/chose .*; the Q-table log has/);
+    // Marked as not teaching the table: not held to its log.
+    const flagged = { ...input, users: input.users.map(u => (u === a ? { ...u, courseLogs: u.courseLogs.map(l => ({ ...l, learnsTable: false })) } : u)) };
+    expect(auditStudy(flagged).problems.join('\n')).not.toMatch(/chose .*; the Q-table log has/);
+    // An admin account: counted apart, never as a study problem.
+    const admin = { ...input, users: input.users.map(u => (u === a ? { ...u, admin: true } : u)) };
+    const report = auditStudy(admin);
+    expect(report.problems.join('\n')).not.toMatch(/participant-a/);
+    expect(report.summary.at(-1)).toMatch(/1 admin account\(s\) set apart/);
   });
 
   it('finds a Q value changed without its log', () => {

@@ -36,10 +36,18 @@ export interface AuditCourseLog {
   rewards: RewardRecord[];
   tableAfter?: QTable;
   timestamp: number;
+  /** False for an admin's course, which the table never learns from (2026-11-16). */
+  learnsTable?: boolean;
 }
 
 export interface AuditUser {
   uid: string;
+  /**
+   * An admin account (2026-11-16): its course is a check of the game, read
+   * from the table but never written to it, so it is not held to the table's
+   * log, and what is wrong in its records is test play, not study data.
+   */
+  admin?: boolean;
   courseLogs: AuditCourseLog[];
   attempts: { levelId: number; logs: ActionLog[]; timestamp?: number; evidenceSeq?: number | null }[];
   sittings: { kind: 'quiz' | 'diagnostic' | 'post_exam'; levelId: number | null; attempt: number | null; answers: ActionLog[]; timestamp?: number; evidenceSeq?: number | null; id?: string }[];
@@ -53,10 +61,14 @@ export interface AuditInput {
   qUpdates: QLogEntry[];
   users: AuditUser[];
   configVersion: string;
+  /** The table's last reset, if any: the table now is the replay of the log from `fromGlobalSeq` on. */
+  lastReset?: { fromGlobalSeq: number; at?: number } | null;
 }
 
 export interface AuditReport {
   problems: string[];
+  /** What is wrong in admin accounts' records: test play, reported but not counted against the study. */
+  adminNotes: string[];
   /** One line per part checked, for the console. */
   summary: string[];
   /** The table the log replays to: what the shared table should be. */
@@ -74,17 +86,28 @@ export const taggedEvidence = (user: Pick<AuditUser, 'attempts' | 'sittings'>): 
   ]);
 
 const auditQTable = (input: AuditInput, problems: string[], summary: string[]): QTable => {
-  const replay = replayQLog(input.qUpdates);
-  problems.push(...replay.problems.slice(0, 20));
-  if (replay.problems.length > 20) problems.push(`... and ${replay.problems.length - 20} more Q-log problems`);
-  if (input.table && !sameTable(input.table, replay.table)) problems.push('policy/competencyQ: the stored table differs from the replay of its log');
+  // A reset empties the table and keeps the log (2026-11-16): the stretch
+  // before it is replayed on its own and checked for its numbering and its
+  // arithmetic; the table now must equal the replay of the stretch after it.
+  const from = input.lastReset?.fromGlobalSeq ?? 1;
+  const before = input.qUpdates.filter(entry => entry.globalSeq < from);
+  const after = input.qUpdates.filter(entry => entry.globalSeq >= from);
+  const earlier = before.length > 0 ? replayQLog(before) : { table: {}, problems: [] as string[] };
+  const replay = replayQLog(after, { firstSeq: from });
+  const logProblems = [...earlier.problems, ...replay.problems];
+  problems.push(...logProblems.slice(0, 20));
+  if (logProblems.length > 20) problems.push(`... and ${logProblems.length - 20} more Q-log problems`);
+  if (input.table && !sameTable(input.table, replay.table)) {
+    problems.push(`policy/competencyQ: the stored table differs from the replay of its log${from > 1 ? ` since the reset (from globalSeq ${from})` : ''}`);
+  }
   if (input.tableUpdates !== null && input.tableUpdates !== input.qUpdates.length) {
     problems.push(`policy/competencyQ counts ${input.tableUpdates} updates; the log has ${input.qUpdates.length}`);
   }
   const byVersion = new Map<string, number>();
   for (const entry of input.qUpdates) byVersion.set(entry.configVersion, (byVersion.get(entry.configVersion) ?? 0) + 1);
   const versions = [...byVersion].map(([tag, n]) => `${tag}: ${n}`).join(', ');
-  summary.push(`Q-table log: ${input.qUpdates.length} entries replayed${versions ? ` (${versions})` : ''}, ${replay.problems.length} problem(s)`);
+  const split = from > 1 ? `; ${before.length} before the last reset, ${after.length} since` : '';
+  summary.push(`Q-table log: ${input.qUpdates.length} entries replayed${versions ? ` (${versions})` : ''}${split}, ${logProblems.length} problem(s)`);
   return replay.table;
 };
 
@@ -96,6 +119,8 @@ const auditCourse = (user: AuditUser, qUpdates: readonly QLogEntry[], problems: 
   const before = problems.length;
 
   for (const log of user.courseLogs) {
+    // Recorded as not teaching the table: nothing of it is in the table's log.
+    if (log.learnsTable === false) continue;
     const at = `${user.uid} courseLog ${log.id}`;
     let lastSeq = 0;
     for (const decision of log.decisions) {
@@ -188,11 +213,22 @@ export const auditStudy = (input: AuditInput): AuditReport => {
 
   let course = 0;
   let bkt = 0;
+  const adminNotes: string[] = [];
+  const admins = input.users.filter(user => user.admin);
   for (const user of input.users) {
+    if (user.admin) {
+      // Not held to the table's log: an admin's course never writes to it.
+      auditBKT(user, input.configVersion, adminNotes);
+      continue;
+    }
     course += auditCourse(user, input.qUpdates, problems);
     bkt += auditBKT(user, input.configVersion, problems);
   }
-  summary.push(`Course logs of ${input.users.length} participant(s) against the Q-table log: ${course} problem(s)`);
-  summary.push(`BKT rebuilt from raw answers for ${input.users.length} participant(s): ${bkt} problem(s)`);
-  return { problems, summary, rebuiltTable };
+  const players = input.users.length - admins.length;
+  summary.push(`Course logs of ${players} account(s) against the Q-table log: ${course} problem(s)`);
+  summary.push(`BKT rebuilt from raw answers for ${players} account(s): ${bkt} problem(s)`);
+  if (admins.length > 0) {
+    summary.push(`${admins.length} admin account(s) set apart (test play, never in the Q-table): ${adminNotes.length} note(s)`);
+  }
+  return { problems, adminNotes, summary, rebuiltTable };
 };

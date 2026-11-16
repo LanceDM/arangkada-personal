@@ -18,7 +18,7 @@ import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import type { QLogEntry } from '@/domain/study/qLog';
 import type { BKTProfileDoc, BKTUpdateRecord } from '@/domain/study/bktLog';
 import { auditStudy, type AuditCourseLog, type AuditUser } from './auditCore';
-import { firestore, flag } from './admin';
+import { auth, firestore, flag } from './admin';
 
 const ownerOf = (snap: DocumentSnapshot) => snap.ref.parent.parent?.id ?? '';
 
@@ -41,6 +41,9 @@ const main = async () => {
     db.collectionGroup('bkt').get(),
   ]);
 
+  // Admin accounts' play is test play: read from the table, never written to it.
+  const adminIds = new Set((await auth().listUsers(1000)).users.filter(u => u.customClaims?.admin === true).map(u => u.uid));
+
   const logsOf = byOwner(courseLogs.docs, d => ({ id: d.id, ...d.data() }) as AuditCourseLog);
   const attemptsOf = byOwner(attempts.docs, d => d.data() as AuditUser['attempts'][number]);
   const sittingsOf = byOwner(sittings.docs, d => ({ ...d.data(), id: d.id }) as AuditUser['sittings'][number]);
@@ -53,6 +56,7 @@ const main = async () => {
     qUpdates: updates.docs.map(d => d.data() as QLogEntry),
     users: users.docs.map(u => ({
       uid: u.id,
+      admin: adminIds.has(u.id),
       courseLogs: (logsOf.get(u.id) ?? []).sort((a, b) => a.timestamp - b.timestamp),
       attempts: attemptsOf.get(u.id) ?? [],
       sittings: sittingsOf.get(u.id) ?? [],
@@ -60,6 +64,7 @@ const main = async () => {
       bktProfile: profiles.get(u.id) ?? null,
     })),
     configVersion: RUN_CONFIG_VERSION,
+    lastReset: tableDoc.exists ? (tableDoc.get('lastReset') ?? null) : null,
   });
 
   for (const line of report.summary) console.log(line);
@@ -67,6 +72,10 @@ const main = async () => {
   if (out) {
     writeFileSync(out, JSON.stringify(report.rebuiltTable, null, 2));
     console.log(`The replayed table is in ${out}.`);
+  }
+  if (report.adminNotes.length > 0) {
+    console.log(`\nAdmin accounts (test play, not study data; not counted):`);
+    for (const note of report.adminNotes) console.log(`  - ${note}`);
   }
   if (report.problems.length > 0) {
     console.log(`\n${report.problems.length} problem(s):`);

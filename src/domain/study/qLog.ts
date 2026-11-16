@@ -201,15 +201,21 @@ const near = (a: number, b: number) => Math.abs(a - b) <= 1e-9;
  */
 export const replayQLog = (
   entries: readonly QLogEntry[],
-  options: { start?: QTable; tableEquals?: (a: QTable, b: QTable) => boolean } = {}
+  options: {
+    start?: QTable;
+    tableEquals?: (a: QTable, b: QTable) => boolean;
+    /** The first entry's number: 1 for the whole log, a reset's `fromGlobalSeq` for the stretch after it. */
+    firstSeq?: number;
+  } = {}
 ): { table: QTable; problems: string[] } => {
   const equals = options.tableEquals ?? sameTable;
+  const firstSeq = options.firstSeq ?? 1;
   const ordered = [...entries].sort((a, b) => a.globalSeq - b.globalSeq);
   const problems: string[] = [];
   let table: QTable = options.start ?? {};
   ordered.forEach((entry, i) => {
     const at = `globalSeq ${entry.globalSeq}`;
-    if (entry.globalSeq !== i + 1) problems.push(`${at}: expected globalSeq ${i + 1}`);
+    if (entry.globalSeq !== firstSeq + i) problems.push(`${at}: expected globalSeq ${firstSeq + i}`);
     if (stateKey(entry.state) !== entry.stateKey) problems.push(`${at}: stateKey ${entry.stateKey} does not match the state`);
     const before = cellOf(table, entry.state, entry.action);
     if (entry.kind === 'visit') {
