@@ -13,6 +13,7 @@ import {
   drawHotspotDetail,
 } from '@/features/driving-sim/presentation/canvas/rendering/renderers/garageRenderer';
 import { useText } from '@/shared/i18n/useText';
+import { holderOnPlate } from '@/features/driving-sim/domain/scenario/garagePlate';
 import { stageMessages as m } from '../messages';
 
 /**
@@ -124,7 +125,7 @@ export const StageDecision = ({
       </div>
       <div className="p-3">
         <p className="font-display text-sm font-black uppercase tracking-wide text-foreground">
-          {hotspot.document.holder}
+          {holderOnPlate(hotspot.document.holder, plate)}
         </p>
         <dl className="mt-3 grid gap-2">
           {hotspot.document.fields.map((field) => (

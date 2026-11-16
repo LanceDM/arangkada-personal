@@ -675,6 +675,8 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gat
           subtitle={activeQuiz.cap === 0 ? 'Not counted in your course' : `Attempt ${activeQuiz.attempt} of ${activeQuiz.cap}`}
           onSubmit={activeQuiz.onSubmit}
           onAnswer={activeQuiz.onAnswer}
+          // Practice is outside the course: it may show what was missed.
+          reviewMissed={activeQuiz.cap === 0}
           onDone={() => {
             setActiveQuiz(null);
             activeQuiz.onDone();

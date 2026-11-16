@@ -2,6 +2,7 @@ import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/l
 import { buildEvents, pickWeighted, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
+import { withOnePlate } from '@/features/driving-sim/domain/scenario/garagePlate';
 import type { GarageHotspot, LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 
 const levelModule = getLevelModule(2);
@@ -104,7 +105,7 @@ const documentsPool: HotspotContent[] = [
       fields: [
         { label: 'CR', value: 'Present, original' },
         { label: 'OR', value: 'Present, paid' },
-        { label: 'COC (Insurance)', value: 'Expired 2026-04-15' },
+        { label: 'COC (Insurance)', value: 'Expired 2026-05-06' },
         { label: 'CEC', value: 'On file' },
         { label: 'RFID', value: 'Affixed, readable' },
       ],
@@ -149,6 +150,7 @@ const documentsPool: HotspotContent[] = [
 const plateShell: HotspotShell = { id: 'plate', label: 'Rear Plate & RFID', area: 'Registration', x: 0.5, y: 0.86, detail: 'plate' };
 const platePool: HotspotContent[] = [
   {
+    plate: 'ABC 1435',
     observation:
       'The plate reads ABC 1435. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. Today is the 20th of May.',
     question:
@@ -170,6 +172,7 @@ const platePool: HotspotContent[] = [
     severity: 'major',
   },
   {
+    plate: 'XYZ 8829',
     observation:
       'The plate reads XYZ 8829. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. Today is the 20th of May.',
     question:
@@ -184,13 +187,14 @@ const platePool: HotspotContent[] = [
     penaltyMessage:
       'The registration deadline was still months away. Refusing a properly-scheduled vehicle is also a wrong call.',
     rewardMessage:
-      'Correct. Last digit 9 means the deadline is September - this plate is still within schedule.',
+      'Correct. Last digit 9 means the deadline is September — this plate is still within schedule.',
     lawCitation:
       'The last digit of the plate sets the registration month and the second-to-last digit sets the weekly deadline; digits 1 to 3 fall on the 1st week.',
     competency: 'document_awareness',
     severity: 'major',
   },
   {
+    plate: 'DEF 4471',
     observation:
       'The plate reads DEF 4471. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. The OR in the glove box shows the last renewal was in January of last year. Today is the 20th of May.',
     question:
@@ -212,6 +216,7 @@ const platePool: HotspotContent[] = [
     severity: 'major',
   },
   {
+    plate: 'GHK 5508',
     observation:
       'The plate reads GHK 5508. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. Today is the 20th of May.',
     question:
@@ -337,7 +342,7 @@ const brakesPool: HotspotContent[] = [
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'The brakes checked out fine. Delaying a trip over healthy brakes is also a wrong call.',
-    rewardMessage: 'Correct. Firm pedal, no leak - the brakes are ready.',
+    rewardMessage: 'Correct. Firm pedal, no leak — the brakes are ready.',
     lawCitation: 'Do not drive until leaking or malfunctioning brakes are repaired.',
     competency: 'hazard_awareness',
     severity: 'critical',
@@ -371,7 +376,7 @@ const brakesPool: HotspotContent[] = [
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'The brakes checked out fine. Delaying a trip over healthy, serviced brakes is also a wrong call.',
-    rewardMessage: 'Correct. Firm pedal, no leak, recently serviced - the brakes are ready.',
+    rewardMessage: 'Correct. Firm pedal, no leak, recently serviced — the brakes are ready.',
     lawCitation: 'Do not drive until leaking or malfunctioning brakes are repaired.',
     competency: 'hazard_awareness',
     severity: 'critical',
@@ -412,7 +417,7 @@ const lightsPool: HotspotContent[] = [
     correctAction: 'stop',
     points: 15,
     penaltyMessage:
-      'A busted brake light and a damaged headlight reduce visibility and signal clearly to other drivers - this must be fixed first.',
+      'A busted brake light and a damaged headlight cut what you can see and stop you signalling clearly to other drivers — they must be fixed first.',
     rewardMessage: 'Correct no-go. Busted bulbs and a damaged lens are fixed before the trip starts.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
     competency: 'hazard_awareness',
@@ -429,7 +434,7 @@ const lightsPool: HotspotContent[] = [
     ],
     correctAction: 'stop',
     points: 15,
-    penaltyMessage: 'Non-working turn signals leave other drivers with no warning of your intentions - this must be fixed first.',
+    penaltyMessage: 'Non-working turn signals leave other drivers with no warning of your intentions — this must be fixed first.',
     rewardMessage: 'Correct no-go. Non-working signal lights are fixed before the trip starts.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
     competency: 'hazard_awareness',
@@ -575,7 +580,7 @@ const trunkPool: HotspotContent[] = [
     ],
     correctAction: 'stop',
     points: 15,
-    penaltyMessage: 'A flat spare cannot help with a real breakdown - this must be sorted before the trip.',
+    penaltyMessage: 'A flat spare cannot help with a real breakdown — this must be sorted before the trip.',
     rewardMessage: 'Correct no-go. A usable spare is sorted before leaving.',
     lawCitation:
       'Vehicles must carry a reflectorized early warning device; the accessories and tools check also covers the spare tire, jack, and wrenches.',
@@ -635,8 +640,8 @@ const cockpitPool: HotspotContent[] = [
     ],
     correctAction: 'accelerate',
     points: 20,
-    penaltyMessage: 'Neutral, mirrors set, driver alert - this was ready to go. Delaying it is also a wrong call.',
-    rewardMessage: 'Correct. Neutral gear, mirrors set, and an alert driver - ready for the trip.',
+    penaltyMessage: 'Neutral, mirrors set, driver alert — this was ready to go. Delaying it is also a wrong call.',
+    rewardMessage: 'Correct. Neutral gear, mirrors set, and an alert driver — ready for the trip.',
     lawCitation:
       'For manual transmission, confirm neutral before starting. Delay the trip if the driver is sick, sleepy, distracted, or unable to focus.',
     competency: 'general_rules',
@@ -644,7 +649,7 @@ const cockpitPool: HotspotContent[] = [
   },
   {
     observation:
-      'The gear lever is in neutral and the mirrors are set, but the driver is scrolling on a phone and not paying attention to the road ahead.',
+      'The gear lever is in neutral and the mirrors are set, but you are scrolling on your phone and not paying attention to anything around you.',
     question: 'You are about to start the engine. What is the correct decision?',
     choices: [
       { label: 'No-Go — a distracted driver should not start the trip until focused', action: 'stop' },
@@ -654,7 +659,7 @@ const cockpitPool: HotspotContent[] = [
     correctAction: 'stop',
     points: 20,
     penaltyMessage: 'A distracted driver is as unfit to drive as an unroadworthy car.',
-    rewardMessage: 'Correct. Delay the trip until the driver is actually focused.',
+    rewardMessage: 'Correct. Delay the trip until you are actually focused.',
     lawCitation:
       'For manual transmission, confirm neutral before starting. Delay the trip if the driver is sick, sleepy, distracted, or unable to focus.',
     competency: 'general_rules',
@@ -671,8 +676,8 @@ const cockpitPool: HotspotContent[] = [
     ],
     correctAction: 'accelerate',
     points: 20,
-    penaltyMessage: 'Neutral, mirrors set, driver alert and belted in - this was ready to go. Delaying it is also a wrong call.',
-    rewardMessage: 'Correct. Neutral gear, mirrors set, alert, and belted in - ready for the trip.',
+    penaltyMessage: 'Neutral, mirrors set, driver alert and belted in — this was ready to go. Delaying it is also a wrong call.',
+    rewardMessage: 'Correct. Neutral gear, mirrors set, alert, and belted in — ready for the trip.',
     lawCitation:
       'For manual transmission, confirm neutral before starting. Delay the trip if the driver is sick, sleepy, distracted, or unable to focus.',
     competency: 'general_rules',
@@ -1021,12 +1026,12 @@ export const createLevel2 = (
 
   return {
     ...level2Base,
-    garage: {
+    garage: withOnePlate({
       plate: 'ABC 1435',
       intro:
         'Your trip starts in the garage. Inspect every point on the vehicle before the engine is started, and decide Go or No-Go for each one.',
       hotspots: buildHotspots(pick),
-    },
+    }),
     events: buildEvents(SLOTS, SLOT_DISTANCES, pick),
   };
 };
@@ -1038,11 +1043,11 @@ export const createLevel2 = (
  */
 export const level2: LevelConfig = {
   ...level2Base,
-  garage: {
+  garage: withOnePlate({
     plate: 'ABC 1435',
     intro:
       'Your trip starts in the garage. Inspect every point on the vehicle before the engine is started, and decide Go or No-Go for each one.',
     hotspots: buildHotspots(pool => pool[0]),
-  },
+  }),
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
 };

@@ -15,6 +15,9 @@ export const garageHotspotToEvent = (hotspot: GarageHotspot): ScenarioEvent => (
   triggerAtDistance: 0,
   type: 'scenario_trigger',
   description: hotspot.label,
+  // The point's own name on its verdict ("The smoking car"), not one read
+  // off its id ("Burning vehicle") (2026-11-16).
+  label: hotspot.label,
   correctAction: hotspot.correctAction,
   points: hotspot.points,
   penaltyMessage: hotspot.penaltyMessage,

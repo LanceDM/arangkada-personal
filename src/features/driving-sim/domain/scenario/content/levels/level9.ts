@@ -589,7 +589,7 @@ const aftermathHotspots: GarageHotspot[] = [
     question: 'What do you do before leaving the scene?',
     choices: [
       { label: 'Show your license, give your details, photograph it, report it.', action: 'stop' },
-      { label: 'Leave now an officer is here; reporting is their job.', action: 'accelerate' },
+      { label: 'Leave now that an officer is here; reporting is their job.', action: 'accelerate' },
       { label: 'Give a name and drive on to clear the lane.', action: 'brake' },
     ],
     correctAction: 'stop',

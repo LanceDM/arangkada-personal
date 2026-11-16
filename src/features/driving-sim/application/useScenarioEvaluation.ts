@@ -38,6 +38,26 @@ export type ScenarioResultState = {
    */
   move?: string;
   realWorldNote?: string;
+  /**
+   * On a correction to a question (a garage or crash-scene point, a
+   * checkpoint, a cutscene): the answer given and the right one, in the
+   * question's own words. "You kept going — this one wanted a full stop" is a
+   * driving sentence, and nobody drove anywhere to answer about a child seat
+   * (2026-11-16).
+   */
+  answered?: string;
+  rightAnswer?: string;
+};
+
+/** The answer given and the right one, where the scenario was a question with choices. */
+export const answerWords = (
+  event: Pick<ScenarioEvent, 'choices' | 'correctAction'>,
+  playerAction: string
+): { answered?: string; rightAnswer: string } | null => {
+  const right = event.choices?.find(choice => choice.action === event.correctAction);
+  if (!right) return null;
+  const given = event.choices?.find(choice => choice.action === playerAction);
+  return given ? { answered: given.label, rightAnswer: right.label } : { rightAnswer: right.label };
 };
 
 /** One scored decision, kept in state so the player panel can show a live feed. */
@@ -206,6 +226,7 @@ export const useScenarioEvaluation = ({
         ...(presented && !result.isCorrect
           ? { move: scenarioInstruction(event, say), realWorldNote: event.realWorldNote }
           : {}),
+        ...(!presented && !isStandingPenalty && !result.isCorrect ? (answerWords(event, playerAction) ?? {}) : {}),
       });
     }
     setDecisions(prev => [

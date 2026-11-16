@@ -248,6 +248,8 @@ export const decisionMessages = {
   dismiss: { en: 'Dismiss' },
   you: { en: 'You' },
   wanted: { en: '— this one wanted' },
+  youAnswered: { en: 'You answered:', fil: 'Sagot mo:' },
+  rightAnswer: { en: 'Right answer:', fil: 'Tamang sagot:' },
 } as const;
 
 export const stageMessages = {

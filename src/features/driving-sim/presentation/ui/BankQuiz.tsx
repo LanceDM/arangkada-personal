@@ -31,6 +31,13 @@ interface BankQuizProps {
   /** After the results: continue (passed, or retake drawn), or close. */
   onDone: () => void;
   onClose?: () => void;
+  /**
+   * After the results, list the items missed with the right answer. Only for
+   * practice, which is outside the course and read by no model: whether a
+   * course quiz gives feedback is still the open decision noted below
+   * (2026-11-16).
+   */
+  reviewMissed?: boolean;
 }
 
 /**
@@ -40,7 +47,35 @@ interface BankQuizProps {
  * competency after the attempt, 2 of 3 to pass; the diagnostic and the
  * post-exam show nothing about the answers.
  */
-const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onAnswer, onDone, onClose }: BankQuizProps) => {
+/** The items answered wrongly, each with the answer given and the right one. */
+const MissedItems = ({ items, choices }: { items: readonly BankItem[]; choices: readonly (number | null)[] }) => {
+  const missed = items.map((item, i) => ({ item, choice: choices[i] })).filter(({ item, choice }) => choice !== item.answer);
+  if (missed.length === 0) return <p className="text-center text-sm text-muted-foreground">Every item right.</p>;
+  return (
+    <div className="space-y-3" data-testid="missed-items">
+      <h3 className="font-display text-xs font-black uppercase tracking-widest text-muted-foreground">
+        To review ({missed.length})
+      </h3>
+      {missed.map(({ item, choice }) => (
+        <div key={item.id} className="space-y-1.5 rounded-2xl border border-border bg-card/60 p-4 text-sm">
+          <p className="font-semibold text-foreground">{item.question}</p>
+          {choice !== null && (
+            <p>
+              <span className="text-muted-foreground">You answered: </span>
+              <span className="text-destructive">{item.choices[choice]}</span>
+            </p>
+          )}
+          <p>
+            <span className="text-muted-foreground">Right answer: </span>
+            <span className="font-semibold text-accent">{item.choices[item.answer]}</span>
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onAnswer, onDone, onClose, reviewMissed = false }: BankQuizProps) => {
   const [step, setStep] = useState(0);
   const [choices, setChoices] = useState<(number | null)[]>(() => items.map(() => null));
   const [results, setResults] = useState<BankQuizResult[] | null>(null);
@@ -122,6 +157,9 @@ const BankQuiz = ({ items, kind, title, subtitle, onSubmit, onAnswer, onDone, on
                 ))}
                 <p className="text-center text-xs text-muted-foreground">2 of 3 correct passes a competency.</p>
               </div>
+            )}
+            {reviewMissed && (
+              <MissedItems items={items} choices={choices} />
             )}
             <button
               onClick={onDone}

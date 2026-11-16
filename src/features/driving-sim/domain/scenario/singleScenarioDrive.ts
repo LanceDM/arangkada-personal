@@ -7,8 +7,8 @@
  * (`composeSingleScenario`). The tutorial's road events, and the points of a
  * level's own garage or crash scene, are played on the level as authored,
  * narrowed to that one point. The drive starts just before the scenario is
- * announced; a garage check starts at the garage, a crash-scene step near the
- * end of the road, where the crash scene is.
+ * announced; a garage check starts at the garage and ends just past it, a
+ * crash-scene step starts near the end of the road, where the crash scene is.
  */
 import { WARNING_ZONE_ENTER } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { composeSingleScenario } from './composeDrive';
@@ -26,6 +26,19 @@ export interface SingleScenarioDrive {
 const RUN_IN = 150;
 /** How far before the road's end a crash-scene check starts. */
 const AFTERMATH_RUN_IN = 300;
+/**
+ * The road after a garage check: a short pull out of the garage, then the end
+ * (2026-11-16). The check is the garage point; the level's road after it, with
+ * none of its scenarios on it, only made the admin drive an empty road to see
+ * the result.
+ */
+const GARAGE_RUN_OUT = 400;
+
+const garageOnly = (level: LevelConfig): SingleScenarioDrive => ({
+  level: { ...level, events: [], roadLength: GARAGE_RUN_OUT },
+  initialDistance: 0,
+  where: 'garage',
+});
 
 const startBefore = (event: ScenarioEvent): number =>
   Math.max(0, event.triggerAtDistance - (event.warningDistance ?? WARNING_ZONE_ENTER) - RUN_IN);
@@ -34,7 +47,7 @@ export const singleScenarioDrive = (levelId: number, scenarioId: string): Single
   const composed = composeSingleScenario(levelId, scenarioId);
   if (composed) {
     const { level, placement } = composed;
-    if (placement === 'garage') return { level, initialDistance: 0, where: 'garage' };
+    if (placement === 'garage') return garageOnly(level);
     if (placement === 'aftermath') return { level, initialDistance: Math.max(0, level.roadLength - AFTERMATH_RUN_IN), where: 'aftermath' };
     const event = level.events.find(e => e.id === scenarioId);
     return event ? { level, initialDistance: startBefore(event), where: 'road' } : null;
@@ -51,7 +64,7 @@ export const singleScenarioDrive = (levelId: number, scenarioId: string): Single
     if (stage && point) {
       const level: LevelConfig = { ...authored, [scene]: { ...stage, hotspots: [point] } };
       return scene === 'garage'
-        ? { level, initialDistance: 0, where: 'garage' }
+        ? garageOnly(level)
         : { level, initialDistance: Math.max(0, level.roadLength - AFTERMATH_RUN_IN), where: 'aftermath' };
     }
   }

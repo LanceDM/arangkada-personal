@@ -47,4 +47,43 @@ describe('the bank quiz', () => {
     expect(host.textContent).toContain('3 of 3 passed');
     await act(async () => root.unmount());
   });
+
+  it('lists what practice missed, with the right answer, and keeps a course quiz silent', async () => {
+    const items = QUESTION_BANK.filter(item => item.competency === 'parking').slice(0, 3);
+    const render = async (reviewMissed: boolean) => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      const root = createRoot(host);
+      await act(async () => {
+        root.render(
+          <BankQuiz
+            items={items}
+            kind="quiz"
+            title="Short Quiz"
+            reviewMissed={reviewMissed}
+            onSubmit={async () => [{ competency: 'parking', correct: 2, total: 3, passed: true }]}
+            onDone={() => {}}
+          />
+        );
+      });
+      for (const [i, item] of items.entries()) {
+        // The first item answered wrongly, the rest rightly.
+        const want = i === 0 ? item.choices[(item.answer + 1) % item.choices.length] : item.choices[item.answer];
+        const button = [...host.querySelectorAll('button')].find(b => b.textContent?.startsWith(want));
+        await click(button!);
+      }
+      return { host, root };
+    };
+
+    const practice = await render(true);
+    const missed = practice.host.querySelector('[data-testid="missed-items"]');
+    expect(missed?.textContent).toContain(items[0].question);
+    expect(missed?.textContent).toContain(items[0].choices[items[0].answer]);
+    expect(missed?.textContent).not.toContain(items[1].question);
+    await act(async () => practice.root.unmount());
+
+    const course = await render(false);
+    expect(course.host.querySelector('[data-testid="missed-items"]')).toBeNull();
+    await act(async () => course.root.unmount());
+  });
 });

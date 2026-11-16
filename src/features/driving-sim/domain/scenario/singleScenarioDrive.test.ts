@@ -24,5 +24,8 @@ describe('one scenario, alone, for the admin to play', () => {
     const drive = singleScenarioDrive(row.levelId, row.id)!;
     expect(drive.where).toBe('garage');
     expect(drive.level.garage?.hotspots).toHaveLength(1);
+    // Nothing to drive after it: the check ends a short way out of the garage.
+    expect(drive.level.events).toEqual([]);
+    expect(drive.level.roadLength).toBeLessThan(1000);
   });
 });

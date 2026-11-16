@@ -24,6 +24,7 @@ import type { SlotVariant } from './pooling';
 import { fitsTheRoad, isPortableRemediation, remediationCandidates } from './remediationPool';
 import { declaredLineSpans } from './roadLine';
 import { stageContent, type StageContent } from './stageContent';
+import { withOnePlate } from './garagePlate';
 import { STAGE_EXTRAS, extrasBefore } from './content/levels/stageExtras';
 
 /** Where a composed scenario stands. */
@@ -169,7 +170,7 @@ const rescaleThresholds = (events: ScenarioEvent[], points: GarageHotspot[]): Pa
 };
 
 const stageScene = (authored: GarageStage | undefined, hotspots: GarageHotspot[]): GarageStage | undefined =>
-  authored && hotspots.length > 0 ? { ...authored, hotspots } : undefined;
+  authored && hotspots.length > 0 ? withOnePlate({ ...authored, hotspots }) : undefined;
 
 /**
  * The drive for these competencies: `perCompetency` scenarios each (3), drawn

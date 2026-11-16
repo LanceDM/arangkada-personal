@@ -811,6 +811,12 @@ export interface GarageHotspot {
   document?: CheckpointInspection;
   /** Close-up art shown when there is no document to display. */
   detail?: GarageDetailArt;
+  /**
+   * The plate this point is about (a registration check), when it is not the
+   * stage's own. The car is drawn with it, and the paperwork names it, so the
+   * plate the question reads is the plate on screen (2026-11-16).
+   */
+  plate?: string;
 }
 
 /**
