@@ -343,11 +343,14 @@ export const mainRoadTraffic = (
   const progress = phase / MAIN_ROAD_TRAFFIC_SHARE;
   const travel = CANVAS_WIDTH + 160;
   const top = screenY - ROAD_WIDTH / 2;
+  // Keep right (2026-11-16): traffic from the left, heading right, runs in the
+  // main road's near lane; traffic from the right, heading left, in its far
+  // lane. They used to run the other way round, as on a keep-left road.
   return {
     clear: false,
     cars: [
-      { x: -80 + progress * travel, y: top + ROAD_WIDTH / 3, color: '#dc2626', ...(named?.from === 'left' ? { kind: named.kind } : {}) },
-      { x: CANVAS_WIDTH + 80 - progress * travel, y: top + (ROAD_WIDTH * 2) / 3, color: '#2563eb', ...(named?.from === 'right' ? { kind: named.kind } : {}) },
+      { x: -80 + progress * travel, y: top + (ROAD_WIDTH * 2) / 3, color: '#dc2626', ...(named?.from === 'left' ? { kind: named.kind } : {}) },
+      { x: CANVAS_WIDTH + 80 - progress * travel, y: top + ROAD_WIDTH / 3, color: '#2563eb', ...(named?.from === 'right' ? { kind: named.kind } : {}) },
     ],
   };
 };

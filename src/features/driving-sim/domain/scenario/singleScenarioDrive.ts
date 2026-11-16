@@ -11,7 +11,8 @@
  * crash-scene step starts near the end of the road, where the crash scene is.
  */
 import { WARNING_ZONE_ENTER } from '@/features/driving-sim/domain/world/vehiclePhysics';
-import { composeSingleScenario } from './composeDrive';
+import { isCompetencyStage, STAGE_COMPETENCIES } from '@/domain/learner/stageCompetencies';
+import { composeDrive, composeSingleScenario } from './composeDrive';
 import { LEVELS } from './levelCatalog';
 import type { LevelConfig, ScenarioEvent } from './scenarioDefinition';
 
@@ -69,4 +70,29 @@ export const singleScenarioDrive = (levelId: number, scenarioId: string): Single
     }
   }
   return null;
+};
+
+/** A small seeded generator, so one seed always composes the same drive. */
+const seeded = (seed: number) => {
+  let state = seed >>> 0 || 1;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+/**
+ * A whole course drive of a level, for checking how its scenarios follow one
+ * another (Admin > Scenarios > Levels, 2026-11-16): composed the way a
+ * learner's first drive of the stage is, every competency of the stage, drawn
+ * from `seed`. The tutorial and the final mission are played as authored.
+ */
+export const wholeDriveForCheck = (levelId: number, seed: number): LevelConfig | null => {
+  if (isCompetencyStage(levelId)) {
+    return composeDrive({ levelId, competencies: STAGE_COMPETENCIES[levelId], rng: seeded(seed) }).level;
+  }
+  return LEVELS.find(level => level.id === levelId) ?? null;
 };

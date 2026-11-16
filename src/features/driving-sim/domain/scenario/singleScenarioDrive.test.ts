@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { scenarioConfigRows } from './scenarioCatalog';
-import { singleScenarioDrive } from './singleScenarioDrive';
+import { singleScenarioDrive, wholeDriveForCheck } from './singleScenarioDrive';
 
 describe('one scenario, alone, for the admin to play', () => {
   const rows = scenarioConfigRows();
@@ -27,5 +27,14 @@ describe('one scenario, alone, for the admin to play', () => {
     // Nothing to drive after it: the check ends a short way out of the garage.
     expect(drive.level.events).toEqual([]);
     expect(drive.level.roadLength).toBeLessThan(1000);
+  });
+
+  it('composes a whole drive of each level for checking, the same for the same seed', () => {
+    for (let levelId = 0; levelId <= 12; levelId++) {
+      const drive = wholeDriveForCheck(levelId, 3);
+      expect(drive, `L${levelId}`).not.toBeNull();
+      expect(drive!.events.length, `L${levelId}`).toBeGreaterThan(0);
+    }
+    expect(wholeDriveForCheck(5, 7)!.events.map(e => e.id)).toEqual(wholeDriveForCheck(5, 7)!.events.map(e => e.id));
   });
 });

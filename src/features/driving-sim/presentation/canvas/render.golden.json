@@ -867,79 +867,79 @@
   "levelId": 2,
   "distance": 240,
   "ops": 265,
-  "digest": "dba359d6"
+  "digest": "577cdf4a"
  },
  {
   "levelId": 2,
   "distance": 240,
   "ops": 265,
-  "digest": "dba359d6"
+  "digest": "577cdf4a"
  },
  {
   "levelId": 2,
   "distance": 490,
   "ops": 265,
-  "digest": "c2688029"
+  "digest": "9272b077"
  },
  {
   "levelId": 2,
   "distance": 490,
   "ops": 265,
-  "digest": "c2688029"
+  "digest": "9272b077"
  },
  {
   "levelId": 2,
   "distance": 660,
   "ops": 265,
-  "digest": "d36c1c14"
+  "digest": "b3c32c00"
  },
  {
   "levelId": 2,
   "distance": 660,
   "ops": 265,
-  "digest": "d36c1c14"
+  "digest": "b3c32c00"
  },
  {
   "levelId": 2,
   "distance": 780,
   "ops": 265,
-  "digest": "4d6d10cc"
+  "digest": "d63cbd54"
  },
  {
   "levelId": 2,
   "distance": 780,
   "ops": 265,
-  "digest": "9ba78fbe"
+  "digest": "3b54d476"
  },
  {
   "levelId": 2,
   "distance": 840,
   "ops": 265,
-  "digest": "31cfa9a0"
+  "digest": "a8169468"
  },
  {
   "levelId": 2,
   "distance": 840,
   "ops": 265,
-  "digest": "9e2f1241"
+  "digest": "dc69dd89"
  },
  {
   "levelId": 2,
   "distance": 880,
   "ops": 282,
-  "digest": "3330ac11"
+  "digest": "f45b9a01"
  },
  {
   "levelId": 2,
   "distance": 880,
   "ops": 282,
-  "digest": "b9dd65cb"
+  "digest": "b4cc07fb"
  },
  {
   "levelId": 2,
   "distance": 250,
   "ops": 265,
-  "digest": "093afa8a"
+  "digest": "e8dc5736"
  },
  {
   "levelId": 2,
@@ -951,7 +951,7 @@
   "levelId": 2,
   "distance": 600,
   "ops": 265,
-  "digest": "abd3d37a"
+  "digest": "0768e9da"
  },
  {
   "levelId": 2,
@@ -963,7 +963,7 @@
   "levelId": 2,
   "distance": 900,
   "ops": 282,
-  "digest": "677c77dc"
+  "digest": "0588bffc"
  },
  {
   "levelId": 2,
@@ -975,7 +975,7 @@
   "levelId": 2,
   "distance": 1150,
   "ops": 282,
-  "digest": "fc3463d1"
+  "digest": "b5abf421"
  },
  {
   "levelId": 2,
@@ -987,7 +987,7 @@
   "levelId": 2,
   "distance": 1320,
   "ops": 183,
-  "digest": "7e7e4c14"
+  "digest": "6c2138f0"
  },
  {
   "levelId": 2,
@@ -999,7 +999,7 @@
   "levelId": 2,
   "distance": 1440,
   "ops": 183,
-  "digest": "87714b24"
+  "digest": "2a055278"
  },
  {
   "levelId": 2,
@@ -1011,7 +1011,7 @@
   "levelId": 2,
   "distance": 1500,
   "ops": 183,
-  "digest": "dc66b15c"
+  "digest": "81bee0b8"
  },
  {
   "levelId": 2,
@@ -1023,7 +1023,7 @@
   "levelId": 2,
   "distance": 1540,
   "ops": 183,
-  "digest": "dff3429a"
+  "digest": "8ecef09a"
  },
  {
   "levelId": 2,
@@ -1035,49 +1035,49 @@
   "levelId": 2,
   "distance": 910,
   "ops": 282,
-  "digest": "3ab48755"
+  "digest": "7518f399"
  },
  {
   "levelId": 2,
   "distance": 910,
   "ops": 282,
-  "digest": "3ab48755"
+  "digest": "7518f399"
  },
  {
   "levelId": 2,
   "distance": 1260,
   "ops": 183,
-  "digest": "1e3a1603"
+  "digest": "3bc17c83"
  },
  {
   "levelId": 2,
   "distance": 1260,
   "ops": 183,
-  "digest": "1e3a1603"
+  "digest": "3bc17c83"
  },
  {
   "levelId": 2,
   "distance": 1560,
   "ops": 183,
-  "digest": "3c2ff329"
+  "digest": "9a1dc7f1"
  },
  {
   "levelId": 2,
   "distance": 1560,
   "ops": 183,
-  "digest": "3c2ff329"
+  "digest": "9a1dc7f1"
  },
  {
   "levelId": 2,
   "distance": 1810,
   "ops": 183,
-  "digest": "a9d8e6a9"
+  "digest": "6e56cf0d"
  },
  {
   "levelId": 2,
   "distance": 1810,
   "ops": 183,
-  "digest": "a9d8e6a9"
+  "digest": "6e56cf0d"
  },
  {
   "levelId": 2,
@@ -7419,79 +7419,79 @@
   "levelId": 12,
   "distance": 1400,
   "ops": 330,
-  "digest": "f7c211ee"
+  "digest": "4d40183a"
  },
  {
   "levelId": 12,
   "distance": 1400,
   "ops": 330,
-  "digest": "f7c211ee"
+  "digest": "4d40183a"
  },
  {
   "levelId": 12,
   "distance": 1650,
   "ops": 330,
-  "digest": "d0fc0f79"
+  "digest": "a57dfabd"
  },
  {
   "levelId": 12,
   "distance": 1650,
   "ops": 330,
-  "digest": "d0fc0f79"
+  "digest": "a57dfabd"
  },
  {
   "levelId": 12,
   "distance": 1820,
   "ops": 192,
-  "digest": "cd0eea55"
+  "digest": "98906b33"
  },
  {
   "levelId": 12,
   "distance": 1820,
   "ops": 192,
-  "digest": "cd0eea55"
+  "digest": "98906b33"
  },
  {
   "levelId": 12,
   "distance": 1940,
   "ops": 192,
-  "digest": "485a50d1"
+  "digest": "79364d19"
  },
  {
   "levelId": 12,
   "distance": 1940,
   "ops": 192,
-  "digest": "485a50d1"
+  "digest": "79364d19"
  },
  {
   "levelId": 12,
   "distance": 2000,
   "ops": 192,
-  "digest": "db880ca9"
+  "digest": "7bf34181"
  },
  {
   "levelId": 12,
   "distance": 2000,
   "ops": 192,
-  "digest": "db880ca9"
+  "digest": "7bf34181"
  },
  {
   "levelId": 12,
   "distance": 2040,
   "ops": 192,
-  "digest": "604ab637"
+  "digest": "b41d6d8f"
  },
  {
   "levelId": 12,
   "distance": 2040,
   "ops": 192,
-  "digest": "604ab637"
+  "digest": "b41d6d8f"
  },
  {
   "levelId": 12,
   "distance": 1450,
   "ops": 330,
-  "digest": "f18ef97f"
+  "digest": "aa426323"
  },
  {
   "levelId": 12,
@@ -7503,7 +7503,7 @@
   "levelId": 12,
   "distance": 1800,
   "ops": 192,
-  "digest": "f3d1a526"
+  "digest": "20142b86"
  },
  {
   "levelId": 12,
@@ -7515,7 +7515,7 @@
   "levelId": 12,
   "distance": 2100,
   "ops": 218,
-  "digest": "f459f4c5"
+  "digest": "eeb0151d"
  },
  {
   "levelId": 12,
@@ -7527,7 +7527,7 @@
   "levelId": 12,
   "distance": 2350,
   "ops": 218,
-  "digest": "a4b0eb3b"
+  "digest": "c5e5097b"
  },
  {
   "levelId": 12,
@@ -7539,7 +7539,7 @@
   "levelId": 12,
   "distance": 2520,
   "ops": 192,
-  "digest": "1142e866"
+  "digest": "5fc7ff7a"
  },
  {
   "levelId": 12,
@@ -7551,7 +7551,7 @@
   "levelId": 12,
   "distance": 2640,
   "ops": 192,
-  "digest": "2aa56634"
+  "digest": "72846948"
  },
  {
   "levelId": 12,
@@ -7563,7 +7563,7 @@
   "levelId": 12,
   "distance": 2700,
   "ops": 192,
-  "digest": "bc754d06"
+  "digest": "0c5f5982"
  },
  {
   "levelId": 12,
@@ -7575,7 +7575,7 @@
   "levelId": 12,
   "distance": 2740,
   "ops": 192,
-  "digest": "5cae1d26"
+  "digest": "d3736846"
  },
  {
   "levelId": 12,
@@ -7587,49 +7587,49 @@
   "levelId": 12,
   "distance": 2150,
   "ops": 218,
-  "digest": "63d63f87"
+  "digest": "afcfddd3"
  },
  {
   "levelId": 12,
   "distance": 2150,
   "ops": 218,
-  "digest": "63d63f87"
+  "digest": "afcfddd3"
  },
  {
   "levelId": 12,
   "distance": 2500,
   "ops": 192,
-  "digest": "b30de07e"
+  "digest": "21fc8b26"
  },
  {
   "levelId": 12,
   "distance": 2500,
   "ops": 192,
-  "digest": "b30de07e"
+  "digest": "21fc8b26"
  },
  {
   "levelId": 12,
   "distance": 2800,
   "ops": 222,
-  "digest": "b22269a1"
+  "digest": "2f919321"
  },
  {
   "levelId": 12,
   "distance": 2800,
   "ops": 222,
-  "digest": "b22269a1"
+  "digest": "2f919321"
  },
  {
   "levelId": 12,
   "distance": 3050,
   "ops": 222,
-  "digest": "ab164542"
+  "digest": "8c0d76be"
  },
  {
   "levelId": 12,
   "distance": 3050,
   "ops": 222,
-  "digest": "ab164542"
+  "digest": "8c0d76be"
  },
  {
   "levelId": 12,
@@ -7683,13 +7683,13 @@
   "levelId": 12,
   "distance": 2850,
   "ops": 222,
-  "digest": "980c45b2"
+  "digest": "4b0f6632"
  },
  {
   "levelId": 12,
   "distance": 2850,
   "ops": 222,
-  "digest": "980c45b2"
+  "digest": "4b0f6632"
  },
  {
   "levelId": 12,

@@ -25,6 +25,7 @@ import { fitsTheRoad, isPortableRemediation, remediationCandidates } from './rem
 import { declaredLineSpans } from './roadLine';
 import { stageContent, type StageContent } from './stageContent';
 import { withOnePlate } from './garagePlate';
+import { WARNING_ZONE_ENTER } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { STAGE_EXTRAS, extrasBefore } from './content/levels/stageExtras';
 
 /** Where a composed scenario stands. */
@@ -135,24 +136,53 @@ const stageSpacing = (distances: number[]): number => {
 const MIN_APPEND_SPACING = 700;
 
 /**
+ * How far past its own point a scenario may still be graded: a prohibition
+ * ("do not stop here") is graded to the end of its stretch, and the drives
+ * that measure the time limits settle those up to about 320 road units past
+ * the point. Measured, not derived (2026-11-16).
+ */
+const SETTLE_REACH = 340;
+/** A stop is graded at or before its point; anything else may run on to `SETTLE_REACH`. */
+const settleReach = (event: Pick<ScenarioEvent, 'correctAction'>): number => (event.correctAction === 'stop' ? 0 : SETTLE_REACH);
+/**
+ * Clear road between one verdict and the next announcement: about three
+ * seconds at a stage's cruising speed, the time a verdict stays on screen.
+ * Without it an appended scenario could be announced in the same moment the
+ * last one was graded, two cards at once (2026-11-16).
+ */
+const CLEAR_ROAD = 240;
+
+/**
  * Appends portable scenarios after the authored road's last slot, at the
  * stage's own spacing, with the authored run-out kept behind the last one. The
  * road grows; every authored slot keeps its distance, geometry and paint. A
  * line a scenario is graded on comes with it, as practice items always did.
+ *
+ * Each one stands far enough past the one before for that one to be graded and
+ * its verdict read before this one is announced: the stage's spacing, or more
+ * where a long announcement or a late verdict needs it.
  */
 const placeAppended = (level: LevelConfig, content: StageContent, variants: SlotVariant[]): LevelConfig => {
   if (variants.length === 0) return level;
   const lastAuthored = Math.max(...content.distances);
   const runway = Math.max(content.base.roadLength - lastAuthored, 0);
   const spacing = stageSpacing(content.distances);
-  const placed: ScenarioEvent[] = variants.map((variant, index) => ({
-    ...variant,
-    triggerAtDistance: lastAuthored + spacing * (index + 1),
-  }));
+  let previous: Pick<ScenarioEvent, 'triggerAtDistance' | 'correctAction'> = level.events.reduce(
+    (last, event) => (event.triggerAtDistance >= last.triggerAtDistance ? event : last),
+    { triggerAtDistance: lastAuthored, correctAction: 'stop' as ScenarioEvent['correctAction'] }
+  );
+  const placed: ScenarioEvent[] = variants.map(variant => {
+    const announced = variant.warningDistance ?? WARNING_ZONE_ENTER;
+    const clear = settleReach(previous) + CLEAR_ROAD + announced;
+    const triggerAtDistance = previous.triggerAtDistance + Math.max(spacing, clear);
+    const event = { ...variant, triggerAtDistance };
+    previous = event;
+    return event;
+  });
   return {
     ...level,
     events: [...level.events, ...placed],
-    roadLength: lastAuthored + spacing * variants.length + runway,
+    roadLength: previous.triggerAtDistance + runway,
     ...(level.paint ? { paint: { ...level.paint, spans: [...level.paint.spans, ...declaredLineSpans(placed)] } } : {}),
   };
 };

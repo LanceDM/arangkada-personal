@@ -18,7 +18,7 @@ const dash = (value: number | null | undefined, unit = '') => (value === null ||
 const LevelsPanel = ({ levels }: { levels: readonly LevelConfigRow[] }) => (
   <Panel
     title="Levels"
-    description="Each level's road. Metres are on the speed scale (how far the car travels at its speed); seconds at the limit leave out stops and questions. The time limit is twice the longest correct reference drive (time-limits:update)."
+    description="Each level's road. Play a drive plays a whole course drive of the level, nothing saved, to check how its scenarios follow one another. Metres are on the speed scale (how far the car travels at its speed); seconds at the limit leave out stops and questions. The time limit is twice the longest correct reference drive (time-limits:update)."
     bodyClassName="p-0"
   >
     <div className="overflow-x-auto">
@@ -33,6 +33,7 @@ const LevelsPanel = ({ levels }: { levels: readonly LevelConfigRow[] }) => (
             <TableHead>Time limit</TableHead>
             <TableHead>Pass mark</TableHead>
             <TableHead>On its road</TableHead>
+            <TableHead>Check</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -53,6 +54,11 @@ const LevelsPanel = ({ levels }: { levels: readonly LevelConfigRow[] }) => (
                 {level.roadEvents} road events
                 {level.garageChecks ? ` · ${level.garageChecks} garage` : ''}
                 {level.aftermathChecks ? ` · ${level.aftermathChecks} crash scene` : ''}
+              </TableCell>
+              <TableCell className="text-xs">
+                <Link to={`/admin/scenarios/play-level/${level.id}`} className="font-semibold text-primary underline">
+                  Play a drive
+                </Link>
               </TableCell>
             </TableRow>
           ))}
