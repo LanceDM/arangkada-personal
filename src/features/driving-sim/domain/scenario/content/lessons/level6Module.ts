@@ -45,7 +45,7 @@ export const level6Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'A turn is not just a change in direction, it is a position you must be in before the intersection, not during it. RA 4136 requires that when turning left from one highway to another, the vehicle be conducted to the right of the center of the intersection.',
+          text: 'A turn is not just a change in direction, it is a position you must be in before the intersection, not during it. RA 4136, Sec. 45(b) requires that a driver turning left approach the intersection in the lane nearest the center line, and the Driver\'s Manual adds that the turn is made into the lane nearest the center line of the road being entered.',
         },
         {
           type: 'table',

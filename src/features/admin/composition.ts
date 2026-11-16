@@ -11,6 +11,7 @@ import { sqlBackgrounds, sqlStudyRecords } from './infrastructure/SqlConnectStud
 import { firebaseSiteStatus } from './infrastructure/FirebaseSiteStatus';
 import { firebaseBktSets } from './infrastructure/FirebaseBktSets';
 import { firebaseProgressReset } from './infrastructure/FirebaseProgressReset';
+import { firebaseQTableReset } from './infrastructure/FirebaseQTableReset';
 
 /** `firestore` (Implementation A) or `firestore+sql` (Implementation B): where the people, roles and settings records live. */
 export const composeAdmin = ({ databaseMode = 'firestore' }: { databaseMode?: 'firestore' | 'firestore+sql' } = {}) =>
@@ -28,5 +29,6 @@ export const composeAdmin = ({ databaseMode = 'firestore' }: { databaseMode?: 'f
     site: firebaseSiteStatus,
     bktSets: firebaseBktSets,
     progressReset: firebaseProgressReset,
+    qTableReset: firebaseQTableReset,
   });
 

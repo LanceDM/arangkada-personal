@@ -1,4 +1,5 @@
 import type { ProgressResetRecord } from '@/features/admin/domain/progressReset';
+import type { QTableResetRecord } from '@/features/admin/domain/qTableReset';
 import type { SiteStatus } from '@/features/admin/domain/siteStatus';
 import type { BktSetsData, SavedValueSet, StartEditRecord } from '@/features/admin/domain/bktSetsAdmin';
 import type { CalibrationRecord, PilotRef } from '@/features/admin/domain/bktCalibration';
@@ -82,6 +83,17 @@ export interface ProgressResetRepository {
   reset(uid: string, admin: { uid: string; email: string | null }, note: string): Promise<ProgressResetRecord & { resetId: string }>;
   /** The account's past resets, newest first. */
   history(uid: string): Promise<(ProgressResetRecord & { resetId: string })[]>;
+}
+
+/**
+ * Resets the shared Q-table (domain/qTableReset.ts): keeps the table as it
+ * stood under `policy/competencyQ/resets/{resetId}` and empties it, in one
+ * transaction. The update log is not touched.
+ */
+export interface QTableResetRepository {
+  reset(admin: { uid: string; email: string | null }, note: string): Promise<QTableResetRecord & { resetId: string }>;
+  /** Past resets, newest first. */
+  history(): Promise<(QTableResetRecord & { resetId: string })[]>;
 }
 
 /**

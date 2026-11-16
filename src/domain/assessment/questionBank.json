@@ -2476,17 +2476,18 @@
  },
  {
   "id": "L6-LD-10",
-  "question": "You are turning left from one highway into another. Where must the vehicle pass, and which lane do you turn into?",
+  "question": "You are turning left from one two-way highway into another. Which lane do you approach in, and which lane do you turn into?",
   "choices": [
-   "To the right of the center of the intersection, turning into the lane nearest the center line",
-   "To the left of the center of the intersection, into the rightmost lane",
-   "Straight through the middle, into any clear lane",
-   "Along the curb line, into the lane nearest the curb"
+   "Approach in the lane nearest the center line, and turn into the lane nearest the center line",
+   "Approach in the lane nearest the curb, and turn into the lane nearest the curb",
+   "Approach in the lane nearest the center line, and turn into the lane nearest the curb",
+   "Approach in the lane nearest the curb, and turn into any lane that is clear"
   ],
   "answer": 0,
   "competency": "lane_discipline",
   "stage": 6,
-  "source": "RA 4136, Secs. 37 and 45(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, pp. 116, 117"
+  "source": "RA 4136, Sec. 45(b); ref. Driver's Manual Vol. 1 (2021), Ch. III, p. 117",
+  "reviewerNotes": "Rewritten 2026-11-16. The earlier version asked which side of the center of the intersection the car passes; RA 4136 Sec. 37 says to the right and Sec. 45(b) says to the left, so no key was defensible. This version tests only what Sec. 45(b) and the Driver's Manual agree on: the approach lane and the lane turned into."
  },
  {
   "id": "L6-LD-11",

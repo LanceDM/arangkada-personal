@@ -1,7 +1,7 @@
 import { collection, doc, getDoc, getDocs, orderBy, query, runTransaction, serverTimestamp, setDoc, type DocumentSnapshot, type Transaction } from 'firebase/firestore';
 import { CourseConflictError, OutdatedAppError } from '@/features/driving-sim/application/errors';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
-import { db } from '@/shared/infrastructure/firebase/client';
+import { auth, db } from '@/shared/infrastructure/firebase/client';
 import { COURSE_SCHEMA_VERSION, sameCursor, type CourseCursor } from '@/domain/competencyRouting/course';
 import { applyQLog, pairQOperations, statesOf } from '@/domain/study/qLog';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
@@ -20,6 +20,12 @@ const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 const cursorDoc = (uid: string) => doc(db, 'users', uid, 'routing', 'competencyCourse');
 const tableDoc = () => doc(db, 'policy', 'competencyQ');
+
+/** Whether the signed-in account carries the admin claim. */
+const isAdminSession = async (): Promise<boolean> => {
+  const token = await auth.currentUser?.getIdTokenResult();
+  return token?.claims.admin === true;
+};
 const configDoc = () => doc(db, 'policy', 'config');
 const evidenceCounterDoc = (uid: string) => doc(db, 'users', uid, 'state', 'evidence');
 const activeDoc = (uid: string) => doc(db, 'users', uid, 'state', 'active');
@@ -78,6 +84,10 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
   },
 
   async commitStep(uid, { expected, compute, context, envelope, evidence }) {
+    // An admin's course is a check of the game, not a learner: its decisions
+    // are still made from the shared table, but it teaches the table nothing
+    // (2026-11-16). The rules refuse an admin's change to the table too.
+    const learns = !(await isAdminSession());
     return runTransaction(
       db,
       async transaction => {
@@ -96,7 +106,7 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
         const current: QTable = tableSnap.exists() ? (tableSnap.data().table as QTable) : emptyQTable();
         const updates = tableSnap.exists() ? Number(tableSnap.data().updates ?? 0) : 0;
         const step = compute(current);
-        const items = pairQOperations(step.operations, step.decisions, step.rewards);
+        const items = learns ? pairQOperations(step.operations, step.decisions, step.rewards) : [];
         const applied =
           items.length > 0
             ? applyQLog({ table: current, items, firstGlobalSeq: updates + 1, context, envelope })
@@ -109,7 +119,7 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
         }
         if (applied.entries.length > 0) {
           const last = applied.entries.at(-1)!;
-          // The table is never reset: each settings version is recorded with the
+          // The log is never reset (an admin reset empties only the table): each settings version is recorded with the
           // first update made under it, so the log can be split by version.
           const versions = { ...((tableSnap.exists() ? tableSnap.data().versions : null) ?? {}) } as Record<string, { fromGlobalSeq: number; firstAt: number }>;
           if (!versions[RUN_CONFIG_VERSION]) versions[RUN_CONFIG_VERSION] = { fromGlobalSeq: updates + 1, firstAt: Date.now() };
@@ -123,6 +133,8 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
               states: statesOf(applied.table),
               configVersion: RUN_CONFIG_VERSION,
               versions,
+              // Kept across updates: where the table was last reset, for splitting its log.
+              lastReset: (tableSnap.exists() ? tableSnap.data().lastReset : null) ?? null,
               lastUpdate: {
                 updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid,
                 participantCode: last.participantCode, at: last.at, configVersion: last.configVersion,

@@ -105,11 +105,11 @@ const leftTurnCentreLaneSlot: SlotVariant[] = [
     correctAction: 'turn_left',
     points: 25,
     warningDistance: 380,
-    penaltyMessage: `A left turn is taken from the lane nearest the center line, and the vehicle must be conducted to the right of the center of the intersection. Turning from the curb side swings you across every lane beside you.`,
-    rewardMessage: 'Correct. Positioned nearest the center line, right of the center of the intersection, then through.',
+    penaltyMessage: `A left turn is taken from the lane nearest the center line, into the lane nearest the center line. Turning from the curb side swings you across every lane beside you.`,
+    rewardMessage: 'Correct. Positioned nearest the center line, and into the lane nearest the center line.',
     duration: 200,
     lawCitation:
-      'RA 4136, Sec. 45(b): when turning left from one highway to another, the vehicle shall be conducted to the right of the center of the intersection, and shall turn into the lane nearest the center line.',
+      'RA 4136, Sec. 45(b): a driver intending to turn left approaches the intersection in the lane to the right of and nearest the center line of the highway. Driver\'s Manual Vol. 1, Ch. III: make the turn into the lane nearest the center line.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {

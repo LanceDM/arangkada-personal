@@ -28,6 +28,7 @@ rules_version = '2';
 //   bktPilots/{uid}, bktPilotLog/{id}              pilot players and every mark/unmark (admin)
 //   policy/competencyQ                             the shared Q-table, learned online by every participant
 //   policy/competencyQ/updates/{updateId}          QLogEntry: every table change, append-only
+//   policy/competencyQ/resets/{resetId}            the table as it stood before an admin reset it
 //   policy/config                                  the settings version in force (written by db:init)
 //   configVersions/{tag}                           every settings version (written by db:init)
 //   participants/{code}                            study enrolment (written by db:participant)
@@ -360,6 +361,17 @@ service cloud.firestore {
         && existsAfter(entryPath)
         && getAfter(entryPath).data.globalSeq == next.updates
         && getAfter(entryPath).data.uid == request.auth.uid;
+    }
+
+    function isQTableReset(next, previous) {
+      let resetPath = /databases/$(database)/documents/policy/competencyQ/resets/$(next.lastReset.resetId);
+      return isQTableDoc(next)
+        && next.updates == previous.updates
+        && next.lastReset is map
+        && next.lastReset.resetId is string
+        && next.lastReset.fromGlobalSeq == previous.updates + 1
+        && existsAfter(resetPath)
+        && getAfter(resetPath).data.updatesBefore == previous.updates;
     }
 
     function isQTableDoc(data) {
@@ -1197,9 +1209,26 @@ service cloud.firestore {
       // names exists in the same transaction under the new counter. Every
       // change to the table is therefore attributed and on the record. (The
       // values themselves cannot be checked here; see DATABASE.md.)
-      allow create: if isSignedIn() && isQTableDoc(request.resource.data) && isLoggedTableChange(0);
-      allow update: if isSignedIn() && isQTableDoc(request.resource.data) && isLoggedTableChange(resource.data.updates);
+      // An admin's course teaches the table nothing (2026-11-16): their play is
+      // a check of the game, not a learner's decisions.
+      allow create: if isSignedIn() && !isAdmin() && isQTableDoc(request.resource.data) && isLoggedTableChange(0);
+      allow update: if isSignedIn() && !isAdmin() && isQTableDoc(request.resource.data) && isLoggedTableChange(resource.data.updates);
+      // An admin's reset (Admin > Q-learning): the table emptied, its update
+      // counter unchanged, and the table as it stood kept under resets/ in the
+      // same transaction.
+      allow update: if isAdmin() && isQTableReset(request.resource.data, resource.data);
       allow delete: if false;
+
+      // The table as it stood before each reset, with who reset it and why.
+      match /resets/{resetId} {
+        allow read: if isAdmin();
+        allow create: if isAdmin()
+          && request.resource.data.keys().hasAll(['at', 'by', 'note', 'updatesBefore', 'fromGlobalSeq', 'tableBefore'])
+          && request.resource.data.by.uid == request.auth.uid
+          && request.resource.data.tableBefore is map
+          && request.resource.data.note is string && request.resource.data.note.size() <= 500;
+        allow update, delete: if false;
+      }
 
       // Every change to the table, written in the same transaction by the
       // participant whose decision or reward caused it.

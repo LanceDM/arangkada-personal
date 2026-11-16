@@ -1,7 +1,7 @@
 /** The bound implementations of Admin's ports. Provided by `app/dependencies`. */
 import type { IrtRepository } from './irtPorts';
 import type { PilotPoolRepository, PilotRecordsRepository, StudyInvitesRepository } from './pilotPorts';
-import type { AdminReportRepository, BktSetsRepository, ProgressResetRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
+import type { AdminReportRepository, BktSetsRepository, ProgressResetRepository, QTableResetRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
 import type { QuizEditorRepository } from './quizPorts';
 
 export interface AdminDependencies {
@@ -23,6 +23,8 @@ export interface AdminDependencies {
   bktSets?: BktSetsRepository;
   /** Resetting an account's course; absent in tests (the panel says it is not wired). */
   progressReset?: ProgressResetRepository;
+  /** Resetting the shared Q-table; absent in tests (the panel says it is not wired). */
+  qTableReset?: QTableResetRepository;
 }
 
 let bound: AdminDependencies | null = null;

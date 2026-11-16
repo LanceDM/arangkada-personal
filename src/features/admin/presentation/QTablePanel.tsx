@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import { useLiveQTable } from '@/features/admin/application/useLiveQTable';
 import { toDateTime } from './formatDate';
+import { QTableResetPanel } from './QTableResetPanel';
+import { tableIsEmpty } from '@/features/admin/domain/qTableReset';
+import type { QTable } from '@/domain/competencyRouting/qLearning';
 import { Legend } from './adminUi';
 import { DEFAULT_WARM_UP } from '@/domain/competencyRouting/qLearning';
 
@@ -149,6 +152,7 @@ export const QTablePanel = () => {
           </Table>
         </CardContent>
       </Card>
+      <QTableResetPanel empty={tableIsEmpty(table?.table as QTable | undefined)} />
     </div>
   );
 };

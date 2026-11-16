@@ -170,10 +170,17 @@ export const SCHEMA: SchemaEntry[] = [
   },
   {
     path: 'policy/competencyQ',
-    description: 'The shared Q-table (never reset), each state\'s phase and tag, the last change, and each settings version with its first update',
+    description: 'The shared Q-table, each state\'s phase and tag, the last change, each settings version with its first update, and the last admin reset',
     writer: 'app', writes: 'transaction',
     source: { kind: 'doc', path: 'policy/competencyQ' },
-    check: fields({ schemaVersion: is.oneOf(1), table: is.map, updates: is.int, updatedAt: is.number, states: is.nullOr(is.map), versions: is.nullOr(is.map), configVersion: is.nullOr(is.string) }),
+    check: fields({ schemaVersion: is.oneOf(1), table: is.map, updates: is.int, updatedAt: is.number, states: is.nullOr(is.map), versions: is.nullOr(is.map), configVersion: is.nullOr(is.string), lastReset: is.nullOr(is.map) }),
+  },
+  {
+    path: 'policy/competencyQ/resets/{resetId}',
+    description: 'The shared Q-table as it stood before an admin reset it (2026-11-16); the update log is never reset',
+    writer: 'app', writes: 'write-once',
+    source: { kind: 'collection', path: 'policy/competencyQ/resets' },
+    check: fields({ at: is.number, by: is.map, note: is.string, updatesBefore: is.int, fromGlobalSeq: is.int, tableBefore: is.map }),
   },
   {
     path: 'policy/competencyQ/updates/{updateId}',

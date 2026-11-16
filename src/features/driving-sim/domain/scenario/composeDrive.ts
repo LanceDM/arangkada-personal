@@ -25,6 +25,7 @@ import { fitsTheRoad, isPortableRemediation, remediationCandidates } from './rem
 import { declaredLineSpans } from './roadLine';
 import { stageContent, type StageContent } from './stageContent';
 import { withOnePlate } from './garagePlate';
+import { cutsFor, safeCuts, withCuts } from './compactRoad';
 import { WARNING_ZONE_ENTER } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { STAGE_EXTRAS, extrasBefore } from './content/levels/stageExtras';
 
@@ -126,13 +127,7 @@ const tiered = (candidates: Candidate[], seen: ReadonlyMap<string, number>, rng:
   return [unseenOwn, unseenBorrowed, seenAny];
 };
 
-/** The gap the stage's own slots are spaced at (their median), never under 700 units. */
-const stageSpacing = (distances: number[]): number => {
-  const sorted = [...distances].sort((a, b) => a - b);
-  const gaps = sorted.slice(1).map((d, i) => d - sorted[i]).sort((a, b) => a - b);
-  const median = gaps.length > 0 ? gaps[Math.floor(gaps.length / 2)] : 0;
-  return Math.max(median, MIN_APPEND_SPACING);
-};
+/** The least gap between two scenarios added after the stage's own road. */
 const MIN_APPEND_SPACING = 700;
 
 /**
@@ -151,6 +146,8 @@ const settleReach = (event: Pick<ScenarioEvent, 'correctAction'>): number => (ev
  * last one was graded, two cards at once (2026-11-16).
  */
 const CLEAR_ROAD = 240;
+/** The speed `CLEAR_ROAD` was measured at, in km/h. */
+const CLEAR_ROAD_SPEED = 30;
 
 /**
  * Appends portable scenarios after the authored road's last slot, at the
@@ -166,15 +163,17 @@ const placeAppended = (level: LevelConfig, content: StageContent, variants: Slot
   if (variants.length === 0) return level;
   const lastAuthored = Math.max(...content.distances);
   const runway = Math.max(content.base.roadLength - lastAuthored, 0);
-  const spacing = stageSpacing(content.distances);
-  let previous: Pick<ScenarioEvent, 'triggerAtDistance' | 'correctAction'> = level.events.reduce(
-    (last, event) => (event.triggerAtDistance >= last.triggerAtDistance ? event : last),
-    { triggerAtDistance: lastAuthored, correctAction: 'stop' as ScenarioEvent['correctAction'] }
-  );
+  // The road's last scenario, wherever closing the road up has moved it.
+  let previous: Pick<ScenarioEvent, 'triggerAtDistance' | 'correctAction'> =
+    level.events.length > 0
+      ? level.events.reduce((last, event) => (event.triggerAtDistance >= last.triggerAtDistance ? event : last))
+      : { triggerAtDistance: lastAuthored, correctAction: 'stop' };
+  // Clear road is time on screen, so it grows with the road's speed.
+  const clearRoad = CLEAR_ROAD * Math.max(1, level.speedLimit / CLEAR_ROAD_SPEED);
   const placed: ScenarioEvent[] = variants.map(variant => {
     const announced = variant.warningDistance ?? WARNING_ZONE_ENTER;
-    const clear = settleReach(previous) + CLEAR_ROAD + announced;
-    const triggerAtDistance = previous.triggerAtDistance + Math.max(spacing, clear);
+    const clear = settleReach(previous) + clearRoad + announced;
+    const triggerAtDistance = previous.triggerAtDistance + Math.max(MIN_APPEND_SPACING, clear);
     const event = { ...variant, triggerAtDistance };
     previous = event;
     return event;
@@ -321,8 +320,12 @@ const assembleDrive = (
 
   const authored = content.base;
   const placed: LevelConfig = content.assemble ? content.assemble(events) : { ...authored, events };
+  // The drive is decided now, so its road is cut to fit it: no empty stretch
+  // where a slot this drive does not use would have stood.
+  const used = new Set(slotTaken.keys());
+  const fitted = withCuts(placed, safeCuts(placed, cutsFor(content.distances, used)));
   const road: LevelConfig = {
-    ...placed,
+    ...fitted,
     garage: stageScene(authored.garage, garageHotspots),
     aftermath: stageScene(authored.aftermath, aftermathHotspots),
   };

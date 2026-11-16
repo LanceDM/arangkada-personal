@@ -80,6 +80,31 @@ describe.skipIf(!host)('security rules for the study logs', () => {
     await assertSucceeds(getDoc(doc(env.authenticatedContext('lance', { admin: true }).firestore(), 'policy/competencyQ/updates/q1')));
   });
 
+  it('keeps an admin\'s play out of the table, and lets an admin reset it only with the old table kept', async () => {
+    const admin = env.authenticatedContext('lance', { admin: true }).firestore();
+    const entry = { ...envelope('lance', 'qa'), globalSeq: 2, kind: 'visit', stateKey: 'M1-failed', action: 'practice', tableAfter: {}, statesAfter: {} };
+    const changed = writeBatch(admin);
+    changed.set(doc(admin, 'policy/competencyQ/updates/qa'), entry);
+    changed.set(doc(admin, 'policy/competencyQ'), {
+      schemaVersion: 1, table: {}, updates: 2, updatedAt: 1, states: {},
+      lastUpdate: { updateId: 'qa', globalSeq: 2, kind: 'visit', uid: 'lance', participantCode: null, at: 1, configVersion: 'c' },
+    });
+    await assertFails(changed.commit());
+
+    const emptied = { schemaVersion: 1, table: {}, updates: 1, updatedAt: 2, states: {}, lastReset: { resetId: 'reset-2', at: 2, fromGlobalSeq: 2, by: 'lance' } };
+    // Without the record of what it was: refused.
+    await assertFails(setDoc(doc(admin, 'policy/competencyQ'), emptied));
+    const reset = writeBatch(admin);
+    reset.set(doc(admin, 'policy/competencyQ/resets/reset-2'), {
+      at: 2, by: { uid: 'lance', email: null }, note: '', updatesBefore: 1, fromGlobalSeq: 2, tableBefore: {},
+    });
+    reset.set(doc(admin, 'policy/competencyQ'), emptied);
+    await assertSucceeds(reset.commit());
+    // A participant can do neither.
+    const alice = env.authenticatedContext('alice').firestore();
+    await assertFails(getDoc(doc(alice, 'policy/competencyQ/resets/reset-2')));
+  });
+
   it('never writes an older course cursor over a newer one', async () => {
     const db = env.authenticatedContext('alice').firestore();
     const cursor = (seq: number) => ({

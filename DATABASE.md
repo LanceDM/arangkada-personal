@@ -89,6 +89,10 @@ Every change writes a log entry in the same transaction, numbered by the table's
 
 Each entry also holds the whole table and every state's tag after it.
 
+**Admin accounts never change the table** (2026-11-16). An account with the `admin` claim still has its course decisions chosen from the shared table, but its steps write no log entries and no table change: `commitStep` drops the step's table operations for an admin, and the rules refuse an admin's logged table change outright.
+
+**Resetting the table** (Admin > Q-learning, 2026-11-16). One transaction writes the table as it stood (values, states, settings versions, the update counter) to `policy/competencyQ/resets/{resetId}` with who reset it, when and why, and empties the table, which then carries `lastReset: { resetId, at, fromGlobalSeq, by }`. The update log is append-only and is not touched, and its counter is not reset: `fromGlobalSeq` is the first log entry that belongs to the fresh table, so an analysis splits the log there, as it splits it by settings version. The rules accept the emptied table only from an admin, only with the counter unchanged, and only with the reset record written in the same transaction.
+
 ### Simultaneous participants: one transaction per course step
 
 Every participant reads and changes the same shared table, often at the same moment, so each course step (lessons read, quiz submitted, review done, drive or final finished, post-exam submitted) is committed as **one Firestore transaction** (`commitStep` in `FirebaseCompetencyCourseRepository`) that:
