@@ -66,7 +66,12 @@ export const QTablePanel = () => {
               ? `${sinceReset} update${sinceReset === 1 ? '' : 's'}${
                   table.lastReset ? ` since the reset of ${toDateTime(table.lastReset.at)} (${fromSeq - 1} before it, kept in the log)` : ''
                 } · ${exploring} of 8 states exploring · last change ${toDateTime(table.updatedAt)}${
-                  table.lastUpdate ? ` by ${table.lastUpdate.participantCode ?? table.lastUpdate.uid} (${table.lastUpdate.kind})` : ''
+                  // Before the reset, the last change is the reset itself.
+                  table.lastUpdate && table.lastUpdate.globalSeq >= fromSeq
+                    ? ` by ${table.lastUpdate.participantCode ?? table.lastUpdate.uid} (${table.lastUpdate.kind})`
+                    : table.lastReset
+                      ? ' (the reset)'
+                      : ''
                 }`
               : 'No table yet: it appears with the first participant decision.'}
           </p>
