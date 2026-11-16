@@ -1,7 +1,7 @@
 {
   "method": "Twice the longest correct reference drive (application/session/referenceDrive.ts), rounded up to the next 30 s; driving steps at 60 a second, held steps not counted; over every roll seed of a pooled level, every practice item the level can take on its longest roll, and every whole-stage course drive (composeDrive) over the roll seeds.",
   "measuredOn": "2026-11-16",
-  "commit": "7705d6c+dirty",
+  "commit": "1d44193+dirty",
   "factor": 2,
   "roundingSeconds": 30,
   "rollSeeds": [

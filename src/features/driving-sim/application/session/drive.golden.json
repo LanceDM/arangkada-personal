@@ -130,7 +130,7 @@
   "seed": 2,
   "frames": 1200,
   "lines": 1200,
-  "digest": "b0644552"
+  "digest": "dde1b826"
  },
  {
   "levelId": 2,
@@ -360,22 +360,22 @@
   "levelId": 7,
   "seed": 1,
   "frames": 1200,
-  "lines": 1202,
-  "digest": "aa5d6c83"
+  "lines": 1201,
+  "digest": "4ca04410"
  },
  {
   "levelId": 7,
   "seed": 2,
   "frames": 1200,
   "lines": 1201,
-  "digest": "93a867b6"
+  "digest": "535bfd0a"
  },
  {
   "levelId": 7,
   "seed": 3,
   "frames": 1200,
   "lines": 1202,
-  "digest": "31cfba1f"
+  "digest": "1b238f53"
  },
  {
   "levelId": 7,
@@ -501,7 +501,7 @@
   "seed": 1,
   "frames": 1200,
   "lines": 1203,
-  "digest": "6ee9742c"
+  "digest": "bb08227c"
  },
  {
   "levelId": 10,
