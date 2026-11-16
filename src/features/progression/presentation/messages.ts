@@ -33,7 +33,7 @@ export const resultMessages = {
   stepJudged: { en: 'How it was judged' },
   stepNext: { en: 'What happened next' },
   stepPractice: { en: 'Practice next' },
-  youChose: (action: string): Localized => ({ en: `You chose ${action}.` }),
+  youDid: (did: string): Localized => ({ en: `You ${did}.` }),
   youAnswered: (answer: string): Localized => ({ en: `You answered: ${answer}` }),
   violation: (severity: string, competency: string): Localized => ({ en: `${severity} ${competency} violation detected.` }),
   correctDecision: (competency: string): Localized => ({ en: `${competency} decision was correct.` }),
@@ -67,8 +67,7 @@ export const resultMessages = {
   cleanRun: { en: 'You handled this best on this run. Nothing dropped below full marks, so the next level moves on to new ground.' },
   lostMost: { en: 'This is the skill you lost the most points on.' },
   lostMostNextRun: { en: 'This is the skill you lost the most points on. Your next run will put more of it in your way.' },
-  expectedChose: (expected: string, chose: string): Localized => ({ en: `Expected ${expected} - chose ${chose}` }),
+  wantedDid: (wanted: string, did: string): Localized => ({ en: `Wanted ${wanted} — you ${did}.` }),
   signsToRevise: { en: 'Signs and markings to revise' },
   signsToReviseNote: { en: 'These came up on this drive and were answered wrongly. They will be brought back on your next attempts until you get them right.' },
-  expectedYou: (expected: string, action: string): Localized => ({ en: `Expected ${expected} — you ${action}.` }),
 } as const;

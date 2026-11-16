@@ -1,6 +1,6 @@
 import { Star, ArrowLeft, RotateCcw, BarChart3, ClipboardList, Target, AlertTriangle, Sparkles } from 'lucide-react';
 import { LevelResult } from '@/domain/learner/attempt';
-import { isTutorial, LevelConfig } from '@/features/driving-sim';
+import { actionLabel, expectedLabel, isTutorial, LevelConfig } from '@/features/driving-sim';
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { LevelRecommendation } from '@/features/driving-sim';
 import { competencyText } from '@/domain/learner/profile';
@@ -150,7 +150,7 @@ const buildAfterActionSteps = (
   return [
     {
       label: labels[0],
-      value: answerGiven(level, keyLog) ? t(m.youAnswered(answerGiven(level, keyLog)!)) : t(m.youChose(formatValue(keyLog.action, t))),
+      value: answerGiven(level, keyLog) ? t(m.youAnswered(answerGiven(level, keyLog)!)) : t(m.youDid(actionLabel(keyLog.action, t))),
     },
     {
       label: labels[1],
@@ -475,7 +475,7 @@ const LevelComplete = ({
                           {formatCompetency(log.competency, t)}
                         </p>
                         <p className="text-[10px] text-muted-foreground">
-                          {t(m.expectedChose(formatValue(log.expectedAction, t), formatValue(log.action, t)))}
+                          {log.expectedAction ? t(m.wantedDid(expectedLabel(log.expectedAction, t), actionLabel(log.action, t))) : t(m.youDid(actionLabel(log.action, t)))}
                         </p>
                       </div>
                       <span className={`shrink-0 rounded-md px-2 py-1 font-display text-[9px] font-black uppercase ${
@@ -520,7 +520,7 @@ const LevelComplete = ({
                         </p>
                         <p className="mt-1 text-[11px] leading-4 text-foreground">{sign.meaning}</p>
                         <p className="mt-1 text-[10px] leading-4 text-destructive">
-                          {t(m.expectedYou(formatValue(sign.expectedAction, t), formatValue(sign.action, t).toLowerCase()))}
+                          {t(m.wantedDid(expectedLabel(sign.expectedAction, t), actionLabel(sign.action, t)))}
                         </p>
                       </div>
                     </div>

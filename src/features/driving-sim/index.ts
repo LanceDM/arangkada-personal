@@ -9,6 +9,8 @@
 export { default as GameScreen } from './presentation/ui/GameScreen';
 export { default as MissionBriefing } from './presentation/ui/MissionBriefing';
 export { default as LessonReader } from './presentation/ui/LessonReader';
+// Action words, shared with the after-action report so it says what the card said (2026-11-16).
+export { actionLabel, expectedLabel } from './presentation/ui/actionCopy';
 
 export { LEVELS } from './domain/scenario/levelCatalog';
 export { playableLevel, playableLevelName, playableModule } from './application/use-cases/playableLevel';
