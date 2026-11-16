@@ -351,8 +351,11 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
   // rest: a learner doing exactly what it asked was charged for speed control.
   const standingApplies = onClearRoad && !isTutorialLevel;
 
+  // Slowing for someone on a crossing, traffic across a junction or a slow
+  // vehicle just ahead is driving, not holding up traffic: the warning used to
+  // say "move off" with a pedestrian on the crossing in front of the car.
   const crawl = stepStandingPenalty(world.crawl, CRAWL_PENALTY, {
-    violating: standingApplies && car.speed < level.speedLimit * CRAWL_SPEED_SHARE,
+    violating: standingApplies && !world.roadOccupiedAhead && car.speed < level.speedLimit * CRAWL_SPEED_SHARE,
     now,
   });
   // Quiet: scored and logged, but silent on screen. The amber

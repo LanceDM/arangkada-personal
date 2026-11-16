@@ -284,6 +284,12 @@ export interface DrivingWorld {
   wrongSide: StandingPenaltyState;
   overLimit: StandingPenaltyState;
   crawlWarning: boolean;
+  /**
+   * Whether something solid stands on the carriageway a short way ahead (a
+   * pedestrian on a crossing, traffic crossing a junction, a slow vehicle),
+   * as of the last frame. Slowing for it is not crawling (2026-11-16).
+   */
+  roadOccupiedAhead: boolean;
   wrongSideWarning: boolean;
   overLimitWarning: boolean;
 
@@ -452,6 +458,7 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
     wrongSide: createStandingPenaltyState(),
     overLimit: createStandingPenaltyState(),
     crawlWarning: false,
+    roadOccupiedAhead: false,
     wrongSideWarning: false,
     overLimitWarning: false,
 

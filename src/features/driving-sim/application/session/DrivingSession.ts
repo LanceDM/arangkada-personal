@@ -60,6 +60,10 @@ import { limitInForce } from '@/features/driving-sim/domain/evaluation/eventTele
 import { snapshotChanged, type DrivingSnapshot } from './DrivingSnapshot';
 import { textIn, type Language, type Localized, type TextOf } from '@/shared/lib/localized';
 
+
+/** How far ahead of the car, in pixels, something on the road makes slowing for it not a crawl. */
+const OCCUPIED_AHEAD_PX = 300;
+
 export { snapshotChanged };
 export type { DrivingSnapshot };
 
@@ -977,6 +981,15 @@ export class DrivingSession {
     const collidables = composeFrame(
       { followerState: world.followerState },
       { veil: driven.surface?.visibility !== undefined ? 1 - driven.surface.visibility : 0 }
+    );
+
+    // What stands on the carriageway just ahead, for the crawl rule next frame.
+    world.roadOccupiedAhead = collidables.some(
+      body =>
+        body.x < roadX + ROAD_WIDTH &&
+        body.x + body.width > roadX &&
+        body.y + body.height <= car.y &&
+        car.y - (body.y + body.height) <= OCCUPIED_AHEAD_PX
     );
 
     // Traffic, pedestrians and barriers are solid, and hitting one ends the
