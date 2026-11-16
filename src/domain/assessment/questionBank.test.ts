@@ -76,3 +76,18 @@ describe('Rasch scoring', () => {
     expect(kr20(m)).toBeCloseTo(0.75, 5);
   });
 });
+
+describe('every quiz image is on the site (2026-11-16)', () => {
+  // The images the site serves, by their path under public/.
+  const served = new Set(
+    Object.keys(import.meta.glob('/public/arangkada_extracted_images/**/*.{png,jpg,jpeg}')).map(path => path.replace(/^\/public\//, ''))
+  );
+
+  it('so no "What does this sign mean?" is asked without its sign', () => {
+    const missing = QUESTION_BANK.filter(item => item.image && !served.has(item.image.replace(/^\//, ''))).map(
+      item => `${item.id}: ${item.image}`
+    );
+    expect(served.size).toBeGreaterThan(0);
+    expect(missing).toEqual([]);
+  });
+});
