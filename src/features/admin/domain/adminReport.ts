@@ -149,6 +149,12 @@ export interface CourseLogRow {
   tableAfter: QTable;
   endReason?: 'certified' | 'cap_reached';
   timestamp: number;
+  /**
+   * Whether this entry's decisions taught the shared table (2026-11-16):
+   * false for an admin's course, whose play is read from the table but never
+   * learned. Absent on entries written before it was recorded.
+   */
+  learnsTable?: boolean;
 }
 
 /**

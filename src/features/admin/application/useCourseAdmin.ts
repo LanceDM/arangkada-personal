@@ -9,6 +9,7 @@ import { decisionRows, playerCourseRows, playerMastery, stateActionStats } from 
 import { adminDeps } from './dependencies';
 import { useAdminData } from './useAdminData';
 import { useBktSets } from './useBktSets';
+import { useQTableReset } from './useQTableReset';
 
 export const useCourseAdmin = (enabled: boolean) => {
   const report = useAdminData(enabled);
@@ -24,7 +25,10 @@ export const useCourseAdmin = (enabled: boolean) => {
   const { courseLogs, sittings } = report.study;
 
   const players = useMemo(() => playerCourseRows(courseLogs, codes, report.users), [courseLogs, codes, report.users]);
-  const stats = useMemo(() => stateActionStats(courseLogs), [courseLogs]);
+  // The table's last reset: what it has earned is counted from there.
+  const resets = useQTableReset();
+  const lastReset = useMemo(() => Math.max(0, ...(resets.history ?? []).map(record => record.at)), [resets.history]);
+  const stats = useMemo(() => stateActionStats(courseLogs, lastReset), [courseLogs, lastReset]);
   const decisions = useMemo(() => decisionRows(courseLogs, codes, report.users), [courseLogs, codes, report.users]);
   const mastery = useMemo(
     // Each player replayed with the value set they run on.
@@ -47,6 +51,7 @@ export const useCourseAdmin = (enabled: boolean) => {
     error: report.loadError ?? (participants.error instanceof Error ? participants.error.message : null),
     collectionErrors: report.collectionErrors,
     refresh: () => {
+      resets.reload();
       void report.loadAdminData();
       void participants.refetch();
       void bkt.refresh();

@@ -139,7 +139,7 @@ export const SCHEMA: SchemaEntry[] = [
   },
   {
     path: 'users/{uid}/courseLog/{id}',
-    description: 'Each drive\'s, quiz\'s, final\'s or post-exam\'s decisions, rewards and the table after',
+    description: 'Each drive\'s, quiz\'s, final\'s or post-exam\'s decisions, rewards and the table after; `learnsTable` false for an admin\'s course, which the table never learns from',
     writer: 'app', writes: 'append-only',
     source: { kind: 'group', id: 'courseLog' },
     check: fields({ schemaVersion: is.oneOf(1), kind: is.oneOf('drive', 'quiz', 'post_exam', 'final'), decisions: is.list, rewards: is.list, timestamp: is.number }),

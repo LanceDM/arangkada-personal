@@ -82,7 +82,7 @@ const DECISIONS_LEGEND = [
 const EarnedPanel = ({ course }: { course: CourseAdmin }) => (
   <Panel
     title="What each action has earned"
-    description="Per state and legal action: how often it was chosen (explored, exploited, forced), and the rewards it received with their parts. Compare actions within a state, never across states."
+    description="Per state and legal action: how often it was chosen (explored, exploited, forced), and the rewards it received with their parts. Counts only what the table as it stands learned from: decisions since its last reset, and none from an admin's course. Compare actions within a state, never across states."
     bodyClassName="p-0"
   >
     <Table>

@@ -148,7 +148,7 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
         if (step.log) {
           transaction.set(
             doc(collection(db, 'users', uid, 'courseLog')),
-            plain({ ...step.log, decisions: step.decisions, rewards: step.rewards, tableAfter: applied.table })
+            plain({ ...step.log, decisions: step.decisions, rewards: step.rewards, tableAfter: applied.table, learnsTable: learns })
           );
         }
         transaction.set(cursorDoc(uid), plain({ ...step.cursor, updatedAt: Date.now() }));

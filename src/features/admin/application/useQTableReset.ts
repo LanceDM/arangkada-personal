@@ -33,5 +33,7 @@ export const useQTableReset = () => {
     [repo]
   );
 
-  return { wired: !!repo, history, error, reset };
+  const reload = useCallback(() => setNonce(n => n + 1), []);
+
+  return { wired: !!repo, history, error, reset, reload };
 };

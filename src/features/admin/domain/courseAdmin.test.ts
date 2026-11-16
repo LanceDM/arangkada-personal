@@ -45,6 +45,18 @@ describe("the admin's course views", () => {
     expect(player.standing.find(s => s.competency === 'document_awareness')).toMatchObject({ attempts: 1, status: 'done' });
   });
 
+  it('counts only what the table as it stands learned from (2026-11-16)', () => {
+    const practice = (rows: CourseLogRow[], since?: number) =>
+      stateActionStats(rows, since).find(s => s.state === 'M2-failed' && s.action === 'practice')!;
+    // An admin's course teaches the table nothing, so it earns nothing here.
+    const admin = logs.map(entry => ({ ...entry, learnsTable: false }));
+    expect(practice(admin)).toMatchObject({ chosen: 0, rewarded: 0, meanReward: null });
+    // After a reset, nothing from before it.
+    expect(practice(logs, 2500)).toMatchObject({ chosen: 0, rewarded: 0 });
+    // Entries written before the flag existed still count.
+    expect(practice(logs)).toMatchObject({ chosen: 1, rewarded: 1 });
+  });
+
   it('sums what each state and action has earned, with its parts', () => {
     const practice = stateActionStats(logs).find(s => s.state === 'M2-failed' && s.action === 'practice')!;
     expect(practice).toMatchObject({ chosen: 1, explore: 1, rewarded: 1, meanReward: 1.44, meanAccuracy: 1, passShare: 1, meanAdded: 3 });

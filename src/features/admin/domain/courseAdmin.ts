@@ -109,9 +109,17 @@ export interface StateActionStats {
 
 const mean = (values: readonly number[]) => (values.length === 0 ? null : values.reduce((a, b) => a + b, 0) / values.length);
 
-export const stateActionStats = (logs: readonly CourseLogRow[]): StateActionStats[] => {
-  const decisions = logs.flatMap(row => row.decisions);
-  const rewards = logs.flatMap(row => row.rewards);
+/**
+ * What each state's actions have earned, from the decisions that taught the
+ * shared table as it is now (2026-11-16): none from an admin's course, which
+ * the table never learns from, and none from before its last reset, `since`.
+ * Without this the panel kept every reward ever logged, so emptying the table
+ * left it as full as before.
+ */
+export const stateActionStats = (logs: readonly CourseLogRow[], since = 0): StateActionStats[] => {
+  const learned = logs.filter(row => row.learnsTable !== false);
+  const decisions = learned.flatMap(row => row.decisions).filter(d => d.timestamp > since);
+  const rewards = learned.flatMap(row => row.rewards).filter(r => r.timestamp > since);
   return Q_STATES.flatMap(state =>
     COMPETENCY_ACTIONS.map((action): StateActionStats => {
       const key = stateKey(state);
