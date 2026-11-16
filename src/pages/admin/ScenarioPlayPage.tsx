@@ -73,7 +73,7 @@ const ScenarioPlayPage = () => {
       {result ? (
         <div className="space-y-1">
           <p>
-            {result.crashReason ? `Ended in a crash: ${result.crashReason}.` : result.timedOut ? 'Ran out of time.' : 'Drive finished.'}
+            {result.crashReason ? `Ended in a crash: ${result.crashReason}` : result.timedOut ? 'Ran out of time.' : 'Drive finished.'}
           </p>
           {mine.length === 0 && <p>This scenario was not graded on that run.</p>}
           {mine.map((log, i) => (

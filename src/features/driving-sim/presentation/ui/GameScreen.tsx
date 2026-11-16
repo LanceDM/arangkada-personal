@@ -379,6 +379,17 @@ const GameScreen = ({
     );
   }, [activeEvent, level.paint?.oncomingLanes, roadPosition, showsResponse, speed, say]);
 
+  // A new scenario announced while the last verdict is still up: a pass makes
+  // way for it, so the column carries one thing to read (2026-11-16). At the
+  // limit a stage's next scenario can be announced a second or two after the
+  // verdict. A correction stays its full time: what was wrong is worth the read.
+  const announcedId = activeEvent?.id ?? null;
+  const lastAnnounced = useRef(announcedId);
+  useEffect(() => {
+    if (announcedId && announcedId !== lastAnnounced.current && result?.correct) dismissResult();
+    lastAnnounced.current = announcedId;
+  }, [announcedId, result, dismissResult]);
+
   // Route progress as precisely as the mission panel can show it,
   // so the panel is not re-rendered for every frame of road.
   const shownProgress = Math.floor(progress * 200) / 200;

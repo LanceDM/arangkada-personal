@@ -71,7 +71,7 @@ const LevelPlayPage = () => {
       </p>
       {result ? (
         <div className="space-y-1">
-          <p>{result.crashReason ? `Ended in a crash: ${result.crashReason}.` : result.timedOut ? 'Ran out of time.' : 'Drive finished.'}</p>
+          <p>{result.crashReason ? `Ended in a crash: ${result.crashReason}` : result.timedOut ? 'Ran out of time.' : 'Drive finished.'}</p>
           <ol className="list-decimal space-y-0.5 pl-5">
             {result.logs.map((log, i) => (
               <li key={i}>
