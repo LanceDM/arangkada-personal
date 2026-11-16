@@ -127,6 +127,15 @@ export const pedestrianGroupNode = (
 };
 
 /**
+ * How far each of a group standing beside the road has stepped along the
+ * footpath this frame (2026-11-16): a slow few paces up and back, each out of
+ * step with the next, so a school gate or a jeepney stop has people on it
+ * rather than cut-outs. Drawn only; their bodies stay where they stand.
+ */
+export const millAbout = (count: number, now: number): number[] =>
+  Array.from({ length: count }, (_, index) => Math.sin(now / 900 + index * 1.9) * 7);
+
+/**
  * A scripted vehicle after the world has posed it for this frame.
  *
  * `solid` is null when the vehicle cannot be hit — a follower still holding

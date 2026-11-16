@@ -279,6 +279,8 @@ type SceneNodeShape =
        * in the lane while the sprite waited on the far curb.
        */
       waiting?: boolean;
+      /** How far the waiting person has walked down the footpath to the crossing, 0..1 (`crossingWalk`). */
+      arrived?: number;
     }
   | {
       kind: 'crossing';
@@ -312,6 +314,8 @@ type SceneNodeShape =
       xs?: (number | null)[];
       /** Mid-walk, so the legs move. */
       walking?: boolean;
+      /** Standing beside the road and moving about on the footpath: each one's step along it this frame (`millAbout`). */
+      dys?: number[];
     }
   /** A sign plate on the verge, already placed beside the thing it governs. */
   | { kind: 'sign'; x: number; y: number; plate: SignPlate; cleared: boolean }

@@ -39,7 +39,9 @@ const drawZebraCrossing = (
   roadX: number,
   screenY: number,
   /** Who waits on the curb; null when the crossing's people are drawn as a walking group. */
-  waiting: PedestrianKind | null
+  waiting: PedestrianKind | null,
+  /** How far they have walked down the footpath to the crossing, 0..1. */
+  arrived = 1
 ) => {
   const top = screenY - 34;
   const height = 40;
@@ -49,7 +51,10 @@ const drawZebraCrossing = (
   // Waiting on the curb, not in the lane: the lesson is reading the sign and
   // slowing early, not swerving around a body in the road. They stand on the
   // opposite curb to the sign so the two never sit on top of each other.
-  if (waiting) drawPedestrian(ctx, roadX - 13, screenY - 14, SPRITE_FOR_KIND[waiting]);
+  if (waiting) {
+    const along = (1 - arrived) * -70;
+    drawPedestrian(ctx, roadX - 13, screenY - 14 + along, SPRITE_FOR_KIND[waiting], arrived < 1 ? strideAt(along) : undefined);
+  }
 };
 
 // Sprite positions live in these helpers rather than inline in the drawing, so

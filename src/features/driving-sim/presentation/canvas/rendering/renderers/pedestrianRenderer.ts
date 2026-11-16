@@ -207,11 +207,15 @@ export const drawCrossingPedestrians = (
   people: readonly CrossingPedestrian[],
   /** Where the world put each of them this frame, null once off the road; absent, where they stand. */
   xs?: readonly (number | null)[],
-  walking = false
+  walking = false,
+  /** Beside the road: each one's step along the footpath this frame. */
+  dys?: readonly number[]
 ) => {
   const at = xs ?? crossingPedestrianPositions(roadX, people);
   at.forEach((x, index) => {
     if (x === null) return;
-    drawPedestrian(ctx, x, screenY - 13, SPRITE_FOR_KIND[people[index].kind], walking ? strideAt(x + index * 5) : undefined);
+    const dy = dys?.[index] ?? 0;
+    const stride = dys ? strideAt(dy * 2.2) : walking ? strideAt(x + index * 5) : undefined;
+    drawPedestrian(ctx, x, screenY - 13 + dy, SPRITE_FOR_KIND[people[index].kind], stride);
   });
 };

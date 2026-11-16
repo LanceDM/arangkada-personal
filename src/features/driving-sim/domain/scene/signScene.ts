@@ -161,6 +161,8 @@ export const signSceneNodes = (
         roadX,
         screenY,
         cleared: handled,
+        // They walk down the footpath to the crossing as it comes up, then wait.
+        arrived: crossingWalk(placement, now).walkIn,
         // Who is waiting comes from the scenario, never from the sign: an
         // asset filename must not be able to move the world.
         ...(event.pedestrians?.[0] ? { pedestrian: event.pedestrians[0].kind } : {}),
