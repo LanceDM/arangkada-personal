@@ -116,6 +116,10 @@ describe("the drive's screens in the language chosen", () => {
   it('put the words the helpers build through the language too', () => {
     expect(actionLabel('stop', say)).toBe('<came to a full stop>');
     expect(expectedLabel('stop', say)).toBe('<a full stop>');
+    // A wrong-lane verdict names the lane (2026-11-16), and says "You were".
+    expect(expectedLabel('lane:curb', say)).toBe('<the right lane>');
+    expect(expectedLabel('lane:stay', say)).toBe('<you to stay in your lane>');
+    expect(actionLabel('wrong_lane', say)).toBe('<were in the wrong lane>');
     // An action no table knows is still read, not lost.
     expect(actionLabel('new_action', say)).toBe('new action');
     const position = { place: 'toll-approach' } as unknown as RoadPosition;

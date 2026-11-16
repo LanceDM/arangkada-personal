@@ -60,6 +60,19 @@ export const answerWords = (
   return given ? { answered: given.label, rightAnswer: right.label } : { rightAnswer: right.label };
 };
 
+/**
+ * What a wrong-lane verdict shows as wanted: the lane, not the action the
+ * scenario grades (a lane direction sign grades carrying on). Display only;
+ * the log keeps the scenario's own expected action.
+ */
+export const wantedLaneKey = (
+  event: Pick<ScenarioEvent, 'maneuver' | 'requiredLane'>
+): string | undefined => {
+  if (event.maneuver) return `lane:${event.maneuver.lane}`;
+  if (!event.requiredLane) return undefined;
+  return event.requiredLane.strict ? 'lane:stay' : `lane:${event.requiredLane.lane}`;
+};
+
 /** One scored decision, kept in state so the player panel can show a live feed. */
 export type DecisionEntry = {
   id: number;
@@ -212,6 +225,10 @@ export const useScenarioEvaluation = ({
     const logIndex = logsRef.current.length - 1;
     // One verdict, carrying what the score actually did. The card decides how
     // long it stays up; this only says what happened.
+    const shownExpected =
+      (result.log.action === 'wrong_lane' ? wantedLaneKey(event) : undefined) ??
+      result.log.expectedAction ??
+      event.correctAction;
     if (!quiet) {
       setResult({
         label: scenarioLabel(event),
@@ -219,7 +236,7 @@ export const useScenarioEvaluation = ({
         message: result.message,
         points: scoreDelta,
         action: result.log.action,
-        expectedAction: result.log.expectedAction ?? event.correctAction,
+        expectedAction: shownExpected,
         citation: result.lawCitation ?? event.lawCitation,
         // Built from the event alone, never from `support`, so a correction is
         // the same at every level.
@@ -235,7 +252,7 @@ export const useScenarioEvaluation = ({
         isCorrect: result.isCorrect,
         competency: result.log.competency,
         action: result.log.action,
-        expectedAction: result.log.expectedAction ?? event.correctAction,
+        expectedAction: shownExpected,
         kind,
         title: event.description,
       },
