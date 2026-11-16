@@ -15,6 +15,7 @@ import {
   resolveLaneRole,
   roadXAt,
   screenYToDistance,
+  SCREEN_PX_PER_UNIT,
   type CurveSpan,
 } from './vehiclePhysics';
 
@@ -220,6 +221,31 @@ export const pedestrianWalkOff = (
   if (handledAt === null) return byDistance;
   // Whichever is further: waiting lets them walk, driving on never holds them back.
   return Math.max(byDistance, Math.min(1, Math.max(0, (now - handledAt) / PEDESTRIAN_WALK_OFF_MS)));
+};
+
+/**
+ * How far along their walk the people on a crossing are this frame
+ * (2026-11-16). They used to stand on the stripes from the moment the crossing
+ * came into view until it scrolled away, which read as cardboard figures.
+ *
+ * - `walkIn`, 0..1: stepping off the right-hand curb and out to where they
+ *   stand. Done by the time the crossing is CROSSING_WALK_IN_DONE units ahead,
+ *   which is further out than any warning zone, so where they stand when the
+ *   driver is warned, and what the driver has to do about it, is unchanged.
+ * - `walkedOff`, 0..1: once the event is answered, walking on across and off
+ *   the far side (the same clock as `pedestrianWalkOff`).
+ */
+export const CROSSING_WALK_IN_FROM = 1000;
+export const CROSSING_WALK_IN_DONE = 700;
+
+export const crossingWalk = (
+  placement: Pick<EventPlacement, 'screenY' | 'handled' | 'handledAt'>,
+  now: number
+): { walkIn: number; walkedOff: number } => {
+  const ahead = (distanceToScreenY(0, 0) - placement.screenY) / SCREEN_PX_PER_UNIT;
+  const walkIn = Math.min(1, Math.max(0, (CROSSING_WALK_IN_FROM - ahead) / (CROSSING_WALK_IN_FROM - CROSSING_WALK_IN_DONE)));
+  const walkedOff = pedestrianWalkOff(-ahead, 0, placement.handled, placement.handledAt ?? null, now);
+  return { walkIn, walkedOff };
 };
 
 /** The lane an oncoming vehicle uses on a two-way stretch. */

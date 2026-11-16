@@ -378,11 +378,11 @@ const renderNode = (ctx: CanvasRenderingContext2D, node: SceneNode, roadAt: Road
       if (node.style === 'signalized') {
         drawSignalizedCrossing(ctx, node.roadX, node.screenY, node.cleared, node.walker);
       } else {
-        drawZebraCrossing(ctx, node.roadX, node.screenY, node.pedestrian ?? 'adult');
+        drawZebraCrossing(ctx, node.roadX, node.screenY, node.waiting === false ? null : (node.pedestrian ?? 'adult'));
       }
       break;
     case 'pedestrian-group':
-      drawCrossingPedestrians(ctx, node.roadX, node.y, node.people);
+      drawCrossingPedestrians(ctx, node.roadX, node.y, node.people, node.xs, node.walking);
       break;
     case 'sign':
       drawSignFace(ctx, node.x, node.y, node.plate, node.cleared);
@@ -410,7 +410,7 @@ const renderNode = (ctx: CanvasRenderingContext2D, node: SceneNode, roadAt: Road
       drawCrossingApproach(ctx, node.roadX, node.y, node.height);
       break;
     case 'driveway-mouth':
-      drawDrivewayMouth(ctx, node.roadX, node.screenY, node.walkedOff, node.people);
+      drawDrivewayMouth(ctx, node.roadX, node.screenY, node.walkedOff, node.people, node.walkIn);
       break;
     case 'road-actor': {
       const sprite = ROAD_ACTOR_SPRITES[node.actor.kind];

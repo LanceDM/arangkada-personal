@@ -249,7 +249,8 @@ export const eventSceneNodes = (
       event.scene,
       oncomingLanes,
       auxiliaryAt(event.triggerAtDistance, level.route)?.width ?? 0,
-      showsResponse
+      showsResponse,
+      now
     );
     // A signalised junction's scripted vehicle — one still clearing the box on
     // a fresh green — is the only cross traffic, so it composes alongside the

@@ -21,7 +21,7 @@ import {
   resolveLaneRole,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { intersectionGeometry } from '@/features/driving-sim/domain/world/junctionGeometry';
-import { MARKING_REACH, ownLaneX, type EventPlacement } from '@/features/driving-sim/domain/world/eventPlacement';
+import { crossingWalk, MARKING_REACH, ownLaneX, type EventPlacement } from '@/features/driving-sim/domain/world/eventPlacement';
 import { bodyAt, bodyRect } from '@/features/driving-sim/domain/world/WorldBody';
 import {
   chevronIslandGeometry,
@@ -31,12 +31,10 @@ import {
   signalCrossingPedestrian,
 } from '@/features/driving-sim/domain/world/sceneGeometry';
 import type { SceneNode } from './SceneNode';
-import { junctionNode } from './prefabs';
+import { junctionNode, pedestrianGroupNode } from './prefabs';
 
 const WHITE = '#f8fafc';
 
-const pedestrianBody = (x: number, y: number) =>
-  bodyAt(x, y, 18, 34, 'pedestrian', 'a pedestrian on the crossing');
 
 /**
  * Markings the carriageway itself carries. The road is painted from the route,
@@ -197,14 +195,11 @@ export const markingSceneNodes = (
         // The stop line sits behind the crossing, which is the whole
         // positioning lesson: you hold at the line, not on the stripes.
         across(screenY + 26, { color: WHITE, width: 8 });
-        nodes.push({
-          kind: 'crossing',
-          style: 'regular',
-          roadX,
-          screenY,
-          cleared: handled,
-          solids: [pedestrianBody(roadX + ROAD_WIDTH - 15, screenY - 4)],
-        });
+        // The person the crossing is about walks out onto it and, once you
+        // have given way, on across (2026-11-16). The body used to stand in the
+        // lane while the crossing drew its person waiting on the far curb.
+        nodes.push({ kind: 'crossing', style: 'regular', roadX, screenY, cleared: handled, waiting: false });
+        nodes.push(pedestrianGroupNode(roadX, screenY, [{ kind: 'adult', solid: true }], crossingWalk(placement, now)));
         break;
 
       case 'pedestrian_crossing_signalized': {

@@ -273,6 +273,12 @@ type SceneNodeShape =
       cleared: boolean;
       /** Who is waiting. Nobody named means an adult. */
       pedestrian?: PedestrianKind;
+      /**
+       * False when the crossing's people are drawn by a pedestrian group of
+       * their own (the marking crossing, 2026-11-16): its solid used to stand
+       * in the lane while the sprite waited on the far curb.
+       */
+      waiting?: boolean;
     }
   | {
       kind: 'crossing';
@@ -293,7 +299,20 @@ type SceneNodeShape =
       walker: Point | null;
     }
   /** People the scenario declares are standing on a crossing. */
-  | { kind: 'pedestrian-group'; roadX: number; y: number; people: CrossingPedestrian[] }
+  | {
+      kind: 'pedestrian-group';
+      roadX: number;
+      y: number;
+      people: CrossingPedestrian[];
+      /**
+       * Where each of them is this frame, when they are walking a crossing
+       * rather than standing beside a scene (2026-11-16). Absent: standing at
+       * `crossingPedestrianPositions`. A person walked off the road is null.
+       */
+      xs?: (number | null)[];
+      /** Mid-walk, so the legs move. */
+      walking?: boolean;
+    }
   /** A sign plate on the verge, already placed beside the thing it governs. */
   | { kind: 'sign'; x: number; y: number; plate: SignPlate; cleared: boolean }
   | { kind: 'road-situation'; situation: RoadSituation }
@@ -324,7 +343,7 @@ type SceneNodeShape =
   | { kind: 'crossing-approach'; roadX: number; y: number; height: number }
   /** A footpath across a driveway mouth, with whoever is still on it. */
   /** `people`: who is crossing, the first in front; they walk clear together. */
-  | { kind: 'driveway-mouth'; roadX: number; screenY: number; walkedOff: number; people: CrossingPedestrian[] }
+  | { kind: 'driveway-mouth'; roadX: number; screenY: number; walkedOff: number; walkIn?: number; people: CrossingPedestrian[] }
   /** A vehicle or animal standing in the carriageway. */
   | { kind: 'road-actor'; actor: RoadActorSpec; x: number; y: number }
   /** The flashing "something is there" glyph, when nothing more specific is known. */

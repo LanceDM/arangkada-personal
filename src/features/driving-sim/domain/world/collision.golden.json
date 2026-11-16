@@ -5455,7 +5455,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -5473,7 +5473,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -5489,7 +5489,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -11,
     "width": 18,
     "height": 34,
@@ -5515,7 +5515,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -11,
     "width": 18,
     "height": 34,
@@ -5539,7 +5539,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 371.533,
     "y": 49,
     "width": 18,
     "height": 34,
@@ -5565,7 +5565,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 371.533,
     "y": 49,
     "width": 18,
     "height": 34,
@@ -5589,7 +5589,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -5615,7 +5615,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -5639,7 +5639,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 357.867,
     "y": 99,
     "width": 18,
     "height": 34,
@@ -5665,7 +5665,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 357.867,
     "y": 99,
     "width": 18,
     "height": 34,
@@ -5689,7 +5689,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -5707,7 +5707,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -5723,7 +5723,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -5749,7 +5749,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -5907,16 +5907,7 @@
    1830
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 336,
-    "y": 499,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -5941,16 +5932,7 @@
    1830
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 336,
-    "y": 529,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -5975,16 +5957,7 @@
    1830
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 336,
-    "y": 549,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -6095,7 +6068,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -6113,7 +6086,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -6129,7 +6102,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -18,
     "width": 18,
     "height": 34,
@@ -6155,7 +6128,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -18,
     "width": 18,
     "height": 34,
@@ -6179,7 +6152,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 354.467,
     "y": 42,
     "width": 18,
     "height": 34,
@@ -6205,7 +6178,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 354.467,
     "y": 42,
     "width": 18,
     "height": 34,
@@ -6229,7 +6202,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -6255,7 +6228,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -6279,7 +6252,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 298.133,
     "y": 92,
     "width": 18,
     "height": 34,
@@ -6305,7 +6278,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 298.133,
     "y": 92,
     "width": 18,
     "height": 34,
@@ -6329,7 +6302,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -6347,7 +6320,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -6363,7 +6336,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -6389,7 +6362,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -6547,16 +6520,7 @@
    3630
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 208,
-    "y": 492,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -6581,16 +6545,7 @@
    3630
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 208,
-    "y": 522,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -6615,16 +6570,7 @@
    3630
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 208,
-    "y": 542,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -20447,7 +20393,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -121,
     "width": 18,
     "height": 34,
@@ -20529,7 +20475,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -121,
     "width": 18,
     "height": 34,
@@ -20553,7 +20499,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": 4,
     "width": 18,
     "height": 34,
@@ -20635,7 +20581,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": 4,
     "width": 18,
     "height": 34,
@@ -20659,7 +20605,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 304.2,
     "y": 89,
     "width": 18,
     "height": 34,
@@ -20733,7 +20679,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 304.2,
     "y": 89,
     "width": 18,
     "height": 34,
@@ -20749,7 +20695,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 231.4,
     "y": 149,
     "width": 18,
     "height": 34,
@@ -20823,7 +20769,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 231.4,
     "y": 149,
     "width": 18,
     "height": 34,
@@ -21019,7 +20965,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -21101,7 +21047,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -21181,7 +21127,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 316.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -21255,7 +21201,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 316.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -21733,14 +21679,6 @@
     "height": 54,
     "kind": "vehicle",
     "label": "an overloaded jeepney"
-   },
-   {
-    "x": 195,
-    "y": 499,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
    }
   ]
  },
@@ -21783,14 +21721,6 @@
     "height": 54,
     "kind": "vehicle",
     "label": "an overloaded jeepney"
-   },
-   {
-    "x": 195,
-    "y": 529,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
    }
   ]
  },
@@ -21833,14 +21763,6 @@
     "height": 54,
     "kind": "vehicle",
     "label": "an overloaded jeepney"
-   },
-   {
-    "x": 195,
-    "y": 549,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
    }
   ]
  },

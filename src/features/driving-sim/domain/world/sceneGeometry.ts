@@ -378,6 +378,35 @@ export const crossingPedestrianPositions = (
       : roadX + person.position * ROAD_WIDTH
   );
 
+/** How far beyond the curb a crossing pedestrian starts from and walks off to. */
+const CROSSING_VERGE_OFFSET = 26;
+
+/**
+ * Where each person on a crossing is this frame, walking rather than standing
+ * (2026-11-16): out from the right-hand curb to their place (`walkIn`), and,
+ * once the event is answered, on across and off the left-hand side
+ * (`walkedOff`). Fully walked in and not yet walking off, this is exactly
+ * `crossingPedestrianPositions`, so the decision and the collision golden see
+ * the same people in the same places as before.
+ */
+export const crossingWalkerPositions = (
+  roadX: number,
+  people: readonly CrossingPedestrian[],
+  walkIn: number,
+  walkedOff: number
+): number[] =>
+  crossingPedestrianPositions(roadX, people).map((stand, index) => {
+    if (walkedOff > 0) {
+      const off = roadX - CROSSING_VERGE_OFFSET - index * CROSSING_SLOT_GAP;
+      return stand + (off - stand) * walkedOff;
+    }
+    const from = roadX + ROAD_WIDTH + CROSSING_VERGE_OFFSET + index * CROSSING_SLOT_GAP;
+    return from + (stand - from) * walkIn;
+  });
+
+/** A walking figure's stride, -1..1, read off how far it has walked so the legs move only while it does. */
+export const strideAt = (x: number): number => Math.sin(x / 3.2);
+
 /**
  * Stood in the driving lane, not off to one side: a centred car has to stop
  * rather than roll past while answering.
@@ -385,8 +414,12 @@ export const crossingPedestrianPositions = (
 /** How far behind the first person each further one in a driveway group walks. */
 export const DRIVEWAY_GROUP_GAP = 16;
 
-export const drivewayPedestrianX = (walkedOff = 0): number =>
-  CANVAS_WIDTH / 2 + 6 + walkedOff * 150;
+/**
+ * Where a driveway group's leader is: walked in from the left-hand footpath
+ * (`walkIn`, 2026-11-16) and, once answered, on across to the right.
+ */
+export const drivewayPedestrianX = (walkedOff = 0, walkIn = 1): number =>
+  CANVAS_WIDTH / 2 + 6 + (walkedOff > 0 ? walkedOff * 150 : (walkIn - 1) * 150);
 
 /** One full pass across a signalised crossing, while the signal is still red. */
 export const SIGNAL_CROSSING_WALK_MS = 2600;
