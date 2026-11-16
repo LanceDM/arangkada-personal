@@ -712,6 +712,7 @@ export class DrivingSession {
           playerLane: car.lane,
           playerSpeed: car.speed,
           traffic: world.traffic,
+          clocks: world.npcClocks,
           ...npc,
         }
       );
@@ -979,7 +980,8 @@ export class DrivingSession {
     // not a change to the road but a limit on how much of it reaches the driver.
     // What the weather hides is still solid, which is the reason to slow for it.
     const collidables = composeFrame(
-      { followerState: world.followerState },
+      // The one frame per step that moves the junction vehicles' own clocks.
+      { followerState: world.followerState, tick: true },
       { veil: driven.surface?.visibility !== undefined ? 1 - driven.surface.visibility : 0 }
     );
 

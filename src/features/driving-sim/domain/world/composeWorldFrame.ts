@@ -14,7 +14,7 @@
  * Order matters: `firstCarCollision` reports the first body it overlaps, so
  * colliders are produced in the same painter order the scene is composed in.
  */
-import { npcHitbox, npcTransform, type NpcRoadContext } from '@/features/driving-sim/domain/systems/updateNpcVehicles';
+import { newNpcClock, npcHitbox, npcTransform, type NpcClock, type NpcRoadContext } from '@/features/driving-sim/domain/systems/updateNpcVehicles';
 import type { RoadTraffic } from '@/features/driving-sim/domain/systems/roadTraffic';
 import type { NpcVehicleSpec } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import { distanceToScreenY, type LaneIndex } from './vehiclePhysics';
@@ -74,6 +74,14 @@ export interface NpcFrameOptions {
   traffic?: RoadTraffic;
   /** Injectable clock, so the two scenes with moving solids are testable. */
   now?: () => number;
+  /**
+   * Each junction vehicle's own clock, keyed by its event (2026-11-16), so it
+   * keeps moving while the player waits. Read on every frame; advanced only on
+   * the one frame per step that sets `tick`. Absent: placed by the player's
+   * distance alone, as a golden sample or a scene test expects.
+   */
+  clocks?: Map<string, NpcClock>;
+  tick?: boolean;
 }
 
 export interface WorldFrame {
@@ -124,9 +132,15 @@ export const composeWorldFrame = (view: FrameView, npc: NpcFrameOptions = {}): W
       // `undefined` is no drive at all, which is a different thing — see `lead`
       // on `NpcRoadContext`.
       const lead = npc.traffic ? (npc.traffic.get(event.id) ?? null) : undefined;
+      let clock = npc.clocks?.get(event.id);
+      if (npc.clocks && !clock) {
+        clock = newNpcClock();
+        npc.clocks.set(event.id, clock);
+      }
       const at = npcTransform(spec, event.triggerAtDistance, npcDistance, roadX, anchorY, handled, {
         ...road,
         lead,
+        ...(clock ? { clock, tick: npc.tick === true } : {}),
       });
       if (spec.path === 'closing_from_behind' && npc.followerState && !npc.frozen) {
         npc.followerState.y = at.y;

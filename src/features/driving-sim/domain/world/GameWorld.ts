@@ -15,6 +15,7 @@ import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/s
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { EventTelemetry } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import type { RoadTraffic } from '@/features/driving-sim/domain/systems/roadTraffic';
+import type { NpcClock } from '@/features/driving-sim/domain/systems/updateNpcVehicles';
 import type { EnvObject } from './roadsideScenery';
 import {
   CANVAS_HEIGHT,
@@ -322,6 +323,8 @@ export interface DrivingWorld {
    */
   chaseLane: LaneIndex | null;
   followerState: FollowerState;
+  /** Each junction vehicle's own clock, so it keeps moving while the player waits (`NpcClock`). */
+  npcClocks: Map<string, NpcClock>;
   /**
    * Where each self-driving scenario vehicle has got to, keyed by its event.
    *
@@ -470,6 +473,7 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
 
     chaseLane: null,
     followerState: { y: null, passing: false },
+    npcClocks: new Map(),
     traffic: new Map(),
 
     crashed: false,
