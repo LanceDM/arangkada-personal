@@ -27,12 +27,14 @@ import type { FrameView } from '@/features/driving-sim/domain/world/eventPlaceme
 import { roadAtFor, supportOf } from '@/features/driving-sim/domain/world/eventPlacement';
 import {
   CANVAS_HEIGHT,
+  SCREEN_PX_PER_UNIT,
   distanceToScreenY,
+  screenYToDistance,
   resolveLaneRole,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { auxiliaryAt, separatorAt } from '@/features/driving-sim/domain/world/routeGeometry';
 import { tollGateBarriers } from '@/features/driving-sim/domain/world/sceneGeometry';
-import { bodyRect } from '@/features/driving-sim/domain/world/WorldBody';
+import { bodyRect, type WorldBody } from '@/features/driving-sim/domain/world/WorldBody';
 import { gantryNode } from './prefabs';
 import type { GantryPanel, SceneNode } from './SceneNode';
 
@@ -141,25 +143,79 @@ const SEPARATOR_STEP = 28;
 
 /** The nose dividing the auxiliary lane from the carriageway, row by row. */
 const separatorNodes = (view: FrameView, roadAt: (screenY: number) => number): SceneNode[] => {
-  const nodes: SceneNode[] = [];
+  const route = view.level.route;
+  const label = (kind: 'island' | 'gore') =>
+    kind === 'island' ? 'the curbed nose beside the slip road' : 'the gore between the exit and the carriageway';
+
+  // What can be hit: sampled row by row down the frame, exactly as every drive
+  // the game has been checked against was driven.
+  const bodies: WorldBody[] = [];
   for (let screenY = CANVAS_HEIGHT + SEPARATOR_STEP; screenY > -SEPARATOR_STEP; screenY -= SEPARATOR_STEP) {
-    const distance = view.distance + (550 - screenY) * 2;
-    const separator = separatorAt(distance, view.level.route);
+    const separator = separatorAt(screenYToDistance(screenY, view.distance), route);
     if (!separator) continue;
-    const roadX = roadAt(screenY);
-    const x = roadX + separator.x - separator.width / 2;
+    const x = roadAt(screenY) + separator.x - separator.width / 2;
+    bodies.push(bodyRect(x, screenY - SEPARATOR_STEP / 2, separator.width, SEPARATOR_STEP, 'obstruction', label(separator.kind)));
+  }
+
+  // What is seen: lengths standing on fixed stretches of the road, clipped to
+  // where the separator runs (2026-11-18). Drawn on the rows above, the gore's
+  // hatching and the island's nose band stayed still on screen while the road
+  // moved under them, so the marking appeared to travel with the car.
+  const nodes: SceneNode[] = [];
+  const step = SEPARATOR_STEP / SCREEN_PX_PER_UNIT;
+  const near = screenYToDistance(CANVAS_HEIGHT + SEPARATOR_STEP, view.distance);
+  const far = screenYToDistance(-SEPARATOR_STEP, view.distance);
+  const runs = (d: number) => separatorAt(d, route) !== null;
+  /** Where between `inside` and `outside` the separator starts or stops. */
+  const edge = (inside: number, outside: number) => {
+    for (let i = 0; i < 12; i++) {
+      const mid = (inside + outside) / 2;
+      if (runs(mid)) inside = mid;
+      else outside = mid;
+    }
+    return inside;
+  };
+  const END = 1e-6;
+  for (let lo = Math.floor(near / step) * step; lo <= far; lo += step) {
+    const hi = lo + step;
+    const startsIn = runs(lo);
+    const endsIn = runs(hi - END);
+    if (!startsIn && !endsIn) continue;
+    const from = startsIn ? lo : edge(hi - END, lo);
+    const to = endsIn ? hi : edge(lo, hi - END);
+    const separator = separatorAt((from + to) / 2, route);
+    if (!separator) continue;
+    const top = distanceToScreenY(to, view.distance);
+    const bottom = distanceToScreenY(from, view.distance);
+    const screenY = (top + bottom) / 2;
     nodes.push({
       kind: 'lane-separator',
-      roadX,
+      roadX: roadAt(screenY),
       screenY,
+      height: bottom - top,
       offsetX: separator.x,
       width: separator.width,
       separator: separator.kind,
-      solids: [
-        bodyRect(x, screenY - SEPARATOR_STEP / 2, separator.width, SEPARATOR_STEP, 'obstruction',
-          separator.kind === 'island' ? 'the curbed nose beside the slip road' : 'the gore between the exit and the carriageway'),
-      ],
+      solids: [],
     });
+  }
+
+  // Each body goes with the length it lies in, so the separator is still one
+  // thing that is both drawn and hit; one beyond every length goes with the
+  // nearest.
+  for (const body of bodies) {
+    const middle = body.y + body.height / 2;
+    let host = nodes[0];
+    let best = Infinity;
+    for (const node of nodes) {
+      if (node.kind !== 'lane-separator') continue;
+      const gap = Math.abs(node.screenY - middle) - node.height / 2;
+      if (gap < best) {
+        best = gap;
+        host = node;
+      }
+    }
+    if (host) host.solids = [...(host.solids ?? []), body];
   }
   return nodes;
 };

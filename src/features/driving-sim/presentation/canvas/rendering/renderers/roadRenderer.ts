@@ -1,4 +1,4 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT, ROAD_WIDTH, LANE_WIDTH, CAR_WIDTH, CAR_HEIGHT, MAX_SPEED, CarState, distanceToScreenY, laneEdges, roadXAt, screenYToDistance, type CurveSpan, } from '@/features/driving-sim/domain/world/vehiclePhysics';
+import { CANVAS_WIDTH, CANVAS_HEIGHT, ROAD_WIDTH, LANE_WIDTH, CAR_WIDTH, CAR_HEIGHT, MAX_SPEED, CarState, SCREEN_PX_PER_UNIT, distanceToScreenY, laneEdges, roadXAt, screenYToDistance, type CurveSpan, } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import type { LongitudinalArt, RoadPaint, RouteLayout } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import { auxiliaryAt } from '@/features/driving-sim/domain/world/routeGeometry';
 import type { EnvObject } from '@/features/driving-sim/domain/world/roadsideScenery';
@@ -11,10 +11,16 @@ import type { EnvObject } from '@/features/driving-sim/domain/world/roadsideScen
  * the carriageway bend — and what lets its paint change as you drive.
  */
 const roadRows = (distance: number, curves: CurveSpan[]) => {
+  // Every 6px, on fixed points of the road rather than fixed screen rows
+  // (2026-11-18). Where the road changes — an auxiliary lane opening, a centre
+  // line turning from solid to broken — the change is drawn at a row, and rows
+  // tied to the screen moved that edge in 6px jumps as the road scrolled.
+  const step = 6 / SCREEN_PX_PER_UNIT;
+  const far = screenYToDistance(-24, distance);
+  const near = screenYToDistance(CANVAS_HEIGHT + 24, distance);
   const rows: RoadRow[] = [];
-  for (let y = -24; y <= CANVAS_HEIGHT + 24; y += 6) {
-    const d = screenYToDistance(y, distance);
-    rows.push({ y, x: roadXAt(d, curves), d });
+  for (let d = Math.ceil(far / step) * step; d >= near - step; d -= step) {
+    rows.push({ y: distanceToScreenY(d, distance), x: roadXAt(d, curves), d });
   }
   return rows;
 };
@@ -54,14 +60,46 @@ const strokeAlongRoad = (
 };
 
 /**
- * Sets a dash pattern scrolled by the road's offset. Reduced by the pattern's
- * own length, never a shared one, or a pattern that does not divide it jumps
- * each time the offset wraps.
+ * Sets a dash pattern fixed to the road under it, for a line stroked from
+ * `start` down the screen.
+ *
+ * A dash pattern is laid from the start of the path it is stroked along. Each
+ * dash therefore stands still on the road only if the pattern's phase is taken
+ * from the point of the road where that path starts (2026-11-18). The old phase
+ * came from the player's distance alone, which was right only for a line
+ * starting at the top of the screen: a line that starts partway down — an
+ * auxiliary lane opening, a centre line turning from solid to broken — starts
+ * at a point that itself moves with the road, so its dashes slid along it.
+ *
+ * Reduced by the pattern's own length, never a shared one, or a pattern that
+ * does not divide it jumps each time the phase wraps.
  */
-const setRoadDash = (ctx: CanvasRenderingContext2D, dash: number[], roadOffset: number) => {
+const setRoadDash = (ctx: CanvasRenderingContext2D, dash: number[], start: RoadRow) => {
   const period = dash.reduce((sum, length) => sum + length, 0);
+  const travelled = start.d * SCREEN_PX_PER_UNIT;
   ctx.setLineDash(dash);
-  ctx.lineDashOffset = -(roadOffset % period);
+  ctx.lineDashOffset = -(((travelled % period) + period) % period);
+};
+
+/**
+ * Points of the road at a fixed spacing (in road units) between the first and
+ * last of these rows, each with the screen point it is drawn at.
+ *
+ * For anything repeated along the road that is not a dash — studs — so each one
+ * stays on its own point of the road instead of on a screen row.
+ */
+const pointsAlongRoad = (rows: RoadRow[], spacing: number): { x: number; y: number }[] => {
+  const points: { x: number; y: number }[] = [];
+  for (let i = 0; i + 1 < rows.length; i++) {
+    const far = rows[i];
+    const near = rows[i + 1];
+    // Rows run down the screen, so the road distance falls from `far` to `near`.
+    for (let d = Math.floor(far.d / spacing) * spacing; d > near.d; d -= spacing) {
+      const t = (far.d - d) / (far.d - near.d);
+      points.push({ x: far.x + (near.x - far.x) * t, y: far.y + (near.y - far.y) * t });
+    }
+  }
+  return points;
 };
 
 /* ------------------------------------------------------------------------- *
@@ -76,6 +114,9 @@ const setRoadDash = (ctx: CanvasRenderingContext2D, dash: number[], roadOffset: 
  *
  * Levels that declare nothing keep the road exactly as it has always been.
  * ------------------------------------------------------------------------- */
+
+/** Road between two reflective studs, in road units (18px on screen). */
+const STUD_SPACING = 18 / SCREEN_PX_PER_UNIT;
 
 /** Road left blank either side of a paint change, so the change is legible. */
 const TRANSITION_GAP = 26;
@@ -237,11 +278,10 @@ const paintRuns = (rows: RoadRow[], paint: RoadPaint) => {
 const drawDeclaredPaint = (
   ctx: CanvasRenderingContext2D,
   rows: RoadRow[],
-  roadOffset: number,
   paint: RoadPaint
 ) => {
-  // Dashes scroll with the road so they read as passing under the car rather
-  // than crawling; the offset is shared by every dashed line on the surface.
+  // Dashes stand still on the road, so they read as passing under the car
+  // rather than crawling: each run's phase comes from where that run starts.
   for (const run of paintRuns(rows, paint)) {
     if (!run.art) continue;
     const spec = paintSpecFor(run.art, paint.oncomingLanes);
@@ -254,16 +294,17 @@ const drawDeclaredPaint = (
       ctx.save();
       ctx.strokeStyle = line.color;
       ctx.lineWidth = line.width;
-      if (line.dash) setRoadDash(ctx, line.dash, roadOffset);
+      if (line.dash) setRoadDash(ctx, line.dash, run.rows[0]);
       strokeAlongRoad(ctx, run.rows, line.offset);
       ctx.restore();
     }
 
     if (spec.studs) {
       ctx.save();
-      for (const row of run.rows) {
-        // One stud every third row, which at 6px rows is a realistic spacing.
-        if (Math.round(row.y / 6) % 3 !== 0) continue;
+      // One stud every 18px of road, which is a realistic spacing — placed on
+      // points of the road, not on screen rows, so the studs pass under the car
+      // instead of riding along with it (2026-11-18).
+      for (const row of pointsAlongRoad(run.rows, STUD_SPACING)) {
         for (const offset of spec.studs) {
           ctx.fillStyle = '#e2e8f0';
           ctx.beginPath();
@@ -302,8 +343,7 @@ const drawDeclaredPaint = (
  */
 const drawLegacyPaint = (
   ctx: CanvasRenderingContext2D,
-  rows: RoadRow[],
-  roadOffset: number
+  rows: RoadRow[]
 ) => {
   // Yellow edge lines
   ctx.strokeStyle = '#f0c929';
@@ -312,13 +352,9 @@ const drawLegacyPaint = (
   strokeAlongRoad(ctx, rows, ROAD_WIDTH - 2);
 
   // Lane dashes
-  const dashLen = 40;
-  const gapLen = 30;
-  const offset = roadOffset % (dashLen + gapLen);
   ctx.strokeStyle = 'rgba(255,255,255,0.6)';
   ctx.lineWidth = 2;
-  ctx.setLineDash([dashLen, gapLen]);
-  ctx.lineDashOffset = -offset;
+  setRoadDash(ctx, [40, 30], rows[0]);
   // Painted where the lanes actually divide, so a car right of the right-hand
   // dash is a car the game agrees is in the right-hand lane. Every interior
   // edge, not a hardcoded pair — LANE_COUNT lanes need LANE_COUNT - 1
@@ -344,8 +380,7 @@ const drawLegacyPaint = (
 const drawAuxiliaryLane = (
   ctx: CanvasRenderingContext2D,
   rows: RoadRow[],
-  route: RouteLayout,
-  roadOffset: number
+  route: RouteLayout
 ) => {
   const widths = rows.map(row => auxiliaryAt(row.d, route)?.width ?? 0);
 
@@ -392,7 +427,7 @@ const drawAuxiliaryLane = (
     );
     ctx.stroke();
 
-    setRoadDash(ctx, [18, 14], roadOffset);
+    setRoadDash(ctx, [18, 14], run[0]);
     ctx.strokeStyle = 'rgba(248,250,252,0.85)';
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -437,13 +472,16 @@ export const drawRoad = (
 
   // The markings themselves: from the route where the level declares them,
   // otherwise the constant paint every other level has always carried.
-  if (paint) drawDeclaredPaint(ctx, rows, roadOffset, paint);
-  else drawLegacyPaint(ctx, rows, roadOffset);
+  // Every dash takes its phase from the road it is painted on, so the scroll
+  // counter is not needed to place them (2026-11-18).
+  void roadOffset;
+  if (paint) drawDeclaredPaint(ctx, rows, paint);
+  else drawLegacyPaint(ctx, rows);
 
   // Then any lane running beside them. Painted after the through lanes so its
   // continuity line reads over the carriageway's own edge, which is what a
   // continuity line does.
-  if (route) drawAuxiliaryLane(ctx, rows, route, roadOffset);
+  if (route) drawAuxiliaryLane(ctx, rows, route);
 
   // Environment objects
   for (const obj of envObjects) {

@@ -382,7 +382,10 @@ type SceneNodeShape =
   | {
       kind: 'lane-separator';
       roadX: number;
+      /** The middle of this length of separator, on screen. */
       screenY: number;
+      /** Its length on screen: clipped to where the separator actually runs. */
+      height: number;
       /** Offset of the nose's centre from the carriageway's left edge. */
       offsetX: number;
       width: number;

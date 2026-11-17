@@ -912,39 +912,43 @@ const drawLaneSeparator = (
   ctx: CanvasRenderingContext2D,
   roadX: number,
   screenY: number,
+  height: number,
   offsetX: number,
   width: number,
   kind: 'island' | 'gore'
 ) => {
   const x = roadX + offsetX - width / 2;
+  const top = screenY - height / 2;
+  const bottom = screenY + height / 2;
   ctx.save();
   if (kind === 'gore') {
     // Hatching between two solid lines: paint, not concrete.
     ctx.fillStyle = 'rgba(248,250,252,0.14)';
-    ctx.fillRect(x, screenY - 14, width, 28);
+    ctx.fillRect(x, top, width, height);
     ctx.strokeStyle = '#f8fafc';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(x + 1, screenY - 14);
-    ctx.lineTo(x + 1, screenY + 14);
-    ctx.moveTo(x + width - 1, screenY - 14);
-    ctx.lineTo(x + width - 1, screenY + 14);
+    ctx.moveTo(x + 1, top);
+    ctx.lineTo(x + 1, bottom);
+    ctx.moveTo(x + width - 1, top);
+    ctx.lineTo(x + width - 1, bottom);
     ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(x, screenY + 14);
-    ctx.lineTo(x + width, screenY - 14);
+    ctx.moveTo(x, bottom);
+    ctx.lineTo(x + width, top);
     ctx.stroke();
     ctx.restore();
     return;
   }
   // A kerbed island: grey concrete with a white-over-red nose band, which is
   // how a divider between a slip road and a carriageway is marked.
+  const band = Math.min(7, height / 4);
   ctx.fillStyle = '#4b5563';
-  ctx.fillRect(x, screenY - 14, width, 28);
+  ctx.fillRect(x, top, width, height);
   ctx.fillStyle = '#e2e8f0';
-  ctx.fillRect(x + 1, screenY - 14, width - 2, 7);
+  ctx.fillRect(x + 1, top, width - 2, band);
   ctx.fillStyle = '#dc2626';
-  ctx.fillRect(x + 1, screenY - 7, width - 2, 7);
+  ctx.fillRect(x + 1, top + band, width - 2, band);
   ctx.restore();
 };
 

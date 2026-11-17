@@ -443,7 +443,7 @@ const renderNode = (ctx: CanvasRenderingContext2D, node: SceneNode, roadAt: Road
       drawMergeTaper(ctx, node.roadX, node.screenY, node.width);
       break;
     case 'lane-separator':
-      drawLaneSeparator(ctx, node.roadX, node.screenY, node.offsetX, node.width, node.separator);
+      drawLaneSeparator(ctx, node.roadX, node.screenY, node.height, node.offsetX, node.width, node.separator);
       break;
     case 'toll-plaza':
       drawTollPlaza(ctx, node.roadX, node.screenY, node.openLane);
