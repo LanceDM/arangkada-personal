@@ -233,8 +233,8 @@ export const level11Module = {
           type: 'list',
           ordered: false,
           items: [
-            'The owner must register a motorcycle with the LTO within five days of acquiring ownership.',
-            'Any subsequent sale or disposal must be reported to the LTO within three days, with the notarized deed of sale.',
+            'The owner must register a motorcycle within five days of acquiring ownership.',
+            'Any subsequent sale or disposal must be reported within three days, with the notarized deed of sale.',
             'The metal plate is 235mm wide by 135mm tall, made of durable reflectorized aluminum, with 60mm-tall alphanumeric characters.',
             'A decal plate is 135mm wide by 85mm tall, with 40mm-tall reflectorized alphanumeric characters.',
           ],
@@ -275,7 +275,7 @@ export const level11Module = {
           type: 'list',
           ordered: false,
           items: [
-            'All tricycles must be registered with the LTO and renewed yearly, like any other motor vehicle.',
+            'All tricycles must be registered and renewed yearly, like any other motor vehicle.',
             'A brand new motorcycle with more than 200cc engine displacement has an initial registration validity of three years.',
             'A tricycle does not need a Certificate of Public Convenience (CPC) from the LTFRB; the concerned Local Government Unit regulates tricycle operation and grants franchises within its own territory.',
             'A Motorized Tricycle Operator\'s Permit (MTOP) with official receipt, an identification card, and the fare matrix must all be visible.',

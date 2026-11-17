@@ -31,7 +31,8 @@ import {
 } from '@/features/driving-sim/domain/adaptive/practiceSelection';
 import { GAME_OPTIONS, type AdaptiveOptions } from '@/features/driving-sim/domain/adaptive/adaptiveOptions';
 import { attemptStream } from '@/features/driving-sim/domain/scenario/attemptSeed';
-import { buildLevelConfig, withRemediation } from '@/features/driving-sim/domain/scenario/levelCatalog';
+import { withRemediation } from '@/features/driving-sim/domain/scenario/levelCatalog';
+import { buildPlayLevel } from '@/features/driving-sim/domain/scenario/playLevel';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import {
   recordPolicyDecision,
@@ -100,7 +101,7 @@ export const buildAdaptivePlan = async (
   // The roll first, then the pick against what it rolled. The two draw from
   // streams of their own, so reading the route here takes nothing from the
   // roll and changes no attempt's content.
-  const rolled = buildLevelConfig(
+  const rolled = buildPlayLevel(
     levelId,
     loadSignCoverage(),
     weakArea?.competency ?? null,

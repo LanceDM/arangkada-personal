@@ -52,6 +52,8 @@ export interface StoryCourse {
   /** The per-competency course: the topics the drive counted and, once saved, each one's verdict. */
   topics?: readonly string[];
   verdicts?: readonly { competency: string; correct: number; total: number; passed: boolean }[] | null;
+  /** The course's own verdict on the drive once saved (every topic 2 of 3; the final's 70%); null until then. */
+  passed?: boolean | null;
   /** Something went wrong loading or entering the course. */
   error: Localized | null;
   continueCourse: () => void;

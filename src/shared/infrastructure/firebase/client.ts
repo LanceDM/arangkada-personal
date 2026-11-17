@@ -38,6 +38,9 @@ if (useEmulator) {
   // network it is the address the page came from.
   const page = typeof window === 'undefined' ? '' : window.location.hostname;
   const emulatorHost = page === '' || page === 'localhost' || page === '127.0.0.1' || page === '[::1]' ? '127.0.0.1' : page;
-  connectAuthEmulator(auth, `http://${emulatorHost}:9099`, { disableWarnings: true });
-  connectFirestoreEmulator(db, emulatorHost, 8080);
+  // The ports are firebase.json's; a second set of emulators (the scripted check's, firebase.check.json) names its own.
+  const authPort = Number(import.meta.env.VITE_EMULATOR_AUTH_PORT ?? 9099);
+  const firestorePort = Number(import.meta.env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080);
+  connectAuthEmulator(auth, `http://${emulatorHost}:${authPort}`, { disableWarnings: true });
+  connectFirestoreEmulator(db, emulatorHost, firestorePort);
 }

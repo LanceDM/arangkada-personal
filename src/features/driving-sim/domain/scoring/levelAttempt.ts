@@ -40,6 +40,14 @@ export interface LevelAttempt {
    * keeps it readable from the bulk-read attempt alone, as the pass rule needs.
    */
   timedOut?: true;
+  /**
+   * A course drive's own record, so every result can be recomputed later:
+   * the seed its road was composed from, the counted scenarios in road order,
+   * and why it ended early, if it did (a crash's text, as the screen gave it).
+   */
+  attemptSeed?: number;
+  composition?: { scenarioId: string; competency: string; sourceLevelId: number }[];
+  crashReason?: string;
 }
 
 /**

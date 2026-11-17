@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Firestore security rules for Arangkada .
+// Firestore security rules for Arangkada.
 //
 // Schema - the TypeScript types named are the authoritative shapes:
 //   users/{uid}                                    UserProfile (features/auth)
@@ -30,6 +30,7 @@ rules_version = '2';
 //   item_reviews/{tagging|experts}                 the test items' content-validity ratings
 //   study_invites/{invite}                         StudyInviteDoc, an invite and its cohort
 //   study_counters/{cohort}                        StudyCounterDoc, the cohort's next enrolment
+//   study_settings/deadline                        the study's deadline for the end path (admin-set; off unless set)
 //   participants/{code}                            ParticipantDoc, the study's registry
 //   users/{uid}/course/cursor                      CourseCursor, the per-competency course
 //   users/{uid}/course/active                      ActiveActivity, the quiz or drive open, with its seed
@@ -49,7 +50,7 @@ rules_version = '2';
 //     with the service account. Their pre/post test record (testSittings)
 //     they write once and never read back.
 //   - An admin is the custom claim `admin: true` on the sign-in token, set by
-//     the developers with a developers' script It is never a document field:
+//     the developers with the service account. It is never a document field:
 //     a `role` on a profile is a legacy label that no rule and no screen
 //     trusts, and no player write can change it.
 //   - An admin reads every player's data (the report's collection-group
@@ -71,7 +72,8 @@ rules_version = '2';
 // key, so an additive payload change - how these shapes have always evolved -
 // never makes a save fail and lose the record.
 //
-// Tests: a developers' script, run by `npm run test:rules`.
+// The developers test these rules on the Firestore emulator before a change
+// to a path or a payload ships.
 //
 // Legacy collections (fsm_sessions, exam_results, daily_results, and the
 // `progress`/`daily` fields still embedded in old users/{uid} docs) are
@@ -130,13 +132,48 @@ service cloud.firestore {
       return data.keys().hasAll(['schemaVersion', 'phase', 'stage', 'pending', 'seen', 'flagged', 'seq', 'updatedAt'])
         && data.schemaVersion == 1
         && data.phase is map
-        && data.phase.kind in ['MODULE', 'QUIZ', 'QUIZ_REVIEW', 'DRIVE', 'REPEAT', 'FINAL', 'CERTIFIED']
+        && data.phase.kind in ['MODULE', 'QUIZ', 'QUIZ_REVIEW', 'DRIVE', 'REPEAT', 'FINAL', 'CERTIFIED', 'FINISHED']
         && data.stage is map
         && data.pending is list
         && data.seen is map
         && data.flagged is list
         && isCount(data.seq)
         && data.updatedAt is number;
+    }
+
+    // The end path: the admin's study deadline, set and passed.
+    // Each function reads a document with one exists and one get: the rules allow 10
+    // document reads per write, and the post-test's opening is near that.
+    function studyDeadlinePassed() {
+      let deadline = /databases/$(database)/documents/study_settings/deadline;
+      return exists(deadline) && isPastDeadline(get(deadline).data);
+    }
+
+    function isPastDeadline(setting) {
+      return setting.at is number && setting.at <= request.time.toMillis();
+    }
+
+    // A course may end without the certificate (phase FINISHED) only from the final
+    // exam after 3 failed attempts, or from any uncertified phase once the deadline
+    // has passed. A cursor already ended stays as it is.
+    function isCourseCursorChange(now, next) {
+      return next.phase.kind != 'FINISHED'
+        || now.phase.kind == 'FINISHED'
+        || (now.phase.kind != 'CERTIFIED'
+          && ((now.phase.kind == 'FINAL' && now.get('finalFailures', 0) >= 3) || studyDeadlinePassed()));
+    }
+
+    // The post-test opens once the course has ended: certified, finished by the
+    // end path, after 3 failed finals, or past the study's deadline.
+    function courseEndedFor(uid) {
+      let cursor = /databases/$(database)/documents/users/$(uid)/course/cursor;
+      // The cursor first: the deadline is read only when the cursor has not ended.
+      return (exists(cursor) && isEndedCourse(get(cursor).data)) || studyDeadlinePassed();
+    }
+
+    function isEndedCourse(cursor) {
+      return cursor.phase.kind in ['CERTIFIED', 'FINISHED']
+        || (cursor.phase.kind == 'FINAL' && cursor.get('finalFailures', 0) >= 3);
     }
 
     function isActiveActivity(data) {
@@ -165,14 +202,18 @@ service cloud.firestore {
         && data.levelId is int
         && data.attempt is int && data.attempt >= 1 && data.attempt <= 3
         && data.answers is list
-        && data.timestamp is number;
+        && data.timestamp is number
+        // How the sitting was shown: the draw's seed and order, the screen's seed and choice orders.
+        && (!data.keys().hasAny(['shown']) || (data.shown is map
+          && data.shown.drawSeed is int && data.shown.seed is int
+          && data.shown.drawOrder is list && data.shown.items is list));
     }
 
     // The post-test is never a course-log kind: it rewards no decision.
     function isCourseLogEntry(data) {
       return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'decisions', 'rewards', 'timestamp'])
         && data.schemaVersion == 1
-        && data.kind in ['drive', 'quiz', 'final']
+        && data.kind in ['drive', 'quiz', 'final', 'finish']
         && data.decisions is list
         && data.rewards is list
         && data.timestamp is number;
@@ -227,10 +268,22 @@ service cloud.firestore {
     // Which shared table an account trains: an active participant only their
     // own cohort's, and an account outside the study (the team) only `test`,
     // so no tester's play reaches the table the study's participants learn.
+    // The study's order for the course (2026-11-17): a study account writes its
+    // course records only once its pre-test is finished. Team, admin and other
+    // accounts are not held to it. One document read, shared by every write of
+    // the request; getAfter, so a record written with the finishing write passes.
+    function courseOpenFor(uid) {
+      let status = /databases/$(database)/documents/users/$(uid)/testStatus/pre;
+      return !isStudyAccount() || (existsAfter(status) && getAfter(status).data.status == 'finished');
+    }
+
+    // An admin's course is a check of the game, not a learner: it never changes
+    // a shared table or its log (the groupmate's rule, 2026-11-16).
     function mayTrainTable(table) {
       let enrolment = enrolmentPath(request.auth.uid);
-      return isSignedIn()
-        && ((exists(enrolment) && get(enrolment).data.cohort == table && isActiveParticipant(request.auth.uid))
+      return isSignedIn() && !isAdmin()
+        && ((exists(enrolment) && get(enrolment).data.cohort == table && isActiveParticipant(request.auth.uid)
+            && courseOpenFor(request.auth.uid))
           || (!isStudyAccount() && !exists(enrolment) && table == 'test'));
     }
 
@@ -279,7 +332,11 @@ service cloud.firestore {
         // Written only when the run's driving time ran out.
         && (!data.keys().hasAny(['timedOut']) || data.timedOut == true)
         // The language the player had chosen when the attempt began.
-        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil']);
+        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil'])
+        // A course drive's seed, its counted scenarios in road order, and a crash's text.
+        && (!data.keys().hasAny(['attemptSeed']) || data.attemptSeed is int)
+        && (!data.keys().hasAny(['composition']) || data.composition is list)
+        && (!data.keys().hasAny(['crashReason']) || data.crashReason is string);
     }
 
     function isFsmTelemetry(data) {
@@ -506,9 +563,11 @@ service cloud.firestore {
     // of events, never whether an answer was right.
     function isOwnParticipantCode(code) {
       let entry = /databases/$(database)/documents/participants/$(code);
-      return code is string && exists(entry)
-        && get(entry).data.uid == request.auth.uid
-        && get(entry).data.withdrawal == null;
+      return code is string && exists(entry) && isOwnActiveEntry(get(entry).data);
+    }
+
+    function isOwnActiveEntry(entry) {
+      return entry.uid == request.auth.uid && entry.withdrawal == null;
     }
 
     // The study's order before the pre-test: consent
@@ -529,7 +588,7 @@ service cloud.firestore {
         && data.startedAt == request.time
         && data.status == 'open'
         && data.finishedAt == null
-        && (kind == 'pre' || isOpenPostTest(data));
+        && (kind == 'pre' || (isOpenPostTest(data) && courseEndedFor(request.auth.uid)));
     }
 
     // The post-test (amendment 3) opens only once its participant's pre-test
@@ -853,7 +912,8 @@ service cloud.firestore {
 
       match /attempts/{attemptId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
+        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data) && isNumberedEvidence(uid, request.resource.data)
+          && courseOpenFor(uid);
         allow update, delete: if false; // append-only, never rewrite history
 
         // The raw FSM transition log, the per-decision record and the routing
@@ -872,8 +932,8 @@ service cloud.firestore {
       }
 
       // The routing FSM in the game. The assignment is written by
-      // the developers alone, with the service account
-      // (a developers' script), which these rules do not govern: no
+      // the developers alone, with the service account, which these rules do
+      // not govern: no
       // client writes it, so no player can choose their own group, and an
       // admin writes no player data. The cursor is the player's place in the
       // course, rewritten as they play.
@@ -918,7 +978,8 @@ service cloud.firestore {
         allow create: if isOwner(uid)
           && isOpenTestStatus(request.resource.data, kind)
           && isOwnParticipantCode(request.resource.data.playerCode)
-          && hasStudyStepsBeforePreTest();
+          // A post-test opens on a finished pre-test, which these steps came before.
+          && (kind == 'post' || hasStudyStepsBeforePreTest());
         allow update: if isOwner(uid)
           && resource.data.status == 'open'
           && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'finishedAt'])
@@ -977,15 +1038,15 @@ service cloud.firestore {
       match /course/{docId} {
         allow read: if isOwner(uid) || isAdmin();
         allow create: if isOwner(uid)
-          && ((docId == 'cursor' && isCourseCursor(request.resource.data))
-            || (docId == 'active' && isActiveActivity(request.resource.data))
-            || (docId == 'evidence' && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1)
+          && ((docId == 'cursor' && isCourseCursor(request.resource.data) && courseOpenFor(uid))
+            || (docId == 'active' && isActiveActivity(request.resource.data) && courseOpenFor(uid))
+            || (docId == 'evidence' && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1 && courseOpenFor(uid))
             || (docId == 'preTestSeed' && isPreTestSeed(request.resource.data)
               && get(/databases/$(database)/documents/users/$(uid)/testStatus/pre).data.status == 'open'
               && getAfter(/databases/$(database)/documents/users/$(uid)/testStatus/pre).data.status == 'finished'
               && existsAfter(/databases/$(database)/documents/users/$(uid)/testSittings/pre)));
-        allow update: if isOwner(uid)
-          && ((docId == 'cursor' && isCourseCursor(request.resource.data))
+        allow update: if isOwner(uid) && courseOpenFor(uid)
+          && ((docId == 'cursor' && isCourseCursor(request.resource.data) && isCourseCursorChange(resource.data, request.resource.data))
             || (docId == 'active' && isActiveActivity(request.resource.data))
             || (docId == 'evidence' && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq));
         allow delete: if false;
@@ -993,25 +1054,26 @@ service cloud.firestore {
 
       match /courseQuizSittings/{sittingId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isCourseQuizSitting(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
+        allow create: if isOwner(uid) && isCourseQuizSitting(request.resource.data) && isNumberedEvidence(uid, request.resource.data)
+          && courseOpenFor(uid);
         allow update, delete: if false;
       }
 
       match /courseLog/{entryId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isCourseLogEntry(request.resource.data);
+        allow create: if isOwner(uid) && isCourseLogEntry(request.resource.data) && courseOpenFor(uid);
         allow update, delete: if false;
       }
 
       match /bkt/{docId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create, update: if isOwner(uid) && docId == 'profile' && isBKTProfile(request.resource.data, uid);
+        allow create, update: if isOwner(uid) && docId == 'profile' && isBKTProfile(request.resource.data, uid) && courseOpenFor(uid);
         allow delete: if false;
       }
 
       match /bktUpdates/{updateId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId);
+        allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId) && courseOpenFor(uid);
         allow update: if isOwner(uid) && onlyServerTimeChanged();
         allow delete: if false;
       }
@@ -1119,7 +1181,7 @@ service cloud.firestore {
 
     // The post-test's frozen design: item ids and cut
     // points, no item's content. Written once by the developers with the
-    // service account (a developers' script), which these rules do
+    // service account, which these rules do
     // not govern, so no client, an admin included, can change how anyone is
     // routed. Any signed-in account reads it.
     match /test_designs/{kind} {
@@ -1129,7 +1191,7 @@ service cloud.firestore {
 
     // The Rasch analysis as the admin area's IRT section shows it: item difficulties, fit, and each participant's θ by code.
     // Written by the developers with the service account
-    // (a developers' script), so no client, an admin included, can
+    // so no client, an admin included, can
     // change a result. Only an admin reads it.
     match /irt_reports/{report} {
       allow read: if isAdmin();
@@ -1169,6 +1231,18 @@ service cloud.firestore {
         && resource.data.open == true
         && request.resource.data.open == false
         && request.resource.data.closedAt is number;
+      allow delete: if false;
+    }
+
+    // The study's settings: the deadline after which anyone not yet certified may
+    // finish the study (the end path). Off unless an admin sets it.
+    match /study_settings/{setting} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() && setting == 'deadline'
+        && request.resource.data.keys().hasAll(['schemaVersion', 'at', 'updatedAt'])
+        && request.resource.data.schemaVersion == 1
+        && (request.resource.data.at == null || request.resource.data.at is number)
+        && request.resource.data.updatedAt is number;
       allow delete: if false;
     }
 

@@ -959,6 +959,9 @@ export const drawMirrorVehicle = (
     case 'bus':
       drawProvincialBus(ctx, 0, 0);
       break;
+    case 'tricycle':
+      drawTricycle(ctx, 0, 0);
+      break;
   }
   ctx.restore();
 };

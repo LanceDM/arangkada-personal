@@ -17,6 +17,9 @@ export type SlotVariant = AuthoredEvent extends unknown
   ? Omit<AuthoredEvent, 'triggerAtDistance'>
   : never;
 
+/** The variants that can be played: everything but those whose situation the road does not draw (`offRoad`). */
+export const inPlay = <T extends { offRoad?: true }>(pool: readonly T[]): T[] => pool.filter(variant => !variant.offRoad);
+
 /** Rolls one variant per slot and attaches each slot's fixed road position. */
 export const buildEvents = (
   slots: SlotVariant[][],

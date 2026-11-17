@@ -114,11 +114,12 @@ const driveButton = () =>
   [...container.querySelectorAll('button')].find(button => button.textContent?.includes('Driving Simulation'))!;
 
 describe('the briefing', () => {
-  it("counts Level 2's garage, and shows its pass score against the maximum", () => {
+  it("counts Level 2's garage, which is the whole level, and shows its pass score against the maximum", () => {
     const text = briefing(level(2));
-    expect(text).toContain('10 garage checks · 3 road events');
-    expect(text).toContain('3Road events+10 garage checks');
-    expect(text).toContain('210 / 280');
+    expect(text).toContain('Driving Simulation11 garage checks');
+    expect(text).toContain('11Garage checks');
+    expect(text).not.toContain('Road events');
+    expect(text).toContain('154 / 220');
   });
 
   it("names Level 9's crash scene and Level 10's garage beside their road events", () => {
@@ -237,7 +238,8 @@ describe('the mission panel', () => {
 
   it('asks for the pass mark out of the maximum, and claims no speed it does not grade', () => {
     const level2 = panel(level(2));
-    expect(level2).toContain('Score 210 of 280 to pass.');
+    expect(level2).toContain('Score 154 of 220 to pass.');
+    expect(level2).toContain('Nothing on this road is graded.');
     expect(level2).toContain('Road limit 30 km/h; signs may post others.');
     expect(level2).not.toContain('Stay at or under');
   });

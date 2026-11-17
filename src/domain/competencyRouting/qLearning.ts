@@ -9,12 +9,16 @@
  * - State: the competency's mastery level (4) x its scenario result in this
  *   attempt (passed / failed) = 8 states.
  * - Actions (TENTATIVE): none, practice, review.
- * - Choosing (TENTATIVE): Double Explore-then-Commit, 2 / 6 / 2, with randomized
- *   exploration visits and a probability floor p = 0.1 (Jin, Xu, Xiao & Gu,
- *   2021; randomized, logged probabilities after Qian et al., 2022, and Trella
- *   et al., 2022).
- * - Learning: Q-learning, alpha = 1/n, gamma = 0.9.
- * - Reward (TENTATIVE): r = A_next + 0.5 * Pass - 0.02 * H, from observed data only.
+ * - Choosing: two tries per legal action at random, then the leader with 0.9
+ *   and the other with 0.1, every probability logged (Trella et al., 2022).
+ * - Learning: episodic Q-learning, one episode per competency per level,
+ *   alpha = 1/n, gamma = 1.
+ * - Reward: a practice or review followed by another decision in the level
+ *   earns -0.02 * H; the episode's last decision earns A_next - 0.02 * H at the
+ *   competency's next measurement after the level. Observed data only.
+ *
+ * Choosing, learning and the reward are the team's decisions of 2026-11-15,
+ * pending the adviser (algorithm ledger §2.3a, Option 2, Q6, Q7).
  *
  * Rules decide what is legal and when the learner advances; the table chooses
  * among the legal actions.
@@ -79,7 +83,11 @@ const cell = (table: QTable, state: QState, action: CompetencyAction): QCell =>
 
 // --- choosing: the warm-up ------------------------------------------------------
 
-/** TENTATIVE warm-up settings; R2 (set from the dry run) may shorten them to 1 / 3 / 1. */
+/**
+ * Warm-up settings. The default is explore-then-commit with a floor: two tries per
+ * legal action, then 0.9 / 0.1 (Commit I and Explore II are off). The team's
+ * decision, 2026-11-15, pending the adviser (algorithm ledger §2.3a, Q7).
+ */
 export interface WarmUp {
   /** Explore I: visits per legal action. */
   exploreFirst: number;
@@ -91,7 +99,7 @@ export interface WarmUp {
   floor: number;
 }
 
-export const DEFAULT_WARM_UP: WarmUp = { exploreFirst: 2, commitLeader: 6, exploreSecond: 2, floor: 0.1 };
+export const DEFAULT_WARM_UP: WarmUp = { exploreFirst: 2, commitLeader: 0, exploreSecond: 0, floor: 0.1 };
 
 export type DecisionPhase = 'only_legal' | 'explore_1' | 'commit_1' | 'explore_2' | 'final_commit';
 
@@ -285,8 +293,12 @@ export const warmUpFinished = (table: QTable, state: QState, warmUp: WarmUp = DE
 
 // --- learning --------------------------------------------------------------------
 
-/** gamma = 0.9; the analysis rechecks the leaders at gamma = 0 from the logs. */
-export const GAMMA = 0.9;
+/**
+ * gamma = 1: each competency at each level is one episode of at most 3
+ * decisions, and its value is its later outcome minus its cost (algorithm
+ * ledger §2.3a, Option 2; the team's decision, pending the adviser).
+ */
+export const GAMMA = 1;
 
 /**
  * One Q-learning update with alpha = 1/n:
@@ -320,15 +332,13 @@ export const updateQ = (
 
 // --- reward ------------------------------------------------------------------------
 
-/** TENTATIVE reward weights. */
+/** Reward weights (the team's decision, 2026-11-15, pending the adviser). */
 export interface RewardWeights {
-  /** beta: weight on passing at the next measurement. */
-  pass: number;
   /** psi: cost per graded decision the action added. */
   perAddedDecision: number;
 }
 
-export const DEFAULT_REWARD: RewardWeights = { pass: 0.5, perAddedDecision: 0.02 };
+export const DEFAULT_REWARD: RewardWeights = { perAddedDecision: 0.02 };
 
 /** The competency's next measurement, from observed data. */
 export interface Measurement {
@@ -338,13 +348,22 @@ export interface Measurement {
 }
 
 /**
- * r = A_next + beta * Pass - psi * H (TENTATIVE).
+ * Option 2 (algorithm ledger §2.3a): an episode is one competency at one level.
  *
- * H = graded decisions the action added: practice, its scenarios in the repeat
- * drive; review, its scenarios after the module section; none, 0. Uses only
- * observed data. Replaces NG_c + 0.5 Pass - 0.02 H, which favoured practice by
- * construction. Basis: outcome minus a small per-activity penalty (Ruan et al.,
- * 2024); accuracy as a reward signal (Girard et al., 2024).
+ * - `step`: a practice or review followed by another decision in the same
+ *   level earns only its cost, r = -psi * H.
+ * - `terminal`: the episode's last decision (a `none`, or the one the cap
+ *   closed) earns the competency's next measurement after the level, minus
+ *   its own cost: r = A_next - psi * H.
+ *
+ * Pass is not a term: it is a function of A at every measurement. Basis for
+ * the form, outcome minus a small per-activity penalty: Ruan et al. (2024).
  */
-export const rewardOf = (measurement: Measurement, addedDecisions: number, weights: RewardWeights = DEFAULT_REWARD): number =>
-  measurement.accuracy + weights.pass * (measurement.passed ? 1 : 0) - weights.perAddedDecision * addedDecisions;
+export type RewardKind = 'step' | 'terminal';
+
+export const rewardOf = (
+  measurement: Measurement,
+  addedDecisions: number,
+  weights: RewardWeights = DEFAULT_REWARD,
+  kind: RewardKind = 'terminal'
+): number => (kind === 'terminal' ? measurement.accuracy : 0) - weights.perAddedDecision * addedDecisions;

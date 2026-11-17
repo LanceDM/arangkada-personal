@@ -1,6 +1,6 @@
 /**
- * The consent, the device check, the survey and a withdrawal, as stored
- *. `firestore.rules` holds each shape.
+ * The consent, the device check, the survey and a withdrawal, as stored.
+ * `firestore.rules` holds each shape.
  *
  *   consents/{uid}                 ConsentDoc: name, typed signature, age, username. Admin-read only,
  *                                  never in any export, apart from every game record
@@ -23,7 +23,7 @@
 import type { Language, Localized } from '@/shared/lib/localized';
 
 /** The consent text's version: the record says which text was agreed to. */
-export const CONSENT_VERSION = 'draft-2026-11-04b';
+export const CONSENT_VERSION = '2026-11-17a';
 
 /**
  * The youngest age the consent page accepts. Under it the page

@@ -29,7 +29,7 @@ export const level7Module = {
           type: 'list',
           ordered: false,
           items: [
-            'Apply the RA 4136 prescribed speed limits for each type of road.',
+            'Apply the Republic Act No. 4136 prescribed speed limits for each type of road.',
             'Maintain a safe following distance using the two-or-three-second rule.',
             'Understand how perception distance, reaction distance, and braking distance combine into total stopping distance.',
             'Follow expressway-specific rules: banned vehicles, lane restrictions, and prohibited actions.',
@@ -41,12 +41,12 @@ export const level7Module = {
     },
     {
       id: 'level-7-speed-limits',
-      title: '1. Speed Limits Under RA 4136',
+      title: '1. Speed Limits Under Republic Act No. 4136',
       text: 'Speed limits are not the same everywhere. The legal maximum depends on the type of road, the traffic around you, and the kind of vehicle you drive.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'Speed limits are not the same everywhere. The legal maximum depends on the type of road, the traffic around you, and the kind of vehicle you drive. In the absence of a posted sign, RA 4136 Section 35(b) sets the default.',
+          text: 'Speed limits are not the same everywhere. The legal maximum depends on the type of road, the traffic around you, and the kind of vehicle you drive. In the absence of a posted sign, Republic Act No. 4136, Section 35(b) sets the default.',
         },
         {
           type: 'table',

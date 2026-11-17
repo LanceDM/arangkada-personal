@@ -105,8 +105,6 @@ const level4Base = {
   // Spaced and measured at 50 on the dial; driven at 30 as it was at 50.
   pace: spacedPace(30, 50),
   requiredScore: 76,
-  stars2: 91,
-  stars3: 105,
 } as const;
 
 /**

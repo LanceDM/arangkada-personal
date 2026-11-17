@@ -13,7 +13,7 @@
  * test.ts` rewrites every description in the game and asserts it does not.
  */
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
-import type { ComplianceCheck, CrossingPedestrian, LanePaintKind, RoadActorSpec } from '@/features/driving-sim/domain/scenario/scenarioScene';
+import type { ComplianceCheck, CrossingPedestrian, LanePaintKind, MainRoadVehicleKind, RoadActorSpec } from '@/features/driving-sim/domain/scenario/scenarioScene';
 
 export type { LanePaintKind };
 
@@ -32,7 +32,7 @@ export type ResolvedScene =
   /** Stop sign over a junction; a declared `npc` crosses it. */
   | { kind: 'stop-sign-junction' }
   /** Footpath running across the mouth of a driveway. */
-  | { kind: 'driveway-crossing' }
+  | { kind: 'driveway-crossing'; pedestrians: CrossingPedestrian[] }
   /** Zebra crossing on open road, with whoever is using it. */
   | { kind: 'open-road-crossing'; pedestrians: CrossingPedestrian[] }
   | { kind: 'tutorial-cue'; cue: TutorialCue }
@@ -72,7 +72,7 @@ export type ResolvedScene =
   /** In-cabin compliance check: seatbelt, phone, child seat, paperwork. */
   | { kind: 'compliance-icon'; glyph: string; color: string }
   | { kind: 'checkpoint-officer' }
-  | { kind: 'main-road-junction' }
+  | { kind: 'main-road-junction'; crossing?: { kind: MainRoadVehicleKind; from: 'left' | 'right' } }
   /**
    * A road crash that has already happened. One scene for the whole tableau —
    * the wreck, the vehicle in the water, the debris — because they are one
@@ -108,7 +108,7 @@ const prefabScene = (event: ScenarioEvent): ResolvedScene | null => {
 
   switch (declaration.kind) {
     case 'driveway_crossing':
-      return { kind: 'driveway-crossing' };
+      return { kind: 'driveway-crossing', pedestrians: pedestriansFor(event) };
     case 'bend_warning':
       return { kind: 'bend-warning' };
     case 'unknown_hazard':
@@ -136,7 +136,7 @@ const prefabScene = (event: ScenarioEvent): ResolvedScene | null => {
     case 'checkpoint_officer':
       return { kind: 'checkpoint-officer' };
     case 'main_road_junction':
-      return { kind: 'main-road-junction' };
+      return declaration.crossing ? { kind: 'main-road-junction', crossing: declaration.crossing } : { kind: 'main-road-junction' };
     case 'road_crash':
       return { kind: 'road-crash' };
     case 'fire_hydrant':

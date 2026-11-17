@@ -12,6 +12,9 @@ export interface StudyInvites {
   close: (code: string) => Promise<void>;
 }
 
+/** The study deadline's store, for the Participants page. */
+export const studyDeadlineRepository = () => adminDeps().deadline;
+
 export const useStudyInvites = (enabled: boolean): StudyInvites => {
   const [invites, setInvites] = useState<InviteEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);

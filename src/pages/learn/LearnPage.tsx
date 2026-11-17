@@ -3,7 +3,7 @@ import AppLayout from '@/app/layout/AppLayout';
 import { LessonReader, LEVELS, LEVEL_MODULES, getLevelModule, markLessonsRead } from '@/features/driving-sim';
 
 /**
- * A level's LTO module, readable on its own.
+ * A level's module, readable on its own.
  *
  * Unlike the three run screens this deep-links and survives a reload: module
  * text is authored content, independent of the per-attempt roll, so there is no

@@ -1,6 +1,6 @@
 
 import type { LevelConfig, ScenarioEvent } from './scenarioDefinition';
-import type { SlotVariant } from './pooling';
+import { buildEvents, inPlay, type SlotVariant } from './pooling';
 import { declaredLineSpans } from './roadLine';
 import { level0 } from '@/features/driving-sim/domain/scenario/content/levels/level0';
 import { level1, createLevel1, SLOTS as level1Slots, SLOT_DISTANCES as level1SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level1';
@@ -12,12 +12,12 @@ import type { DrivingCompetency } from '@/domain/learner/competency';
 import { level4, createLevel4, assembleLevel4, level4MarkingNames, SLOT_DISTANCES as level4SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level4/level4';
 import { SLOTS as level4Slots } from '@/features/driving-sim/domain/scenario/content/levels/level4/pools';
 import { level5, createLevel5, SLOTS as level5Slots, SLOT_DISTANCES as level5SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level5';
-import { level6 } from '@/features/driving-sim/domain/scenario/content/levels/level6';
+import { level6, SLOTS as level6Slots, SLOT_DISTANCES as level6SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level6';
 import { level7 } from '@/features/driving-sim/domain/scenario/content/levels/level7';
-import { level8 } from '@/features/driving-sim/domain/scenario/content/levels/level8';
-import { level9 } from '@/features/driving-sim/domain/scenario/content/levels/level9';
-import { level10 } from '@/features/driving-sim/domain/scenario/content/levels/level10';
-import { level11 } from '@/features/driving-sim/domain/scenario/content/levels/level11';
+import { level8, assembleLevel8, SLOTS as level8Slots, SLOT_DISTANCES as level8SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level8';
+import { level9, SLOTS as level9Slots, SLOT_DISTANCES as level9SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level9';
+import { level10, SLOTS as level10Slots, SLOT_DISTANCES as level10SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level10';
+import { level11, SLOTS as level11Slots, SLOT_DISTANCES as level11SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level11';
 import { level12, createLevel12, assembleLevel12, SLOTS as level12Slots, SLOT_DISTANCES as level12SlotDistances } from '@/features/driving-sim/domain/scenario/content/levels/level12';
 
 export {
@@ -57,6 +57,23 @@ export const LEVELS = [
  * LEVELS above stay static, since the level map, briefing and results only need
  * the metadata; the drive itself is built here when the player starts it.
  */
+/** One version per slot, drawn in slot order; with no stream, from Math.random. */
+const rollSlots = (
+  levelId: number,
+  slots: SlotVariant[][],
+  distances: number[],
+  rng: () => number = Math.random
+): LevelConfig =>
+  // Assembled as a roll of these events is, so a level that paints what it
+  // rolled (8) paints this roll's lines.
+  levelWithEvents(
+    levelId,
+    buildEvents(slots, distances, pool => {
+      const playable = inPlay(pool);
+      return playable[Math.floor(rng() * playable.length)];
+    })
+  )!;
+
 const LEVEL_BUILDERS: Record<
   number,
   (coverage?: SignCoverage, weakCompetency?: DrivingCompetency | null, rng?: () => number) => LevelConfig
@@ -69,6 +86,16 @@ const LEVEL_BUILDERS: Record<
   // The final exam rolls too, from the seed alone: it is the same test for
   // every learner, so it is handed no coverage and no weak area. See level12.ts.
   12: (_coverage, _weakCompetency, rng) => createLevel12(rng),
+  // Levels 6 and 8-11 pool every slot (2026-11-16, future work): one version
+  // per slot, drawn from the attempt's roll stream, so every path that builds
+  // a level (Legacy, New routing, a free replay) rolls them per attempt. They
+  // read no coverage and no weak area. Level 7 stays as authored: its slots
+  // are the expressway road itself (level7.ts).
+  6: (_coverage, _weakCompetency, rng) => rollSlots(6, level6Slots, level6SlotDistances, rng),
+  8: (_coverage, _weakCompetency, rng) => rollSlots(8, level8Slots, level8SlotDistances, rng),
+  9: (_coverage, _weakCompetency, rng) => rollSlots(9, level9Slots, level9SlotDistances, rng),
+  10: (_coverage, _weakCompetency, rng) => rollSlots(10, level10Slots, level10SlotDistances, rng),
+  11: (_coverage, _weakCompetency, rng) => rollSlots(11, level11Slots, level11SlotDistances, rng),
 };
 
 /**
@@ -115,6 +142,13 @@ export const getRerollableSlots = (levelId: number): { slots: SlotVariant[][]; d
  */
 const LEVEL_POOLED_SLOTS: Record<number, { slots: SlotVariant[][]; distances: number[] }> = {
   ...LEVEL_REROLL_SLOTS,
+  // Levels 6 and 8-11 pool their slots too (2026-11-16, future work), so the
+  // dev tools stage every variant; the live re-roll stays Levels 1-5.
+  6: { slots: level6Slots, distances: level6SlotDistances },
+  8: { slots: level8Slots, distances: level8SlotDistances },
+  9: { slots: level9Slots, distances: level9SlotDistances },
+  10: { slots: level10Slots, distances: level10SlotDistances },
+  11: { slots: level11Slots, distances: level11SlotDistances },
   12: { slots: level12Slots, distances: level12SlotDistances },
 };
 
@@ -128,6 +162,7 @@ export const getPooledSlots = (levelId: number): { slots: SlotVariant[][]; dista
  */
 const LEVEL_ASSEMBLERS: Record<number, (events: ScenarioEvent[]) => LevelConfig> = {
   4: assembleLevel4,
+  8: assembleLevel8,
   12: assembleLevel12,
 };
 

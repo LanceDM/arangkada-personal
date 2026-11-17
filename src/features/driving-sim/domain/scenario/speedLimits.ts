@@ -1,6 +1,5 @@
 /**
- * What a level's road is under RA 4136 §35, and the limit that class takes
- *.
+ * What a level's road is under Republic Act No. 4136, Section 35, and the limit that class takes.
  *
  * A level names its class and states its limit; `speedLimits.test.ts` holds
  * the two to each other, so a limit can only change with the class it is

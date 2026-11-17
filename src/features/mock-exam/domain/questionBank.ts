@@ -1,5 +1,5 @@
 /**
- * The local exam bank: 40 LTO-style items with their law citations.
+ * The local exam bank: 40 license-exam-style items with their law citations.
  *
  * This is also the fallback when the `exam_questions` Firestore collection is
  * empty or unreadable.
@@ -45,7 +45,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'At an uncontrolled intersection, who has the right of way?',
     choices: ['The vehicle on the left', 'The vehicle on the right', 'The faster vehicle', 'The larger vehicle'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 42(a) — The driver on the right has the right of way at intersections without traffic signs or signals.',
+    lawCitation: 'Republic Act No. 4136, Section 42(a) — The driver on the right has the right of way at intersections without traffic signs or signals.',
     category: 'right_of_way',
   },
   {
@@ -53,7 +53,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'When approaching a rotunda (roundabout), who has the right of way?',
     choices: ['Vehicles entering the rotunda', 'Vehicles already inside the rotunda', 'The larger vehicle', 'Whoever honks first'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 42 — Vehicles already in the rotunda have the right of way over entering vehicles.',
+    lawCitation: 'Republic Act No. 4136 — Vehicles already in the rotunda have the right of way over entering vehicles.',
     category: 'right_of_way',
   },
   {
@@ -61,7 +61,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'An emergency vehicle with sirens is approaching from behind. What should you do?',
     choices: ['Speed up to stay ahead', 'Pull over to the right and stop', 'Honk back to acknowledge', 'Continue at the same speed'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 49 — All vehicles must yield and pull to the right upon hearing an emergency siren.',
+    lawCitation: 'Republic Act No. 4136, Section 49 — All vehicles must yield and pull to the right upon hearing an emergency siren.',
     category: 'right_of_way',
   },
   {
@@ -69,7 +69,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'At a T-intersection without signs, who has the right of way?',
     choices: ['The vehicle on the through road', 'The vehicle turning', 'The vehicle arriving first', 'The vehicle on the left'],
     correctIndex: 0,
-    lawCitation: 'RA 4136, Section 42 — Vehicles on the through road have priority at T-intersections.',
+    lawCitation: 'Republic Act No. 4136, Section 43(c) — Vehicles on the through road have priority at T-intersections.',
     category: 'right_of_way',
   },
   {
@@ -77,7 +77,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'A pedestrian is crossing at a marked crosswalk. Who has the right of way?',
     choices: ['The driver', 'The pedestrian', 'Whoever got there first', 'It depends on the speed'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 42(d) — Pedestrians on marked crosswalks have the right of way.',
+    lawCitation: 'Republic Act No. 4136, Section 42(c) — Pedestrians on marked crosswalks have the right of way.',
     category: 'right_of_way',
   },
 
@@ -87,7 +87,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'What does a flashing yellow traffic light mean?',
     choices: ['Stop completely', 'Proceed with caution', 'Speed up before it turns red', 'Yield to pedestrians only'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 34 — A flashing yellow light means proceed with caution.',
+    lawCitation: 'Republic Act No. 4136 — A flashing yellow light means proceed with caution.',
     category: 'traffic_signals',
   },
   {
@@ -95,7 +95,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'When the traffic light turns yellow, what is the correct action?',
     choices: ['Speed up to beat the red', 'Slow down and prepare to stop', 'Stop immediately even if in the intersection', 'Honk and proceed'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 34 — Yellow light warns that the signal is about to change to red.',
+    lawCitation: 'Republic Act No. 4136 — Yellow light warns that the signal is about to change to red.',
     category: 'traffic_signals',
   },
   {
@@ -103,7 +103,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'A traffic enforcer is directing traffic against the traffic light. Which should you follow?',
     choices: ['The traffic light', 'The traffic enforcer', 'Whichever lets you go faster', 'Wait until both agree'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 34 — Traffic enforcers override traffic lights.',
+    lawCitation: 'Republic Act No. 4136 — Traffic enforcers override traffic lights.',
     category: 'traffic_signals',
   },
   {
@@ -111,7 +111,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'What does a flashing red traffic light mean?',
     choices: ['Proceed with caution', 'Stop, then proceed when safe', 'The light is broken, ignore it', 'Speed up'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 34 — A flashing red light is treated as a stop sign.',
+    lawCitation: 'Republic Act No. 4136 — A flashing red light is treated as a stop sign.',
     category: 'traffic_signals',
   },
   {
@@ -119,7 +119,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'Can you make a right turn on a red light in the Philippines?',
     choices: ['Yes, always', 'No, never', 'Only if there is a sign allowing it', 'Only if no one is looking'],
     correctIndex: 2,
-    lawCitation: 'RA 4136 — Right turn on red is only allowed when a sign specifically permits it.',
+    lawCitation: 'Republic Act No. 4136 — Right turn on red is only allowed when a sign specifically permits it.',
     category: 'traffic_signals',
   },
 
@@ -163,7 +163,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'What is the maximum speed limit on a national highway outside city/town limits?',
     choices: ['40 km/h', '60 km/h', '80 km/h', '100 km/h'],
     correctIndex: 2,
-    lawCitation: 'RA 4136, Section 35 — Maximum speed on open national highways is 80 km/h for passenger cars.',
+    lawCitation: 'Republic Act No. 4136, Section 35 — Maximum speed on open national highways is 80 km/h for passenger cars.',
     category: 'speed_limits',
   },
   {
@@ -171,7 +171,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'What is the speed limit in a school zone?',
     choices: ['20 km/h', '30 km/h', '40 km/h', '60 km/h'],
     correctIndex: 0,
-    lawCitation: 'RA 4136, Section 35 — Speed limit in school zones is 20 km/h.',
+    lawCitation: 'Republic Act No. 4136, Section 35 — Speed limit in school zones is 20 km/h.',
     category: 'speed_limits',
   },
   {
@@ -179,7 +179,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'On a crowded city street, the maximum speed limit is:',
     choices: ['20 km/h', '30 km/h', '40 km/h', '60 km/h'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 35 — Maximum speed on crowded streets is 30 km/h.',
+    lawCitation: 'Republic Act No. 4136, Section 35 — Maximum speed on crowded streets is 30 km/h.',
     category: 'speed_limits',
   },
   {
@@ -187,7 +187,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'When passing a hospital or church, what speed should you maintain?',
     choices: ['Normal speed', 'Not more than 20 km/h', 'Not more than 30 km/h', 'Not more than 40 km/h'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 35 — Speed limit near hospitals and churches is 20 km/h.',
+    lawCitation: 'Republic Act No. 4136, Section 35 — Speed limit near hospitals and churches is 20 km/h.',
     category: 'speed_limits',
   },
 
@@ -197,7 +197,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'When is overtaking on the right allowed?',
     choices: ['Never', 'When the vehicle ahead is turning left', 'Whenever there is space', 'On all multi-lane roads'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 41(c) — Overtaking on the right is allowed only when the vehicle ahead is making a left turn.',
+    lawCitation: 'Republic Act No. 4136, Section 41(c) — Overtaking on the right is allowed only when the vehicle ahead is making a left turn.',
     category: 'overtaking',
   },
   {
@@ -205,7 +205,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'You should NOT overtake when:',
     choices: ['On a straight road with clear visibility', 'Approaching a curve or hill crest', 'On a wide two-lane road', 'The vehicle ahead is slow'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 41 — No overtaking on curves, hill crests, intersections, or when vision is obstructed.',
+    lawCitation: 'Republic Act No. 4136, Section 41 — No overtaking on curves, hill crests, intersections, or when vision is obstructed.',
     category: 'overtaking',
   },
   {
@@ -221,7 +221,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'When being overtaken, what should you do?',
     choices: ['Speed up to prevent it', 'Move to the right and slow down slightly', 'Move to the left', 'Honk repeatedly'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 41(b) — The driver being overtaken shall give way to the right.',
+    lawCitation: 'Republic Act No. 4136, Section 40 — The driver being overtaken shall give way to the right.',
     category: 'overtaking',
   },
 
@@ -230,8 +230,8 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     id: 23,
     question: 'It is illegal to park within how many meters of a fire hydrant?',
     choices: ['3 meters', '4 meters', '5 meters', '6 meters'],
-    correctIndex: 2,
-    lawCitation: 'RA 4136, Section 46 — Parking within 5 meters of a fire hydrant is prohibited.',
+    correctIndex: 1,
+    lawCitation: 'Republic Act No. 4136, Section 46(e) — Parking within 4 meters of a fire hydrant is prohibited.',
     category: 'parking',
   },
   {
@@ -239,7 +239,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'You must NOT park:',
     choices: ['On a wide shoulder', 'Within 6 meters of an intersection', 'In a private parking lot', 'On a one-way street'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 46 — Parking within 6 meters of an intersection is prohibited.',
+    lawCitation: 'Republic Act No. 4136, Section 46(c) — Parking within 6 meters of an intersection is prohibited.',
     category: 'parking',
   },
   {
@@ -247,7 +247,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'When parking uphill without a curb, your front wheels should:',
     choices: ['Point straight', 'Turn to the right (toward shoulder)', 'Turn to the left', 'It does not matter'],
     correctIndex: 1,
-    lawCitation: 'RA 4136 — When parking uphill without a curb, turn wheels toward the shoulder so the car rolls off the road if brakes fail.',
+    lawCitation: 'Republic Act No. 4136 — When parking uphill without a curb, turn wheels toward the shoulder so the car rolls off the road if brakes fail.',
     category: 'parking',
   },
   {
@@ -255,7 +255,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'Double parking means:',
     choices: ['Parking in two spots', 'Parking beside an already parked vehicle', 'Parking twice in the same spot', 'Backing into a parking spot'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 46 — Double parking (parking alongside a parked vehicle) is illegal.',
+    lawCitation: 'Republic Act No. 4136, Section 46(g) — Double parking (parking alongside a parked vehicle) is illegal.',
     category: 'parking',
   },
 
@@ -265,7 +265,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'When must a driver yield to a pedestrian?',
     choices: ['Only at traffic lights', 'At any marked crosswalk', 'Only when a traffic enforcer says so', 'Never — pedestrians must yield to cars'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 42(d) — Drivers must yield to pedestrians at marked crosswalks.',
+    lawCitation: 'Republic Act No. 4136, Section 42(c) — Drivers must yield to pedestrians at marked crosswalks.',
     category: 'pedestrians',
   },
   {
@@ -273,7 +273,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'In a school zone, what extra precaution should you take?',
     choices: ['Honk to warn children', 'Slow to 20 km/h and watch for children', 'Flash your headlights', 'Drive normally if no children are visible'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 35 — Reduce speed to 20 km/h in school zones.',
+    lawCitation: 'Republic Act No. 4136, Section 35 — Reduce speed to 20 km/h in school zones.',
     category: 'pedestrians',
   },
   {
@@ -281,7 +281,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'A blind pedestrian with a white cane is at a crosswalk. What should you do?',
     choices: ['Honk to alert them', 'Stop completely and let them cross', 'Flash lights to signal', 'Drive slowly around them'],
     correctIndex: 1,
-    lawCitation: 'RA 4136 — Drivers must give full right of way to blind pedestrians with white canes.',
+    lawCitation: 'Republic Act No. 4136 — Drivers must give full right of way to blind pedestrians with white canes.',
     category: 'pedestrians',
   },
 
@@ -291,7 +291,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'What should you do if your brakes fail while driving?',
     choices: ['Turn off the engine immediately', 'Pump the brake pedal rapidly and downshift', 'Jump out of the car', 'Honk continuously'],
     correctIndex: 1,
-    lawCitation: 'LTO Driver Education — Pump brakes rapidly and downshift to use engine braking.',
+    lawCitation: 'Driver Education — Pump brakes rapidly and downshift to use engine braking.',
     category: 'emergency',
   },
   {
@@ -299,7 +299,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'If your tire blows out at high speed, you should:',
     choices: ['Brake hard immediately', 'Grip the steering wheel firmly and slow down gradually', 'Swerve to the shoulder immediately', 'Accelerate to maintain control'],
     correctIndex: 1,
-    lawCitation: 'LTO Driver Education — Grip wheel firmly, ease off gas, and slow down gradually. Do not brake hard.',
+    lawCitation: 'Driver Education — Grip wheel firmly, ease off gas, and slow down gradually. Do not brake hard.',
     category: 'emergency',
   },
   {
@@ -307,7 +307,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'Early warning devices (EWD) must be placed how far from a stalled vehicle on a highway?',
     choices: ['2 meters', '4 meters', 'At least 4 meters in front and behind', 'Only behind the vehicle'],
     correctIndex: 2,
-    lawCitation: 'RA 4136 — EWDs must be placed at least 4 meters in front and behind a stalled vehicle.',
+    lawCitation: 'Republic Act No. 4136 — EWDs must be placed at least 4 meters in front and behind a stalled vehicle.',
     category: 'emergency',
   },
 
@@ -375,7 +375,7 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     question: 'What document must you always carry while driving?',
     choices: ['Birth certificate', 'Valid driver\'s license and vehicle registration', 'Passport', 'Barangay clearance'],
     correctIndex: 1,
-    lawCitation: 'RA 4136, Section 15 — Drivers must carry a valid license and official receipt of vehicle registration.',
+    lawCitation: 'Republic Act No. 4136, Sections 15 and 19 — Drivers must carry a valid license and official receipt of vehicle registration.',
     category: 'general_rules',
   },
 ];

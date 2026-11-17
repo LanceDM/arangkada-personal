@@ -44,6 +44,7 @@ import {
 import {
   createDrivingSession,
   snapshotChanged,
+  type DrivingSession,
   type DrivingSnapshot,
 } from '@/features/driving-sim/application/session/DrivingSession';
 import type { useFSM } from '@/features/driving-sim/application/useFSM';
@@ -109,6 +110,17 @@ interface UseDrivingSimulationOptions {
    * per mounted drive.
    */
   liveReroll?: boolean;
+  /**
+   * No time limit, no clock and no panel countdown: the admin's scenario check
+   * alone (Admin > Scenarios > Play). Nothing it plays is saved.
+   */
+  noTimeLimit?: boolean;
+  /**
+   * Handed the drive's session once it exists. Only a headless harness passes
+   * one, to steer the car as the reference
+   * drive does; the game passes none, and nothing here reads it.
+   */
+  sessionRef?: { current: DrivingSession | null };
 }
 
 export interface DrivingSimulation {
@@ -150,13 +162,25 @@ export const useDrivingSimulation = ({
   priorLogs,
   support,
   liveReroll = true,
+  noTimeLimit = false,
+  sessionRef,
 }: UseDrivingSimulationOptions): DrivingSimulation => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // One session per mounted drive. `GameScreen` is keyed per attempt, so a
   // retry mounts a fresh one rather than reusing this.
   const [session] = useState(() =>
-    createDrivingSession({ level, fsm, initialDistance, signCoverage: loadSignCoverage(), support })
+    createDrivingSession({
+      level,
+      fsm,
+      initialDistance,
+      signCoverage: loadSignCoverage(),
+      support,
+      ...(noTimeLimit ? { timeLimitSteps: Number.POSITIVE_INFINITY, panelSteps: Number.POSITIVE_INFINITY } : {}),
+    })
   );
+  useEffect(() => {
+    if (sessionRef) sessionRef.current = session;
+  }, [sessionRef, session]);
   const [history] = useState(() => priorLogs ?? []);
   const [rerollsLive] = useState(liveReroll);
 

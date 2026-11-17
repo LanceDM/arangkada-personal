@@ -11,6 +11,10 @@ export { default as MissionBriefing } from './presentation/ui/MissionBriefing';
 export { default as LessonReader } from './presentation/ui/LessonReader';
 
 export { LEVELS } from './domain/scenario/levelCatalog';
+// Admin > Scenarios: every scenario's configuration, and one played alone. Read only.
+export { levelConfigRows, scenarioConfigRows } from './domain/scenario/scenarioCatalog';
+export type { LevelConfigRow, ScenarioConfigRow } from './domain/scenario/scenarioCatalog';
+export { singleScenarioDrive } from './domain/scenario/singleScenarioDrive';
 export { playableLevel, playableLevelName, playableModule } from './application/use-cases/playableLevel';
 export { getLevelModule, LEVEL_MODULES } from './domain/scenario/content/lessons/lessonCatalog';
 export { buildAdaptivePlan } from './application/use-cases/buildAdaptivePlan';
@@ -77,7 +81,7 @@ export {
   type CourseDriveRun,
   type QuizCompetencyResult,
 } from './application/use-cases/competencyCourse';
-export { courseDepsFor, finishCourseDrive, loadCompetencyCourseCursor, type CourseAccount } from './application/use-cases/courseSession';
+export { courseDepsFor, finishCompetencyCourse, finishCourseDrive, loadCompetencyCourseCursor, type CourseAccount } from './application/use-cases/courseSession';
 export type { BriefingCourse } from './presentation/ui/MissionBriefing';
 export type { QTableId } from './application/ports';
 export type { QuizSittingDoc } from './domain/scenario/quizBank';
@@ -85,6 +89,7 @@ export type { QuizSittingDoc } from './domain/scenario/quizBank';
 export { useTouchDevice, usePortrait } from './presentation/input/useTouchDevice';
 export { KEEPS_UP_AT_FPS } from './presentation/drive/frameSteps';
 export { isTutorial } from './domain/systems/tutorial';
+export { choiceLabel, scenarioChoices } from './domain/scenario/scenarioChoices';
 export { POST_TEST_SEED, postTestNote } from './domain/adaptive/pilotPostTest';
 
 // The pilot's participant definitions: one copy, read by the export and the admin dashboard.
@@ -94,6 +99,7 @@ export {
   PARTICIPANT_FLAGS,
   attemptDurationMs,
   attemptKind,
+  courseRecordsExpected,
   fsmAsRead,
   participantExport,
   participantSourceOf,

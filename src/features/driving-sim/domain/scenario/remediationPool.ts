@@ -14,7 +14,8 @@
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { SlotVariant } from './pooling';
 import { SLOTS as level1Slots } from '@/features/driving-sim/domain/scenario/content/levels/level1';
-import { SLOTS as level2Slots } from '@/features/driving-sim/domain/scenario/content/levels/level2';
+// Level 2's road is empty; its former road slots still serve as practice (LEVEL2_PRACTICE).
+import { LEVEL2_PRACTICE as level2Slots } from '@/features/driving-sim/domain/scenario/content/levels/level2';
 import { SLOTS as level3Slots } from '@/features/driving-sim/domain/scenario/content/levels/level3/pools';
 import { SLOTS as level4Slots } from '@/features/driving-sim/domain/scenario/content/levels/level4/pools';
 import { SLOTS as level5Slots } from '@/features/driving-sim/domain/scenario/content/levels/level5';
@@ -80,8 +81,8 @@ const LEVEL_SLOTS: Record<number, SlotVariant[][]> = {
  *   for the geometry of the level it was injected into. Same argument as
  *   `maneuver`, one step further along.
  * - `scene: 'route'` stands on its own level's `RouteLayout`, which is
- *   declared on that level's config and does not travel with the variant
- *. Appended elsewhere, the acceleration lane, the lane gantry and
+ *   declared on that level's config and does not travel with the variant.
+ * Appended elsewhere, the acceleration lane, the lane gantry and
  *   the toll plaza it is graded against are simply not there - and a merge
  *   with no auxiliary lane to leave is graded correct by construction, which
  *   is `neutral`'s argument.
@@ -121,6 +122,7 @@ export const isPortableRemediation = (variant: SlotVariant): boolean =>
   !variant.emergency &&
   !variant.overtake &&
   !variant.neutral &&
+  !variant.offRoad &&
   variant.scene !== 'route' &&
   variant.requiredLane?.lane !== 'middle';
 

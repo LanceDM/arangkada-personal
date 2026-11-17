@@ -12,18 +12,16 @@ import { studyMessages as m, studyValueMessages as v } from './messages';
 
 /**
  * The survey: the team's ISO/IEC 25010 + TAM Google
- * Form, opened with the participant code filled in and nothing else, so its
- * answers link to the game's records without a name. The app cannot see a
+ * Form, opened at its own address with nothing about the participant in the
+ * link. The app cannot see a
  * Google Form being submitted, so the participant says so.
  */
 export const SurveyStep = ({
   uid,
-  code,
   opened,
   onDone,
 }: {
   uid: string;
-  code: string;
   /** The form was opened before, from this or another visit. */
   opened: boolean;
   onDone: () => void;
@@ -37,7 +35,7 @@ export const SurveyStep = ({
   const open = async () => {
     setError(null);
     // Opened in the same click, so the browser does not block it; recorded after.
-    window.open(surveyLink(code), '_blank', 'noopener');
+    window.open(surveyLink(), '_blank', 'noopener');
     if (hasOpened) return;
     try {
       await openSurvey(uid);
@@ -66,7 +64,7 @@ export const SurveyStep = ({
         <Say {...m.theSurvey} />
       </h1>
       <p className="text-sm">
-        {text(v.surveyIntro(code))}
+        {text(v.surveyIntro())}
       </p>
       {!ready && (
         <p className="rounded-lg border border-border bg-muted/40 p-3 text-sm" role="status">

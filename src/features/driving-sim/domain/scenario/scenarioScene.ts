@@ -139,7 +139,7 @@ export interface SignPlate {
    * are drawn as a signal head instead.
    */
   image?: string;
-  /** Official LTO name, worded as the level module lists it. */
+  /** Official name, worded as the level module lists it. */
   name: string;
   /** Category line, e.g. 'A. Regulatory Sign'. */
   category: string;
@@ -326,7 +326,11 @@ export type ScenePrefab =
   | { kind: 'lane_arrow'; direction: 'left' | 'right' }
   | { kind: 'compliance'; check: ComplianceCheck }
   | { kind: 'checkpoint_officer' }
-  | { kind: 'main_road_junction' }
+  /**
+   * `crossing`: the vehicle the scenario names on the main road (2026-11-16),
+   * drawn as that vehicle coming from that side; ordinary cars otherwise.
+   */
+  | { kind: 'main_road_junction'; crossing?: { kind: MainRoadVehicleKind; from: 'left' | 'right' } }
   /**
    * A road crash that has already happened: the wreck across the lane, the
    * vehicle that left the road, the debris between them.
@@ -355,7 +359,7 @@ export interface MarkingPlate {
    * fully playable without them.
    */
   image?: string;
-  /** Official LTO name, worded as the level module lists it. */
+  /** Official name, worded as the level module lists it. */
   name: string;
   /** Category line, e.g. 'A. Longitudinal Line'. */
   category: string;
@@ -515,7 +519,7 @@ export type NpcPathKind =
   | 'filtering_past'
   // Comes down the opposing lane and peels away across your path, signalling.
   // Distinct from `oncoming_through` because the rule it illustrates is about
-  // where it is going, not that it is there: RA 4136 gives an oncoming vehicle
+  // where it is going, not that it is there: Republic Act No. 4136 gives an oncoming vehicle
   // turning left across you priority only if it signalled, so a driver has to
   // be able to see it turn.
   | 'oncoming_turning_left';
@@ -597,7 +601,7 @@ export interface NpcVehicleSpec {
    * still in the carriageway, which makes "hold back until there is room" a
    * lane change rather than a gap — the one manoeuvre the rule is not about.
    */
-  vehicleKind: 'car' | 'ambulance' | 'jeepney' | 'motorcycle' | 'truck' | 'van' | 'bus' | 'bicycle';
+  vehicleKind: 'car' | 'ambulance' | 'jeepney' | 'motorcycle' | 'truck' | 'van' | 'bus' | 'bicycle' | 'tricycle';
   /** Plain-language name used in the crash report if the player hits it. */
   label: string;
   /** Road-distance span its approach plays out over; a sensible default applies per path if omitted. */
@@ -682,17 +686,23 @@ export interface NpcVehicleSpec {
   inBox?: boolean;
 }
 
+/** What crosses a main-road junction a driver is waiting to join. */
+export type MainRoadVehicleKind = 'car' | 'jeepney' | 'tricycle' | 'motorcycle';
+
 /**
  * Somebody on foot, as a scene composes them rather than as the renderer
  * guesses them.
  *
- * The four kinds are the four sprites `drawPedestrian` draws. Declared for the
+ * The kinds are the sprites `drawPedestrian` draws. Declared for the
  * same reason `sign`, `marking` and `npc` are: the renderer draws what the
  * level says is there, never what its prose happens to mention, so a crossing
  * can hold a group rather than whichever single person a sentence named. See
  * `pedestrians` on `ScenarioEvent`.
+ *
+ * `dog`: an animal walked on a lead beside its owner, drawn and never solid
+ * on its own.
  */
-export type PedestrianKind = 'adult' | 'child' | 'elderly' | 'pwd';
+export type PedestrianKind = 'adult' | 'child' | 'elderly' | 'pwd' | 'dog';
 
 /**
  * One person on a crossing. `position` is a share of the carriageway's width

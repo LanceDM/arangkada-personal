@@ -1,10 +1,12 @@
 /** Admin's wiring, for the composition root alone. Kept out of `index.ts`. */
 import { provideAdminDependencies } from './application/dependencies';
 import { designatedRoutingPolicyOf, type DesignatedRoutingPolicy } from './domain/designatedRoutingPolicy';
+import { firebaseCourseLogsRepository } from './infrastructure/FirebaseCourseLogsRepository';
 import { firebaseIrtRepository } from './infrastructure/FirebaseIrtRepository';
 import { firebaseAdminReportRepository } from './infrastructure/FirebaseAdminRepository';
 import { firebasePilotPoolRepository } from './infrastructure/FirebasePilotPoolRepository';
 import { firebaseStudyInvitesRepository } from './infrastructure/FirebaseStudyInvitesRepository';
+import { firebaseStudyDeadlineRepository } from './infrastructure/FirebaseStudyDeadlineRepository';
 import { firebasePilotRecordsRepository } from './infrastructure/FirebasePilotRecordsRepository';
 import { firebaseQuizEditorRepository } from './infrastructure/FirebaseQuizEditorRepository';
 
@@ -13,9 +15,11 @@ export const composeAdmin = () =>
     report: firebaseAdminReportRepository,
     pilotPool: firebasePilotPoolRepository,
     invites: firebaseStudyInvitesRepository,
+    deadline: firebaseStudyDeadlineRepository,
     pilotRecords: firebasePilotRecordsRepository,
     quizEditor: firebaseQuizEditorRepository,
     irt: firebaseIrtRepository,
+    courseLogs: firebaseCourseLogsRepository,
   });
 
 /**

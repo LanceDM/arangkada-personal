@@ -50,6 +50,11 @@ export const studyMessages = {
   yourParticipantCode: { en: 'Your participant code', fil: 'Ang iyong participant code' },
   youHaveWithdrawnFrom: { en: 'You have withdrawn from the study. Thank you for your time.', fil: 'Umatras ka na sa pag-aaral. Salamat sa iyong oras.' },
   nextStep: { en: 'NEXT STEP' },
+  // The end path (English only until the team writes the Filipino).
+  finishTheStudy: { en: 'Finish the study' },
+  finishAfterFinals: { en: 'You have taken the final exam three times. You can try the final again with Next step, or finish the study now. The post-test and the survey come next.' },
+  finishAtDeadline: { en: 'The study is closing. You can finish the study now. The post-test and the survey come next.' },
+  finishFailed: { en: 'Could not finish the study. Try again.' },
   couldNotJoinTry: { en: 'Could not join. Try again.', fil: 'Hindi makasali. Subukan ulit.' },
   yourAccountIsMade: { en: 'Your account is made. Enter the invite code to finish joining.', fil: 'Nagawa na ang iyong account. Ilagay ang invite code para matapos ang pagsali.' },
   inviteCode: { en: 'Invite code', fil: 'Invite code mula sa team' },
@@ -102,16 +107,15 @@ export const studyValueMessages = {
     fil: 'Pindutin ang bawat kontrol nang isang beses.',
   }),
   debrief: (code: string): Localized => ({
-    en: `[DRAFT] You have finished the study. While you played, the game chose what to add between levels and learned from every participant. Your answers help the team judge how well it chose. Your participant code is ${code}.`,
-    fil: '[DRAFT] Natapos mo na ang pag-aaral. Habang naglalaro ka, pumipili ang laro kung ano ang idadagdag at natututo sa bawat kalahok. Tumutulong ang iyong mga sagot para masuri ng team kung gaano ito kahusay pumili.',
+    en: `You have finished the study. While you played, the game chose what to add between levels and learned from every participant. Your answers help the team judge how well it chose. Your participant code is ${code}.`,
+    fil: 'Natapos mo na ang pag-aaral. Habang naglalaro ka, pumipili ang laro kung ano ang idadagdag at natututo sa bawat kalahok. Tumutulong ang iyong mga sagot para masuri ng team kung gaano ito kahusay pumili.',
   }),
   passwordHint: (min: number): Localized => ({
     en: `At least ${min} characters; a few words are easy to remember. Use a new one, never a password from your email, Facebook or bank.`,
     fil: `Hindi bababa sa ${min}; madaling tandaan ang ilang salita. Gumamit ng bago, hindi ang password ng iyong email, Facebook o bangko.`,
   }),
-  surveyIntro: (code: string): Localized => ({
-    en: `Tell us what you thought of the app. The form opens in a new tab with your participant code, ${code}, already filled in: do not change it. It asks for no name.`,
-    fil: 'Sabihin sa amin ang iyong palagay sa app. Bubukas ang form na may nakasulat nang participant code mo. Huwag itong baguhin.',
+  surveyIntro: (): Localized => ({
+    en: 'Tell us what you thought of the app. The form opens in a new tab. It asks for no name, and the link carries nothing about you.',
   }),
   sayYourCode: (code: string): Localized => ({
     en: `Say your participant code, ${code}. Never send your password.`,

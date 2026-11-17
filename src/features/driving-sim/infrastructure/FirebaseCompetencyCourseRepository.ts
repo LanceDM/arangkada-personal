@@ -13,11 +13,12 @@
  * pre-test it comes from.
  */
 import { collection, doc, getDoc, getDocs, runTransaction, serverTimestamp, writeBatch, type Transaction } from 'firebase/firestore';
-import { db } from '@/shared/infrastructure/firebase/client';
+import { auth, db } from '@/shared/infrastructure/firebase/client';
+import { contendedCommit } from './contendedCommit';
 import { CourseConflictError } from '@/features/driving-sim/application/errors';
 import { COURSE_SCHEMA_VERSION, sameCursor, type CourseCursor } from '@/domain/competencyRouting/course';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
-import { applyQLog, pairQOperations, statesOf } from '@/domain/study/qLog';
+import { applyQLog, learningItems, statesOf } from '@/domain/study/qLog';
 import type { EvidenceRecord, PreTestSeed } from '@/domain/study/evidence';
 import type { BKTProfileDoc } from '@/domain/study/bktLog';
 import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
@@ -54,6 +55,9 @@ const writeEvidence = (transaction: Transaction, uid: string, evidence: Evidence
   transaction.set(courseDoc(uid, 'evidence'), { nextSeq: evidenceSeq + 1 });
 };
 
+/** Whether the signed-in account carries the admin claim: checked here too, whatever the caller said. */
+const isAdminSession = async (): Promise<boolean> => (await auth.currentUser?.getIdTokenResult())?.claims.admin === true;
+
 export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
   async loadCursor(uid) {
     const snap = await getDoc(courseDoc(uid, 'cursor'));
@@ -87,8 +91,10 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
     return snap.exists() ? (snap.data() as PreTestSeed) : null;
   },
 
-  async commitStep(uid, { table, expected, compute, context, envelope, evidence }) {
-    return runTransaction(
+  async commitStep(uid, { table, expected, compute, context, envelope, evidence, teachesTable }) {
+    // An admin's course teaches the shared table nothing; the rules refuse it too.
+    const teaches = teachesTable && !(await isAdminSession());
+    return contendedCommit(() => runTransaction(
       db,
       async transaction => {
         const [cursorSnap, tableSnap, counterSnap] = await Promise.all([
@@ -102,7 +108,7 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
         const current: QTable = tableSnap.exists() ? (tableSnap.data().table as QTable) : emptyQTable();
         const updates = tableSnap.exists() ? Number(tableSnap.data().updates ?? 0) : 0;
         const step = compute(current);
-        const items = pairQOperations(step.operations, step.decisions, step.rewards);
+        const items = learningItems(teaches, step.operations, step.decisions, step.rewards);
         const applied = items.length > 0
           ? applyQLog({ table: current, items, firstGlobalSeq: updates + 1, context, envelope })
           : { table: current, entries: [] };
@@ -131,13 +137,15 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
           }
         }
         if (step.log) {
-          transaction.set(doc(collection(db, 'users', uid, 'courseLog')), plain({ ...step.log, decisions: step.decisions, rewards: step.rewards, tableAfter: applied.table }));
+          transaction.set(doc(collection(db, 'users', uid, 'courseLog')), plain({
+            ...step.log, decisions: step.decisions, rewards: step.rewards, tableAfter: applied.table, ...(teaches ? {} : { teachesTable: false }),
+          }));
         }
         transaction.set(courseDoc(uid, 'cursor'), plain({ ...step.cursor, updatedAt: Date.now() }));
         return { step, entries: applied.entries, table: applied.table, evidenceSeq };
       },
       { maxAttempts: MAX_COMMIT_ATTEMPTS }
-    );
+    ));
   },
 
   async openActivity(uid, fresh) {

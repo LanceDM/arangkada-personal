@@ -8,16 +8,19 @@ import { Link, NavLink } from 'react-router-dom';
 import {
   BrainCircuit,
   ClipboardList,
+  Gauge,
   FlaskConical,
   Gamepad2,
   History,
   LayoutDashboard,
   ListChecks,
+  Signpost,
   LogOut,
   Route,
   Shield,
   Sigma,
   Users,
+  UserSearch,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -39,21 +42,28 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
     items: [
       { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
       { to: '/admin/pilot', label: 'Participants', icon: ClipboardList },
+      { to: '/admin/players', label: 'Players', icon: UserSearch },
     ],
   },
   {
     heading: 'Reports',
     items: [
       { to: '/admin/replay', label: 'Replay', icon: History },
-      { to: '/admin/routing', label: 'Routing flow', icon: Route },
-      { to: '/admin/q-learning', label: 'Q-learning', icon: BrainCircuit },
+      { to: '/admin/course-flow', label: 'Course flow', icon: Route },
+      { to: '/admin/course-q-learning', label: 'Q-learning', icon: BrainCircuit },
+      { to: '/admin/course-bkt', label: 'BKT', icon: Gauge },
+      { to: '/admin/routing', label: 'Routing flow (pilot)', icon: Route },
+      { to: '/admin/q-learning', label: 'Q-learning (pilot)', icon: BrainCircuit },
       { to: '/admin/irt', label: 'IRT', icon: Sigma },
       { to: '/admin/report', label: 'Player report', icon: Users },
     ],
   },
   {
     heading: 'Content',
-    items: [{ to: '/admin/quiz', label: 'Quiz items', icon: ListChecks }],
+    items: [
+      { to: '/admin/quiz', label: 'Quiz items', icon: ListChecks },
+      { to: '/admin/scenarios', label: 'Scenarios', icon: Signpost },
+    ],
   },
   {
     heading: 'Tools',

@@ -40,7 +40,7 @@ import type { SceneNode, ScriptedVehicleRole } from './SceneNode';
  * the move, which the support level decides whether to show, and the
  * world, drawn the same at every level, never shows it.
  */
-const CHECKPOINT_LABEL = 'LTO CHECKPOINT';
+const CHECKPOINT_LABEL = 'ROADSIDE CHECKPOINT';
 
 /**
  * The traffic that makes a yellow box mean something: a vehicle committed
@@ -152,7 +152,8 @@ const ownRoadVehicle = (placement: EventPlacement, poseVehicle: PoseVehicle): Sc
 const declaredPedestrians = (placement: EventPlacement, composed: SceneNode[]): SceneNode[] => {
   const people = placement.event.pedestrians;
   if (!people?.length) return [];
-  if (composed.some(node => node.kind === 'pedestrian-group' || node.kind === 'crossing')) return [];
+  // A driveway crossing draws its own people, walking clear together.
+  if (composed.some(node => node.kind === 'pedestrian-group' || node.kind === 'crossing' || node.kind === 'driveway-mouth')) return [];
   return [pedestrianGroupNode(placement.roadX, placement.screenY, people)];
 };
 
@@ -223,7 +224,9 @@ export const eventSceneNodes = (
     // to. Neither puts anything solid on the road.
     if (event.inspection.pullOver) return [{ kind: 'traffic-stop', roadX, screenY }];
     const readable = screenY > 60 && screenY < CANVAS_HEIGHT - 120 && !handled;
-    return [{ kind: 'checkpoint', roadX, screenY, label: readable ? CHECKPOINT_LABEL : null }];
+    // Once answered the boom is raised: a barrier left across the road after the
+    // driver was cleared reads as "still stopped here" while they drive through it.
+    return [{ kind: 'checkpoint', roadX, screenY, label: readable ? CHECKPOINT_LABEL : null, open: handled }];
   }
 
   if (event.marking) {
@@ -231,6 +234,10 @@ export const eventSceneNodes = (
     if (event.marking.art === 'yellow_box') {
       nodes.push(...yellowBoxTraffic(placement, poseVehicle));
       nodes.push(...vehicleInTheBox(placement, oncomingLanes));
+    } else {
+      // Whoever the reserved lane is for, travelling in it (a cyclist in the
+      // bike lane, a rider in the motorcycle lane), where the scenario says so.
+      nodes.push(...ownRoadVehicle(placement, poseVehicle));
     }
     return nodes;
   }

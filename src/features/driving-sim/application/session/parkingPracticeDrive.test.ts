@@ -23,7 +23,7 @@ import { evaluateWeightedRule } from '@/features/driving-sim/domain/evaluation/r
 import { noStandingStretch, type NoStandingStretch } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import { driveScenario, type Driver } from './thetaDrives';
 
-const PARKING = ['level6.hydrant-at-the-curb', 'level6.tow-away-zone'];
+const PARKING = ['level6.red-curb-no-parking.inside-the-intersection', 'level6.hydrant-at-the-curb', 'level6.tow-away-zone'];
 
 /** Every level the selector may append them to: after Level 6, and not the exam, which never adapts. */
 const HOSTS = [7, 8, 9, 10, 11];

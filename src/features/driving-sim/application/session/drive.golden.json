@@ -60,105 +60,105 @@
   "seed": 3,
   "frames": 1200,
   "lines": 1201,
-  "digest": "e375892d"
+  "digest": "a09443ee"
  },
  {
   "levelId": 1,
   "seed": 4,
   "frames": 1000,
   "lines": 1002,
-  "digest": "d7d677a3"
+  "digest": "1ea01c65"
  },
  {
   "levelId": 1,
   "seed": 5,
   "frames": 1000,
   "lines": 1002,
-  "digest": "91101c2c"
+  "digest": "9f697cec"
  },
  {
   "levelId": 1,
   "seed": 6,
   "frames": 8000,
   "lines": 8006,
-  "digest": "f15398ea"
+  "digest": "d1b16467"
  },
  {
   "levelId": 1,
   "seed": 10,
   "frames": 420,
   "lines": 421,
-  "digest": "5425c2e8"
+  "digest": "f8d42177"
  },
  {
   "levelId": 1,
   "seed": 11,
   "frames": 420,
   "lines": 421,
-  "digest": "354dea54"
+  "digest": "612ec2c5"
  },
  {
   "levelId": 1,
   "seed": 12,
   "frames": 420,
   "lines": 421,
-  "digest": "e0a36ba2"
+  "digest": "5137d477"
  },
  {
   "levelId": 1,
   "seed": 13,
   "frames": 420,
   "lines": 421,
-  "digest": "4d775661"
+  "digest": "29a662ee"
  },
  {
   "levelId": 1,
   "seed": 14,
   "frames": 420,
   "lines": 421,
-  "digest": "72652c9b"
+  "digest": "3edd4a0e"
  },
  {
   "levelId": 2,
   "seed": 1,
   "frames": 1200,
-  "lines": 1200,
-  "digest": "3001c4cc"
+  "lines": 1201,
+  "digest": "334ad193"
  },
  {
   "levelId": 2,
   "seed": 2,
   "frames": 1200,
-  "lines": 1200,
-  "digest": "75aaec29"
+  "lines": 1201,
+  "digest": "377822ef"
  },
  {
   "levelId": 2,
   "seed": 3,
   "frames": 1200,
   "lines": 1201,
-  "digest": "54ebfdce"
+  "digest": "09128864"
  },
  {
   "levelId": 2,
   "seed": 4,
   "frames": 1000,
-  "lines": 1002,
-  "digest": "e99580a2"
+  "lines": 1001,
+  "digest": "e0cb31d4"
  },
  {
   "levelId": 2,
   "seed": 5,
   "frames": 1000,
-  "lines": 1002,
-  "digest": "a1cb33c4"
+  "lines": 1001,
+  "digest": "31384109"
  },
  {
   "levelId": 2,
   "seed": 6,
   "frames": 8000,
   "lines": 8001,
-  "digest": "4c55c47a"
+  "digest": "958496e9"
  },
  {
   "levelId": 3,
@@ -536,7 +536,7 @@
   "seed": 6,
   "frames": 8000,
   "lines": 8008,
-  "digest": "db33ac5a"
+  "digest": "1f85f76f"
  },
  {
   "levelId": 10,
@@ -550,7 +550,7 @@
   "seed": 11,
   "frames": 420,
   "lines": 421,
-  "digest": "baac5bcd"
+  "digest": "5358406e"
  },
  {
   "levelId": 11,
@@ -599,63 +599,63 @@
   "seed": 1,
   "frames": 1200,
   "lines": 1203,
-  "digest": "8d7704d0"
+  "digest": "dbe66c4b"
  },
  {
   "levelId": 12,
   "seed": 2,
   "frames": 1200,
   "lines": 1204,
-  "digest": "f11f11ae"
+  "digest": "a3d256de"
  },
  {
   "levelId": 12,
   "seed": 3,
   "frames": 1200,
   "lines": 1204,
-  "digest": "4cecaa85"
+  "digest": "526d1d91"
  },
  {
   "levelId": 12,
   "seed": 4,
   "frames": 1000,
   "lines": 1004,
-  "digest": "d86b8780"
+  "digest": "207a70e6"
  },
  {
   "levelId": 12,
   "seed": 5,
   "frames": 1000,
   "lines": 1003,
-  "digest": "5ff5674f"
+  "digest": "8ba83d95"
  },
  {
   "levelId": 12,
   "seed": 6,
   "frames": 8000,
   "lines": 8009,
-  "digest": "f36beac9"
+  "digest": "5b405618"
  },
  {
   "levelId": 12,
   "seed": 10,
   "frames": 420,
   "lines": 421,
-  "digest": "4fa882d8"
+  "digest": "e9782327"
  },
  {
   "levelId": 12,
   "seed": 11,
   "frames": 420,
   "lines": 421,
-  "digest": "3e23348b"
+  "digest": "5622403c"
  },
  {
   "levelId": 12,
   "seed": 12,
   "frames": 420,
   "lines": 421,
-  "digest": "b640d9ac"
+  "digest": "a44ca5ab"
  },
  {
   "levelId": 12,

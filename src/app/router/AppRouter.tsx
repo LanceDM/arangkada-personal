@@ -51,6 +51,12 @@ const AdminRouting = lazy(() => import('@/pages/admin/RoutingPage'));
 const AdminQLearning = lazy(() => import('@/pages/admin/QLearningPage'));
 const AdminQuiz = lazy(() => import('@/pages/admin/QuizPage'));
 const AdminIrt = lazy(() => import('@/pages/admin/IrtPage'));
+const AdminCourseFlow = lazy(() => import('@/pages/admin/CourseFlowPage'));
+const AdminCourseQLearning = lazy(() => import('@/pages/admin/CourseQLearningPage'));
+const AdminCourseBkt = lazy(() => import('@/pages/admin/CourseBktPage'));
+const AdminPlayers = lazy(() => import('@/pages/admin/PlayersPage'));
+const AdminScenarios = lazy(() => import('@/pages/admin/ScenariosPage'));
+const AdminScenarioPlay = lazy(() => import('@/pages/admin/ScenarioPlayPage'));
 // The study's own pages: a participant joins and signs in by username.
 const StudyHome = lazy(() => import('@/pages/study/StudyHomePage'));
 const StudyJoin = lazy(() => import('@/pages/study/StudyJoinPage'));
@@ -108,13 +114,19 @@ export const AppRouter = () => (
     >
       <Route index element={<AdminOverview />} />
       <Route path="pilot" element={<Pilot />} />
+      <Route path="players" element={<AdminPlayers />} />
       <Route path="test-mode" element={<TestMode />} />
       <Route path="replay" element={<AdminReplay />} />
       <Route path="routing" element={<AdminRouting />} />
       <Route path="q-learning" element={<AdminQLearning />} />
       <Route path="irt" element={<AdminIrt />} />
+      <Route path="course-flow" element={<AdminCourseFlow />} />
+      <Route path="course-q-learning" element={<AdminCourseQLearning />} />
+      <Route path="course-bkt" element={<AdminCourseBkt />} />
       <Route path="report" element={<AdminReport />} />
       <Route path="quiz" element={<AdminQuiz />} />
+      <Route path="scenarios" element={<AdminScenarios />} />
+      <Route path="scenarios/play/:levelId/:scenarioId" element={<AdminScenarioPlay />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Route>
     {lazyRoute('/study', <StudyHome />)}

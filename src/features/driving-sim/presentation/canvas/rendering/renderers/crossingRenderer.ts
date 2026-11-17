@@ -29,8 +29,8 @@
 import { ROAD_WIDTH, CANVAS_WIDTH } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { drawCrossingApproach, drawIntersection, drawSignalHead, } from '@/features/driving-sim/presentation/canvas/rendering/renderPrimitives';
 import { DRIVEWAY_CROSSING_HEIGHT } from '@/features/driving-sim/domain/world/junctionGeometry';
-import { drivewayPedestrianX, type Point } from '@/features/driving-sim/domain/world/sceneGeometry';
-import type { PedestrianKind } from '@/features/driving-sim/domain/scenario/scenarioScene';
+import { DRIVEWAY_GROUP_GAP, drivewayPedestrianX, type Point } from '@/features/driving-sim/domain/world/sceneGeometry';
+import type { CrossingPedestrian, PedestrianKind } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import { drawPedestrian, SPRITE_FOR_KIND } from './pedestrianRenderer';
 
 /** Zebra crossing with dropped curbs and someone waiting to use it. */
@@ -65,7 +65,8 @@ const drawDrivewayMouth = (
   ctx: CanvasRenderingContext2D,
   roadX: number,
   screenY: number,
-  walkedOff = 0
+  walkedOff = 0,
+  people: readonly CrossingPedestrian[] = [{ kind: 'adult' }]
 ) => {
   const half = DRIVEWAY_CROSSING_HEIGHT / 2;
   const top = screenY - half;
@@ -94,7 +95,9 @@ const drawDrivewayMouth = (
   drawCrossingApproach(ctx, roadX, top, DRIVEWAY_CROSSING_HEIGHT);
 
   if (walkedOff < 1) {
-    drawPedestrian(ctx, drivewayPedestrianX(walkedOff), screenY - 2, 'regular');
+    people.forEach((person, index) =>
+      drawPedestrian(ctx, drivewayPedestrianX(walkedOff) - index * DRIVEWAY_GROUP_GAP, screenY - 2, SPRITE_FOR_KIND[person.kind])
+    );
   }
 };
 

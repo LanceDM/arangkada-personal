@@ -13,7 +13,7 @@
 import { guestAttempts } from '@/features/progression';
 import { createStudyAccount, signInStudyAccount } from '@/features/auth';
 import { loadTestProgress } from '@/features/assessment';
-import { competencyCourseProgressOf, loadCompetencyCourseCursor } from '@/features/driving-sim';
+import { competencyCourseProgressOf, finishCompetencyCourse, loadCompetencyCourseCursor, type QTableId } from '@/features/driving-sim';
 import { composeAuth } from '@/features/auth/composition';
 import { composeAssessment } from '@/features/assessment/composition';
 import { composeStudy } from '@/features/study/composition';
@@ -61,6 +61,8 @@ composeStudy({
   sources: {
     // The per-competency course, as the game plays it.
     course: async uid => competencyCourseProgressOf(await loadCompetencyCourseCursor(uid)),
+    finishCourse: (account, reason) =>
+      finishCompetencyCourse({ uid: account.uid, participantCode: account.participantCode, table: account.cohort as QTableId }, reason),
     tests: loadTestProgress,
   },
 });

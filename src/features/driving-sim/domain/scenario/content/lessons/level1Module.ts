@@ -11,11 +11,11 @@ export const level1Module = {
     {
       id: 'level-1-mission-briefing',
       title: 'Mission Briefing: Legal To Drive',
-      text: 'Your first official trip begins before the engine starts. At an LTO-style checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
+      text: 'Your first official trip begins before the engine starts. At a roadside checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'Your first official trip begins before the engine starts. At an LTO-style checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
+          text: 'Your first official trip begins before the engine starts. At a roadside checkpoint, the question is whether the driver is legally authorized to operate this vehicle for this trip.',
         },
         {
           type: 'paragraph',
@@ -46,11 +46,11 @@ export const level1Module = {
     {
       id: 'level-1-license-privilege',
       title: '1. License Is Authority',
-      text: "The LTO describes a driver's license as a privilege, not a right. It is authority to drive only within the limits granted by the LTO.",
+      text: "A driver's license is a privilege, not a right. It is authority to drive only within the limits it grants.",
       blocks: [
         {
           type: 'paragraph',
-          text: "The LTO describes a driver's license as a privilege, not a right. It is authority to drive only within the limits granted by the LTO.",
+          text: "A driver's license is a privilege, not a right. It is authority to drive only within the limits it grants.",
         },
         {
           type: 'paragraph',
@@ -79,11 +79,11 @@ export const level1Module = {
     {
       id: 'level-1-permit-license-types',
       title: '2. Permit And License Types',
-      text: 'Level 1 focuses on four kinds of LTO authority: SP, CL, NPDL, and PDL. They are not interchangeable.',
+      text: 'Level 1 focuses on four kinds of driving authority: SP, CL, NPDL, and PDL. They are not interchangeable.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'Level 1 focuses on four kinds of LTO authority. They are not interchangeable.',
+          text: 'Level 1 focuses on four kinds of driving authority. They are not interchangeable.',
         },
         {
           type: 'table',
@@ -339,7 +339,7 @@ export const level1Module = {
           type: 'list',
           ordered: false,
           items: [
-            'Thinking any LTO document allows driving.',
+            'Thinking any official document allows driving.',
             'Letting a student driver proceed alone.',
             "Using a Conductor's License as driving authority.",
             'Matching the vehicle type but ignoring transmission limits.',

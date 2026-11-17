@@ -110,6 +110,17 @@ const RAMP_COMMIT_TOLERANCE = CAR_LENGTH;
  */
 const MAX_SHOWN_GAP = 9.9;
 
+
+/**
+ * How long a car must stand still short of a stop scenario's zone for that to
+ * be its stop: 1.2 s of driving steps, the world's clock.
+ */
+export const EARLY_STOP_HOLD_STEPS = 72;
+
+/** What a checkpoint driven through without stopping is told. */
+export const CHECKPOINT_MISSED_MESSAGE =
+  'You drove through the checkpoint without stopping. Stop at the line so the officer can check you; the question is asked once you have stopped.';
+
 export interface ScanEventsContext {
   world: DrivingWorld;
   level: LevelConfig;
@@ -268,6 +279,7 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
     ) {
       world.activeEvent = event;
       world.playerActed = false;
+      world.earlyStop = { since: null, moved: false };
       // Opening the approach decides whose zone is being measured, not when the
       // measuring starts (below). Anything still measured for an event that
       // never became active is dropped rather than graded against this one.
@@ -532,6 +544,30 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
       }
     }
 
+    // A full stop before the line is the stop (ported from the groupmate's
+    // repository, timed in driving steps here). A stop scenario was
+    // graded only when the car left its zone, so a driver who stopped as told
+    // and waited saw nothing happen: the pedestrian waiting on the answer never
+    // walked, and the drive waited on the car moving off first. Standing still
+    // for EARLY_STOP_HOLD_STEPS with the approach open and the line still ahead,
+    // after moving in it, is graded as the stop there and then.
+    if (
+      event.correctAction === 'stop' &&
+      !isTutorialLevel &&
+      !isCheckpoint &&
+      !isParking &&
+      !event.cutscene &&
+      world.activeEvent === event &&
+      !world.playerActed &&
+      diff < 0
+    ) {
+      if (car.speed > 0) world.earlyStop = { since: null, moved: true };
+      else if (world.earlyStop.moved) {
+        world.earlyStop.since ??= world.drivenSteps;
+        if (world.drivenSteps - world.earlyStop.since >= EARLY_STOP_HOLD_STEPS) gradeNow(event, 'response');
+      }
+    }
+
     // Checkpoint: coming to a full stop inside the zone opens the inspection.
     // Knowledge, not the brake key, decides the outcome from here. Flagged down
     // by an enforcer, the stop is a pull-over to the extreme right, so only a
@@ -783,15 +819,16 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
       world.activeEvent === event
     ) {
       world.playerActed = true;
-      // A traffic stop driven through is told what it missed - the pull-over -
-      // rather than the penalty for a question the driver was never asked.
-      const missed = event.inspection?.pullOver?.missedMessage;
-      decide(
-        events,
-        missed ? { ...event, penaltyMessage: missed } : event,
-        event.correctAction === 'accelerate' ? 'brake' : 'accelerate',
-        isTutorialLevel ? 'guided' : 'expired'
-      );
+      if (isCheckpoint) {
+        // A checkpoint driven through is told what it missed - the stop (or,
+        // flagged down, the pull-over) - rather than the go/no-go answer to a
+        // question the driver was never asked: "you slowed down, this one
+        // wanted you to carry on" read as if stopping at the barrier was wrong.
+        const missed = event.inspection?.pullOver?.missedMessage ?? CHECKPOINT_MISSED_MESSAGE;
+        decide(events, { ...event, correctAction: 'stop', penaltyMessage: missed }, 'no_stop', 'expired');
+      } else {
+        decide(events, event, event.correctAction === 'accelerate' ? 'brake' : 'accelerate', 'guided');
+      }
     }
   }
 

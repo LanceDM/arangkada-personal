@@ -5,13 +5,20 @@ import type { SupportLevel } from '@/domain/learner/competency';
 import { evaluateWeightedRule } from './ruleEngine';
 import { NO_REACTION, type ReactionObservation } from './reactionTiming';
 import { englishText, type Localized, type TextOf } from '@/shared/lib/localized';
+import { hotspotScenarioId } from '@/features/driving-sim/domain/scenario/hotspotScenarioId';
+import { labelFromId } from '@/features/driving-sim/domain/scenario/scenarioCopy';
 
 /**
  * Garage hotspots are scored through the same pipeline as road events, so they
  * are adapted into the shape the evaluator already understands.
+ *
+ * The event takes the point's scenario id, which the decision log records and a
+ * course drive counts the point under (`hotspotScenarioId`). Its label stays the
+ * one the point's own id gives, as the feedback card always showed it.
  */
 export const garageHotspotToEvent = (hotspot: GarageHotspot): ScenarioEvent => ({
-  id: hotspot.id,
+  id: hotspotScenarioId(hotspot),
+  label: labelFromId(hotspot.id),
   triggerAtDistance: 0,
   type: 'scenario_trigger',
   description: hotspot.label,

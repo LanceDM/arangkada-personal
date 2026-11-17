@@ -571,9 +571,7 @@ describe('the Level 8 score', () => {
 
   it('is calibrated against what the route is actually worth', () => {
     expect(total).toBe(170);
-    expect(level8.requiredScore).toBeLessThan(level8.stars2);
-    expect(level8.stars2).toBeLessThan(level8.stars3);
-    expect(level8.stars3).toBeLessThanOrEqual(total);
+    expect(level8.requiredScore).toBeLessThanOrEqual(total);
     expect(level8.requiredScore / total).toBeGreaterThan(0.66);
     expect(level8.requiredScore / total).toBeLessThan(0.72);
   });

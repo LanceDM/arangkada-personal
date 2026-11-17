@@ -96,6 +96,12 @@ const humanizeVariant = (id: string): string => {
  * is left alone.
  */
 export const labelForEvent = (event: ScenarioEvent): string => {
+  // Listed so it can still be staged, but marked: no pool or drive plays it.
+  const prefix = event.offRoad ? '[not in play] ' : '';
+  return prefix + baseLabel(event);
+};
+
+const baseLabel = (event: ScenarioEvent): string => {
   const plateName = event.sign?.name ?? event.marking?.name ?? event.inspection?.documentType;
   if (plateName) {
     const variant = humanizeVariant(event.id);

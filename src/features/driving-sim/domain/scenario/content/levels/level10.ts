@@ -1,6 +1,7 @@
 import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
+import { qaVariant } from './qaVariant';
 import type { GarageHotspot, LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 
 const levelModule = getLevelModule(10);
@@ -30,7 +31,7 @@ const levelModule = getLevelModule(10);
  * | 1 | The phone rings     | the answer, frozen — see below |
  * | 2 | Out of her seat     | the car came to rest off the travel lane |
  * | 3 | Smoke in your lane  | the closest gap held to the jeepney ahead |
- * | 4 | LTO checkpoint      | a full stop, then the call made at the window |
+ * | 4 | Roadside checkpoint | a full stop, then the call made at the window |
  * | 5 | Losing its load     | the center line was never crossed |
  * | 6 | Bus on the grade    | the speed carried past the posted twenty |
  * | 7 | Rider down          | a full stop, short of the bike |
@@ -69,14 +70,14 @@ const levelModule = getLevelModule(10);
  * where somebody who wants them can open them, and nowhere a player can lose
  * points to a number they had no way to look up. Several would not survive
  * being graded anyway — RA 8749's fines are ceilings and RA 10586's are ranges,
- * and the two LTO decks disagree about RA 10916's second offense, so its
+ * and the two source decks disagree about RA 10916's second offense, so its
  * citation stops at the first.
  *
  * ## Where every claim comes from
  *
- * The team's source notes quotes the LTO material each scenario
- * rests on, by file and heading, and lists what the sources do not settle
- *. A verdict or a correct answer says nothing the pack does not.
+ * The collected LTO material quotes the source material each scenario
+ * rests on, by file and heading, and lists what the sources do not settle.
+ * A verdict or a correct answer says nothing the pack does not.
  */
 
 /* -------------------------------------------------------------------------
@@ -105,7 +106,7 @@ const hotspots: GarageHotspot[] = [
   //
   // The second wrong answer is the one people genuinely believe: that 0.05% is
   // a permission slip. It is the level at which blood alcohol alone is
-  // conclusive proof, and nobody can read it off themselves; the rule the LTO
+  // conclusive proof, and nobody can read it off themselves; the rule the source
   // teaches for this moment is RO101's, don't drink and drive.
   {
     id: 'the-keys',
@@ -129,7 +130,7 @@ const hotspots: GarageHotspot[] = [
     rewardMessage:
       'Right — the keys stay with the sober driver. Knowing the road does nothing for a reaction time that is already gone.',
     lawCitation:
-      "RA 10586, the Anti-Drunk and Drugged Driving Act, makes it unlawful to drive a motor vehicle while under the influence of alcohol, dangerous drugs or similar substances. For a private vehicle of up to 4,500 kg gross vehicle weight, a blood alcohol concentration of 0.05% or higher is conclusive proof; for drivers of trucks, buses, motorcycles and public utility vehicles, anything above 0.00% is. Nobody reads their own number: alcohol slows the brain, reduces the ability to decide and makes a driver sleepy, whatever they feel. The LTO's own checklist asks before every drive whether you have been drinking in the last twenty-four hours, and its rule is plain: don't drink and drive. Where nobody is hurt the penalty is three months' imprisonment and a fine of Php 20,000 to Php 80,000, and a non-professional license is confiscated and suspended for twelve months on a first conviction.",
+      "RA 10586, the Anti-Drunk and Drugged Driving Act, makes it unlawful to drive a motor vehicle while under the influence of alcohol, dangerous drugs or similar substances. For a private vehicle of up to 4,500 kg gross vehicle weight, a blood alcohol concentration of 0.05% or higher is conclusive proof; for drivers of trucks, buses, motorcycles and public utility vehicles, anything above 0.00% is. Nobody reads their own number: alcohol slows the brain, reduces the ability to decide and makes a driver sleepy, whatever they feel. A driver's self-check before every drive asks whether you have been drinking in the last twenty-four hours, and its rule is plain: don't drink and drive. Where nobody is hurt the penalty is three months' imprisonment and a fine of Php 20,000 to Php 80,000, and a non-professional license is confiscated and suspended for twelve months on a first conviction.",
     competency: 'general_rules',
     severity: 'critical',
   },
@@ -250,7 +251,7 @@ const hotspots: GarageHotspot[] = [
 // "temporarily stopped at a red light or intersection" in the same breath as
 // one in motion, so waiting for the lights is not a workaround — it is the
 // same offense. What is outside it is a car parked off the road, which is
-// where the LTO's own review answer sends a driver who needs the phone.
+// where the exam's own review answer sends a driver who needs the phone.
 //
 // Hands-free is not the answer here: the three Level 10 decks never state it,
 // and the one list of prohibited acts they carry is an image (the pack's gap
@@ -394,7 +395,7 @@ const smokeInTheLaneSlot: SlotVariant[] = [
       'Right. Well back in clear air, with room to stop, and the violation left to the people who can actually test for it.',
     duration: 200,
     lawCitation:
-      "RA 8749, the Clean Air Act, ties a vehicle's registration to its emissions: a new vehicle needs a Certificate of Conformity and a used one a Certificate of Compliance to Emission Standard, from a test taken within sixty days before registration. A vehicle found emitting excessive smoke while operating on a public highway is subject to an emission test by the DOTr, through the LTO, its designated enforcement units or its deputized agents. Fines run to not more than Php 2,000 for a first offense, Php 4,000 for a second, and Php 6,000 with a one-year suspension of the registration for a third, and the driver and operator attend a DOTr seminar on pollution control. Enforcement is theirs, not yours, and it is not done from a bumper. Yours is the smoke itself: it hides the road, so slow down, keep your eyes on the road, and keep a suitable braking distance — two or three seconds — behind the vehicle ahead.",
+      "RA 8749, the Clean Air Act, ties a vehicle's registration to its emissions: a new vehicle needs a Certificate of Conformity and a used one a Certificate of Compliance to Emission Standard, from a test taken within sixty days before registration. A vehicle found emitting excessive smoke while operating on a public highway is subject to a roadside emission test by the DOTr, through its designated enforcement units or its deputized agents. Fines run to not more than Php 2,000 for a first offense, Php 4,000 for a second, and Php 6,000 with a one-year suspension of the registration for a third, and the driver and operator attend a DOTr seminar on pollution control. Enforcement is theirs, not yours, and it is not done from a bumper. Yours is the smoke itself: it hides the road, so slow down, keep your eyes on the road, and keep a suitable braking distance — two or three seconds — behind the vehicle ahead.",
     competency: 'hazard_awareness',
     severity: 'major',
     following: {
@@ -432,7 +433,7 @@ const smokeInTheLaneSlot: SlotVariant[] = [
 const theCheckpointSlot: SlotVariant[] = [
   {
     id: 'level10.the-checkpoint',
-    label: 'LTO checkpoint',
+    label: 'Roadside checkpoint',
     type: 'stop_sign',
     description:
       'An enforcer waves you into a checkpoint, tells you your eyes look bloodshot, and directs you to take the three field sobriety tests.',
@@ -542,7 +543,7 @@ const losingItsLoadSlot: SlotVariant[] = [
 // The Act binds covered vehicles, not the player's car, so what the driver is
 // graded on comes from RO101 — a suitable speed downhill, rather than braking
 // all the way — and the posted sign. The citation stops at the first offense:
-// the two LTO decks disagree about the second.
+// the two source decks disagree about the second.
 const busOnTheGradeSlot: SlotVariant[] = [
   {
     id: 'level10.bus-on-the-grade',
@@ -580,7 +581,7 @@ const busOnTheGradeSlot: SlotVariant[] = [
       'Right — twenty held all the way down, while the bus ran away from you. Its speed is not a limit you have to match.',
     duration: 200,
     lawCitation:
-      "RA 10916, the Road Speed Limiter Act, requires covered vehicles — closed vans, haulers and cargo trucks or trailers, public utility vehicles, shuttle services and tanker trucks, but not taxicabs or public utility jeepneys — to run with a standard speed limiter, set under LTO or LTFRB supervision to the maximum allowed on the route they ply, and a covered vehicle without one is not registered. Operating without one, or with one that does not work or has been tampered with, carries a Php 50,000 fine with the driver's license suspended for one month or the franchise for three months on a first offense, and the vehicle is impounded until the fine is paid. Tampering with a limiter carries six months to three years' imprisonment and a Php 30,000 fine. None of it applies to your car: yours is the posted limit, and on a descent a suitable speed, so that the brakes are not worked all the way down.",
+      "RA 10916, the Road Speed Limiter Act, requires covered vehicles — closed vans, haulers and cargo trucks or trailers, public utility vehicles, shuttle services and tanker trucks, but not taxicabs or public utility jeepneys — to run with a standard speed limiter, set under government supervision to the maximum allowed on the route they ply, and a covered vehicle without one is not registered. Operating without one, or with one that does not work or has been tampered with, carries a Php 50,000 fine with the driver's license suspended for one month or the franchise for three months on a first offense, and the vehicle is impounded until the fine is paid. Tampering with a limiter carries six months to three years' imprisonment and a Php 30,000 fine. None of it applies to your car: yours is the posted limit, and on a descent a suitable speed, so that the brakes are not worked all the way down.",
     competency: 'speed_control',
     severity: 'major',
     effect: { gradient: 0.08, span: 220 },
@@ -599,7 +600,7 @@ const busOnTheGradeSlot: SlotVariant[] = [
 // the read panel's real-world note, the verdict and the citation, and what is
 // graded is the stop.
 //
-// The duty RA 4136 puts on a driver binds one "concerned in" the crash, which
+// The duty Republic Act No. 4136 puts on a driver binds one "concerned in" the crash, which
 // this driver is not, so the stop is RO101's first aid rather than a legal duty
 // and none is claimed. The numbers are RO101's with one correction from a later
 // law (pack K7): RO101 prints PNP 117, which Executive Order No. 56, s. 2018
@@ -635,6 +636,301 @@ const riderDownSlot: SlotVariant[] = [
     severity: 'critical',
   },
 ];
+
+
+/* -------------------------------------------------------------------------
+ * Pooled versions (2026-11-16, future work, draft for the team's check)
+ *
+ * Each slot keeps its own scenario and gains two frozen questions on the same
+ * competency, each a different rule from the Level 10 module
+ * (`level10Module.ts`), or for the speed slot the speed-limits pack, cited by
+ * section or tag. The phone call, the harness bay, the checkpoint and the
+ * shedding truck are unique scenes, so their other versions are asked
+ * (`qaVariant`).
+ * ---------------------------------------------------------------------- */
+
+phoneRingsSlot.push(
+  // Frozen on the road, as the slot's own phone call is: you are driving
+  // behind a jeepney when the call comes. The question is what the Act allows
+  // (Level 10 module, Anti-Distracted Driving Act).
+  {
+    id: 'level10.the-phone-rings.hands-free',
+    label: 'Hands-free',
+    type: 'scenario_trigger',
+    cutscene: true,
+    npc: {
+      path: 'travelling_ahead',
+      vehicleKind: 'jeepney',
+      label: 'a jeepney in the lane ahead',
+      lane: 'inner',
+      entryHeadway: 2.4,
+      approachSpan: 760,
+      speed: { cruise: 0.8 },
+    },
+    description: 'You are behind a jeepney when a call comes in. Your phone is paired to the car by Bluetooth.',
+    question: 'May you take the call?',
+    choices: [
+      { label: 'Yes, hands-free through the car: a hands-free device is permitted.', action: 'accelerate' },
+      { label: 'Yes, holding the phone low, below the window.', action: 'brake' },
+      { label: 'Only at the next red light, with the phone in hand.', action: 'stop' },
+    ],
+    correctAction: 'accelerate',
+    points: 20,
+    warningDistance: 440,
+    penaltyMessage:
+      'Using a communication device is prohibited while moving or stopped at a red light, but a hands-free device, such as Bluetooth or an earpiece, is permitted.',
+    rewardMessage: 'Right. Hands-free is allowed; the phone in your hand is not.',
+    duration: 200,
+    lawCitation:
+      'Level 10 module, Anti-Distracted Driving Act (RA 10913): "All motorists are prohibited from using any communication device while the vehicle is in motion, or temporarily stopped at a red light or intersection. A hands-free device, such as Bluetooth or an earpiece, is permitted."',
+    competency: 'general_rules',
+    severity: 'major',
+  },
+  qaVariant(phoneRingsSlot[0], {
+    id: 'level10.the-phone-rings.near-a-school',
+    label: 'Near a school',
+    description: 'A school service driver texts while passing the school gate.',
+    question: 'What does RA 10913 set for that?',
+    correct: 'A Php 30,000 penalty and a three-month license suspension',
+    wrong: ['The same Php 5,000 as any first offense', 'A warning only, on a first offense'],
+    penaltyMessage:
+      'Drivers of public utility vehicles, school buses or services, and carriers of volatile, flammable or toxic materials who violate the Act within 50 meters of a school face Php 30,000 and a three-month suspension.',
+    rewardMessage: 'Correct. Within 50 meters of a school, those drivers face the heavier penalty.',
+    lawCitation:
+      'Level 10 module, Anti-Distracted Driving Act: "Drivers of public utility vehicles, school buses or services, and common carriers of volatile, flammable, or toxic materials who violate this Act within a 50-meter radius of a school are subject to a Php 30,000 penalty and a three-month suspension of their driver\'s license."',
+  }),
+);
+
+outOfHerSeatSlot.push(
+  qaVariant(outOfHerSeatSlot[0], {
+    id: 'level10.out-of-her-seat.front-seat-height',
+    label: 'Front seat',
+    description: 'Your 11-year-old nephew, 152 centimeters tall, asks to ride in the front seat.',
+    question: 'May he?',
+    correct: 'Yes, if he is properly secured with the regular seat belt',
+    wrong: ['No: no child 12 or under may ever sit in front', 'Yes, with or without a seat belt'],
+    penaltyMessage:
+      'A child 12 and below may sit in front only if at least 150 cm tall and properly secured with a regular seat belt.',
+    rewardMessage: 'Correct. At 150 cm or taller, the regular belt is the restraint.',
+    lawCitation:
+      'Level 10 module, Child Safety in Motor Vehicles Act (RA 11229): "A child 12 and below may sit in front only if at least 150 cm tall and properly secured with a regular seat belt."',
+  }),
+  qaVariant(outOfHerSeatSlot[0], {
+    id: 'level10.out-of-her-seat.left-alone',
+    label: 'A quick errand',
+    description: 'Your toddler has fallen asleep in her child seat, and you need two minutes in a shop.',
+    question: 'May you leave her in the car?',
+    correct: 'No: a child in a CRS must never be left unaccompanied by an adult',
+    wrong: ['Yes, with the windows open', 'Yes, if the engine is off'],
+    penaltyMessage: 'A child in a child restraint system must never be left unaccompanied by an adult in the vehicle.',
+    rewardMessage: 'Correct. She comes with you, or an adult stays with her.',
+    lawCitation:
+      'Level 10 module, Child Safety in Motor Vehicles Act: "A child in a CRS must never be left unaccompanied by an adult in the vehicle."',
+  }),
+);
+
+smokeInTheLaneSlot.push(
+  qaVariant(smokeInTheLaneSlot[0], {
+    id: 'level10.smoke-in-the-lane.over-tasked-engine',
+    label: 'Why the smoke',
+    description: 'A truck stacked far above its rails labors up the road ahead, belching black smoke.',
+    question: 'What is one reason the law restricts overloading?',
+    correct: 'An over-tasked engine belches smoke, and the load is a road-safety risk',
+    wrong: ['Only to collect higher registration fees', 'Overloading is restricted only on expressways'],
+    penaltyMessage:
+      'Overloading is restricted for road safety, to prevent premature deterioration of the road, and to prevent smoke-belching caused by an over-tasked engine.',
+    rewardMessage: 'Correct. Safety, the road, and the smoke an over-tasked engine makes.',
+    lawCitation:
+      'Level 10 module, Motor Vehicle User\'s Charge Law, Why Overloading Is Restricted: "For road safety." "To prevent premature deterioration of the road." "To prevent smoke-belching caused by an over-tasked engine."',
+  }),
+  qaVariant(smokeInTheLaneSlot[0], {
+    id: 'level10.smoke-in-the-lane.one-drink',
+    label: 'Just one drink',
+    description: 'At a party, a friend says a drink before driving makes them sharper on the road.',
+    question: 'What does alcohol actually do to a driver?',
+    correct: 'Slows the brain, reduces focus, and increases aggressiveness',
+    wrong: ['Sharpens reactions in small amounts', 'Nothing, below the legal limit'],
+    penaltyMessage:
+      'Alcohol and drugs slow brain function, reduce the ability to decide, increase arrogance and aggressiveness, reduce focus on the road, and cause drowsiness.',
+    rewardMessage: 'Correct. Never drive after drinking.',
+    lawCitation:
+      'Level 10 module, Anti-Drunk and Drugged Driving Act, Effects Of Alcohol And Drugs On Driving: "Slows brain function and reduces the ability to decide." "Increases arrogance and aggressiveness." "Reduces focus on the road." "Causes drowsiness or fatigue."',
+  }),
+);
+
+theCheckpointSlot.push(
+  // At the checkpoint the slot's own scenario stops at, answered on the
+  // officer's card (Level 10 module, BAC limits).
+  {
+    id: 'level10.the-checkpoint.private-car-bac',
+    label: 'LTO checkpoint',
+    type: 'stop_sign',
+    description: 'An enforcer at a checkpoint asks what blood alcohol reading would be conclusive proof of drunk driving for your car.',
+    correctAction: 'stop',
+    points: 25,
+    warningDistance: 560,
+    question: 'Your car is private, under 4,500 kg. What reading is conclusive proof?',
+    choices: [
+      { label: '0.05% or higher', action: 'stop' },
+      { label: 'Any reading above 0.00%', action: 'accelerate' },
+      { label: '0.10% or higher', action: 'brake' },
+    ],
+    penaltyMessage:
+      'For a private motor vehicle under 4,500 kg gross vehicle weight, a BAC of 0.05% or higher is conclusive proof. For trucks, buses, motorcycles and PUVs, any BAC above 0.00% is.',
+    rewardMessage: 'Right. 0.05% for a private car under 4,500 kg.',
+    duration: 220,
+    lawCitation:
+      'Level 10 module, Anti-Drunk and Drugged Driving Act (RA 10586), Blood Alcohol Concentration (BAC) Limits: "Private motor vehicle, gross vehicle weight under 4,500 kg — BAC of 0.05% or higher." "Trucks, buses, motorcycles, and public utility vehicles — Any BAC above 0.00%."',
+    competency: 'general_rules',
+    severity: 'critical',
+    inspection: {
+      officerLine: 'Good afternoon. A quick question about the alcohol limit for your car.',
+      documentType: 'Checkpoint Record — Anti-Drunk and Drugged Driving Act',
+      holder: 'DELA CRUZ, JUAN M.',
+      fields: [
+        { label: 'Vehicle', value: 'Private car, 1,890 kg gross vehicle weight' },
+        { label: 'Question', value: 'Conclusive BAC for this vehicle' },
+      ],
+      vehicle: 'Private passenger car — 1,890 kg gross vehicle weight',
+      tripPurpose: 'Private family trip, own vehicle',
+    },
+  },
+  // At the checkpoint, answered on the officer's card (Level 10 module, BAC
+  // limits).
+  {
+    id: 'level10.the-checkpoint.motorcycle-bac',
+    label: 'LTO checkpoint',
+    type: 'stop_sign',
+    description: 'An enforcer at a checkpoint asks about the alcohol limit for the motorcycle you also ride.',
+    correctAction: 'stop',
+    points: 25,
+    warningDistance: 560,
+    question: 'On a motorcycle, what reading is conclusive proof of drunk driving?',
+    choices: [
+      { label: 'Any reading above 0.00%', action: 'stop' },
+      { label: '0.05% or higher, as for a car', action: 'accelerate' },
+      { label: '0.10% or higher', action: 'brake' },
+    ],
+    penaltyMessage:
+      'For trucks, buses, motorcycles and public utility vehicles, any BAC above 0.00% is conclusive proof of driving under the influence.',
+    rewardMessage: 'Right. On a motorcycle, any alcohol at all.',
+    duration: 220,
+    lawCitation:
+      'Level 10 module, Anti-Drunk and Drugged Driving Act (RA 10586), Blood Alcohol Concentration (BAC) Limits: "Trucks, buses, motorcycles, and public utility vehicles — Any BAC above 0.00%."',
+    competency: 'general_rules',
+    severity: 'critical',
+    inspection: {
+      officerLine: 'Good afternoon. You also ride a motorcycle? One question about its limit.',
+      documentType: 'Checkpoint Record — Anti-Drunk and Drugged Driving Act',
+      holder: 'DELA CRUZ, JUAN M.',
+      fields: [
+        { label: 'Also rides', value: 'Motorcycle' },
+        { label: 'Question', value: 'Conclusive BAC for a motorcycle' },
+      ],
+      vehicle: 'Private passenger car',
+      tripPurpose: 'Private family trip, own vehicle',
+    },
+  },
+);
+
+losingItsLoadSlot.push(
+  qaVariant(losingItsLoadSlot[0], {
+    id: 'level10.losing-its-load.check-before-and-during',
+    label: 'Before the trip',
+    description: 'You are about to drive behind a convoy of loaded trucks for an hour.',
+    question: 'When do you watch for smoke-belching or overload signs?',
+    correct: 'Before and during the trip',
+    wrong: ['Only when a truck starts to shed its load', 'Never: that is the enforcer\'s job alone'],
+    penaltyMessage: 'Watch for visible smoke-belching or overload signs before and during the trip.',
+    rewardMessage: 'Correct. Before you set off, and all the way.',
+    lawCitation:
+      'Level 10 module, the pre-trip habit: "Watch for visible smoke-belching or overload signs before and during the trip." Why Overloading Is Restricted: "For road safety."',
+  }),
+  qaVariant(losingItsLoadSlot[0], {
+    id: 'level10.losing-its-load.drowsy',
+    label: 'Feeling drowsy',
+    description: 'An hour into the drive you feel drowsy after the medicine you took this morning.',
+    question: 'What does the module say that drowsiness does?',
+    correct: 'It reduces your focus on the road: do not drive on',
+    wrong: ['Nothing, if you open the window', 'It only matters at night'],
+    penaltyMessage: 'Substances that cause drowsiness or fatigue reduce focus on the road. Never drive on a substance that could affect judgment or reaction time.',
+    rewardMessage: 'Correct. A drowsy driver is not fit to drive on.',
+    lawCitation:
+      'Level 10 module, Effects Of Alcohol And Drugs On Driving: "Reduces focus on the road." "Causes drowsiness or fatigue." The pre-trip habit: "Never drive after drinking or using a substance that could affect judgment or reaction time."',
+  }),
+);
+
+busOnTheGradeSlot.push(
+  qaVariant(busOnTheGradeSlot[0], {
+    id: 'level10.bus-on-the-grade.assured-clear-distance',
+    label: 'Over the crest',
+    description: 'The road climbs over a crest, and you cannot see what is on the other side.',
+    question: 'How fast may you take it?',
+    correct: 'No faster than lets you stop within the clear distance you can see ahead',
+    wrong: ['The posted limit, whatever you can see', 'As fast as the car in front of you'],
+    penaltyMessage:
+      'No person shall drive at a speed greater than will permit them to bring the vehicle to a stop within the assured clear distance ahead.',
+    rewardMessage: 'Correct. Your speed is set by the road you can see.',
+    lawCitation:
+      'Speed-limits pack L1, RA 4136 §35(a): "Any person driving a motor vehicle on a highway shall drive the same at a careful and prudent speed … nor at a speed greater than will permit him to bring the vehicle to a stop within the assured clear distance ahead."',
+  }),
+  // Driven: a posted 20 on a 30 street. Graded on the speed driven past it
+  // (speed-limits pack F2: the posted limit prevails).
+  {
+    id: 'level10.bus-on-the-grade.posted-limit-prevails',
+    label: 'A posted limit',
+    type: 'speed_limit',
+    scene: 'open_road',
+    speedRule: 'maximum',
+    postedSpeed: 20,
+    description: 'A sign ahead posts a 20 km/h maximum on this street, below the 30 the law sets for city streets.',
+    correctAction: 'brake',
+    points: 20,
+    warningDistance: 560,
+    penaltyMessage: 'A speed limit posted on the road prevails. Here it is 20, not the street\'s usual 30.',
+    rewardMessage: 'Correct. The posted 20 applied where it was posted, and you kept to it.',
+    duration: 200,
+    lawCitation:
+      'Speed-limits pack F2, FDM Vol. 1 SPEED RESTRICTIONS: "Note: Speed Limit posted on the road shall prevail." L5, RA 4136 §35(b) row 3: city and municipal streets, 30 km per hour.',
+    competency: 'speed_control',
+    severity: 'major',
+    sign: {
+      name: 'Maximum Speed Restriction',
+      category: 'A. Regulatory Sign — Speed',
+      meaning: 'Vehicles must not exceed the posted speed.',
+      art: 'circle_limit',
+      glyph: '20',
+    },
+  },
+);
+
+riderDownSlot.push(
+  qaVariant(riderDownSlot[0], {
+    id: 'level10.rider-down.one-belt-each',
+    label: 'Two to a belt',
+    description: 'Your two small cousins want to share one seat belt in the back so a third person fits.',
+    question: 'May they?',
+    correct: 'No: never use one seat belt for two or more people',
+    wrong: ['Yes, for a short trip', 'Yes, if they are both small'],
+    penaltyMessage: 'Never use one seat belt for two or more people at the same time.',
+    rewardMessage: 'Correct. One belt, one person.',
+    lawCitation:
+      'Level 10 module, Seat Belt Use Act (RA 8750), Correct Seat Belt Fit: "Never use one seat belt for two or more people at the same time."',
+  }),
+  qaVariant(riderDownSlot[0], {
+    id: 'level10.rider-down.passenger-refuses',
+    label: 'A passenger refuses',
+    description: 'You drive a for-hire van, and the front-seat passenger refuses to buckle up.',
+    question: 'What does the law say?',
+    correct: 'The passenger may not continue the trip',
+    wrong: ['Let them ride: it is their own risk', 'Only a fine for the passenger, the trip goes on'],
+    penaltyMessage:
+      'A for-hire driver must inform and require front-seat passengers to wear seat belts. A passenger who refuses may not continue the trip.',
+    rewardMessage: 'Correct. No belt, no trip.',
+    lawCitation:
+      'Level 10 module, Seat Belt Use Act: "For hire vehicles: the driver must inform and require front seat passengers to wear seat belts upon boarding. A passenger who refuses may not continue the trip, and must be informed that no insurance can be recovered in case of a crash."',
+  }),
+);
 
 export const SLOT_DISTANCES = [900, 1800, 2700, 3500, 4420, 5320, 6220];
 export const SLOTS: SlotVariant[][] = [
@@ -677,7 +973,7 @@ export const level10: LevelConfig = {
   // Seven events 800 to 920 apart, plus a runway past the last one long enough
   // for its measurement window to close before the road ends.
   roadLength: 6920,
-  // The same road Level 9 drives: buildings along its verge, so RA 4136's city
+  // The same road Level 9 drives: buildings along its verge, so Republic Act No. 4136's city
   // or municipal street rather than open country (speed-limits pack, O3). Its
   // following gaps and its descent were spaced and measured at 60 on the dial;
   // the pace drives that same road at 30.
@@ -685,8 +981,6 @@ export const level10: LevelConfig = {
   speedLimit: 30,
   pace: spacedPace(30, 60),
   requiredScore: 148,
-  stars2: 178,
-  stars3: 204,
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
   /**
    * The driveway, before the engine starts. See `hotspots` above for what the

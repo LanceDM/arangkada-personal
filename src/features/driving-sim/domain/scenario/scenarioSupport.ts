@@ -111,6 +111,7 @@ const VEHICLE: Record<NpcVehicleSpec['vehicleKind'], Localized> = {
   van: { en: 'the van' },
   bus: { en: 'the bus' },
   bicycle: { en: 'the cyclist' },
+  tricycle: { en: 'the tricycle' },
 };
 
 const npcPlace = (path: NpcVehicleSpec['path'], say: TextOf): string => {
@@ -156,6 +157,7 @@ const PEDESTRIAN: Record<PedestrianKind, Localized> = {
   child: { en: 'the child' },
   elderly: { en: 'the elderly pedestrian' },
   pwd: { en: 'the wheelchair user' },
+  dog: { en: 'the dog' },
 };
 
 const prefabPlace = (prefab: ScenePrefab, say: TextOf): string => {

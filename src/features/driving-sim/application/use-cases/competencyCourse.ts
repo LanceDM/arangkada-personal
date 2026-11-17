@@ -24,6 +24,8 @@ import {
   finalCompleted,
   finalMeasured,
   lessonsRead,
+  finishWithoutCertificate,
+  type CourseFinishReason,
   phaseId,
   phaseLevel,
   quizMeasured,
@@ -53,14 +55,24 @@ import { buildLevelConfig } from '@/features/driving-sim/domain/scenario/levelCa
 import { composeDrive, type ComposedDrive } from '@/features/driving-sim/domain/scenario/composeDrive';
 import { drawCourseQuiz, type CourseQuizDraw } from '@/features/driving-sim/domain/scenario/courseQuiz';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
-import type { QuizItemDoc } from '@/features/driving-sim/domain/scenario/quizBank';
-import { competencyVerdicts, type CompetencyVerdict } from '@/features/driving-sim/domain/scoring/competencyVerdict';
+import type { QuizItemDoc, QuizSittingDoc } from '@/features/driving-sim/domain/scenario/quizBank';
+import { orderChoices, seedForQuestion } from '@/features/driving-sim/domain/scenario/choiceOrder';
+import {
+  FINAL_PASS_SHARE,
+  competencyVerdicts,
+  finalExamPassed,
+  wasAsked,
+  type CompetencyVerdict,
+} from '@/features/driving-sim/domain/scoring/competencyVerdict';
+import { endedEarly } from '@/features/driving-sim/domain/scoring/buildLevelResult';
+import { hotspotScenarioId } from '@/features/driving-sim/domain/scenario/hotspotScenarioId';
 import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
 import { CourseConflictError } from '../errors';
 import type {
   BKTLogRepository,
   CompetencyCourseRepository,
   CourseQuizSitting,
+  CourseQuizShown,
   CourseStep,
   EvidenceWrite,
   PreTestSeed,
@@ -86,6 +98,8 @@ export interface CourseDeps {
   /** The git commit the app was built from. */
   appBuild?: string;
   sessionId?: string;
+  /** False for an admin's account: its course teaches the shared table nothing. Default true. */
+  teachesTable?: boolean;
 }
 
 const clock = (deps: CourseDeps) => deps.now ?? Date.now;
@@ -181,6 +195,7 @@ const commit = async (
     context: { participantCode: deps.participantCode, levelId: phaseLevel(from.phase), phase: phaseId(from.phase), attemptId: options.attemptId ?? null },
     envelope,
     evidence: options.evidence ?? null,
+    teachesTable: deps.teachesTable !== false,
   });
   if (options.evidence) await recordCourseBKT(deps, uid);
   return committed;
@@ -240,6 +255,26 @@ export const markCourseLessonsRead = (deps: CourseDeps, uid: string, cursor: Cou
 export const finishCourseQuizReview = (deps: CourseDeps, uid: string, cursor: CourseCursor) =>
   moveCursor(deps, uid, cursor, quizReviewDone(cursor));
 
+/** The end path: the course ends without the certificate (course.ts `finishWithoutCertificate`). */
+/** The end path: the course is finished without the certificate, and the course log says so. */
+export const finishCourseWithoutCertificate = async (deps: CourseDeps, uid: string, cursor: CourseCursor, reason: CourseFinishReason) => {
+  const to = finishWithoutCertificate(cursor, reason);
+  const at = clock(deps)();
+  const { step } = await commit(deps, uid, cursor, () => ({
+    cursor: to,
+    decisions: [],
+    rewards: [],
+    operations: [],
+    log: {
+      schemaVersion: 1, kind: 'finish', levelId: 12, phase: phaseId(cursor.phase), attemptId: null, verdicts: [],
+      endReason: reason === 'final_attempts' ? 'finished_after_finals' : 'finished_at_deadline',
+      unrewarded: cursor.pending.map(p => p.id),
+      timestamp: at,
+    },
+  }));
+  return step.cursor;
+};
+
 export const markCourseReviewShown = (deps: CourseDeps, uid: string, cursor: CourseCursor) =>
   moveCursor(deps, uid, cursor, reviewShown(cursor));
 
@@ -249,10 +284,10 @@ export const openCourseQuiz = async (
   uid: string,
   cursor: CourseCursor,
   level: Pick<LevelConfig, 'moduleId'>
-): Promise<CourseQuizDraw> => {
+): Promise<CourseQuizDraw & { seed: number }> => {
   if (cursor.phase.kind !== 'QUIZ' || !cursor.quiz) throw new Error(`no quiz in ${phaseId(cursor.phase)}`);
   const [{ seed }, bank] = await Promise.all([openActivity(deps, uid, cursor, 'quiz'), deps.quizBank.load(level.moduleId)]);
-  return drawCourseQuiz(bank.items, cursor.quiz.remaining, cursor.quiz.seenItems, createRng(seed));
+  return { ...drawCourseQuiz(bank.items, cursor.quiz.remaining, cursor.quiz.seenItems, createRng(seed)), seed };
 };
 
 export interface QuizCompetencyResult {
@@ -276,12 +311,39 @@ export const quizAnswerLog = (item: QuizItemDoc, choice: number | null, at: numb
   ...(choice === null ? { unanswered: true as const } : {}),
 });
 
+/**
+ * The order a course quiz was shown in, so the shuffles can be checked later:
+ * the course's draw (by `drawSeed`), then the screen's reshuffle of it and each
+ * item's choices (by `seed`, through `orderChoices` and `seedForQuestion`).
+ */
+export const shownQuiz = (drawSeed: number, sitting: QuizSittingDoc, drawn: readonly QuizItemDoc[]): CourseQuizShown => ({
+  drawSeed,
+  drawOrder: drawn.map(item => item.id),
+  seed: sitting.seed,
+  items: sitting.answers.map(answer => {
+    const item = drawn.find(d => d.id === answer.itemId);
+    const n = item ? item.options.length : 0;
+    return {
+      itemId: answer.itemId,
+      revision: answer.revision,
+      choiceOrder: orderChoices([...Array(n).keys()], seedForQuestion(sitting.seed, answer.itemId)),
+      chosen: answer.chosen,
+    };
+  }),
+  startedAt: sitting.startedAt,
+  finishedAt: sitting.finishedAt,
+  timedOut: sitting.timedOut,
+  ...(sitting.language ? { language: sitting.language } : {}),
+});
+
 export const submitCourseQuiz = async (
   deps: CourseDeps,
   uid: string,
   cursor: CourseCursor,
   items: readonly QuizItemDoc[],
-  choices: readonly (number | null)[]
+  choices: readonly (number | null)[],
+  /** What the screen showed: the draw's seed and the screen's own sitting record. */
+  shown?: { drawSeed: number; sitting: QuizSittingDoc }
 ): Promise<{ cursor: CourseCursor; results: QuizCompetencyResult[] }> => {
   await ensureCurrent(deps, uid, cursor);
   const at = clock(deps)();
@@ -304,7 +366,10 @@ export const submitCourseQuiz = async (
         results.map(r => ({ competency: r.competency, accuracy: r.total > 0 ? r.correct / r.total : 0, passed: r.passed }))
       )
     : [];
-  const sitting: CourseQuizSitting = { schemaVersion: 1, kind: 'quiz', levelId: level, attempt, answers, timestamp: at };
+  const sitting: CourseQuizSitting = {
+    schemaVersion: 1, kind: 'quiz', levelId: level, attempt, answers, timestamp: at,
+    ...(shown ? { shown: shownQuiz(shown.drawSeed, shown.sitting, items) } : {}),
+  };
 
   const { step } = await commit(deps, uid, cursor, table => {
     if (measurements.length === 0) return plainMove(submitted)();
@@ -358,7 +423,7 @@ export const planCourseDrive = async (deps: CourseDeps, uid: string, cursor: Cou
     const composed = composeDrive({ levelId: 12, competencies: COMPETENCIES, seen, rng: createRng(seed), perCompetency: 1 });
     const events = composed.level.events.map(event => ({ ...event, points: FINAL_POINTS, severity: 'major' as const }));
     const total = events.length * FINAL_POINTS;
-    const level = { ...composed.level, events, requiredScore: Math.round(total * 0.7), stars2: Math.round(total * 0.85), stars3: Math.round(total * 0.95) };
+    const level = { ...composed.level, events, requiredScore: Math.round(total * FINAL_PASS_SHARE) };
     return { levelId: 12, level, composed: { ...composed, level }, attemptSeed: seed };
   }
   throw new Error(`no drive in ${phaseId(phase)}`);
@@ -367,13 +432,19 @@ export const planCourseDrive = async (deps: CourseDeps, uid: string, cursor: Cou
 export interface CourseDriveSettled {
   cursor: CourseCursor;
   verdicts: CompetencyVerdict[];
+  /**
+   * The course's own verdict on the drive, the one the results screen shows:
+   * every counted topic passed (2 of 3) on a stage drive, `finalExamPassed` on
+   * the final exam; false for the tutorial, which passes nothing.
+   */
+  passed: boolean;
   attemptId: string;
 }
 
 const scenarioIdsOf = (level: LevelConfig): string[] => [
   ...level.events.map(event => event.id),
-  ...(level.garage?.hotspots ?? []).map(point => point.scenarioId ?? point.id),
-  ...(level.aftermath?.hotspots ?? []).map(point => point.scenarioId ?? point.id),
+  ...(level.garage?.hotspots ?? []).map(hotspotScenarioId),
+  ...(level.aftermath?.hotspots ?? []).map(hotspotScenarioId),
 ];
 
 /**
@@ -401,6 +472,11 @@ export const completeCourseDrive = async (
     correctDecisions: result.correctActions,
     logs: result.logs,
     ...extras,
+    attemptSeed: run.attemptSeed,
+    ...(run.composed
+      ? { composition: run.composed.items.map(item => ({ scenarioId: item.scenarioId, competency: item.competency, sourceLevelId: item.sourceLevelId })) }
+      : {}),
+    ...(result.crashReason !== undefined ? { crashReason: result.crashReason } : {}),
   };
   const evidence: EvidenceWrite = { kind: 'attempt', id: attemptId, attempt };
   const scenarioIds = scenarioIdsOf(run.level);
@@ -412,22 +488,31 @@ export const completeCourseDrive = async (
       () => plainMove(driveCompleted(cursor, { measurements: [], scenarioIds, table: {}, rng: random, now }).cursor)(),
       { attemptId, evidence }
     );
-    return { cursor: step.cursor, verdicts: [], attemptId };
+    return { cursor: step.cursor, verdicts: [], passed: false, attemptId };
   }
 
   // A crash or a timeout ends the drive unfinished: no topic is passed on it,
   // whatever it had right before (as a crash or timeout fails a level).
-  const verdicts = competencyVerdicts(run.composed.items, result.logs).map(v => (result.completed ? v : { ...v, passed: false }));
+  // Only that: the level's points pass mark (`completed`) never decides a
+  // topic, which is graded 2 of 3 on its own scenarios.
+  //
+  // A topic the drive never asked before it ended has no measurement here
+  // (pending the adviser): no
+  // reward (its open episode waits for its next measurement), and on a stage
+  // drive no decision and no attempt counted, so the repeat asks it.
+  const ended = endedEarly(result);
+  const verdicts = competencyVerdicts(run.composed.items, result.logs).map(v => (ended ? { ...v, passed: false } : v));
+  const judged = verdicts.filter(v => !ended || wasAsked(v));
   const measurements = measure(
     await loadCourseEvidence(deps, uid, { kind: 'attempt', levelId: result.levelId, attempt: null, timestamp: now, logs: result.logs }),
-    verdicts.map(v => ({ competency: v.competency, accuracy: v.accuracy, passed: v.passed }))
+    judged.map(v => ({ competency: v.competency, accuracy: v.accuracy, passed: v.passed }))
   );
   const logged = measurements.map((m, i) => ({
-    competency: m.competency, total: verdicts[i].total, correct: verdicts[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
+    competency: m.competency, total: judged[i].total, correct: judged[i].correct, passed: m.passed, masteryP: m.masteryP, driveEvidence: m.driveEvidence,
   }));
 
   if (cursor.phase.kind === 'FINAL') {
-    const passed = result.completed;
+    const passed = finalExamPassed(verdicts, ended);
     const { step } = await commit(deps, uid, cursor, table => {
       const settled = finalMeasured(cursor, measurements, table, now);
       return {
@@ -437,16 +522,17 @@ export const completeCourseDrive = async (
         operations: settled.operations,
         log: {
           schemaVersion: 1, kind: 'final', levelId: 12, phase: phaseId(cursor.phase), attemptId, verdicts: logged, timestamp: now,
-          ...(passed ? { endReason: 'certified' as const } : {}),
+          ...(passed ? { endReason: 'certified' as const, unrewarded: finalCompleted(settled.cursor, passed, scenarioIds).pending.map(p => p.id) } : {}),
         },
       };
     }, { attemptId, evidence });
-    return { cursor: step.cursor, verdicts, attemptId };
+    return { cursor: step.cursor, verdicts, passed, attemptId };
   }
 
-  // A competency the road could give no scenario is closed for the stage, never measured here.
-  const measured = new Set(verdicts.map(v => v.competency));
-  const unmeasurable = driveCompetencies(cursor).filter(competency => !measured.has(competency));
+  // A competency the road could give no scenario is closed for the stage,
+  // never measured here; one left unasked by an ended drive stays open.
+  const placed = new Set(run.composed.items.map(item => item.competency));
+  const unmeasurable = driveCompetencies(cursor).filter(competency => !placed.has(competency));
   const { step } = await commit(deps, uid, cursor, table => {
     const drive = driveCompleted(cursor, { measurements, scenarioIds, table, rng: random, now, unmeasurable });
     return {
@@ -460,5 +546,5 @@ export const completeCourseDrive = async (
       },
     };
   }, { attemptId, evidence });
-  return { cursor: step.cursor, verdicts, attemptId };
+  return { cursor: step.cursor, verdicts, passed: verdicts.length > 0 && verdicts.every(v => v.passed), attemptId };
 };

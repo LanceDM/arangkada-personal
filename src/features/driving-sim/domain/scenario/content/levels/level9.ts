@@ -1,6 +1,7 @@
 import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
+import { qaVariant } from './qaVariant';
 import type { GarageHotspot, GarageStage, LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 
 const levelModule = getLevelModule(9);
@@ -299,7 +300,7 @@ const tireBlowoutSlot: SlotVariant[] = [
     competency: 'hazard_awareness',
     severity: 'critical',
     // 20 is the speed the rest of the game already treats as "slowed for this"
-    // (`slowTarget`, RA 4136 §35(b) row 4). Above it the car is still unstable
+    // (`slowTarget`, Republic Act No. 4136, Section 35(b) row 4). Above it the car is still unstable
     // and a held pedal is the mistake the module puts in bold; at or below it,
     // braking softly to a stop is what the module asks for next.
     //
@@ -434,11 +435,286 @@ const crashAtTheBottomSlot: SlotVariant[] = [
       'Correct. Stopped clear of the wreck, hazards on, and out to see who needs what.',
     duration: 220,
     lawCitation:
-      "Duty of the driver in case of a crash: the driver present must show their driver's license and give their true name and address, along with the true name and address of the vehicle's owner. No driver involved in a road crash may leave the scene without aiding the victim, except if the driver is in imminent danger of serious harm because of the crash, if the driver reports the crash to the nearest law officer, or if the driver has to summon a physician or nurse to aid the victim.",
+      "Republic Act No. 4136, Section 55: Duty of the driver in case of a crash: the driver present must show their driver's license and give their true name and address, along with the true name and address of the vehicle's owner. No driver involved in a road crash may leave the scene without aiding the victim, except if the driver is in imminent danger of serious harm because of the crash, if the driver reports the crash to the nearest law officer, or if the driver has to summon a physician or nurse to aid the victim.",
     competency: 'general_rules',
     severity: 'critical',
   },
 ];
+
+
+/* -------------------------------------------------------------------------
+ * Pooled versions (2026-11-16, future work, draft for the team's check)
+ *
+ * Each slot keeps its driven scenario and gains two frozen questions on the
+ * same competency, each a different rule from the Level 9 module
+ * (`level9Module.ts`), cited by section. The flood, the blowout bay, the
+ * brake failure and the crash are unique scenes, so their second and third
+ * versions are asked (`qaVariant`).
+ * ---------------------------------------------------------------------- */
+
+rainClosesInSlot.push(
+  qaVariant(rainClosesInSlot[0], {
+    id: 'level9.rain-closes-in.fog-high-beam',
+    label: 'Fog at night',
+    description: 'Thick fog settles over the road at night, and the low beams light only a short way ahead.',
+    question: 'Should you switch to the high beam to see further?',
+    correct: 'No: keep the low beam; the high beam reflects back off the fog',
+    wrong: ['Yes: the high beam always shows more of the road', 'Yes, and switch on the hazard lights while moving'],
+    penaltyMessage:
+      'Avoid the high or "white" beam in fog: it reflects back and can worsen your own view of the road. Drive on low beam.',
+    rewardMessage: 'Correct. Low beam, and a speed that matches what you can see.',
+    lawCitation:
+      'Level 9 module, section 4, poor visibility: "Drive with lights on low beam." "Avoid using your high or "white" headlight beam in poor visibility conditions such as fog; it reflects back and can worsen your own view of the road."',
+  }),
+  // Driven: the rain closes the road down, and a lay-by is the safe place to
+  // stop. Graded on coming to rest in the bay, off the travel lane, as the
+  // blowout's bay is (Level 9 module, section 4, poor visibility).
+  {
+    id: 'level9.rain-closes-in.too-poor-to-continue',
+    label: 'Cannot see the road',
+    type: 'scenario_trigger',
+    scene: 'lay_by',
+    description: 'The downpour is so heavy you can barely see the road ahead. A marked emergency parking area opens on the right.',
+    recommendedMove: 'Pull into the emergency parking area and stop.',
+    realWorldNote: 'Hazard lights on once you have stopped, not while you are still moving.',
+    correctAction: 'stop',
+    points: 25,
+    warningDistance: 440,
+    penaltyMessage:
+      'If visibility becomes too poor to continue, stop at a safe place, off the travel lane, and turn on your hazard lights there.',
+    rewardMessage: 'Correct. You stopped at a safe place, off the road, until you could see again.',
+    duration: 200,
+    lawCitation:
+      'Level 9 module, section 4, poor visibility: "Slow down, and do not switch on hazard lights while still moving." "If visibility becomes too poor to continue, stop at a safe place and turn on hazard lights there."',
+    competency: 'hazard_awareness',
+    severity: 'major',
+    effect: { visibility: 0.32, span: 280 },
+    sign: {
+      name: 'Emergency Parking Area',
+      category: 'D. Guide Sign',
+      meaning: 'A marked area off the carriageway where a disabled vehicle may be stopped.',
+      art: 'rect_instruction',
+      glyph: 'EMERGENCY PARKING',
+    },
+    bay: {
+      side: 'right',
+      mayStop: true,
+      hint: 'Emergency parking area ahead — pull off the lane and stop',
+    },
+  },
+);
+
+floodedDipSlot.push(
+  qaVariant(floodedDipSlot[0], {
+    id: 'level9.flooded-dip.dry-the-brakes',
+    label: 'Out of the water',
+    description: 'You have just driven out of a flooded stretch at a crawl.',
+    question: 'What do you do now?',
+    correct: 'Gently step on the brake to dry the pads, rotors, linings and drums',
+    wrong: ['Brake hard once to clear the water off them', 'Nothing: the brakes dry by themselves'],
+    penaltyMessage:
+      'After passing the flooded stretch, gently step on the brake pedal to dry the brake pads, rotors, linings and drums.',
+    rewardMessage: 'Correct. A gentle brake dries them out.',
+    lawCitation:
+      'Level 9 module, section 3, flooded road: "Gently step on the brake pedal after passing the flooded stretch, to dry the brake pads, rotors, linings, and drums."',
+  }),
+  // Driven: a slippery wet stretch, signed. Graded on the speed carried onto
+  // it, with the grip it really has (Level 9 module, section 3, hydroplaning).
+  {
+    id: 'level9.flooded-dip.hydroplaning',
+    label: 'Slippery road',
+    type: 'obstacle_ahead',
+    scene: 'wet',
+    description: 'A Slippery Road sign stands ahead, and the road beyond it is wet from the first rain in weeks.',
+    recommendedMove: 'Slow down before the wet stretch, and no hard braking on it.',
+    correctAction: 'brake',
+    points: 30,
+    warningDistance: 520,
+    penaltyMessage:
+      'On a road slick after the first rain, slow down and drive in a lower gear, do not jam the brake pedal, and do not make a sharp or quick turn.',
+    rewardMessage: 'Correct. You had the speed off before the wet stretch.',
+    duration: 200,
+    lawCitation:
+      'Level 9 module, section 3, hydroplaning: "On a dry road, tar, rubber, and oil residue build up on the surface; when it rains, this mixture becomes especially slippery." "Slow down and drive in a lower gear." "Do not jam the brake pedal." "Do not make a sharp or quick turn."',
+    competency: 'hazard_awareness',
+    severity: 'critical',
+    effect: { grip: 0.55, span: 150 },
+    sign: {
+      image: 'arangkada_extracted_images/level3/slippery-road.png',
+      name: 'Slippery Road',
+      category: 'B. Warning Sign — Road Obstacle',
+      meaning: 'The road surface may be slippery, especially when wet.',
+      art: 'diamond',
+      glyph: 'SKID',
+    },
+  },
+);
+
+throttleSticksOpenSlot.push(
+  // A frozen emergency, then the car plays the answer out: the jammed pedal
+  // (Level 9 module, section 1). Answered as `stop`, the wrong answers as other
+  // acts, so no wrong answer satisfies the right one.
+  {
+    id: 'level9.throttle-sticks-open.keep-the-engine-on',
+    label: 'Jammed pedal',
+    type: 'scenario_trigger',
+    cutscene: true,
+    emergency: 'jammed_pedal',
+    description: 'You lift off and the car keeps pulling: the accelerator has jammed. Your passenger shouts at you to switch the engine off.',
+    question: 'The accelerator is stuck. What do you do?',
+    choices: [
+      { label: 'Shift to neutral, brake firmly, and keep the engine on until you are in a safe area.', action: 'stop' },
+      { label: 'Switch the engine off now.', action: 'turn_right' },
+      { label: 'Pump the accelerator to free it and keep going.', action: 'accelerate' },
+    ],
+    correctAction: 'stop',
+    points: 30,
+    warningDistance: 520,
+    penaltyMessage:
+      'Do not shut off the engine; you may lose the ability to steer. Release the accelerator, shift to neutral, and firmly press the brake.',
+    rewardMessage: 'Right. Neutral, a firm brake, and the engine on until you were somewhere safe.',
+    duration: 220,
+    lawCitation:
+      'Level 9 module, section 1, jammed gas pedal: "Release the accelerator pedal." "Shift to neutral." "Firmly press the brake pedal to slow the vehicle." "Do not shut off the engine; you may lose the ability to steer." "Maneuver the vehicle to a safe area, then stop and shut the engine off."',
+    competency: 'hazard_awareness',
+    severity: 'critical',
+  },
+  // A frozen emergency on a wet bend, then the car plays the answer out: the
+  // skid (Level 9 module, section 3).
+  {
+    id: 'level9.throttle-sticks-open.skid',
+    label: 'The back steps out',
+    type: 'scenario_trigger',
+    scene: 'wet',
+    cutscene: true,
+    emergency: 'skid',
+    description: 'On the wet road the rear of the car starts to slide out.',
+    question: 'The rear has broken traction and is sliding. What do you do?',
+    choices: [
+      { label: 'Off the pedals, and look and steer where you want to go.', action: 'turn_left' },
+      { label: 'Brake hard to stop the slide.', action: 'stop' },
+      { label: 'Accelerate to pull the car straight.', action: 'accelerate' },
+    ],
+    correctAction: 'turn_left',
+    points: 30,
+    warningDistance: 520,
+    penaltyMessage:
+      'In a skid, look and steer where you want to go, release the brake or accelerator to regain rolling traction, and never take your hands off the wheel.',
+    rewardMessage: 'Right. Off the pedals, eyes and wheel where you wanted to go.',
+    duration: 220,
+    lawCitation:
+      'Level 9 module, section 3, skid and traction loss: "Look — Look where you want to go." "Steer — Steer where you want to go." "Off Pedals — Release the brake or accelerator to help the tires regain rolling traction." "Never Give Up — Maintain constant attention to steering until the vehicle is back under control. Never take your hands off the steering wheel."',
+    competency: 'hazard_awareness',
+    severity: 'critical',
+  },
+);
+
+tireBlowoutSlot.push(
+  qaVariant(tireBlowoutSlot[0], {
+    id: 'level9.tire-blowout.warning-device',
+    label: 'Broken down',
+    description: 'You have stopped off the lane on a two-way road with a flat, hazard lights on.',
+    question: 'Where does the Early Warning Device go?',
+    correct: 'On both sides of the vehicle, about four meters apart',
+    wrong: ['Behind the vehicle only', 'On the roof, where it can be seen'],
+    penaltyMessage:
+      'Place the Early Warning Device about four meters apart behind the vehicle on a one-way road, or on both sides on a two-way road.',
+    rewardMessage: 'Correct. Both sides, on a two-way road.',
+    lawCitation:
+      'Level 9 module, section 6, breakdown procedure: "Place your Early Warning Device, spaced about four meters apart, behind the vehicle on a one-way road, or on both sides on a two-way road."',
+  }),
+  qaVariant(tireBlowoutSlot[0], {
+    id: 'level9.tire-blowout.no-repair-in-the-lane',
+    label: 'Changing the wheel',
+    description: 'Your car is stopped on the shoulder with a flat, and the wheel to change is on the traffic side.',
+    question: 'May you change it standing in the travel lane?',
+    correct: 'No: do not attempt a repair that requires standing in an active lane',
+    wrong: ['Yes, with the hazard lights on', 'Yes, if you work quickly'],
+    penaltyMessage: 'Do not attempt a repair that requires standing in an active traffic lane.',
+    rewardMessage: 'Correct. Not from the live lane.',
+    lawCitation:
+      'Level 9 module, section 6, breakdown procedure: "Move the vehicle to the safest available position, off the main travel lane if possible." "Do not attempt a repair that requires standing in an active traffic lane."',
+  }),
+);
+
+brakesGoneSlot.push(
+  // A frozen emergency on the descent, then the car plays the answer out: brake
+  // fade on a car with ABS (Level 9 module, section 2).
+  {
+    id: 'level9.brakes-gone.abs',
+    label: 'Brakes fading, ABS',
+    type: 'scenario_trigger',
+    cutscene: true,
+    emergency: 'brake_loss',
+    scene: 'gradient_down',
+    description: 'Halfway down the long descent the brakes start to fade. Your car has anti-lock brakes (ABS).',
+    question: 'The brakes are fading. What do you do?',
+    choices: [
+      { label: 'Do not pump the pedal; shift to a lower gear and use the parking brake in bursts.', action: 'stop' },
+      { label: 'Pump the pedal hard and fast.', action: 'turn_right' },
+      { label: 'Switch the engine off.', action: 'accelerate' },
+    ],
+    correctAction: 'stop',
+    points: 35,
+    penaltyMessage:
+      'Pumping builds fluid pressure on ordinary brakes, but on a vehicle equipped with ABS, do not pump. Shift to a lower gear, and never switch off the engine.',
+    rewardMessage: 'Right. No pumping with ABS: a lower gear and the parking brake in bursts.',
+    duration: 220,
+    lawCitation:
+      'Level 9 module, section 2, emergency braking technique: "When the brake fails, rapidly pump the brake pedal several times to build brake fluid pressure. For a vehicle equipped with anti-lock brakes (ABS), do not pump the brake." "Shift to a lower gear." "Sporadically use the parking brake to slow the vehicle." Loss of brake: "Downshift; do not switch off the engine."',
+    competency: 'hazard_awareness',
+    severity: 'critical',
+    effect: { gradient: 0.1, span: 220 },
+    sign: {
+      name: 'Steep Descent',
+      category: 'B. Warning Sign — Road Alignment',
+      meaning: 'A steep downgrade is ahead; select a lower gear before the descent.',
+      art: 'diamond',
+      glyph: 'DOWN',
+    },
+  },
+  qaVariant(brakesGoneSlot[0], {
+    id: 'level9.brakes-gone.engine-fire',
+    label: 'Smoke from the hood',
+    description: 'Smoke and flame come from under the hood as you drive.',
+    question: 'What do you do?',
+    correct: 'Steer out of traffic, ignition off, everyone out and away; do not open the hood',
+    wrong: ['Stop and open the hood to see the fire', 'Throw water on it from the roadside'],
+    penaltyMessage:
+      'Engine fire: steer out of traffic, turn off the ignition, have everyone leave and move away, and do not open the hood. Never put water on a gasoline or diesel fire.',
+    rewardMessage: 'Correct. Out of traffic, out of the car, and the hood stays shut.',
+    lawCitation:
+      'Level 9 module, section 5, engine fire: "Steer out of traffic, away from buildings, people, and other vehicles." "Have all occupants leave the car immediately and move away." "Do not open the hood." "Turn off the ignition, then get out quickly." Any vehicle fire: "Do not put water on a diesel or gasoline fire."',
+  }),
+);
+
+crashAtTheBottomSlot.push(
+  qaVariant(crashAtTheBottomSlot[0], {
+    id: 'level9.crash-at-the-bottom.who-first',
+    label: 'Who needs you first',
+    description: 'At a crash, one passenger is walking around and talking; another is sitting still and silent.',
+    question: 'Whom do you attend to first?',
+    correct: 'The one who is not walking and talking',
+    wrong: ['The one who is walking and talking', 'Neither, until the police arrive'],
+    penaltyMessage: 'Attend first to anyone who is not yet walking and talking; they need the most urgent attention.',
+    rewardMessage: 'Correct. The silent one first.',
+    lawCitation:
+      'Level 9 module, section 8, first aid limits: "Attend first to anyone who is not yet walking and talking; they need the most urgent attention."',
+  }),
+  qaVariant(crashAtTheBottomSlot[0], {
+    id: 'level9.crash-at-the-bottom.do-not-move-them',
+    label: 'Moving the injured',
+    description: 'A crash victim is lying beside a car that is not burning, and a bystander wants to carry them to the shade.',
+    question: 'Should the victim be moved?',
+    correct: 'No: not unless they are in a burning vehicle or other immediate danger',
+    wrong: ['Yes: anyone injured should be moved somewhere comfortable', 'Yes, if two people carry them'],
+    penaltyMessage:
+      'Do not remove an injured person unless they are in a burning vehicle or facing other immediate danger. Unnecessary movement often makes injuries worse.',
+    rewardMessage: 'Correct. Keep them still, and get trained help on the way.',
+    lawCitation:
+      'Level 9 module, section 8, first aid limits: "Do not remove an injured person unless they are in a burning vehicle or facing other immediate danger. Unnecessary movement often makes injuries worse."',
+  }),
+);
 
 export const SLOT_DISTANCES = [900, 1750, 2600, 3500, 4400, 5350];
 export const SLOTS: SlotVariant[][] = [
@@ -644,7 +920,7 @@ export const level9: LevelConfig = {
   // window to close before the road ends.
   roadLength: 6000,
   // A two-way road with buildings along its verge: closely bordered by
-  // habitations, so not §35(b)'s open country, and RA 4136's city or municipal
+  // habitations, so not §35(b)'s open country, and Republic Act No. 4136's city or municipal
   // street (speed-limits pack, O3). The emergencies were spaced and measured at
   // 60 on the dial, where a blowout pulls the wheel and a descent cooks the
   // brakes; the pace drives that same road at 30.
@@ -652,8 +928,6 @@ export const level9: LevelConfig = {
   speedLimit: 30,
   pace: spacedPace(30, 60),
   requiredScore: 186,
-  stars2: 224,
-  stars3: 257,
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
   aftermath,
   /**

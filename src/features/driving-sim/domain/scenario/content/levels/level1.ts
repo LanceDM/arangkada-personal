@@ -7,7 +7,7 @@ import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenari
 
 const levelModule = getLevelModule(1);
 
-// Five LTO checkpoints, evenly spaced along the drive.
+// Five roadside checkpoints, evenly spaced along the drive.
 export const SLOT_DISTANCES = [750, 1340, 1930, 2830, 3420];
 
 // Slot 1: is the DL code/clutch code/vehicle combination compliant?
@@ -15,7 +15,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.passenger-car',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -49,7 +49,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.motorcycle-code-a',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This rider was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -82,7 +82,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.at-only-automatic',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -116,7 +116,7 @@ const codeMatchSlot: SlotVariant[] = [
   {
     id: 'level1.code-match.pickup-manual',
     type: 'stop_sign',
-    description: 'LTO checkpoint: routine authority check.',
+    description: 'Roadside checkpoint: routine authority check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -154,7 +154,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.at-only-manual-car',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Clutch code violation: automatic-only authority does not cover a manual-transmission trip.',
@@ -188,7 +188,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.mt-at-manual-car',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: "This driver's authority already covered a manual-transmission trip. Refusing a compliant trip is also a wrong call.",
@@ -222,7 +222,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.at-only-automatic-suv',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'accelerate',
     points: 20,
     penaltyMessage: 'This driver was fully compliant. Refusing a lawful trip is also a wrong call.',
@@ -256,7 +256,7 @@ const clutchCodeSlot: SlotVariant[] = [
   {
     id: 'level1.clutch-code.at-only-manual-van',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: transmission check.',
+    description: 'Roadside checkpoint: transmission check.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Clutch code violation: automatic-only authority does not cover a manual-transmission trip.',
@@ -294,7 +294,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-a-passenger-car-mt-at',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code A is for motorcycles, not this passenger-car trip.',
@@ -327,7 +327,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-b-motorcycle-aquino',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code B does not cover a motorcycle trip.',
@@ -360,7 +360,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-a-passenger-car-mt',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code A is for motorcycles, not this passenger-car trip.',
@@ -393,7 +393,7 @@ const categoryMatchSlot: SlotVariant[] = [
   {
     id: 'level1.category-match.code-b-motorcycle-pascual',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: DL code versus vehicle category.',
+    description: 'Roadside checkpoint: DL code versus vehicle category.',
     correctAction: 'brake',
     points: 20,
     penaltyMessage: 'Authority mismatch: Code B does not cover a motorcycle trip.',
@@ -430,7 +430,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.conductors-license',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: "A Conductor's License does not authorize driving. This trip must not start.",
@@ -463,7 +463,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.student-permit-unsupervised',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A Student Permit does not authorize unsupervised driving. This trip must not start.',
@@ -496,7 +496,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.barangay-id',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A Barangay ID does not authorize driving. This trip must not start.',
@@ -509,7 +509,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
       { label: 'No-Go — a Barangay ID is not driving authority', action: 'stop' },
     ],
     lawCitation:
-      "Only a valid driver's license, student permit, or equivalent LTO-issued authority may be used to operate a motor vehicle.",
+      "Only a valid driver's license, student permit, or equivalent officially issued authority may be used to operate a motor vehicle.",
     competency: 'driver_legality',
     severity: 'critical',
     inspection: {
@@ -530,7 +530,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
   {
     id: 'level1.driving-authority.student-permit-expired',
     type: 'scenario_trigger',
-    description: 'LTO checkpoint: driving authority check.',
+    description: 'Roadside checkpoint: driving authority check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'An expired Student Permit is not valid authority, supervised or not. This trip must not start.',
@@ -555,7 +555,7 @@ const drivingAuthoritySlot: SlotVariant[] = [
         { label: 'DL Code', value: 'Not applicable' },
         { label: 'Conditions', value: 'Must be accompanied by licensed driver' },
         { label: 'Expiry', value: '2026-06-30' },
-        { label: 'Status', value: 'Expired 1 month ago' },
+        { label: 'Status', value: 'Expired' },
       ],
       vehicle: 'Passenger car — category M1',
       tripPurpose: 'Driving with a licensed driver beside them, permit expired',
@@ -568,7 +568,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.expired-license',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'An expired license is not valid authority to drive; proceeding is a violation.',
@@ -592,7 +592,7 @@ const validitySlot: SlotVariant[] = [
         { label: 'Clutch Code', value: 'MT / AT' },
         { label: 'Conditions', value: '1 — corrective lenses (worn)' },
         { label: 'Expiry', value: '2025-12-04' },
-        { label: 'Status', value: 'Expired 4 months ago' },
+        { label: 'Status', value: 'Expired' },
       ],
       vehicle: 'Passenger car — category M1',
       tripPurpose: 'Private trip',
@@ -601,7 +601,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.valid-license-ramos',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'This license was still valid. Refusing a properly valid document is also a wrong call.',
@@ -634,7 +634,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.lenses-condition-not-met',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A required condition was not met; driving without the corrective lenses on file is a violation.',
@@ -668,7 +668,7 @@ const validitySlot: SlotVariant[] = [
   {
     id: 'level1.validity.valid-license-cruz',
     type: 'stop_sign',
-    description: 'LTO checkpoint: validity check.',
+    description: 'Roadside checkpoint: validity check.',
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'This license was still valid. Refusing a properly valid document is also a wrong call.',
@@ -678,7 +678,7 @@ const validitySlot: SlotVariant[] = [
     choices: [
       { label: 'Go — the license is valid and unexpired', action: 'accelerate' },
       { label: 'No-Go — a license issued more than three years ago is stale', action: 'stop' },
-      { label: 'No-Go — validity must be confirmed with the LTO hotline first', action: 'brake' },
+      { label: 'No-Go — validity must be confirmed with the hotline first', action: 'brake' },
     ],
     lawCitation: "A driver's license must be valid and unexpired to serve as legal authority to drive.",
     competency: 'document_awareness',
@@ -719,8 +719,6 @@ const level1Base = {
   // Spaced and measured at 35 on the dial; driven at 30 as it was at 35.
   pace: spacedPace(30, 35),
   requiredScore: 45,
-  stars2: 55,
-  stars3: 65,
 } as const;
 
 /**

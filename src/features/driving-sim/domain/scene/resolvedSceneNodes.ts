@@ -29,7 +29,9 @@ import {
 import { bodyAt } from '@/features/driving-sim/domain/world/WorldBody';
 import { ROAD_ACTORS } from '@/features/driving-sim/domain/world/roadActors';
 import {
+  DRIVEWAY_GROUP_GAP,
   drivewayPedestrianX,
+  MAIN_ROAD_BODY,
   mainRoadTraffic,
 } from '@/features/driving-sim/domain/world/sceneGeometry';
 import { junctionCentreY } from '@/features/driving-sim/domain/world/junctionGeometry';
@@ -180,15 +182,22 @@ export const resolvedSceneNodes = (
       break;
 
     case 'driveway-crossing': {
-      const walkedOff = pedestrianWalkOff(distance, event.triggerAtDistance, handled);
+      const walkedOff = pedestrianWalkOff(distance, event.triggerAtDistance, handled, placement.answeredForSteps ?? null);
       nodes.push({
         kind: 'driveway-mouth',
         roadX,
         screenY,
         walkedOff,
+        people: scene.pedestrians,
         // Once they have walked clear they are out of the road, so a driver who
-        // already stopped for them cannot then be punished for it.
-        solids: walkedOff < 1 ? [pedestrianBody(drivewayPedestrianX(walkedOff), screenY - 3)] : [],
+        // already stopped for them cannot then be punished for it. Only the
+        // people marked solid can be hit; the rest walk with them as scenery.
+        solids:
+          walkedOff < 1
+            ? scene.pedestrians.flatMap((person, index) =>
+                person.solid ? [pedestrianBody(drivewayPedestrianX(walkedOff) - index * DRIVEWAY_GROUP_GAP, screenY - 3)] : []
+              )
+            : [],
       });
       break;
     }
@@ -491,15 +500,16 @@ export const resolvedSceneNodes = (
       // slides past after the call has been made and you drive through.
       // Yielding earns clear passage, so a correct call is never punished by
       // traffic that reappears while you are still crossing.
-      const traffic = mainRoadTraffic(screenY, handled, now);
+      const traffic = mainRoadTraffic(screenY, handled, now, scene.crossing);
       nodes.push({
         kind: 'main-road-junction',
         roadX,
         screenY,
         traffic,
-        solids: traffic.cars.map(car =>
-          bodyAt(car.x, car.y, 50, 24, 'vehicle', 'a vehicle crossing on the main road')
-        ),
+        solids: traffic.cars.map(car => {
+          const body = MAIN_ROAD_BODY[car.kind ?? 'car'];
+          return bodyAt(car.x, car.y, body.width, body.height, 'vehicle', 'a vehicle crossing on the main road');
+        }),
       });
       break;
     }

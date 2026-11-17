@@ -56,8 +56,6 @@ const level3Base = {
   // Spaced and measured at 60 on the dial; driven at 40 as it was at 60.
   pace: spacedPace(40, 60),
   requiredScore: 110,
-  stars2: 130,
-  stars3: 160,
   /**
    * An ordinary two-way street: four lanes, the left two carrying opposing
    * traffic.

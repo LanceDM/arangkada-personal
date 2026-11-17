@@ -29,7 +29,7 @@ const levelModule = getLevelModule(5);
  * whole design of this file. A pool of one teaches the *situation*, not the
  * rule. A learner who only ever meets a car arriving from their right learns
  * "there is a car at the junction, therefore stop" — which passes this level
- * and fails a real one, because it is not the rule. RA 4136 says the vehicle on
+ * and fails a real one, because it is not the rule. Republic Act No. 4136 says the vehicle on
  * the *left* yields; the mirror image of that junction has the opposite answer
  * and looks almost identical.
  *
@@ -76,9 +76,9 @@ const levelModule = getLevelModule(5);
  * so a wording fix lands in one place rather than in nine string literals.
  */
 const RA4136_LEFT_YIELDS =
-  'RA 4136: the vehicle on the left shall yield the right-of-way to the vehicle on the right, except where another right-of-way rule applies.';
+  'Republic Act No. 4136: the vehicle on the left shall yield the right-of-way to the vehicle on the right, except where another right-of-way rule applies.';
 const RA4136_CROSSWALK =
-  'RA 4136: the driver shall yield the right-of-way to a pedestrian crossing within a crosswalk, except where a peace officer or traffic signal is regulating the crossing.';
+  'Republic Act No. 4136: the driver shall yield the right-of-way to a pedestrian crossing within a crosswalk, except where a peace officer or traffic signal is regulating the crossing.';
 
 /* -------------------------------------------------------------------------
  * Slot 1 — Uncontrolled junctions. Driven: the crossing vehicle is on the road
@@ -186,7 +186,7 @@ const uncontrolledCrossroadsSlot: SlotVariant[] = [
     rewardMessage: 'Correct. It signaled and was already within the junction, so it had the right-of-way.',
     duration: 200,
     lawCitation:
-      'RA 4136: a driver shall yield to a vehicle already within the intersection, or one turning left across their path, provided that turning vehicle gave a plainly visible signal of its intention to turn.',
+      'Republic Act No. 4136: a driver shall yield to a vehicle already within the intersection, or one turning left across their path, provided that turning vehicle gave a plainly visible signal of its intention to turn.',
     competency: 'right_of_way',
     severity: 'major',
     npc: {
@@ -221,7 +221,7 @@ const uncontrolledCrossroadsSlot: SlotVariant[] = [
     rewardMessage: 'Correct. It was already inside the junction, so it finished crossing before you entered.',
     duration: 200,
     lawCitation:
-      'RA 4136: a driver approaching but not yet within an intersection shall yield to a vehicle already within it.',
+      'Republic Act No. 4136: a driver approaching but not yet within an intersection shall yield to a vehicle already within it.',
     competency: 'right_of_way',
     severity: 'major',
     npc: {
@@ -359,7 +359,9 @@ const crossingYieldSlot: SlotVariant[] = [
     // be able to stop is what is being asked, and a driver who does come to a
     // full stop still passes, since a stop satisfies any request to slow.
     id: 'level5.crossing-yield.outside-crosswalk',
-    type: 'pedestrian_crossing',
+    // Not `pedestrian_crossing`: that type draws a zebra and its sign, and this
+    // man is crossing nowhere near one (scene audit, 2026-11-16).
+    type: 'scenario_trigger',
     scene: 'open_road',
     description:
       'A man steps off the curb and starts across the road, nowhere near a pedestrian lane.',
@@ -371,7 +373,7 @@ const crossingYieldSlot: SlotVariant[] = [
     rewardMessage: 'Correct. The right-of-way was yours, and you still slowed enough to stop for him.',
     duration: 200,
     lawCitation:
-      'RA 4136: a pedestrian crossing at a point other than a crosswalk shall yield the right-of-way to vehicles on the highway. A driver at unlawful speed forfeits any right-of-way they would otherwise hold.',
+      'Republic Act No. 4136: a pedestrian crossing at a point other than a crosswalk shall yield the right-of-way to vehicles on the highway. A driver at unlawful speed forfeits any right-of-way they would otherwise hold.',
     competency: 'pedestrians',
     severity: 'critical',
   },
@@ -398,7 +400,7 @@ const controlledJunctionSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Full stop, cross traffic cleared, then away.',
     duration: 200,
     lawCitation:
-      'RA 4136: at a Stop sign the driver shall come to a full stop and yield to any vehicle in or approaching the intersection. Never make a rolling stop.',
+      'Republic Act No. 4136: at a Stop sign the driver shall come to a full stop and yield to any vehicle in or approaching the intersection. Never make a rolling stop.',
     competency: 'right_of_way',
     severity: 'critical',
     npc: {
@@ -425,7 +427,7 @@ const controlledJunctionSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Full stop even with nothing in sight — which is what the sign actually requires.',
     duration: 200,
     lawCitation:
-      'RA 4136: at a Stop sign the driver shall bring the vehicle to a full stop before proceeding, whether or not other traffic is present.',
+      'Republic Act No. 4136: at a Stop sign the driver shall bring the vehicle to a full stop before proceeding, whether or not other traffic is present.',
     competency: 'right_of_way',
     severity: 'critical',
   },
@@ -443,7 +445,7 @@ const controlledJunctionSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You slowed on the approach and let the crossing traffic go first.',
     duration: 200,
     lawCitation:
-      'RA 4136: at a Give Way sign the driver shall yield the right-of-way to any vehicle in, or closely approaching, the intersection.',
+      'Republic Act No. 4136: at a Give Way sign the driver shall yield the right-of-way to any vehicle in, or closely approaching, the intersection.',
     competency: 'right_of_way',
     severity: 'critical',
     npc: {
@@ -477,7 +479,7 @@ const controlledJunctionSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Nothing was coming, so you gave way to nothing and kept moving.',
     duration: 200,
     lawCitation:
-      'RA 4136: at a Give Way sign the driver shall yield the right-of-way to any vehicle in, or closely approaching, the intersection. A Give Way sign requires yielding, not an unconditional stop.',
+      'Republic Act No. 4136: at a Give Way sign the driver shall yield the right-of-way to any vehicle in, or closely approaching, the intersection. A Give Way sign requires yielding, not an unconditional stop.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -524,7 +526,7 @@ const signalRightOfWaySlot: SlotVariant[] = [
     rewardMessage: 'Correct. Green means go only once the junction is actually clear, and you waited until it was.',
     duration: 200,
     lawCitation:
-      'On a green light a driver may proceed, but must first yield to other vehicles and pedestrians already lawfully within the intersection.',
+      'PD 207 (Vienna Convention on Road Signs and Signals): On a green light a driver may proceed, but must first yield to other vehicles and pedestrians already lawfully within the intersection.',
     competency: 'traffic_signals',
     severity: 'critical',
   },
@@ -554,7 +556,7 @@ const signalRightOfWaySlot: SlotVariant[] = [
     rewardMessage: 'Correct. You held back until the vehicle already in the junction had cleared it.',
     duration: 200,
     lawCitation:
-      'On a green light a driver may proceed, but must first yield to other vehicles and pedestrians already lawfully within the intersection.',
+      'PD 207 (Vienna Convention on Road Signs and Signals): On a green light a driver may proceed, but must first yield to other vehicles and pedestrians already lawfully within the intersection.',
     competency: 'traffic_signals',
     severity: 'critical',
     npc: {
@@ -587,7 +589,7 @@ const signalRightOfWaySlot: SlotVariant[] = [
     rewardMessage: 'Correct. Full stop first, then yield — which is the only way a turn on red is lawful.',
     duration: 200,
     lawCitation:
-      'Where a right turn on red is permitted, the driver shall come to a full stop and yield to pedestrians and to cross-traffic vehicles before proceeding. Never make a rolling stop.',
+      'PD 207 (Vienna Convention on Road Signs and Signals): Where a right turn on red is permitted, the driver shall come to a full stop and yield to pedestrians and to cross-traffic vehicles before proceeding. Never make a rolling stop.',
     competency: 'traffic_signals',
     severity: 'critical',
   },
@@ -625,7 +627,7 @@ const signalRightOfWaySlot: SlotVariant[] = [
     rewardMessage: 'Correct. Green light, clear junction, nothing to yield to — so you proceeded.',
     duration: 200,
     lawCitation:
-      'On a green light the driver may proceed, after yielding to any vehicles and pedestrians already lawfully within the intersection. With the junction clear, there is nothing left to yield to.',
+      'PD 207 (Vienna Convention on Road Signs and Signals): On a green light the driver may proceed, after yielding to any vehicles and pedestrians already lawfully within the intersection. With the junction clear, there is nothing left to yield to.',
     competency: 'traffic_signals',
     severity: 'major',
   },
@@ -651,7 +653,7 @@ const emergencyYieldSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You moved to the right edge and slowed, and the ambulance got through.',
     duration: 200,
     lawCitation:
-      'RA 4136: drivers shall yield the right-of-way to police, fire department vehicles and ambulances operated on official business when the driver sounds an audible signal of approach.',
+      'Republic Act No. 4136: drivers shall yield the right-of-way to police, fire department vehicles and ambulances operated on official business when the driver sounds an audible signal of approach.',
     competency: 'right_of_way',
     severity: 'critical',
     // Yielding here is a place on the road, not only a speed: pulling to the
@@ -685,7 +687,7 @@ const emergencyYieldSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stopped and let it through, even though the junction would otherwise have been yours.',
     duration: 200,
     lawCitation:
-      'RA 4136: drivers shall yield the right-of-way to police, fire department vehicles and ambulances operated on official business when the driver sounds an audible signal of approach.',
+      'Republic Act No. 4136: drivers shall yield the right-of-way to police, fire department vehicles and ambulances operated on official business when the driver sounds an audible signal of approach.',
     competency: 'right_of_way',
     severity: 'critical',
     // The easiest portable right-of-way variant in the game — the two easier
@@ -994,12 +996,12 @@ const drivewayJoinSlot: SlotVariant[] = [
       'Correct. The right-of-way was yours, and you still slowed enough to be able to stop for it.',
     duration: 200,
     lawCitation:
-      'RA 4136: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. A driver at unlawful speed forfeits any right-of-way they would otherwise hold.',
+      'Republic Act No. 4136: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. A driver at unlawful speed forfeits any right-of-way they would otherwise hold.',
     competency: 'right_of_way',
     severity: 'major',
     npc: {
       path: 'crossing_from_left',
-      vehicleKind: 'car',
+      vehicleKind: 'van',
       label: 'a van pulling out of a driveway',
       color: '#64748b',
       // Noses out of the driveway into your lane and stays there, completing
@@ -1021,12 +1023,12 @@ const drivewayJoinSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stopped for it rather than insisting on a right-of-way it was never going to respect.',
     duration: 200,
     lawCitation:
-      'RA 4136: a vehicle entering a highway from a private road or driveway shall yield to all vehicles approaching on that highway — but the doctrine of last clear chance still holds the driver who could have avoided the collision responsible.',
+      'Republic Act No. 4136: a vehicle entering a highway from a private road or driveway shall yield to all vehicles approaching on that highway — but the doctrine of last clear chance still holds the driver who could have avoided the collision responsible.',
     competency: 'right_of_way',
     severity: 'critical',
     npc: {
       path: 'crossing_from_left',
-      vehicleKind: 'motorcycle',
+      vehicleKind: 'tricycle',
       label: 'a tricycle pulling out of a gate',
       color: '#0ea5e9',
       // Pulls straight out into your lane and sits there in your path — you
@@ -1046,6 +1048,12 @@ const drivewayJoinSlot: SlotVariant[] = [
     description:
       'A jeepney is stopped at the curb ahead of you, loading passengers, half in your lane.',
     actor: { kind: 'jeepney', side: 'curb' },
+    // The passengers it is loading, on the footpath beside it: not in the road,
+    // and not solid, as at Level 11's jeepney stop.
+    pedestrians: [
+      { kind: 'adult', position: 1.1 },
+      { kind: 'adult', position: 1.22 },
+    ],
     correctAction: 'brake',
     points: 20,
     warningDistance: 340,
@@ -1053,7 +1061,7 @@ const drivewayJoinSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You eased off coming up on the loading jeepney instead of holding your speed past it.',
     duration: 200,
     lawCitation:
-      'RA 4136: a driver shall drive at a careful and prudent speed having regard to actual hazards, and yield to a vehicle pulling out from a standing position at the curb.',
+      'Republic Act No. 4136: a driver shall drive at a careful and prudent speed having regard to actual hazards, and yield to a vehicle pulling out from a standing position at the curb.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -1079,12 +1087,12 @@ const drivewayJoinSlot: SlotVariant[] = [
     rewardMessage: 'Correct. It was already yielding properly, so you held your speed and stayed predictable.',
     duration: 200,
     lawCitation:
-      'RA 4136: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway.',
+      'Republic Act No. 4136: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway.',
     competency: 'right_of_way',
     severity: 'major',
     npc: {
       path: 'crossing_from_left',
-      vehicleKind: 'car',
+      vehicleKind: 'van',
       label: 'a van waiting at a driveway mouth',
       color: '#64748b',
       // Stopped at the mouth of the driveway, holding for the road to clear —
@@ -1171,15 +1179,13 @@ const level5Base = {
   // Eight junctions 700 apart, plus a runway after the last one long enough for
   // its measurement window to close before the road ends.
   roadLength: 8030,
-  // A city route through intersections: RA 4136 §35(b)'s city or municipal
+  // A city route through intersections: Republic Act No. 4136, Section 35(b)'s city or municipal
   // street. Spaced and measured at 40 on the dial; driven at 30 as it was at
   // 40.
   roadClass: 'city_street',
   speedLimit: 30,
   pace: spacedPace(30, 40),
   requiredScore: 124,
-  stars2: 149,
-  stars3: 171,
 } as const;
 
 /**

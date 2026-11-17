@@ -4,11 +4,13 @@ import { useLanguage } from '@/shared/i18n/useText';
 import type { Language, Localized } from '@/shared/lib/localized';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import { competencyText } from '@/domain/learner/profile';
+import { mistakesIn, starsForMistakes } from '@/domain/learner/stars';
 import { QUIZ_PASS_CORRECT } from '@/domain/learner/stageCompetencies';
 import { phaseLevel, reviewsDue, type CourseCursor } from '@/domain/competencyRouting/course';
 import { useProgressStore } from '@/features/progression';
 import {
   LEVELS,
+
   competencyCourseProgressOf,
   courseDepsFor,
   finishCourseDrive,
@@ -61,6 +63,8 @@ interface PlannedDrive {
   drive: CourseDriveRun;
   language: Language;
   attempt: number;
+  /** An admin's free replay: outside the course, so it moves no cursor and trains no table. */
+  free?: boolean;
 }
 
 type QuizState = BriefingCourse['quiz'];
@@ -97,10 +101,13 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
   const [briefed, setBriefed] = useState<{ levelId: number; note: CourseNote } | null>(null);
   const [run, setRun] = useState<PlannedDrive | null>(null);
   const [quiz, setQuiz] = useState<QuizState>({ kind: 'loading' });
+  // The open quiz's draw seed, recorded with the sitting (what was shown).
+  const quizDrawSeed = useRef<number | null>(null);
   const [finished, setFinished] = useState<{ levelId: number; level: LevelConfig; topics?: string[] } | null>(null);
   const [levelResult, setLevelResult] = useState<LevelResult | null>(null);
   const [resultNote, setResultNote] = useState<Localized | null>(null);
   const [verdicts, setVerdicts] = useState<StoryCourse['verdicts']>(null);
+  const [coursePassed, setCoursePassed] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [startedRun, setStartedRun] = useState<number | null>(null);
   const attempts = useRef(0);
@@ -209,6 +216,7 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
           const ready = at.phase.kind === 'MODULE' ? await markCourseLessonsRead(deps, uid, at) : at;
           if (ready !== at) setCursor(ready);
           const draw = await openCourseQuiz(deps, uid, ready, level);
+          quizDrawSeed.current = draw.seed;
           setQuiz(
             draw.items.length === 0
               ? { kind: 'empty' }
@@ -239,7 +247,8 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
     const items = quiz.quiz.items;
     const chosen = new Map(sitting.answers.map(answer => [answer.itemId, answer.chosen]));
     void guarded(async () => {
-      const { cursor: next } = await submitCourseQuiz(deps, uid, cursor, items, items.map(item => chosen.get(item.id) ?? null));
+      const { cursor: next } = await submitCourseQuiz(deps, uid, cursor, items, items.map(item => chosen.get(item.id) ?? null),
+        quizDrawSeed.current === null ? undefined : { drawSeed: quizDrawSeed.current, sitting });
       setCursor(next);
       if (next.phase.kind === 'DRIVE') await planDrive(next, [m.courseDriveNow]);
       else if (next.phase.kind === 'QUIZ_REVIEW') {
@@ -258,14 +267,23 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
     setLevelResult(result);
     saveLevelResult(result);
     if (!run) return;
+    if (run.free) {
+      setFinished({ levelId: run.levelId, level: run.drive.level });
+      setResultNote(m.replayOutside);
+      return;
+    }
     setFinished({ levelId: run.levelId, level: run.drive.level, topics: run.drive.composed ? [...new Set(run.drive.composed.items.map(item => item.competency))] : undefined });
     setSaving(true);
     setResultNote(null);
     setVerdicts(null);
+    setCoursePassed(null);
     finishCourseDrive(account, run.cursor, run.drive, result, telemetry, run.language, play)
       .then(settled => {
         setCursor(settled.cursor);
         setVerdicts(settled.verdicts.map(v => ({ competency: v.competency, correct: v.correct, total: v.total, passed: v.passed })));
+        setCoursePassed(settled.passed);
+        // The map keeps the stars the course's own verdict gives, by the one rule.
+        saveLevelResult({ ...result, stars: starsForMistakes(settled.passed, mistakesIn(result.logs)) });
         const { phase } = settled.cursor;
         const next =
           phase.kind === 'CERTIFIED' ? m.courseCertified
@@ -295,7 +313,7 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
     frontierLevelId: progress.frontierLevel,
     certified: progress.endReason === 'certified',
     loading: cursor === null,
-    openAll: false,
+    openAll: routing.openAll,
     note: briefed && briefed.levelId === activeLevel ? briefed.note : null,
     resultNote,
     saving,
@@ -303,7 +321,17 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
     continueCourse,
     topics: current?.drive.composed ? [...new Set(current.drive.composed.items.map(item => item.competency))] : finishedTopics,
     verdicts,
-    playFreeReplay: () => {},
+    passed: coursePassed,
+    playFreeReplay: (levelId: number) => {
+      if (!routing.openAll) return;
+      const level = LEVELS.find(entry => entry.id === levelId) ?? null;
+      if (!level || !cursor) return;
+      setRun({ levelId, cursor, drive: { levelId, level, composed: null, attemptSeed: Date.now() }, language, attempt: ++attempts.current, free: true });
+      setBriefed({ levelId, note: { heading: m.courseHeading, lines: [m.replayOutside] } });
+      setQuiz({ kind: 'no-quiz' });
+      setStartedRun(null);
+      navigate(`/play/story/${levelId}/briefing`);
+    },
   };
 
   const courseBriefing: BriefingCourse | null =

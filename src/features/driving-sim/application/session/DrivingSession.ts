@@ -19,7 +19,7 @@
  * It has no lifecycle of its own. It subscribes to nothing and schedules
  * nothing, so a drive stops simply by not being updated again — the host owns
  * the animation frame and is the only thing that can end one. There is
- * deliberately no `dispose()`: 
+ * deliberately no `dispose()`.
  */
 import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { getRerollableSlots } from '@/features/driving-sim/domain/scenario/levelCatalog';
@@ -107,13 +107,19 @@ export interface DrivingSessionOptions {
    * infinity, so the limit never cuts short the drive it is measured from.
    */
   timeLimitSteps?: number;
+  /**
+   * How many world steps a panel may hold the drive before it closes
+   * unanswered. Omitted means `PANEL_STEPS`; only the admin's
+   * scenario check passes infinity, so a panel waits for its answer.
+   */
+  panelSteps?: number;
 }
 
 /**
  * Never re-roll an event closer than this. Derived from the renderer's own
  * visibility filter (the cutoff is 1300 distance-units ahead) plus a buffer, so
  * a re-roll can never swap a sign's appearance while it is already on screen.
- * Exported for the fourth experiment's environment, which re-rolls as a drive does.
+ * Exported for the offline simulation, which re-rolls as a drive does.
  */
 export const REROLL_SAFETY_MARGIN = 1400;
 
@@ -182,7 +188,7 @@ export const WRONG_SIDE_PENALTY_EVENT: ScenarioEvent = {
 /**
  * Charged while the car is over the road's limit on clear road.
  *
- * RA 4136 §35 is the rule, and it binds on the whole road, not only beside a
+ * Republic Act No. 4136, Section 35 is the rule, and it binds on the whole road, not only beside a
  * sign. Scored like the crawl penalty — points only, a standing offence, never
  * BKT evidence (`bktEvidence`) — and at the crawl's weight, which is
  * an assumption until step 7 gives the weights a basis.
@@ -195,7 +201,7 @@ export const OVER_LIMIT_PENALTY_EVENT: ScenarioEvent = {
   correctAction: 'brake',
   points: 10,
   penaltyMessage:
-    "You are over this road's limit. RA 4136 Section 35 sets a road's limit everywhere on it, not only beside a sign.",
+    "You are over this road's limit. Republic Act No. 4136, Section 35 sets a road's limit everywhere on it, not only beside a sign.",
   rewardMessage: '',
   duration: 0,
   competency: 'speed_control',
@@ -270,6 +276,7 @@ export class DrivingSession {
   private readonly support: SupportLevel;
   /** World steps of driving the run may spend. */
   private readonly timeLimitSteps: number;
+  private readonly panelSteps: number;
   private signCoverage: SignCoverage;
 
   private world: DrivingWorld;
@@ -281,6 +288,7 @@ export class DrivingSession {
     this.fsm = options.fsm;
     this.support = options.support ?? 'full';
     this.timeLimitSteps = options.timeLimitSteps ?? timeLimitStepsFor(options.level.id);
+    this.panelSteps = options.panelSteps ?? PANEL_STEPS;
     this.curves = curvesForLevel(options.level);
     this.speedProfile = speedProfileFor(options.level.speedLimit);
     this.isTutorialLevel = isTutorial(options.level);
@@ -304,7 +312,7 @@ export class DrivingSession {
     this.fsm.reset();
     this.world = createDrivingWorld(options.level, this.initialDistance);
     this.world.envObjects = generateEnvObjects(options.level.roadLength, Math.random, options.level.route);
-    this.snapshot = project(this.world, options.level, this.curves, this.timeLimitSteps);
+    this.snapshot = project(this.world, options.level, this.curves, this.timeLimitSteps, this.panelSteps);
   }
 
   /** Starts the drive over, on the same level. */
@@ -313,12 +321,12 @@ export class DrivingSession {
     this.world = createDrivingWorld(this.level, this.initialDistance);
     this.world.envObjects = generateEnvObjects(this.level.roadLength, Math.random, this.level.route);
     this.frame = null;
-    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps);
+    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps, this.panelSteps);
   }
 
   /** What the screen should show. A fresh object each frame; compare with `snapshotChanged`. */
   getSnapshot(): DrivingSnapshot {
-    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps);
+    this.snapshot = project(this.world, this.level, this.curves, this.timeLimitSteps, this.panelSteps);
     return this.snapshot;
   }
 
@@ -611,6 +619,7 @@ export class DrivingSession {
   ): void {
     const { world } = this;
     world.handled.add(event.triggerAtDistance);
+    world.handledAt.set(event.triggerAtDistance, world.drivenSteps);
     world.activeEvent = null;
     world.playerActed = false;
     world.laneCue = null;
@@ -672,7 +681,7 @@ export class DrivingSession {
       overlay: { flash?: number; veil?: number } = {}
     ) => {
       const composed = composeWorldFrame(
-        { level: liveLevel, distance: car.distance, handled: world.handled, curves, support: this.support },
+        { level: liveLevel, distance: car.distance, handled: world.handled, handledAt: world.handledAt, drivenSteps: world.drivenSteps, curves, support: this.support },
         {
           chaseLane: world.chaseLane ?? undefined,
           playerLane: car.lane,
@@ -866,9 +875,9 @@ export class DrivingSession {
           veil: 1 - (visibilityAt(world.events, car.distance) ?? 1),
         }
       );
-      // No panel holds the drive for longer than `PANEL_STEPS`.
+      // No panel holds the drive for longer than `panelSteps`.
       world.heldSteps += 1;
-      if (world.heldSteps >= PANEL_STEPS) events.push(...this.closeHold());
+      if (world.heldSteps >= this.panelSteps) events.push(...this.closeHold());
       return events;
     }
 
@@ -994,11 +1003,13 @@ const project = (
   world: DrivingWorld,
   level: LevelConfig,
   curves: CurveSpan[],
-  timeLimitSteps: number
+  timeLimitSteps: number,
+  panelSteps: number
 ): DrivingSnapshot => ({
-  panelSecondsLeft: world.paused
-    ? Math.max(0, Math.ceil((PANEL_STEPS - world.heldSteps) / DRIVING_STEPS_PER_SECOND))
-    : null,
+  panelSecondsLeft:
+    world.paused && Number.isFinite(panelSteps)
+      ? Math.max(0, Math.ceil((panelSteps - world.heldSteps) / DRIVING_STEPS_PER_SECOND))
+      : null,
   drivingSecondsLeft: Number.isFinite(timeLimitSteps)
     ? Math.max(0, Math.ceil((timeLimitSteps - world.drivenSteps) / DRIVING_STEPS_PER_SECOND))
     : null,

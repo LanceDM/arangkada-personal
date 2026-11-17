@@ -6,6 +6,7 @@
  * position and its solids, so a hitbox and the thing it belongs to cannot drift
  * apart.
  */
+import type { MainRoadVehicleKind } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import type { LaneRequirement } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { CrossingPedestrian } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import {
@@ -314,14 +315,27 @@ const MAIN_ROAD_TRAFFIC_SHARE = 0.5;
 
 export interface MainRoadTraffic {
   clear: boolean;
-  /** The two crossing vehicles, empty while the gap is open. */
-  cars: (Point & { color: string })[];
+  /**
+   * The two crossing vehicles, empty while the gap is open: the first comes
+   * from the left, the second from the right. `kind` is what is drawn; absent
+   * is an ordinary car.
+   */
+  cars: (Point & { color: string; kind?: MainRoadVehicleKind })[];
 }
+
+/** The body a vehicle crossing the main road is hit at, side-on. */
+export const MAIN_ROAD_BODY: Record<MainRoadVehicleKind, { width: number; height: number }> = {
+  car: { width: 50, height: 24 },
+  jeepney: { width: 54, height: 30 },
+  tricycle: { width: 34, height: 30 },
+  motorcycle: { width: 38, height: 20 },
+};
 
 export const mainRoadTraffic = (
   screenY: number,
   yielded: boolean,
-  nowMs: number
+  nowMs: number,
+  named?: { kind: MainRoadVehicleKind; from: 'left' | 'right' }
 ): MainRoadTraffic => {
   const phase = (nowMs % MAIN_ROAD_CYCLE_MS) / MAIN_ROAD_CYCLE_MS;
   if (yielded || phase >= MAIN_ROAD_TRAFFIC_SHARE) return { clear: true, cars: [] };
@@ -332,8 +346,8 @@ export const mainRoadTraffic = (
   return {
     clear: false,
     cars: [
-      { x: -80 + progress * travel, y: top + ROAD_WIDTH / 3, color: '#dc2626' },
-      { x: CANVAS_WIDTH + 80 - progress * travel, y: top + (ROAD_WIDTH * 2) / 3, color: '#2563eb' },
+      { x: -80 + progress * travel, y: top + ROAD_WIDTH / 3, color: '#dc2626', ...(named?.from === 'left' ? { kind: named.kind } : {}) },
+      { x: CANVAS_WIDTH + 80 - progress * travel, y: top + (ROAD_WIDTH * 2) / 3, color: '#2563eb', ...(named?.from === 'right' ? { kind: named.kind } : {}) },
     ],
   };
 };
@@ -365,6 +379,9 @@ export const crossingPedestrianPositions = (
  * Stood in the driving lane, not off to one side: a centred car has to stop
  * rather than roll past while answering.
  */
+/** How far behind the first person each further one in a driveway group walks. */
+export const DRIVEWAY_GROUP_GAP = 16;
+
 export const drivewayPedestrianX = (walkedOff = 0): number =>
   CANVAS_WIDTH / 2 + 6 + walkedOff * 150;
 

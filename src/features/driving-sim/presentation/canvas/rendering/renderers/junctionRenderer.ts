@@ -19,6 +19,7 @@ import {
 import type { RoadAt } from '@/features/driving-sim/domain/world/eventPlacement';
 import { mergeLaneGeometry, tollGateBarriers, type MainRoadTraffic } from '@/features/driving-sim/domain/world/sceneGeometry';
 import type { GantryPanel } from '@/features/driving-sim/domain/scene/SceneNode';
+import { drawJeepney, drawMotorcycle, drawTricycle } from './vehicleRenderer';
 
 const drawCrossStreet = (ctx: CanvasRenderingContext2D, screenY: number) => {
   drawIntersection(ctx, (CANVAS_WIDTH - ROAD_WIDTH) / 2, screenY, { crossTraffic: true });
@@ -458,8 +459,20 @@ const drawMainRoadJunction = (
   // Posed by the world, not recomputed here: these are the same vehicles the
   // collision pass tests, so the banner below cannot say CLEAR while a body
   // you can still hit is on the road.
-  for (const car of traffic.cars) {
-    drawCrossingCar(ctx, car.x, car.y, car.color);
+  for (const [index, car] of traffic.cars.entries()) {
+    if (!car.kind || car.kind === 'car') {
+      drawCrossingCar(ctx, car.x, car.y, car.color);
+      continue;
+    }
+    // Nose-up sprites, turned to face along the main road: the first vehicle
+    // travels left to right, the second right to left.
+    ctx.save();
+    ctx.translate(car.x, car.y);
+    ctx.rotate(index === 0 ? Math.PI / 2 : -Math.PI / 2);
+    if (car.kind === 'jeepney') drawJeepney(ctx, 0, 0, 0.8);
+    else if (car.kind === 'tricycle') drawTricycle(ctx, 0, 0, 1);
+    else drawMotorcycle(ctx, 0, 0, 0.9);
+    ctx.restore();
   }
 
   // Say plainly, in the scene, whether it is safe to move.

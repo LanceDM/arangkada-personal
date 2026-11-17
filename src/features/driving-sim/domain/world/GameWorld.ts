@@ -148,6 +148,19 @@ export interface DrivingWorld {
   events: ScenarioEvent[];
   /** Trigger distances already answered. */
   handled: Set<number>;
+  /**
+   * When each was answered, in `drivenSteps`: what a pedestrian who walks
+   * clear after the answer walks by, so they keep walking while the car waits
+   * rather than only as it moves. The world's step clock, never the device's
+   *: a walker is solid, so a scripted drive must replay the same.
+   */
+  handledAt: Map<number, number>;
+  /**
+   * A full stop made short of a stop scenario's graded zone: when the car came
+   * to rest there (in `drivenSteps`), and whether it had moved since the
+   * approach opened. See EARLY_STOP_HOLD_STEPS in scanEvents.
+   */
+  earlyStop: { since: number | null; moved: boolean };
   roadOffset: number;
   envObjects: EnvObject[];
 
@@ -399,6 +412,8 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
 
     events: level.events,
     handled: new Set<number>(),
+    handledAt: new Map<number, number>(),
+    earlyStop: { since: null, moved: false },
     roadOffset: 0,
     envObjects: [],
 

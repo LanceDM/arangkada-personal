@@ -298,11 +298,12 @@ type SceneNodeShape =
   | { kind: 'sign'; x: number; y: number; plate: SignPlate; cleared: boolean }
   | { kind: 'road-situation'; situation: RoadSituation }
   /**
-   * An LTO checkpoint: the whole roadside scene plus its floating label. It is
+   * A roadside checkpoint: the whole roadside scene plus its floating label. It is
    * suppressed once the stop has been made, and while the scene is at the very
    * top or bottom of the frame.
    */
-  | { kind: 'checkpoint'; roadX: number; screenY: number; label: string | null }
+  /** `open`: the check is answered and the boom is raised, so the road ahead is visibly clear. */
+  | { kind: 'checkpoint'; roadX: number; screenY: number; label: string | null; open: boolean }
   /**
    * An enforcer at the right curb flagging the car down (`inspection.pullOver`):
    * a traffic stop, not a checkpoint, so no barrier across the road and no
@@ -322,7 +323,8 @@ type SceneNodeShape =
   /** The zebra band with dropped curbs that every crossing in the game uses. */
   | { kind: 'crossing-approach'; roadX: number; y: number; height: number }
   /** A footpath across a driveway mouth, with whoever is still on it. */
-  | { kind: 'driveway-mouth'; roadX: number; screenY: number; walkedOff: number }
+  /** `people`: who is crossing, the first in front; they walk clear together. */
+  | { kind: 'driveway-mouth'; roadX: number; screenY: number; walkedOff: number; people: CrossingPedestrian[] }
   /** A vehicle or animal standing in the carriageway. */
   | { kind: 'road-actor'; actor: RoadActorSpec; x: number; y: number }
   /** The flashing "something is there" glyph, when nothing more specific is known. */

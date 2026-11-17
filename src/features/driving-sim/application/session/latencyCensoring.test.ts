@@ -128,7 +128,7 @@ describe('a decision the window closed on', () => {
   it('says nothing where the whole window was the answer', () => {
     // A prohibition passed by driving on, and a speed read at the sign: the
     // window closing is how both are always settled.
-    for (const id of ['level3.route-restriction.no-entry-all-vehicles', 'level2.settle.posted-limit']) {
+    for (const id of ['level3.route-restriction.no-entry-all-vehicles', 'level3.speed.preferred-max-30']) {
       const kept = drive(id);
       expect(kept.settlement, id).toBe('expired');
       expect(kept.reaction, id).toEqual({ kind: 'none' });

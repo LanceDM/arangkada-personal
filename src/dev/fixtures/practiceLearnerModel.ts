@@ -23,7 +23,7 @@
 //     chance of a correct answer (assumption A1, this game's own screens), and
 //     it changes how much an attempt teaches, in opposite directions for a
 //     novice and an expert - the expertise reversal effect, calibrated to a
-//     published meta-analysis rather than chosen. the algorithm notes,
+//     published meta-analysis rather than chosen. The experiment protocol,
 //     "Experiment protocol" sections 2-3, fixed all of this before any run.
 import type { DrivingCompetency, SupportLevel } from '@/domain/learner/competency';
 import { COMPETENCIES } from '@/domain/learner/profile';
@@ -74,7 +74,7 @@ export interface EffectSizes {
  * betaExpert*s`, positive for a novice (support helps) and negative for an
  * expert (it gets in the way). Not chosen: calibrated so the simulator
  * reproduces the effect sizes above (`calibrateSupportGain` in
- * a developers' script).
+ * the simulation environment).
  */
 export interface SupportGain {
   betaNovice: number;
@@ -133,7 +133,7 @@ export const COMMITTED_EFFECT_SIZES: EffectSizes = {
 /**
  * How much of an attempt's gain spills to the practised competency's curriculum
  * relatives. The edges come from `relatedness.ts`, which is derived from
- * the curriculum's Traceability Matrix - a row assigning one LTO topic to two
+ * the curriculum's Traceability Matrix - a row assigning one curriculum topic to two
  * levels is that document's own statement that the knowledge is reinforced in
  * both, so partial transfer is the curriculum's claim, not a new assumption.
  */
@@ -144,7 +144,7 @@ export const RELATED_TRANSFER = 0.35;
  * episode under every policy, so the simulation described forgetting faster than
  * learning, which is not a study period). At 0.005 a sensible policy ends above
  * where it started while forgetting still bites. Re-check it with
- * a developers' script, whose true-skill outcomes are where each
+ * the experiment, whose true-skill outcomes are where each
  * condition ends; learners start at a mean of 25.
  */
 export const RETENTION_DECAY = 0.005;
@@ -339,12 +339,12 @@ export const readinessReward = (args: {
 /**
  * Which protocol's reward a training run uses.
  *
- * `mean-readiness` is the first experiment's, kept so that experiment stays runnable exactly as it
- * was published. `weakest-link` is the second experiment's: the same two terms over the same
+ * `mean-readiness` is the first study's, kept so it stays runnable exactly as
+ * it was published. `weakest-link` is the second's: the same two terms over the same
  * syllabus, aggregated by the minimum instead of the mean, so the policy is
  * trained on the quantity the experiment judges it by - weakest-competency
- * readiness. That experiment trained on the mean and judged the floor, and reported the
- * mismatch as a limitation; that is the defect the second experiment repairs.
+ * readiness. The first trained on the mean and judged the floor, and reported
+ * the mismatch as a limitation; that is the defect the second repairs.
  */
 export type RewardKind = 'mean-readiness' | 'weakest-link';
 

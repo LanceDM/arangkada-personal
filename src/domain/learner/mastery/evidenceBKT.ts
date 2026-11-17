@@ -30,12 +30,15 @@ export interface EvidenceBKTModel {
   pre_test: EvidenceParams;
 }
 
-/** Hand-set, fixed before the first participant; fitted to the real answers only after the study. */
+/**
+ * Fixed design values, held for every participant and never calibrated (a delimitation):
+ * the reasons are in the team's algorithm notes. pInit 0.5 is neutral, so each
+ * learner's own pre-test sets their starting mastery. No forgetting, by design.
+ */
 export const EVIDENCE_BKT_MODEL: EvidenceBKTModel = {
-  pInit: 0.3,
+  pInit: 0.5,
   drive: { pTransit: 0.03, pSlip: 0.1, pGuess: 0.2 },
-  // OPEN (carried from the groupmate's code): whether the quiz gives feedback after each answer
-  // decides whether a learning step applies during it. Kept on until that is decided.
+  // A learning step applies: every quiz item is followed by its correct answer and explanation.
   quiz: { pTransit: 0.03, pSlip: 0.1, pGuess: 0.25 },
   pre_test: { pTransit: 0, pSlip: 0.1, pGuess: 0.25 },
 };
@@ -43,7 +46,7 @@ export const EVIDENCE_BKT_MODEL: EvidenceBKTModel = {
 export const evidenceSourceOf = (log: Pick<ActionLog, 'source'>): EvidenceSource => log.source ?? 'drive';
 
 /** A log BKT reads: tagged with a known competency, graded, answered, and not a standing penalty. */
-const isEvidence = (log: ActionLog): log is ActionLog & { competency: DrivingCompetency } =>
+export const isEvidence = (log: ActionLog): log is ActionLog & { competency: DrivingCompetency } =>
   !!log.competency &&
   (COMPETENCIES as string[]).includes(log.competency) &&
   log.result !== 'neutral' &&

@@ -127,12 +127,17 @@ describe('the admin frame', () => {
     expect(links.map(link => [link.textContent, link.getAttribute('href')])).toEqual([
       ['Overview', '/admin'],
       ['Participants', '/admin/pilot'],
+      ['Players', '/admin/players'],
       ['Replay', '/admin/replay'],
-      ['Routing flow', '/admin/routing'],
-      ['Q-learning', '/admin/q-learning'],
+      ['Course flow', '/admin/course-flow'],
+      ['Q-learning', '/admin/course-q-learning'],
+      ['BKT', '/admin/course-bkt'],
+      ['Routing flow (pilot)', '/admin/routing'],
+      ['Q-learning (pilot)', '/admin/q-learning'],
       ['IRT', '/admin/irt'],
       ['Player report', '/admin/report'],
       ['Quiz items', '/admin/quiz'],
+      ['Scenarios', '/admin/scenarios'],
       ['Test mode', '/admin/test-mode'],
     ]);
     expect(links.filter(link => link.getAttribute('aria-current') === 'page').map(link => link.textContent)).toEqual(['Participants']);

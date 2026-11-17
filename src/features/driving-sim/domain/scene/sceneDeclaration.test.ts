@@ -99,6 +99,10 @@ describe('every scenario declares its own scene', () => {
     const undeclared = everyEvent()
       .filter(({ event }) => ownsItsScene(event))
       .filter(({ level, event }) => sceneOf(level, event).kind === 'nothing')
+      // Declared people are composed beside any scene, an empty road included
+      // (`declaredPedestrians`): a pedestrian stepping out away from any
+      // crossing is a declaration, not a scene left to the prose.
+      .filter(({ event }) => !event.pedestrians?.length)
       .map(({ event }) => `${event.id} (${event.type})`);
 
     expect(undeclared).toEqual([]);

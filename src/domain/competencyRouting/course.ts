@@ -57,6 +57,7 @@ import {
   type RewardWeights,
   type ScenarioResult,
   type WarmUp,
+  type RewardKind,
 } from './qLearning';
 
 export const TUTORIAL_STAGE = 0;
@@ -74,14 +75,22 @@ export type CoursePhase =
   | { kind: 'DRIVE'; level: number }
   | { kind: 'REPEAT'; level: CompetencyStage }
   | { kind: 'FINAL' }
-  | { kind: 'CERTIFIED' };
+  | { kind: 'CERTIFIED' }
+  /** The course ended without the certificate: the participant chose to finish the study (the end path). */
+  | { kind: 'FINISHED'; reason: CourseFinishReason };
+
+/** Why a course ended without the certificate: after the failed finals, or at the study's deadline. */
+export type CourseFinishReason = 'final_attempts' | 'deadline';
+
+/** Failed final exams after which the study home offers to finish the study. */
+export const FINAL_ATTEMPTS_BEFORE_FINISH = 3;
 
 export const phaseId = (phase: CoursePhase): string =>
-  phase.kind === 'FINAL' || phase.kind === 'CERTIFIED' ? phase.kind : `${phase.kind}(${phase.level})`;
+  phase.kind === 'FINAL' || phase.kind === 'CERTIFIED' || phase.kind === 'FINISHED' ? phase.kind : `${phase.kind}(${phase.level})`;
 
-/** The level a phase plays or teaches; null once certified. */
+/** The level a phase plays or teaches; null once the course has ended. */
 export const phaseLevel = (phase: CoursePhase): number | null =>
-  phase.kind === 'CERTIFIED' ? null : phase.kind === 'FINAL' ? FINAL_STAGE : phase.level;
+  phase.kind === 'CERTIFIED' || phase.kind === 'FINISHED' ? null : phase.kind === 'FINAL' ? FINAL_STAGE : phase.level;
 
 export interface CompetencyProgress {
   attempts: number;
@@ -115,6 +124,12 @@ export interface PendingDecision {
   /** H: graded decisions the action added. */
   addedDecisions: number;
   decidedAt: number;
+  /**
+   * The episode ended with this decision and it waits for the competency's next
+   * measurement after the level (Option 2): a `none`, or a practice or review
+   * the attempt cap closed. Absent on cursors saved before it: read as `none`.
+   */
+  awaitsOutcome?: boolean;
 }
 
 export interface CourseCursor {
@@ -130,6 +145,8 @@ export interface CourseCursor {
   flagged: { levelId: number; competency: DrivingCompetency }[];
   /** Decisions taken so far: the next decision's sequence number. */
   seq: number;
+  /** Final exams failed so far; absent before the first. */
+  finalFailures?: number;
 }
 
 export const COURSE_SCHEMA_VERSION = 1;
@@ -309,6 +326,8 @@ export interface RewardRecord {
   next: QState | null;
   /** Where the next measurement came from. */
   measuredBy: 'drive' | 'quiz' | 'final';
+  /** Option 2: a step earns only its cost; a terminal reward earns the outcome too. */
+  kind: RewardKind;
   timestamp: number;
 }
 
@@ -335,7 +354,9 @@ export interface DriveInput {
    * The stage's competencies this drive could place no scenario for: the
    * level's road can host none that fits. Each
    * is closed for this stage with no decision and no reward, since nothing
-   * measured it; the stages that teach it elsewhere still measure it.
+   * measured it; the stages that teach it elsewhere still measure it. A
+   * competency an ended drive never asked is not listed here: it is not
+   * measured, and stays open.
    */
   unmeasurable?: readonly DrivingCompetency[];
 }
@@ -354,10 +375,21 @@ const measuredState = (m: CompetencyMeasurement): QState => ({
   result: m.passed ? 'passed' : 'failed',
 });
 
+const awaitsOutcome = (decision: PendingDecision): boolean => decision.awaitsOutcome ?? decision.action === 'none';
+
 /**
- * Rewards every pending decision whose competency `measurements` measured,
- * r = A_next + 0.5 Pass - 0.02 H, with s' the measured state, or null (Q = 0)
- * when no decision for that competency follows.
+ * Rewards the pending decisions on the competencies `measurements` measured
+ * (Option 2, algorithm ledger §2.3a: one episode per competency per level,
+ * gamma = 1). `level` is the stage a drive measured; null for a quiz or the
+ * final exam, which always come after the level that decided.
+ *
+ * - Same level, a practice or review, and a decision follows: a step, r =
+ *   -psi * H, s' the measured state.
+ * - Same level, a practice or review the cap closes: no reward yet; it now
+ *   waits for the next measurement after the level.
+ * - Same level, a decision already waiting (a `none`): untouched.
+ * - A later level, a quiz or the final exam: terminal, r = A - psi * H, s'
+ *   null. Nothing chains across levels.
  */
 const rewardPending = (
   pending: readonly PendingDecision[],
@@ -365,6 +397,7 @@ const rewardPending = (
   willDecide: ReadonlySet<DrivingCompetency>,
   table: QTable,
   measuredBy: RewardRecord['measuredBy'],
+  level: number | null,
   now: number,
   weights: RewardWeights
 ) => {
@@ -379,31 +412,32 @@ const rewardPending = (
       stillPending.push(decision);
       continue;
     }
-    const nextState = willDecide.has(m.competency) ? measuredState(m) : null;
-    const reward = rewardOf({ accuracy: m.accuracy, passed: m.passed }, decision.addedDecisions, weights);
+    const sameLevel = level !== null && decision.levelId === level;
+    if (sameLevel && awaitsOutcome(decision)) {
+      stillPending.push(decision);
+      continue;
+    }
+    if (sameLevel && !willDecide.has(m.competency)) {
+      stillPending.push({ ...decision, awaitsOutcome: true });
+      continue;
+    }
+    const kind: RewardKind = sameLevel ? 'step' : 'terminal';
+    const nextState = kind === 'step' ? measuredState(m) : null;
+    const reward = rewardOf({ accuracy: m.accuracy, passed: m.passed }, decision.addedDecisions, weights, kind);
     next = updateQ(next, decision.state, decision.action, reward, nextState, GAMMA).table;
     operations.push({ kind: 'update', state: decision.state, action: decision.action, reward, next: nextState, gamma: GAMMA });
     rewards.push({
       decisionId: decision.id, competency: decision.competency, state: decision.state, action: decision.action, reward,
-      accuracy: m.accuracy, passed: m.passed, addedDecisions: decision.addedDecisions, next: nextState, measuredBy, timestamp: now,
+      accuracy: m.accuracy, passed: m.passed, addedDecisions: decision.addedDecisions, next: nextState, measuredBy, kind, timestamp: now,
     });
   }
   return { rewards, operations, stillPending, table: next };
 };
 
 /**
- * A short-quiz sitting was graded. Reward timing is "the competency's next
- * measurement anywhere" (Tentative, OPEN for discussion, 2026-10-28): a
- * pending decision is rewarded by the first graded answers its competency gets
- * after it, so a quiz that covers the competency settles it before the drive.
- *
- * The quiz only covers the stage's own competencies, and every one of them
- * gets a drive decision next, so s' is the quiz's state (mastery after the
- * quiz, passed at it) and never terminal.
- *
- * OPEN: s' is the state after the quiz, but the next decision is taken at the
- * drive's state, so the max over Q(s', a') looks at a state the learner moves
- * on from before deciding. To discuss with the reward function.
+ * A short-quiz sitting was graded. The quiz opens a level, so every pending
+ * decision on a competency it measured comes from an earlier level and is
+ * rewarded terminally here (Option 2): r = A - psi * H, s' null.
  */
 export const quizMeasured = (
   cursor: CourseCursor,
@@ -412,8 +446,7 @@ export const quizMeasured = (
   now: number,
   weights: RewardWeights = DEFAULT_REWARD
 ): { cursor: CourseCursor; rewards: RewardRecord[]; operations: QOperation[]; table: QTable } => {
-  const willDecide = new Set(measurements.map(m => m.competency));
-  const rewarded = rewardPending(cursor.pending, measurements, willDecide, table, 'quiz', now, weights);
+  const rewarded = rewardPending(cursor.pending, measurements, new Set(), table, 'quiz', null, now, weights);
   return { cursor: { ...cursor, pending: rewarded.stillPending }, rewards: rewarded.rewards, operations: rewarded.operations, table: rewarded.table };
 };
 
@@ -422,7 +455,9 @@ export const quizMeasured = (
  * decisions on them are rewarded now, and terminally, because no routing
  * decision follows the final exam (Tentative, part of "next measurement
  * anywhere"). A retaken final settles nothing more: the first sitting
- * already settled what it measured.
+ * already settled what it measured. A sitting that ended early measures only
+ * the competencies it asked: the caller leaves the rest out, so their
+ * decisions stay pending for the next sitting, and none is rewarded twice.
  */
 export const finalMeasured = (
   cursor: CourseCursor,
@@ -431,17 +466,16 @@ export const finalMeasured = (
   now: number,
   weights: RewardWeights = DEFAULT_REWARD
 ): { cursor: CourseCursor; rewards: RewardRecord[]; operations: QOperation[]; table: QTable } => {
-  const rewarded = rewardPending(cursor.pending, measurements, new Set(), table, 'final', now, weights);
+  const rewarded = rewardPending(cursor.pending, measurements, new Set(), table, 'final', null, now, weights);
   return { cursor: { ...cursor, pending: rewarded.stillPending }, rewards: rewarded.rewards, operations: rewarded.operations, table: rewarded.table };
 };
 
 /**
  * A drive or repeat drive ended. In order:
  *
- * 1. Every pending decision whose competency this drive measured (and no quiz
- *    measured first) is rewarded, r = A_next + 0.5 Pass - 0.02 H, with s' this
- *    measurement's state; s' is null (Q = 0) when the competency has no
- *    decision after it.
+ * 1. Every pending decision whose competency this drive measured is rewarded
+ *    as `rewardPending` says: a step within the level, terminal from an
+ *    earlier level.
  * 2. Each counted competency gets its decision, unless the attempt cap ends it.
  * 3. The stage advances when every competency is done; otherwise a repeat drive.
  *
@@ -476,7 +510,7 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
   }
 
   // 1. Rewards for pending decisions measured here.
-  const rewarded = rewardPending(cursor.pending, input.measurements, willDecide, table, 'drive', input.now, weights);
+  const rewarded = rewardPending(cursor.pending, input.measurements, willDecide, table, 'drive', level, input.now, weights);
   table = rewarded.table;
   operations.push(...rewarded.operations);
   rewards.push(...rewarded.rewards);
@@ -530,6 +564,7 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
       action: decision.action,
       addedDecisions: ADDED_DECISIONS_PER_ACTION[decision.action],
       decidedAt: input.now,
+      awaitsOutcome: decision.action === 'none',
     });
 
     if (state.result === 'failed') progress.failedBefore = true;
@@ -539,8 +574,8 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
     stage[m.competency] = progress;
   }
   for (const competency of input.unmeasurable ?? []) {
-    const progress = stage[competency];
-    if (progress && !progress.done) stage[competency] = { ...progress, done: true, pendingReview: false };
+    const progress = stage[competency] ?? freshProgress();
+    if (!progress.done) stage[competency] = { ...progress, done: true, pendingReview: false };
   }
 
   // 3. Advance.
@@ -572,7 +607,27 @@ export const driveCompleted = (cursor: CourseCursor, input: DriveInput): DriveOu
 /** FINAL -> CERTIFIED on a pass, FINAL again on a fail. */
 export const finalCompleted = (cursor: CourseCursor, passed: boolean, scenarioIds: readonly string[]): CourseCursor => {
   expect(cursor, ['FINAL'], 'final_completed');
-  return { ...cursor, phase: passed ? { kind: 'CERTIFIED' } : { kind: 'FINAL' }, seen: markSeen(cursor.seen, scenarioIds, cursor.seq) };
+  const seen = markSeen(cursor.seen, scenarioIds, cursor.seq);
+  return passed
+    ? { ...cursor, phase: { kind: 'CERTIFIED' }, seen }
+    : { ...cursor, phase: { kind: 'FINAL' }, seen, finalFailures: (cursor.finalFailures ?? 0) + 1 };
+};
+
+/** Whether this participant may finish the study without the certificate now. */
+export const mayFinishWithoutCertificate = (cursor: CourseCursor, reason: CourseFinishReason): boolean =>
+  cursor.phase.kind !== 'CERTIFIED' && cursor.phase.kind !== 'FINISHED' &&
+  (reason === 'deadline' || (cursor.phase.kind === 'FINAL' && (cursor.finalFailures ?? 0) >= FINAL_ATTEMPTS_BEFORE_FINISH));
+
+/**
+ * The end path: the course ends without the certificate, and the study goes on
+ * to the post-test. Offered after FINAL_ATTEMPTS_BEFORE_FINISH failed finals,
+ * or to anyone not yet certified once the admin's study deadline has passed
+ * (the caller has checked it). Decisions still pending stay unrewarded, as at
+ * any other end of the course.
+ */
+export const finishWithoutCertificate = (cursor: CourseCursor, reason: CourseFinishReason): CourseCursor => {
+  if (!mayFinishWithoutCertificate(cursor, reason)) throw new IllegalTransition(`finish (${reason}) is not legal in ${phaseId(cursor.phase)}`);
+  return { ...cursor, phase: { kind: 'FINISHED', reason }, stage: {}, quiz: null };
 };
 
 /**

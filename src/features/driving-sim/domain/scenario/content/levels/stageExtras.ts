@@ -6,7 +6,7 @@
 // the stage's authored road (`composeDrive.ts`).
 //
 // DRAFT CONTENT: every scenario here is a draft for the group's review and the
-// LTO's validation of the competency mapping. Each cites the module text it
+// an official validation of the competency mapping. Each cites the module text it
 // tests; none has a verified FDM page yet.
 import type { SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import { STAGE_EXTRA_SCENARIOS } from './stageExtraScenarios';

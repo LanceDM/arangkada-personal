@@ -27,6 +27,10 @@ export const saveDeviceCheck = (uid: string, check: DeviceCheckDoc) => studyDeps
 
 export const openSurvey = (uid: string, now: () => number = Date.now) => studyDeps().records.openSurvey(uid, now());
 
+/** "Finish the study" on the home: the course ends without the certificate, and the post-test opens. */
+export const finishStudyCourse = (account: { uid: string; participantCode: string; cohort: string }, reason: 'final_attempts' | 'deadline') =>
+  studyDeps().sources.finishCourse(account, reason);
+
 export const confirmSurvey = (uid: string, now: () => number = Date.now) => studyDeps().records.confirmSurvey(uid, now());
 
 /** Withdraws: nothing more is recorded, and what was given is kept, as the consent page says. */

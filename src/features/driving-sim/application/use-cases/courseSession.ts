@@ -9,8 +9,8 @@ import type { Language } from '@/shared/lib/localized';
 import type { PlayConditions } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 import { drivingSimDeps } from '../dependencies';
 import type { QTableId } from '../ports';
-import { completeCourseDrive, type CourseDeps, type CourseDriveRun } from './competencyCourse';
-import type { CourseCursor } from '@/domain/competencyRouting/course';
+import { completeCourseDrive, finishCourseWithoutCertificate, loadCourse, type CourseDeps, type CourseDriveRun } from './competencyCourse';
+import type { CourseCursor, CourseFinishReason } from '@/domain/competencyRouting/course';
 
 export interface CourseAccount {
   uid: string;
@@ -18,6 +18,8 @@ export interface CourseAccount {
   participantCode: string | null;
   /** The shared table this account trains (the rules allow no other). */
   table: QTableId;
+  /** An admin's account: its course play never changes the shared table. */
+  isAdmin?: boolean;
 }
 
 /** A tab's session id, stamped on every log entry it writes. */
@@ -30,6 +32,12 @@ export const loadCompetencyCourseCursor = (uid: string) => {
   return competencyCourse.loadCursor(uid);
 };
 
+/** The study home's "Finish the study": the account's course ends without the certificate. */
+export const finishCompetencyCourse = async (account: CourseAccount, reason: CourseFinishReason) => {
+  const deps = courseDepsFor(account);
+  await finishCourseWithoutCertificate(deps, account.uid, await loadCourse(deps, account.uid), reason);
+};
+
 export const courseDepsFor = (account: CourseAccount): CourseDeps => {
   const { competencyCourse, bktLog, quizBank } = drivingSimDeps();
   if (!competencyCourse) throw new Error('The course store is not bound: app/dependencies must provide it.');
@@ -39,6 +47,7 @@ export const courseDepsFor = (account: CourseAccount): CourseDeps => {
     quizBank,
     participantCode: account.participantCode,
     table: account.table,
+    teachesTable: account.isAdmin !== true,
     sessionId: SESSION_ID,
     appBuild: import.meta.env.VITE_APP_BUILD ?? 'unknown',
   };

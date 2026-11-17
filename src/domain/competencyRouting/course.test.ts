@@ -6,6 +6,8 @@ import {
   applyQOperations,
   driveCompetencies,
   driveCompleted,
+  finalCompleted,
+  finishWithoutCertificate,
   lessonsRead,
   unrewardedAtEnd,
   quizMeasured,
@@ -19,6 +21,19 @@ import {
   type CourseCursor,
 } from './course';
 import { emptyQTable } from './qLearning';
+
+describe('the end path', () => {
+  it('counts failed finals, and finishes without the certificate only after three or at the deadline', () => {
+    let cursor: CourseCursor = { ...startingCourse(), phase: { kind: 'FINAL' } };
+    for (let i = 0; i < 2; i++) cursor = finalCompleted(cursor, false, []);
+    expect(cursor.finalFailures).toBe(2);
+    expect(() => finishWithoutCertificate(cursor, 'final_attempts')).toThrow(IllegalTransition);
+    cursor = finalCompleted(cursor, false, []);
+    expect(finishWithoutCertificate(cursor, 'final_attempts').phase).toEqual({ kind: 'FINISHED', reason: 'final_attempts' });
+    expect(finishWithoutCertificate({ ...startingCourse(), phase: { kind: 'DRIVE', level: 4 } }, 'deadline').phase).toEqual({ kind: 'FINISHED', reason: 'deadline' });
+    expect(() => finishWithoutCertificate({ ...startingCourse(), phase: { kind: 'CERTIFIED' } }, 'deadline')).toThrow(IllegalTransition);
+  });
+});
 
 const answers = (competency: DrivingCompetency, correct: number, attempt = 1) =>
   [0, 1, 2].map(i => ({ itemId: `${competency}-${attempt}-${i}`, competency, correct: i < correct }));
@@ -124,11 +139,35 @@ describe('the per-competency routing FSM', () => {
     });
     const rewarded = second.rewards.find(r => r.competency === 'document_awareness')!;
     expect(rewarded.action).toBe('practice');
-    // A_next 2/3, passed, practice added 3 decisions.
-    expect(rewarded.reward).toBeCloseTo(2 / 3 + 0.5 - 0.06, 10);
+    // Option 2: a practice followed by another decision in the level is a step, its cost only.
+    expect(rewarded.kind).toBe('step');
+    expect(rewarded.reward).toBeCloseTo(-0.06, 10);
     expect(rewarded.next).toEqual({ mastery: 3, result: 'passed' });
     // The none taken for driver_legality waits for its next measurement.
     expect(second.cursor.pending.some(p => p.competency === 'driver_legality')).toBe(true);
+  });
+
+  it('holds a practice the cap closes for the next measurement after the level, then rewards it terminally', () => {
+    let cursor = quizSubmitted(atLevel1Quiz(), [...answers('driver_legality', 3), ...answers('document_awareness', 3)]);
+    let table = emptyQTable();
+    const drive = (measurements: CompetencyMeasurement[]) => {
+      const outcome = driveCompleted(cursor, { measurements, scenarioIds: [], table, rng: () => 0.01, now: 0 });
+      cursor = outcome.cursor;
+      table = outcome.table;
+      return outcome;
+    };
+    drive([measured('driver_legality', 3, 0.86), measured('document_awareness', 0, 0.2)]);
+    drive([measured('document_awareness', 0, 0.1)]);
+    const capped = drive([measured('document_awareness', 0, 0.05)]);
+    // The third attempt is the cap: the second decision is not rewarded at this drive.
+    expect(capped.rewards.filter(r => r.competency === 'document_awareness')).toHaveLength(0);
+    const waiting = cursor.pending.filter(p => p.competency === 'document_awareness');
+    expect(waiting).toHaveLength(1);
+    expect(waiting[0].awaitsOutcome).toBe(true);
+    const later = quizMeasured({ ...cursor, phase: { kind: 'DRIVE', level: 2 } }, [measured('document_awareness', 2, 0.6)], table, 9);
+    const terminal = later.rewards.find(r => r.competency === 'document_awareness')!;
+    expect(terminal).toMatchObject({ kind: 'terminal', next: null });
+    expect(terminal.reward).toBeCloseTo(2 / 3 - 0.06, 10);
   });
 
   it('ends a competency after 3 attempts and flags it when none was not legal', () => {
@@ -171,7 +210,7 @@ describe('the per-competency routing FSM', () => {
     expect(unrewardedAtEnd(cursor).map(p => p.competency).sort()).toEqual(['document_awareness', 'driver_legality']);
   });
 
-  it('rewards a pending decision at the next quiz that measures its competency (Tentative)', () => {
+  it('rewards a pending decision at the next quiz that measures its competency, terminally', () => {
     const cursor: CourseCursor = {
       ...startingCourse(),
       phase: { kind: 'DRIVE', level: 2 },
@@ -182,8 +221,9 @@ describe('the per-competency routing FSM', () => {
     };
     const out = quizMeasured(cursor, [measured('document_awareness', 2, 0.85)], emptyQTable(), 5);
     expect(out.rewards).toHaveLength(1);
-    expect(out.rewards[0]).toMatchObject({ competency: 'document_awareness', measuredBy: 'quiz', next: { mastery: 3, result: 'passed' } });
-    expect(out.rewards[0].reward).toBeCloseTo(2 / 3 + 0.5, 10);
+    // Option 2: the quiz opens a later level, so the episode's reward is terminal: r = A.
+    expect(out.rewards[0]).toMatchObject({ competency: 'document_awareness', measuredBy: 'quiz', kind: 'terminal', next: null });
+    expect(out.rewards[0].reward).toBeCloseTo(2 / 3, 10);
     // Driver legality is not in Level 2's quiz: it keeps waiting.
     expect(out.cursor.pending.map(p => p.competency)).toEqual(['driver_legality']);
     expect(applyQOperations(emptyQTable(), out.operations)).toEqual(out.table);
@@ -199,7 +239,7 @@ describe('the per-competency routing FSM', () => {
     };
     const out = finalMeasured(cursor, [{ competency: 'parking', accuracy: 1, passed: true, masteryP: 0.9, driveEvidence: 9 }], emptyQTable(), 3);
     expect(out.rewards).toHaveLength(1);
-    expect(out.rewards[0]).toMatchObject({ measuredBy: 'final', next: null, reward: 1.5 });
+    expect(out.rewards[0]).toMatchObject({ measuredBy: 'final', next: null, reward: 1, kind: 'terminal' });
     expect(out.cursor.pending).toEqual([]);
   });
 

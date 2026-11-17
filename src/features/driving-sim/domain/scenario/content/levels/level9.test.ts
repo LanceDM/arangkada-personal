@@ -439,9 +439,7 @@ describe('Level 9 scores the mission it now is', () => {
     const total =
       events.reduce((sum, event) => sum + event.points, 0) +
       level9.aftermath!.hotspots.reduce((sum, spot) => sum + spot.points, 0);
-    expect(level9.requiredScore).toBeLessThan(level9.stars2);
-    expect(level9.stars2).toBeLessThan(level9.stars3);
-    expect(level9.stars3).toBeLessThanOrEqual(total);
+    expect(level9.requiredScore).toBeLessThanOrEqual(total);
   });
 
   it('leaves room past the last scenario for its window to close', () => {

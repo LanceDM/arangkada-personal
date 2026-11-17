@@ -643,13 +643,22 @@ export interface ScenarioEvent {
    */
   neutral?: boolean;
   /**
+   * Out of play: the road does not draw the situation this scenario describes
+   * (2026-11-16 scene audit), so it is never rolled into a slot, composed into
+   * a drive, borrowed or appended as practice, and gives BKT no evidence. It is
+   * kept in the code and listed by the dev and admin tools as not in play,
+   * until a scene can draw it.
+   */
+  offRoad?: true;
+  /**
    * Set only on an event the adaptive remediation selector injected into a
    * level, rather than one the level authored as its own curriculum.
    *
    * Never counted toward the pass mark in the game (`scoreDecision`'s
    * `neutral` rule): no points either way and the streak untouched, so a
-   * level's `requiredScore`/`stars2`/`stars3` mean exactly what they were
-   * calibrated to whether or not remediation fired on this run. The fourth experiment
+   * level's `requiredScore` means exactly what it was
+   * calibrated to whether or not remediation fired on this run. The game-level
+   * simulation
    * scored it upside-only, which let the learners who got one pass on fewer
    * authored points. It is still graded and still logged, because
    * the entire point of injecting it is to get fresh evidence back into the
@@ -870,13 +879,11 @@ export interface LevelConfig {
   name: string;
   description: string;
   roadLength: number;
-  /** What this road is under RA 4136 §35, which sets `speedLimit`. */
+  /** What this road is under Republic Act No. 4136, Section 35, which sets `speedLimit`. */
   roadClass: RoadClass;
   speedLimit: number;
   events: ScenarioEvent[];
   requiredScore: number;
-  stars3: number;
-  stars2: number;
   moduleId: string;
   /** Present on levels that begin with a pre-drive readiness stage. */
   garage?: GarageStage;

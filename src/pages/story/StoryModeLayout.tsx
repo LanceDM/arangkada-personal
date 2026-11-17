@@ -42,10 +42,11 @@ const StoryModeLayout = () => {
   const enrolment = useEnrolment(uid);
   const account = useMemo<CourseAccount | null>(() => {
     if (!uid) return null;
-    if (enrolment.status === 'enrolled') return { uid, participantCode: enrolment.enrolment.code, table: enrolment.enrolment.cohort };
-    if (enrolment.status === 'not-enrolled') return { uid, participantCode: null, table: 'test' };
+    // An admin's course play draws from the table and never changes it.
+    if (enrolment.status === 'enrolled') return { uid, participantCode: enrolment.enrolment.code, table: enrolment.enrolment.cohort, isAdmin };
+    if (enrolment.status === 'not-enrolled') return { uid, participantCode: null, table: 'test', isAdmin };
     return null;
-  }, [uid, enrolment]);
+  }, [uid, enrolment, isAdmin]);
 
   const immediate = routingGroupNow({ uid, canOverride, authLoading: loading });
   const key = `${uid ?? 'guest'}:${canOverride}:${override}`;

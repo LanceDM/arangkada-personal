@@ -1,10 +1,11 @@
-import { Star, ArrowLeft, RotateCcw, BarChart3, ClipboardList, Target, AlertTriangle, Sparkles } from 'lucide-react';
+import { Star, ArrowLeft, RotateCcw, BarChart3, Target, AlertTriangle, Sparkles } from 'lucide-react';
 import { LevelResult } from '@/domain/learner/attempt';
-import { isTutorial, LevelConfig } from '@/features/driving-sim';
+import { choiceLabel, isTutorial, LevelConfig, scenarioChoices } from '@/features/driving-sim';
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { LevelRecommendation } from '@/features/driving-sim';
 import { competencyText } from '@/domain/learner/profile';
-import { useAuthSession } from '@/features/auth';
+import { FINAL_EXAM_LEVEL } from '@/domain/routing/routingTypes';
+import { mistakesIn, starsForMistakes } from '@/domain/learner/stars';
 import { publicAsset } from '@/shared/lib/publicAsset';
 import { useText, type TextOf } from '@/shared/i18n/useText';
 import type { Localized } from '@/shared/lib/localized';
@@ -43,132 +44,70 @@ export interface LevelCompleteCourse {
    */
   topics?: readonly string[];
   verdicts?: readonly { competency: string; correct: number; total: number; passed: boolean }[] | null;
+  /**
+   * The course's verdict on the drive, once saved: every topic passed, or the
+   * final exam's 70% of its scenarios. Null while saving or when the save
+   * failed, and then the screen claims neither a pass nor a fail.
+   */
+  passed?: boolean | null;
 }
 
 const formatCompetency = (competency: string | null | undefined, t: TextOf) => t(competencyText(competency));
 
-/**
- * Competencies are seeded at 100 and only move when the run touches them, so a
- * score alone can't tell "never driven" from "driven perfectly". The run log
- * can: these are the skills this level actually put in front of the player.
- */
-const getPracticedCompetencies = (logs: ActionLog[], scores: Record<string, number>) => {
-  const practiced = new Set<string>();
-  for (const log of logs) {
-    if ((log.result === 'correct' || log.result === 'violation') && log.competency) {
-      practiced.add(log.competency);
-    }
-  }
-
-  return [...practiced]
-    .map(competency => [competency, scores[competency] ?? 100] as [string, number])
-    .sort((a, b) => a[1] - b[1]);
-};
-
 const formatValue = (value: string | null | undefined, t: TextOf) =>
   value ? value.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()) : t(m.notRecorded);
 
-const getMasteryState = (score: number) => {
-  if (score >= 85) {
-    return {
-      label: m.mastered,
-      phase: 'Level Complete',
-      className: 'text-accent',
-      barClassName: 'bg-accent',
-    };
-  }
-
-  if (score >= 70) {
-    return {
-      label: m.improving,
-      phase: 'Mastery Check',
-      className: 'text-primary',
-      barClassName: 'bg-primary',
-    };
-  }
-
-  if (score >= 50) {
-    return {
-      label: m.needsPractice,
-      phase: 'Remediation',
-      className: 'text-signal-amber',
-      barClassName: 'bg-signal-amber',
-    };
-  }
-
-  return {
-    label: m.critical,
-    phase: 'Remediation',
-    className: 'text-destructive',
-    barClassName: 'bg-destructive',
-  };
-};
+/** A topic's count on this drive: never an estimate of what the player knows. */
+interface TopicRow {
+  competency: string;
+  correct: number;
+  total: number;
+}
 
 /**
- * Players get plain driving-school language; the FSM/learning-model vocabulary
- * is kept for admins reviewing a run, in English: the admin area is.
+ * The decisions this drive graded, counted as the stars count them
+ * (`domain/learner/stars`): a standing penalty is no decision, and a practice
+ * item scores nothing either way.
  */
-const copyFor = (isAdmin: boolean, t: TextOf) => isAdmin
-  ? {
-    focus: 'Layered FSM Learning State',
-    strength: 'Layered FSM Learning State',
-    report: 'After-Action Report',
-    mastery: 'Mastery Estimate',
-    recent: 'Recent Evaluations',
-    steps: ['Action Captured', 'Rule Evaluation', 'Learning State', 'Recommendation'],
+const isCountedDecision = (log: ActionLog) =>
+  (log.result === 'correct' || log.result === 'violation') && !log.standing && !log.remediation;
+
+/** Each topic this drive put in front of the player, in the order met. */
+const topicRowsOf = (logs: readonly ActionLog[]): TopicRow[] => {
+  const rows = new Map<string, TopicRow>();
+  for (const log of logs) {
+    if (!isCountedDecision(log) || !log.competency) continue;
+    const row = rows.get(log.competency) ?? { competency: log.competency, correct: 0, total: 0 };
+    row.total += 1;
+    if (log.result === 'correct') row.correct += 1;
+    rows.set(log.competency, row);
   }
-  : {
-    focus: t(m.focus),
-    strength: t(m.strength),
-    report: t(m.report),
-    mastery: t(m.mastery),
-    recent: t(m.recent),
-    steps: [t(m.stepDid), t(m.stepJudged), t(m.stepNext), t(m.stepPractice)],
+  return [...rows.values()];
+};
+
+/** The topic with the most mistakes on this drive (the first met on a tie), or null on a clean drive. */
+const topicToWorkOn = (rows: readonly TopicRow[]): TopicRow | null =>
+  rows.reduce<TopicRow | null>(
+    (worst, row) => (row.total - row.correct > (worst ? worst.total - worst.correct : 0) ? row : worst),
+    null,
+  );
+
+/**
+ * What a decision was, in the words the player saw. A question (a garage or
+ * crash-scene point, a frozen prompt) is named by its choices' labels: its
+ * `action` is only the token a choice submits, and "You chose Accelerate"
+ * would be read as the car's. A scenario driven with the car keeps its move.
+ */
+const describeDecision = (log: ActionLog, level: LevelConfig, t: TextOf) => {
+  const choices = scenarioChoices(level, log.scenarioId);
+  if (!choices) {
+    return { question: false, chose: formatValue(log.action, t), expected: formatValue(log.expectedAction, t) };
+  }
+  return {
+    question: true,
+    chose: choiceLabel(choices, log.action) ?? (log.unanswered ? t(m.noAnswer) : formatValue(log.action, t)),
+    expected: choiceLabel(choices, log.expectedAction) ?? formatValue(log.expectedAction, t),
   };
-
-const buildAfterActionSteps = (
-  logs: ActionLog[],
-  weakestCompetency: string | null | undefined,
-  labels: string[],
-  isAdmin: boolean,
-  t: TextOf,
-) => {
-  const evaluated = logs.filter(log => log.result === 'correct' || log.result === 'violation');
-  const firstViolation = evaluated.find(log => log.result === 'violation');
-  const keyLog = firstViolation ?? evaluated[0];
-
-  if (!keyLog) return [];
-
-  const isViolation = keyLog.result === 'violation';
-
-  return [
-    {
-      label: labels[0],
-      value: t(m.youChose(formatValue(keyLog.action, t))),
-    },
-    {
-      label: labels[1],
-      value: isViolation
-        ? t(m.violation(formatValue(keyLog.severity, t), formatCompetency(keyLog.competency, t)))
-        : t(m.correctDecision(formatCompetency(keyLog.competency, t))),
-    },
-    {
-      label: labels[2],
-      value: isViolation
-        ? isAdmin
-          ? 'Feedback moved the learner into remediation.'
-          : t(m.shownCorrection)
-        : isAdmin
-          ? 'Practice continued toward mastery.'
-          : t(m.noPenalty),
-    },
-    {
-      label: labels[3],
-      value: weakestCompetency
-        ? t(m.focusNext(formatCompetency(weakestCompetency, t)))
-        : t(m.continueNext),
-    },
-  ];
 };
 
 const LevelComplete = ({
@@ -186,43 +125,33 @@ const LevelComplete = ({
   const t = useText();
   const perTopic = course?.topics !== undefined;
   const verdicts = course?.verdicts ?? null;
-  const passed = perTopic ? (verdicts ? verdicts.every(v => v.passed) : result.completed) : result.score >= level.requiredScore;
-  // In the course the stars follow its own rule, the one the algorithm reads
-  //: 3 when every topic is all right, 2 when every
-  // topic passes (2 of 3), 1 otherwise. Display only: nothing reads them.
-  const stars = !perTopic
-    ? result.stars
-    : !verdicts
-      ? 0
-      : verdicts.every(v => v.correct === v.total) && verdicts.every(v => v.passed)
-        ? 3
-        : verdicts.every(v => v.passed)
-          ? 2
-          : 1;
+  // In the course the pass is the course's own, never the points total.
+  const passed = perTopic ? course?.passed === true : result.score >= level.requiredScore;
+  const endedEarly = Boolean(result.crashReason || result.timedOut);
+  const checking = perTopic && !endedEarly && (course?.passed ?? null) === null;
+  // One rule on every level (2026-11-12): passed, then counted in mistakes.
+  // In the course "passed" is the course's own verdict, never the points.
+  // Display only: nothing reads them.
+  const stars = !perTopic ? result.stars : !verdicts ? 0 : starsForMistakes(course?.passed === true, mistakesIn(result.logs));
   // The tutorial teaches the controls. Its steps carry a competency only because
   // their scenario type implies one, so naming skills after it would report as
   // knowledge what was a keypress: no breakdown, no focus, no practice.
   const tutorial = isTutorial(level);
-  const competencyEntries = tutorial
+  // Counts on this drive alone. The stored `competencyScores` (the frozen
+  // design's BKT over this one drive) is never shown: one correct answer reads
+  // 69% there. In the course the counts are the course's own verdicts once
+  // saved, and the drive's logs on its topics until then.
+  const topicRows: TopicRow[] = tutorial
     ? []
-    : getPracticedCompetencies(result.logs, result.competencyScores ?? {})
-        .filter(([competency]) => !perTopic || course!.topics!.includes(competency))
-        .slice(0, 6);
-  const hasProfile = competencyEntries.length > 0;
+    : perTopic
+      ? verdicts?.map(v => ({ competency: v.competency, correct: v.correct, total: v.total }))
+        ?? topicRowsOf(result.logs).filter(row => course!.topics!.includes(row.competency))
+      : topicRowsOf(result.logs);
+  const hasProfile = topicRows.length > 0;
+  const workOn = topicToWorkOn(topicRows);
 
-  // Sorted weakest-first: anything below 100 is what to work on, otherwise the
-  // run was clean and the top skill is worth naming instead.
-  const weakest = competencyEntries.find(([, score]) => score < 100) ?? null;
-  const strongest = competencyEntries.length ? competencyEntries[competencyEntries.length - 1] : null;
-  const isCleanRun = !weakest;
-  const highlight = weakest ?? strongest;
-  const highlightState = getMasteryState(highlight?.[1] ?? 100);
-
-  const { isAdmin } = useAuthSession();
-  const copy = copyFor(isAdmin, t);
-  const afterActionSteps = buildAfterActionSteps(result.logs, weakest?.[0] ?? null, copy.steps, isAdmin, t);
   const recentEvaluations = result.logs
-    .filter(log => log.result === 'correct' || log.result === 'violation')
+    .filter(log => (log.result === 'correct' || log.result === 'violation') && !log.standing)
     .slice(-3)
     .reverse();
 
@@ -247,16 +176,18 @@ const LevelComplete = ({
         >
           <span
             className={`mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.2em] ${
-              passed
+              checking
+                ? 'border-border bg-secondary text-muted-foreground'
+                : passed
                 ? 'border-accent/40 bg-accent/10 text-accent'
                 : 'border-destructive/40 bg-destructive/10 text-destructive'
             }`}
           >
-            {t(result.crashReason ? m.crashed : result.timedOut ? m.timesUp : passed ? m.passed : m.failed)}
+            {t(result.crashReason ? m.crashed : result.timedOut ? m.timesUp : checking ? m.checking : passed ? m.passed : m.failed)}
           </span>
 
           <h2 className="mt-1 font-display text-xl text-foreground">
-            {t(result.crashReason || result.timedOut ? m.runEnded : passed ? m.levelComplete : m.tryAgain)}
+            {t(endedEarly ? m.runEnded : checking ? m.driveFinished : passed ? m.levelComplete : m.tryAgain)}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">{level.name}</p>
 
@@ -284,11 +215,21 @@ const LevelComplete = ({
                 <div key={v.competency} className="flex items-center justify-between rounded-xl bg-secondary px-3 py-2">
                   <span className="text-xs font-medium text-foreground">{formatCompetency(v.competency, t)}</span>
                   <span className={`font-display text-xs ${v.passed ? 'text-accent' : 'text-destructive'}`}>
-                    {t(m.topicVerdict(v.correct, v.total, v.passed))}
+                    {t(endedEarly ? m.topicEnded(v.correct, v.total) : m.topicVerdict(v.correct, v.total, v.passed))}
                   </span>
                 </div>
               ))}
-              <p className="text-center text-[11px] text-muted-foreground">{t(m.topicRule)}</p>
+              <p className="text-center text-[11px] text-muted-foreground">
+                {t(
+                  endedEarly
+                    ? m.endedRule
+                    : level.id === FINAL_EXAM_LEVEL
+                    ? m.finalRule
+                    : (verdicts ?? []).every(v => v.total === 3)
+                    ? m.topicRule
+                    : m.topicRuleUneven
+                )}
+              </p>
             </div>
           )}
           {/* Stars */}
@@ -304,6 +245,10 @@ const LevelComplete = ({
               />
             ))}
           </div>
+
+          {!endedEarly && (
+            <p className="mt-2 text-xs text-muted-foreground">{t(m.mistakes(mistakesIn(result.logs)))}</p>
+          )}
 
           {/* Stats */}
           <div className="mt-5 grid grid-cols-3 gap-2">
@@ -321,9 +266,12 @@ const LevelComplete = ({
             </div>
           </div>
 
-          <p className="mt-3 text-[11px] text-muted-foreground">
-            {t(m.passMark)} <span className="font-display text-foreground">{level.requiredScore}</span>
-          </p>
+          {/* The course passes by its topics, never the points: no points pass mark there. */}
+          {!perTopic && (
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              {t(m.passMark)} <span className="font-display text-foreground">{level.requiredScore}</span>
+            </p>
+          )}
 
           {/* Buttons */}
           {course ? (
@@ -386,122 +334,83 @@ const LevelComplete = ({
           <div className="min-h-0 min-w-0 flex-1 space-y-3 overflow-y-auto border-t border-border p-6 text-left lg:border-t-0">
             <div className="rounded-xl border border-border bg-background/50 p-4">
               <div className="flex items-start gap-3">
-                <div className={`rounded-lg p-2 ${isCleanRun ? 'bg-accent/15 text-accent' : 'bg-primary/15 text-primary'}`}>
+                <div className={`rounded-lg p-2 ${workOn ? 'bg-primary/15 text-primary' : 'bg-accent/15 text-accent'}`}>
                   <Target className="h-4 w-4" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-display text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {isCleanRun ? copy.strength : copy.focus}
+                    {t(workOn ? m.focus : m.cleanHeading)}
                   </p>
-                  <p className="mt-1 text-sm font-bold text-foreground">
-                    {formatCompetency(highlight?.[0], t)}
-                    {highlight && (
-                      <span className={`ml-2 font-display text-xs ${highlightState.className}`}>
-                        {highlight[1]}% - {t(highlightState.label)}
-                      </span>
-                    )}
-                  </p>
-                  {isAdmin ? (
-                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                      Suggested phase: <span className="font-semibold text-foreground">{highlightState.phase}</span>.{' '}
-                      {isCleanRun
-                        ? 'No competency fell below mastery on this run.'
-                        : 'The system uses your weakest competency to guide the next practice state.'}
-                    </p>
+                  {workOn ? (
+                    <>
+                      <p className="mt-1 text-sm font-bold text-foreground">{formatCompetency(workOn.competency, t)}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                        {t(m.focusNote(workOn.correct, workOn.total))}
+                      </p>
+                    </>
                   ) : (
-                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                      {isCleanRun
-                        ? t(m.cleanRun)
-                        : course
-                          // No weak-area roll in a New group: the next run is the routing FSM's.
-                          ? t(m.lostMost)
-                          : t(m.lostMostNextRun)}
-                    </p>
+                    <p className="mt-1 text-sm font-bold text-foreground">{t(m.cleanRun)}</p>
                   )}
                 </div>
               </div>
             </div>
 
-            {afterActionSteps.length > 0 && (
+            {/* In the course the topics and their verdicts stand in the outcome column already. */}
+            {!perTopic && (
               <div className="rounded-xl border border-border bg-background/50 p-4">
                 <div className="mb-3 flex items-center gap-2">
-                  <ClipboardList className="h-4 w-4 text-primary" />
+                  <BarChart3 className="h-4 w-4 text-primary" />
                   <p className="font-display text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {copy.report}
+                    {t(m.breakdown)}
                   </p>
                 </div>
 
-                <div className="space-y-3">
-                  {afterActionSteps.map((step, index) => (
-                    <div key={step.label} className="flex gap-3">
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 font-display text-[10px] font-black text-primary">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-foreground">{step.label}</p>
-                        <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{step.value}</p>
-                      </div>
+                <div className="space-y-2">
+                  {topicRows.map(row => (
+                    <div key={row.competency} className="flex items-center justify-between gap-3 text-xs">
+                      <span className="font-medium text-foreground">{formatCompetency(row.competency, t)}</span>
+                      <span className={`font-display ${row.correct === row.total ? 'text-accent' : 'text-signal-amber'}`}>
+                        {t(m.topicCount(row.correct, row.total))}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="rounded-xl border border-border bg-background/50 p-4">
-              <div className="mb-3 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <p className="font-display text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {copy.mastery}
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                {competencyEntries.map(([competency, score]) => {
-                  const state = getMasteryState(score);
-
-                  return (
-                    <div key={competency} className="space-y-1.5">
-                      <div className="flex items-center justify-between gap-3 text-xs">
-                        <span className="font-medium text-foreground">{formatCompetency(competency, t)}</span>
-                        <span className={`font-display ${state.className}`}>{score}% - {t(state.label)}</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-secondary">
-                        <div
-                          className={`h-full rounded-full ${state.barClassName}`}
-                          style={{ width: `${Math.max(4, score)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
             {recentEvaluations.length > 0 && (
               <div className="rounded-xl border border-border bg-background/50 p-4">
                 <p className="mb-3 font-display text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {copy.recent}
+                  {t(m.recent)}
                 </p>
                 <div className="space-y-2">
-                  {recentEvaluations.map((log) => (
+                  {recentEvaluations.map((log) => {
+                    const decision = describeDecision(log, level, t);
+                    return (
                     <div key={`${log.timestamp}-${log.action}`} className="flex items-center justify-between gap-3 rounded-lg bg-secondary/60 px-3 py-2">
                       <div className="min-w-0">
                         <p className="truncate text-xs font-semibold text-foreground">
                           {formatCompetency(log.competency, t)}
                         </p>
                         <p className="text-[10px] text-muted-foreground">
-                          {t(m.expectedChose(formatValue(log.expectedAction, t), formatValue(log.action, t)))}
+                          {decision.question
+                            ? t(m.youAnswered(decision.chose))
+                            : t(m.expectedChose(decision.expected, decision.chose))}
                         </p>
+                        {decision.question && log.result !== 'correct' && (
+                          <p className="text-[10px] text-muted-foreground">{t(m.correctIs(decision.expected))}</p>
+                        )}
                       </div>
                       <span className={`shrink-0 rounded-md px-2 py-1 font-display text-[9px] font-black uppercase ${
                         log.result === 'correct'
                           ? 'bg-accent/15 text-accent'
                           : 'bg-destructive/15 text-destructive'
                       }`}>
-                        {log.result}
+                        {t(log.result === 'correct' ? m.answerRight : m.answerWrong)}
                       </span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

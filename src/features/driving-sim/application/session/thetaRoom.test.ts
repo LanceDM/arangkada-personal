@@ -20,6 +20,10 @@ import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { remediationCandidates } from '@/features/driving-sim/domain/scenario/remediationPool';
 import { TUTORIAL_LEVEL_ID } from '@/features/driving-sim/domain/systems/tutorial';
 import { everyPairing, limitsOf } from './thetaDrives';
+import { composeDrive } from '@/features/driving-sim/domain/scenario/composeDrive';
+import { stageContent } from '@/features/driving-sim/domain/scenario/stageContent';
+import { COMPETENCY_STAGES, STAGE_COMPETENCIES } from '@/domain/learner/stageCompetencies';
+import { createRng } from '@/shared/lib/rng';
 
 /** The widest theta a level entry can be given. */
 const WIDEST = Math.max(...Object.values(WINDOW_SCALE));
@@ -53,4 +57,29 @@ describe('the room each approach has', () => {
     });
     expect(held).toEqual([]);
   });
+});
+
+describe('the room a composed drive leaves its road slots', () => {
+  // A scenario lent to a road slot (composeDrive, 2026-11-17) must fit the
+  // slot's spacing as the slot's own versions do: the room behind it holds its
+  // widest approach, and its zone leaves the next slot its room. Appended
+  // scenarios are left out here: they stand at the appended spacing, under
+  // the rules the practice item always had.
+  it(`never holds the widest theta (${WIDEST}) short at a slot, on any seeded drive`, () => {
+    const held: string[] = [];
+    for (const levelId of COMPETENCY_STAGES.filter(takesTheta)) {
+      const slotDistances = new Set(stageContent(levelId)!.distances);
+      for (let seed = 1; seed <= 40; seed++) {
+        const { level } = composeDrive({ levelId, competencies: STAGE_COMPETENCIES[levelId], rng: createRng(seed) });
+        for (const event of level.events.filter(entry => slotDistances.has(entry.triggerAtDistance))) {
+          const limits = limitsOf(level, event);
+          const wanted = limits.warningDistance * WIDEST;
+          if (approachLead(limits, { approachScale: WIDEST }) < wanted) {
+            held.push(`level ${levelId} seed ${seed} ${event.id} at ${event.triggerAtDistance}: room ${limits.approachRoom}, needs ${wanted}`);
+          }
+        }
+      }
+    }
+    expect([...new Set(held)]).toEqual([]);
+  }, 120_000);
 });

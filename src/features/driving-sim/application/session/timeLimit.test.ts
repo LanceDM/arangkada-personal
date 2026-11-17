@@ -97,7 +97,8 @@ describe('the clock', () => {
   });
 
   it('spends nothing while a scenario is held for reading', () => {
-    const session = createDrivingSession({ level: level(2), fsm: new DrivingFSM(), signCoverage: {} });
+    // Level 5: Level 2, the garage alone, has no scenario on its road.
+    const session = createDrivingSession({ level: level(5), fsm: new DrivingFSM(), signCoverage: {} });
     // Drive up to the first scenario's briefing, and leave it open.
     let steps = 0;
     while (!session.getSnapshot().briefingEvent && steps < 5_000) {
@@ -157,7 +158,7 @@ describe('the time a panel may hold the drive', () => {
   };
 
   it('closes a briefing left open for a minute, the Short Quiz time per item, and the drive goes on', () => {
-    const session = holdAtFirstPanel(2, s => s.getSnapshot().briefingEvent !== null);
+    const session = holdAtFirstPanel(5, s => s.getSnapshot().briefingEvent !== null);
     expect(session.getSnapshot().panelSecondsLeft).toBe(60);
     const before = session.getDrivenSteps();
     for (let step = 0; step < 59 * 60; step++) session.update(NO_INPUT);
@@ -193,7 +194,7 @@ describe('the time a panel may hold the drive', () => {
   });
 
   it('spends time away from the page on the open panel, or as driving time when none is open', () => {
-    const held = holdAtFirstPanel(2, s => s.getSnapshot().briefingEvent !== null);
+    const held = holdAtFirstPanel(5, s => s.getSnapshot().briefingEvent !== null);
     const before = held.getDrivenSteps();
     held.spendAway(61_000);
     expect(held.getDrivenSteps()).toBe(before);

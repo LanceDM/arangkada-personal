@@ -93,7 +93,7 @@ const MissionPanel = ({ level, score, progress, eventsCleared, decisions, compac
 
         {decisions.length === 0 ? (
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            {say(m.nothingScored)}
+            {say(totalEvents === 0 ? m.nothingOnRoad : m.nothingScored)}
           </p>
         ) : (
           <ul className="mt-2 space-y-1.5">

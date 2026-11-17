@@ -20,7 +20,7 @@ import {
 } from '@/domain/learner/stageCompetencies';
 
 /** Bump when any value below changes: `<date><letter>`. */
-export const RUN_CONFIG_VERSION = '2026-11-10a';
+export const RUN_CONFIG_VERSION = '2026-11-17c';
 
 export const RUN_CONFIG = {
   bktModel: EVIDENCE_BKT_MODEL,
@@ -40,9 +40,13 @@ export const RUN_CONFIG = {
     unansweredInBKT: false,
     preTestSeedsBKT: true,
     postTestRewardsQ: false,
+    // A drive ended early (crash, time-up) measures only the topics it asked.
+    endedDriveMeasuresAskedOnly: true,
   },
   stageCompetencies: STAGE_COMPETENCIES,
   irt: { model: 'rasch', scope: 'pre-test and post-test only, off gameplay' },
+  // What each record keeps so every result can be recomputed later from it alone.
+  recorded: { courseDriveSeedAndComposition: true, courseQuizShownOrder: true },
 } as const;
 
 export type RunConfig = typeof RUN_CONFIG;

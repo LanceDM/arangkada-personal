@@ -88,10 +88,11 @@ interface GameScreenProps {
   /**
    * Whether the drive re-rolls its route toward a weak competency, with the
    * adaptation notice and the "Extra guidance" panel that come with it.
-   * Omitted means true, Legacy's game; the routing FSM's groups pass false
-   *.
+   * Omitted means true, Legacy's game; the routing FSM's groups pass false.
    */
   liveReroll?: boolean;
+  /** No time limit, no clock and no panel countdown: the admin's scenario check alone (Admin > Scenarios > Play). */
+  noTimeLimit?: boolean;
 }
 
 /** The lane strip's markers where the support level withholds the response. */
@@ -139,6 +140,7 @@ const GameScreen = ({
   attemptSeed,
   priorLogs,
   liveReroll,
+  noTimeLimit,
 }: GameScreenProps) => {
   const say = useText();
   // Levels carrying a garage stage start there; the road only opens once every
@@ -281,6 +283,7 @@ const GameScreen = ({
     priorLogs,
     support,
     liveReroll,
+    noTimeLimit,
   });
 
   // The drive's view model. Everything the screen shows comes from here; the

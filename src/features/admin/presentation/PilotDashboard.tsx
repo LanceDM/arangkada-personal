@@ -10,11 +10,15 @@ import type { StudyInvites } from '@/features/admin/application/useStudyInvites'
 import { SectionHeader } from './adminUi';
 import { stageLabel } from './stageFormat';
 import { InvitesPanel } from './InvitesPanel';
+import { StudyDeadlinePanel } from './StudyDeadlinePanel';
+import type { StudyDeadlineRepository } from '@/features/admin/application/pilotPorts';
 import { dateTime, deviceCheckLabel, deviceLabel, gamingLabel, testLabel } from './profileFormat';
 
 interface PilotDashboardProps {
   sessions: PilotSessions;
   invites: StudyInvites;
+  /** The study deadline's store; the panel is shown only when the page gives one. */
+  deadline?: StudyDeadlineRepository;
 }
 
 const COHORT_LABEL: Record<StudyCohort, string> = { study: 'Study', dryrun: 'Dry run', test: 'Test' };
@@ -149,7 +153,7 @@ const CohortTable = ({ cohort, rows, now }: { cohort: StudyCohort; rows: PilotRo
  * followed live, each at their stage of the study's order; and the invites
  * they join with. Progress only, never a score or a result.
  */
-export const PilotDashboard = ({ sessions, invites }: PilotDashboardProps) => (
+export const PilotDashboard = ({ sessions, invites, deadline }: PilotDashboardProps) => (
   <div className="space-y-6">
     <SectionHeader
       title="Participants"
@@ -157,6 +161,8 @@ export const PilotDashboard = ({ sessions, invites }: PilotDashboardProps) => (
     />
 
     <InvitesPanel invites={invites} />
+
+    {deadline && <StudyDeadlinePanel repository={deadline} />}
 
     {sessions.error && (
       <Card className="border-destructive/40 bg-destructive/5">

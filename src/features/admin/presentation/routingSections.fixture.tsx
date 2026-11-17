@@ -60,6 +60,7 @@ export const repository: PilotRecordsRepository = {
     const stored = POOL.find(entry => entry.uid === uid)!.attempts.find(attempt => attempt.id === id)!;
     return { fsm: { transitions: [], truncated: false, totalCount: 0 }, decisions: null, routing: stored.routing };
   },
+  courseRecords: async () => ({ courseLog: true, bktUpdate: true }),
   otherModes: async () => ({ examSittings: [], dailyAnswers: [] }),
   fsmLog: async () => null,
 };

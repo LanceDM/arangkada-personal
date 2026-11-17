@@ -134,6 +134,7 @@ const repository: PilotRecordsRepository = {
     recordReads.push(`${uid}/${id}`);
     return RECORDS[id];
   },
+  courseRecords: async () => ({ courseLog: true, bktUpdate: true }),
   otherModes: async () => ({ examSittings: [], dailyAnswers: [] }),
   fsmLog: async (uid, id) => {
     fsmReads.push(`${uid}/${id}`);

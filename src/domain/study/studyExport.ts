@@ -45,6 +45,8 @@ export interface StudyExportRow {
   preTest: TestProgress;
   preTestFinishedAt: string | null;
   courseEndReason: string | null;
+  /** Whether the course ended certified; false for the end path (finished without the certificate), null while it runs. */
+  certified: boolean | null;
   postTest: TestProgress;
   postTestBlock: string | null;
   postTestFinishedAt: string | null;
@@ -58,7 +60,7 @@ export const STUDY_EXPORT_COLUMNS: ReadonlyArray<keyof StudyExportRow> = [
   'consentVersion', 'consentedAt', 'ageBand',
   'gaming', 'device',
   'deviceTouch', 'deviceLandscape', 'deviceMedianFps', 'deviceSlow', 'deviceCheckedAt',
-  'preTest', 'preTestFinishedAt', 'courseEndReason', 'postTest', 'postTestBlock', 'postTestFinishedAt',
+  'preTest', 'preTestFinishedAt', 'courseEndReason', 'certified', 'postTest', 'postTestBlock', 'postTestFinishedAt',
   'surveyOpenedAt', 'surveyConfirmedAt', 'withdrawnAt',
 ];
 
@@ -91,6 +93,7 @@ export const studyExportRow = (source: StudyExportSource): StudyExportRow => ({
   preTest: source.preTest.status,
   preTestFinishedAt: iso(source.preTest.finishedAt),
   courseEndReason: source.course.endReason,
+  certified: source.course.endReason === null ? null : source.course.endReason === 'certified',
   postTest: source.postTest.status,
   postTestBlock: source.postTest.block,
   postTestFinishedAt: iso(source.postTest.finishedAt),
@@ -98,3 +101,28 @@ export const studyExportRow = (source: StudyExportSource): StudyExportRow => ({
   surveyConfirmedAt: iso(source.survey?.confirmedAt),
   withdrawnAt: iso(source.withdrawnAt),
 });
+
+/**
+ * The export's console line for one enrolled participant, read from the same
+ * row `study.csv` writes and the course's own progress, as the admin
+ * Participants page reads them: the stage, the level the next Continue enters
+ * (or why the course ended), the drives saved and both tests. It never reads
+ * the frozen design's routing cursor or its pilot post-test.
+ */
+export const studySummaryLine = (
+  row: Pick<StudyExportRow, 'code' | 'cohort' | 'stage' | 'preTest' | 'postTest' | 'postTestBlock'>,
+  course: CourseProgress,
+  drives: number,
+  notes: readonly string[] = []
+): string => {
+  const place = !course.started
+    ? 'not started'
+    : course.frontierLevel !== null
+    ? `level ${course.frontierLevel}`
+    : course.endReason ?? 'ended';
+  const post = row.postTest === 'none' ? 'none' : `${row.postTest}${row.postTestBlock ? ` (${row.postTestBlock})` : ''}`;
+  return (
+    `${row.code.padEnd(8)}  ${row.cohort.padEnd(7)} stage ${row.stage.padEnd(12)} ${place.padEnd(11)} drives ${String(drives).padStart(3)}  ` +
+    `pre-test ${row.preTest.padEnd(8)} post-test ${post}${notes.length > 0 ? `  [${notes.join('|')}]` : ''}`
+  );
+};

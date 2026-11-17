@@ -25,6 +25,12 @@ export interface InviteEntry {
 }
 
 /** The study's invites: followed live, created open, closed once. */
+/** The study deadline (`study_settings/deadline`): after it, anyone not yet certified may finish the study. Off while null. */
+export interface StudyDeadlineRepository {
+  watch(onChange: (at: number | null) => void, onError: (message: string) => void): () => void;
+  set(at: number | null): Promise<void>;
+}
+
 export interface StudyInvitesRepository {
   watch(onChange: (invites: InviteEntry[]) => void, onError: (message: string) => void): () => void;
   /** Creates an open invite for the cohort under a fresh random code, and returns the code. */
@@ -44,6 +50,12 @@ export interface AttemptDocument {
   id: string;
   savedAt: number;
   data: unknown;
+}
+
+/** Whether a course attempt's course log entry and a BKT update citing it were found. */
+export interface CourseRecordsFound {
+  courseLog: boolean;
+  bktUpdate: boolean;
 }
 
 /** The three records beside an attempt, as read: each null where it does not exist. */
@@ -68,6 +80,12 @@ export interface PilotRecordsRepository {
   attemptsFrom(uid: string, from: number | null): Promise<AttemptDocument[]>;
   /** The records beside one attempt. */
   attemptRecords(uid: string, attemptId: string): Promise<AttemptRecordDocuments>;
+  /**
+   * Whether a course attempt's other records name it: an entry of
+   * `courseLog` with its `attemptId`, and a `bktUpdates` entry whose origin is
+   * this attempt.
+   */
+  courseRecords(uid: string, attemptId: string): Promise<CourseRecordsFound>;
   /**
    * One attempt's whole FSM record, read again for the Replay of that attempt
    * alone: the store keeps only its start. Null where it does not exist.

@@ -29,7 +29,7 @@ const items: QuizItemDoc[] = COMPETENCIES.flatMap((competency, c) =>
     explanation: '',
     image: '',
     competency,
-    source: 'RA 4136, Sec. 35',
+    source: 'Republic Act No. 4136, Section 35',
     use: 'test' as const,
     isActive: true,
     order: k,
@@ -126,7 +126,7 @@ describe('the IRT section', () => {
     await open('bank');
     expect(view().querySelector('[data-testid="irt-readiness"]')!.textContent).toContain('60 of 60 switched on · 11 of 11 competencies covered');
     expect(text()).toContain('the pre-test can open');
-    expect(text()).toContain('RA 4136, Sec. 35');
+    expect(text()).toContain('Republic Act No. 4136, Section 35');
     expect(text()).toContain('No tagging yet');
   });
 

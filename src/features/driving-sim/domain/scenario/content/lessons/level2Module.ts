@@ -75,7 +75,7 @@ export const level2Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'Before operating a vehicle, the driver should know where the important documents are and why they matter. The extracted LTO source states that a photocopy or the original CR must be preserved and carried in the car by the owner or driver.',
+          text: 'Before operating a vehicle, the driver should know where the important documents are and why they matter. The source material states that a photocopy or the original CR must be preserved and carried in the car by the owner or driver.',
         },
         {
           type: 'image',
@@ -170,15 +170,15 @@ export const level2Module = {
     {
       id: 'level-2-registration-awareness',
       title: '4. Motor Vehicle Registration Awareness',
-      text: 'A beginner does not need to memorize every LTO office workflow, but should recognize the pattern behind a legally ready vehicle.',
+      text: 'A beginner does not need to memorize every licensing-office workflow, but should recognize the pattern behind a legally ready vehicle.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'A beginner does not need to memorize every LTO office workflow, but should recognize the pattern behind a legally ready vehicle: proof of ownership, proof of identity, insurance, inspection, emissions compliance, clearances, plates, and special authority documents may be required depending on the transaction.',
+          text: 'A beginner does not need to memorize every licensing-office workflow, but should recognize the pattern behind a legally ready vehicle: proof of ownership, proof of identity, insurance, inspection, emissions compliance, clearances, plates, and special authority documents may be required depending on the transaction.',
         },
         {
           type: 'paragraph',
-          text: "When the extracted source conflicts with the LTO Citizen's Charter, the Citizen's Charter prevails.",
+          text: "When the extracted source conflicts with the official Citizen's Charter, the Citizen's Charter prevails.",
         },
         {
           type: 'table',
@@ -197,7 +197,7 @@ export const level2Module = {
         },
         {
           type: 'paragraph',
-          text: 'For Level 2 gameplay, the question is not whether you can process registration at an LTO office. The question is whether the vehicle has the required legal proof before it is driven.',
+          text: 'For Level 2 gameplay, the question is not whether you can process registration at a licensing office. The question is whether the vehicle has the required legal proof before it is driven.',
         },
       ],
     },
@@ -208,7 +208,7 @@ export const level2Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'BLOWBAGETS is a simple do-it-yourself motor vehicle inspection used to avoid road crashes and breakdowns. The extracted source also reminds drivers that regular preventive maintenance is cheaper than corrective maintenance.',
+          text: 'BLOWBAGETS is a simple do-it-yourself motor vehicle inspection used to avoid road crashes and breakdowns. Regular preventive maintenance is also cheaper than corrective maintenance.',
         },
         {
           type: 'table',
@@ -239,11 +239,11 @@ export const level2Module = {
     {
       id: 'level-2-unsafe-conditions',
       title: '6. Unsafe Conditions And No-Go Decisions',
-      text: 'The extracted source says motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
+      text: 'Under Republic Act No. 4136, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'The extracted source says motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
+          text: 'Under Republic Act No. 4136, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
         },
         {
           type: 'table',

@@ -6,6 +6,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import {
+  courseRecordsExpected,
   fsmAsRead,
   participantExport,
   participantSourceOf,
@@ -24,6 +25,7 @@ const recordsStore = () =>
     sourceOf: participantSourceOf,
     exportOf: participantExport,
     keepFsm: fsm => fsmAsRead(fsm as Parameters<typeof fsmAsRead>[0]),
+    courseRecordsExpected,
   }));
 
 export interface PilotRecords {

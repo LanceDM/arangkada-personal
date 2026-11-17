@@ -84,7 +84,5 @@ export const level0: LevelConfig = {
   // Spaced and measured at 40 on the dial; driven at 30 as it was at 40.
   pace: spacedPace(30, 40),
   requiredScore: 55,
-  stars2: 70,
-  stars3: 85,
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
 };

@@ -18,7 +18,8 @@ import { scenarioInstruction, scenarioLabel } from './scenarioCopy';
 import { scenarioSupport, supportCue } from './scenarioSupport';
 import { SLOTS as level0 } from './content/levels/level0';
 import { SLOTS as level1 } from './content/levels/level1';
-import { SLOTS as level2 } from './content/levels/level2';
+// Level 2's road is empty; its former slots still play as practice.
+import { LEVEL2_PRACTICE as level2 } from './content/levels/level2';
 import { SLOTS as level3 } from './content/levels/level3/pools';
 import { SLOTS as level4 } from './content/levels/level4/pools';
 import { SLOTS as level5 } from './content/levels/level5';
@@ -62,7 +63,7 @@ const stopSign = answeredByDriving().find(row => row.event.id === 'level3.priori
 const annotated: ScenarioEvent = {
   ...stopSign,
   realWorldNote: 'Also check your mirrors.',
-  lawCitation: 'RA 4136, Sec. 42.',
+  lawCitation: 'Republic Act No. 4136.',
 };
 
 describe('what each support level shows', () => {
@@ -78,7 +79,7 @@ describe('what each support level shows', () => {
     const full = scenarioSupport(annotated, 'full');
     expect(full.instruction).toBe(scenarioInstruction(annotated));
     expect(full.realWorldNote).toBe('Also check your mirrors.');
-    expect(full.lawCitation).toBe('RA 4136, Sec. 42.');
+    expect(full.lawCitation).toBe('Republic Act No. 4136.');
     expect(full.showsResponse).toBe(true);
     expect(full.cue).toBeNull();
 

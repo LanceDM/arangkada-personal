@@ -131,15 +131,18 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
     : t(m.objective(levelModule.title, checkpoint));
   const composition = missionComposition(level);
   const parts = compositionParts(composition, t);
-  // The road tile's count is the road events; whatever else is scored is named under it.
+  // The road tile's count is the road events; whatever else is scored is named
+  // under it. A garage alone (Level 2) has no road to count, so the tile counts
+  // its checks instead.
+  const garageTile = composition.road === 0 && composition.garage > 0;
   const otherParts = parts
-    .filter(part => !/ road events?$/.test(part))
+    .filter(part => !(garageTile ? / garage checks?$/ : / road events?$/).test(part))
     .map(part => (part.startsWith('+') ? part : `+${part}`));
   const limitsLine = isTutorial(level) ? null : postedLimitsLine(postedLimits(level), t);
   const timeLimit = timeLimitSecondsFor(level.id);
   const { isAdmin, user } = useAuthSession();
   const uid = user?.uid ?? null;
-  const moduleBadge = t(levelModule.sourceLevel === 0 ? m.tutorialModule : m.ltoModule(levelModule.sourceLevel));
+  const moduleBadge = t(levelModule.sourceLevel === 0 ? m.tutorialModule : m.manualModuleNumber(levelModule.sourceLevel));
   const {
     lessonsRead,
     quizPassed,
@@ -261,8 +264,8 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-lg border border-border bg-background/60 p-4">
                 <Route className="mb-3 h-5 w-5 text-primary" />
-                <p className="font-display text-2xl font-black text-foreground">{composition.road}</p>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t(m.roadEvents)}</p>
+                <p className="font-display text-2xl font-black text-foreground">{garageTile ? composition.garage : composition.road}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t(garageTile ? m.garageChecks : m.roadEvents)}</p>
                 {otherParts.length > 0 && (
                   <p className="mt-2 text-xs leading-5 text-muted-foreground">{otherParts.join(' · ')}</p>
                 )}

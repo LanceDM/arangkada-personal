@@ -9,7 +9,13 @@ import type { CourseProgress } from '@/domain/study/studyStage';
  */
 export const competencyCourseProgressOf = (cursor: CourseCursor | null): CourseProgress => {
   if (!cursor || sameCursor(cursor, startingCourse())) return { started: false, frontierLevel: 0, endReason: null };
-  if (cursor.phase.kind === 'CERTIFIED') return { started: true, frontierLevel: null, endReason: 'certified' };
-  if (cursor.phase.kind === 'FINAL') return { started: true, frontierLevel: FINAL_STAGE, endReason: null };
-  return { started: true, frontierLevel: phaseLevel(cursor.phase), endReason: null };
+  // Named only once a final has been failed, so a course without one reads as it always did.
+  const failures = cursor.finalFailures ? { finalFailures: cursor.finalFailures } : {};
+  if (cursor.phase.kind === 'CERTIFIED') return { started: true, frontierLevel: null, endReason: 'certified', ...failures };
+  if (cursor.phase.kind === 'FINISHED') {
+    const endReason = cursor.phase.reason === 'deadline' ? 'finished_at_deadline' : 'finished_after_finals';
+    return { started: true, frontierLevel: null, endReason, ...failures };
+  }
+  if (cursor.phase.kind === 'FINAL') return { started: true, frontierLevel: FINAL_STAGE, endReason: null, ...failures };
+  return { started: true, frontierLevel: phaseLevel(cursor.phase), endReason: null, ...failures };
 };

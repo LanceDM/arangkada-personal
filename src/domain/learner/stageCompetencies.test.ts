@@ -15,14 +15,19 @@ describe('the competency spread', () => {
     }
   });
 
-  it('matches the placement table of 2026-10-28', () => {
+  it('matches the placement table of 2026-10-28, with Level 2 the garage alone (2026-11-12)', () => {
     expect(stagesOf('driver_legality')).toEqual([1, 10, 11]);
     expect(stagesOf('document_awareness')).toEqual([1, 2, 10, 11]);
-    expect(stagesOf('right_of_way')).toEqual([2, 5, 6, 7, 8]);
+    expect(stagesOf('right_of_way')).toEqual([5, 6, 7, 8]);
     expect(stagesOf('traffic_signals')).toEqual([3, 5, 6, 8, 10]);
     expect(stagesOf('road_signs')).toEqual([3, 5, 6, 7]);
     expect(stagesOf('parking')).toEqual([6, 7, 9, 11]);
-    expect(stagesOf('speed_control')).toEqual([2, 3, 4, 7, 10]);
+    expect(stagesOf('speed_control')).toEqual([3, 4, 7, 10]);
+    expect(stagesOf('pedestrians')).toEqual([3, 4, 5, 8, 11]);
+  });
+
+  it('gives Level 2 only what its garage grades', () => {
+    expect(STAGE_COMPETENCIES[2]).toEqual(['document_awareness', 'hazard_awareness', 'general_rules']);
   });
 
   it('introduces parking at L6, where its module teaches it (L5 and L6 are not swapped)', () => {

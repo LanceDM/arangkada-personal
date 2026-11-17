@@ -1,6 +1,6 @@
 /**
  * The "pull over and deal with an official" scenes: an `event.inspection`
- * LTO checkpoint (boom barrier, officer, cones, sign), an enforcer flagging a
+ * roadside checkpoint (boom barrier, officer, cones, sign), an enforcer flagging a
  * car down at the curb (`inspection.pullOver`), and the marked
  * `parking_bay`/`loading_bay`/`red_curb`/`yellow_curb`/`lay_by` pull-over bay
  * a `PullOverBay` describes.
@@ -23,7 +23,8 @@ import type { PullOverBay } from '@/features/driving-sim/domain/scenario/scenari
 const drawCheckpointScene = (
   ctx: CanvasRenderingContext2D,
   roadX: number,
-  screenY: number
+  screenY: number,
+  open = false
 ) => {
   ctx.save();
 
@@ -31,17 +32,23 @@ const drawCheckpointScene = (
   ctx.fillStyle = '#f8fafc';
   ctx.fillRect(roadX + 4, screenY + 16, ROAD_WIDTH - 8, 6);
 
-  // Boom barrier with hazard stripes.
+  // Boom barrier with hazard stripes: across the road until the check is
+  // answered, then raised upright beside its left post.
   const barY = screenY - 12;
+  const arm = open
+    ? { x: roadX - 7, y: barY - 70, w: 10, h: 74, along: 'y' as const }
+    : { x: roadX + 2, y: barY, w: ROAD_WIDTH - 4, h: 10, along: 'x' as const };
   ctx.fillStyle = '#e2e8f0';
-  ctx.fillRect(roadX + 2, barY, ROAD_WIDTH - 4, 10);
+  ctx.fillRect(arm.x, arm.y, arm.w, arm.h);
   ctx.fillStyle = '#dc2626';
-  for (let i = 0; i < ROAD_WIDTH - 4; i += 28) {
-    ctx.fillRect(roadX + 2 + i, barY, 14, 10);
+  const length = arm.along === 'x' ? arm.w : arm.h;
+  for (let i = 0; i < length; i += 28) {
+    if (arm.along === 'x') ctx.fillRect(arm.x + i, arm.y, Math.min(14, length - i), arm.h);
+    else ctx.fillRect(arm.x, arm.y + i, arm.w, Math.min(14, length - i));
   }
   ctx.strokeStyle = 'rgba(15,23,42,0.55)';
   ctx.lineWidth = 1;
-  ctx.strokeRect(roadX + 2, barY, ROAD_WIDTH - 4, 10);
+  ctx.strokeRect(arm.x, arm.y, arm.w, arm.h);
 
   // Posts holding the barrier.
   ctx.fillStyle = '#475569';
@@ -53,7 +60,7 @@ const drawCheckpointScene = (
   drawCheckpointOfficer(ctx, roadX - 34, screenY + 4, 0.95);
   drawTrafficCone(ctx, roadX + 16, screenY + 40, 0.5);
   drawTrafficCone(ctx, roadX + ROAD_WIDTH - 16, screenY + 40, 0.5);
-  drawRoadsideSign(ctx, roadX + ROAD_WIDTH + 44, screenY - 26, 'LTO', 'CHECKPOINT', '#1d4ed8');
+  drawRoadsideSign(ctx, roadX + ROAD_WIDTH + 44, screenY - 26, 'ROADSIDE', 'CHECKPOINT', '#1d4ed8');
 };
 
 /**

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ageBandOf, checkConsent, consentRecords } from './consentRecords';
-import { stageIndex, studyStage, type StudyFacts } from './studyStage';
+import { finishOffer, stageIndex, studyStage, type StudyFacts } from './studyStage';
 
 const fresh: StudyFacts = {
   withdrawn: false,
@@ -14,6 +14,22 @@ const fresh: StudyFacts = {
 };
 const at = (over: Partial<StudyFacts>) => studyStage({ ...fresh, ...over });
 const ready = { consented: true, background: true, deviceChecked: true, preTest: 'finished' as const };
+
+describe('the end path', () => {
+  const final = (finalFailures: number) => ({ ...ready, course: { started: true, frontierLevel: 12, endReason: null, finalFailures } });
+  it('offers Finish after three failed finals, or to anyone in the course past the deadline', () => {
+    expect(finishOffer({ ...fresh, ...final(2) }, 0)).toBeNull();
+    expect(finishOffer({ ...fresh, ...final(3) }, 0)).toBe('final_attempts');
+    const midCourse = { ...fresh, ...ready, course: { started: true, frontierLevel: 5, endReason: null } };
+    expect(finishOffer({ ...midCourse, deadlineAt: 1_000 }, 999)).toBeNull();
+    expect(finishOffer({ ...midCourse, deadlineAt: 1_000 }, 1_000)).toBe('deadline');
+    expect(finishOffer({ ...fresh, deadlineAt: 1_000 }, 2_000)).toBeNull();
+  });
+  it('opens the post-test once the course is finished without the certificate', () => {
+    expect(at({ ...ready, course: { started: true, frontierLevel: null, endReason: 'finished_after_finals' } })).toBe('post-test');
+    expect(at({ ...ready, course: { started: true, frontierLevel: null, endReason: 'finished_at_deadline' }, postTest: 'finished', survey: { openedAt: 1, confirmedAt: 2 } })).toBe('done');
+  });
+});
 
 describe("the study's order", () => {
   it('opens each step only after the one before it', () => {

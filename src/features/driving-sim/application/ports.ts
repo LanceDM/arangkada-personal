@@ -129,7 +129,8 @@ export interface QuizSittingRepository {
 /** One course-log entry: what a drive, quiz or final measured, and what it decided. */
 export interface CourseLogEntry {
   schemaVersion: 1;
-  kind: 'drive' | 'quiz' | 'final';
+  /** `finish`: the participant took the end path (Finish the study), with no certificate. */
+  kind: 'drive' | 'quiz' | 'final' | 'finish';
   levelId: number;
   phase: string;
   /** The attempt the drive was saved as, where there is one. */
@@ -140,7 +141,11 @@ export interface CourseLogEntry {
   rewards: RewardRecord[];
   /** The shared table after this entry's operations. */
   tableAfter: QTable;
-  endReason?: 'certified' | 'cap_reached';
+  endReason?: 'certified' | 'cap_reached' | 'finished_after_finals' | 'finished_at_deadline';
+  /** False when this step taught the shared table nothing (an admin's course); absent otherwise. */
+  teachesTable?: false;
+  /** On a `finish` entry: the decisions still waiting for a reward, left unrewarded as at certification. */
+  unrewarded?: string[];
   timestamp: number;
 }
 
@@ -165,6 +170,23 @@ export interface CourseQuizSitting {
   attempt: number;
   answers: ActionLog[];
   timestamp: number;
+  /** How the sitting was shown; absent on sittings saved before it was recorded. */
+  shown?: CourseQuizShown;
+}
+
+export interface CourseQuizShown {
+  /** The course draw's seed (which items, from the bank). */
+  drawSeed: number;
+  /** The drawn item ids, in the draw's order. */
+  drawOrder: string[];
+  /** The screen's seed: the order asked and each item's choice order. */
+  seed: number;
+  /** In the order asked: each item's revision, its choices' authored indices in the order shown, and the authored index picked. */
+  items: { itemId: string; revision: number; choiceOrder: number[]; chosen: number | null }[];
+  startedAt: number;
+  finishedAt: number;
+  timedOut: boolean;
+  language?: string;
 }
 
 /** A record of graded answers a step saves with itself. */
@@ -215,6 +237,8 @@ export interface CompetencyCourseRepository {
       context: QLogContext;
       envelope: (index: number) => StudyEnvelope;
       evidence?: EvidenceWrite | null;
+      /** False for an admin's course: nothing is written to the shared table or its log. */
+      teachesTable: boolean;
     }
   ): Promise<{ step: CourseStep; entries: QLogEntry[]; table: QTable; evidenceSeq: number | null }>;
   /** The activity open at `fresh.position` (its open count raised), or `fresh` opened now. */

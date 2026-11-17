@@ -42,8 +42,8 @@ const levelModule = getLevelModule(12);
  * borrowed scenario; its question, grading and citation are its own. With eight
  * equal slots, 140 of 200 passes one miss always, three never, and two only
  * when both come before the running score has anything to lose (it cannot go
- * below zero). That is the 70% every level from 2 to 11 already asks; no LTO
- * source sets a pass mark .
+ * below zero). That is the 70% every level from 2 to 11 already asks; no official
+ * source sets a pass mark.
  *
  * ## The enforcement half is asked at a stop
  *
@@ -60,7 +60,7 @@ const levelModule = getLevelModule(12);
  *
  * ## Where every claim comes from
  *
- * The team's source notes quotes each claim this file makes, by
+ * The collected LTO material quotes each claim this file makes, by
  * file and heading, and lists what the sources leave open. The
  * borrowed half carries its own levels' claims. The emergencies rest on the
  * final-readiness row (E1*-E4*).
@@ -101,7 +101,7 @@ const borrowed = (
     .map(variant => ({ ...variant, points: POINTS, severity: SEVERITY }));
 
 // 1. Roadside check - curriculum ingredient "checkpoint", and the module's
-// documents and registration . The card says what was
+// documents and registration (F). The card says what was
 // presented; the question is what the check comes to, which is the law's
 // consequence and never a move the sources do not give. Amounts stay in the
 // citations: the choices turn on which violation it is, and on the one-month
@@ -158,7 +158,7 @@ const roadsideCheckSlot: SlotVariant[] = [
     correctAction: 'stop',
     points: POINTS,
     penaltyMessage:
-      'A lapsed registration is not a fee waiting for the next visit to the LTO: driving the car is driving an unregistered motor vehicle. Once the lapse is past a month, the car is impounded and released only when it is validly registered.',
+      'A lapsed registration is not a fee waiting for the next renewal: driving the car is driving an unregistered motor vehicle. Once the lapse is past a month, the car is impounded and released only when it is validly registered.',
     rewardMessage:
       'Right. An expired registration makes it an unregistered vehicle, and past a month the car stays impounded until it is registered and the fines are paid.',
     duration: 220,
@@ -309,7 +309,7 @@ const flaggedDownSlot: SlotVariant[] = [
     rewardMessage: 'Right. Stopped, and asking the reason: the exact violation, and who is apprehending you, are yours to know.',
     duration: 220,
     lawCitation:
-      'FDM Vol. 1 reviewer, stopped by an enforcer when you believe you did not violate any rule: "Stop at the roadside and politely ask the reason why you were being stopped." FDM Vol. 1: during an apprehension a driver has the right to know the complete name and agency of the apprehending officer and the exact alleged traffic violation, and to contest within a prescribed period. RO105: the license "shall be shown and/or surrendered for cause and upon demand to any person with authority under this RA 4136 to confiscate the same."',
+      'FDM Vol. 1 reviewer, stopped by an enforcer when you believe you did not violate any rule: "Stop at the roadside and politely ask the reason why you were being stopped." FDM Vol. 1: during an apprehension a driver has the right to know the complete name and agency of the apprehending officer and the exact alleged traffic violation, and to contest within a prescribed period. RO105: the license "shall be shown and/or surrendered for cause and upon demand to any person with authority under this Republic Act No. 4136 to confiscate the same."',
     competency: 'general_rules',
     severity: SEVERITY,
     inspection: {
@@ -331,7 +331,7 @@ const flaggedDownSlot: SlotVariant[] = [
     label: 'Flagged down',
     type: 'scenario_trigger',
     description:
-      'An LTO-deputized enforcer at the curb ahead flags you down and apprehends you for a violation you are sure you did not commit.',
+      'A deputized enforcer at the curb ahead flags you down and apprehends you for a violation you are sure you did not commit.',
     question: 'You think the apprehension is wrong. How do you dispute it?',
     choices: [
       { label: 'Argue it out with the enforcer before you drive off', action: 'accelerate' },
@@ -342,10 +342,10 @@ const flaggedDownSlot: SlotVariant[] = [
     points: POINTS,
     penaltyMessage:
       'An apprehension is deemed admitted unless it is contested in writing within five days, and the roadside is not where it is settled. Left unpaid for fifteen days, it suspends the license for thirty, on top of the fine.',
-    rewardMessage: 'Right. A written contest within five days; the LTO resolves it within five days of receiving it.',
+    rewardMessage: 'Right. A written contest within five days; it is resolved within five days of receipt.',
     duration: 220,
     lawCitation:
-      'JAO 2014-01, as printed in FDM Vol. 2: "All apprehensions are deemed admitted unless contested by filling a written contest within five (5) days from date of apprehension. … The LTO shall resolve a contested case within five (5) days from receipt of said written contest." FDM Vol. 1 reviewer: "it is improper for any driver or any traffic enforcer to negotiate a violation. Any complaint/contest may be done at the proper adjudication office."',
+      'JAO 2014-01, as printed in FDM Vol. 2: "All apprehensions are deemed admitted unless contested by filling a written contest within five (5) days from date of apprehension. … The [licensing office] shall resolve a contested case within five (5) days from receipt of said written contest." FDM Vol. 1 reviewer: "it is improper for any driver or any traffic enforcer to negotiate a violation. Any complaint/contest may be done at the proper adjudication office."',
     competency: 'general_rules',
     severity: SEVERITY,
     inspection: {
@@ -353,7 +353,7 @@ const flaggedDownSlot: SlotVariant[] = [
       documentType: "Temporary Operator's Permit",
       holder: 'DIAZ, ROMEO C.',
       fields: [
-        { label: 'Issued by', value: 'LTO-deputized enforcer' },
+        { label: 'Issued by', value: 'Deputized enforcer' },
         { label: 'Violation', value: 'Disregarding traffic signs' },
         { label: "Driver's statement", value: 'Denies the violation' },
       ],
@@ -364,7 +364,7 @@ const flaggedDownSlot: SlotVariant[] = [
   },
 ];
 
-// 5. Ticket issued - the TOP and the license record (source notes rows A and
+// 5. Ticket issued - the TOP and the license record (
 // D). What the TOP lets you do and what an unpaid one costs are FDM Vol. 2's
 // and RO105's; the renewal is FDM Vol. 1's demerit table, asked by total and
 // never by what a violation's category is (G4).
@@ -374,7 +374,7 @@ const ticketIssuedSlot: SlotVariant[] = [
     label: 'Ticket issued',
     type: 'scenario_trigger',
     description:
-      "An LTO-deputized enforcer at the curb ahead flags you down, apprehends you, keeps your license and hands you a Temporary Operator's Permit.",
+      "A deputized enforcer at the curb ahead flags you down, apprehends you, keeps your license and hands you a Temporary Operator's Permit.",
     question: 'May you keep driving?',
     choices: [
       { label: 'No-Go — not until the fine has been paid', action: 'stop' },
@@ -388,7 +388,7 @@ const ticketIssuedSlot: SlotVariant[] = [
     rewardMessage: 'Right. You drive on the TOP, for 72 hours.',
     duration: 220,
     lawCitation:
-      'JAO 2014-01, as printed in FDM Vol. 2: the TOP "Serves as a permit to operate a motor vehicle for a period of seventy-two (72) hours only." RO105: issued by LTO-deputized enforcers, it serves as "Receipt for driver\'s license confiscated; Notice and Summon; Temporary driver\'s license (for 72 hrs. only)". Only LTO-deputized traffic enforcers may confiscate a license.',
+      'JAO 2014-01, as printed in FDM Vol. 2: the TOP "Serves as a permit to operate a motor vehicle for a period of seventy-two (72) hours only." RO105: issued by deputized enforcers, it serves as "Receipt for driver\'s license confiscated; Notice and Summon; Temporary driver\'s license (for 72 hrs. only)". Only deputized traffic enforcers may confiscate a license.',
     competency: 'driver_legality',
     severity: SEVERITY,
     inspection: {
@@ -396,7 +396,7 @@ const ticketIssuedSlot: SlotVariant[] = [
       documentType: "Temporary Operator's Permit",
       holder: 'LIM, TERESA G.',
       fields: [
-        { label: 'Issued by', value: 'LTO-deputized enforcer' },
+        { label: 'Issued by', value: 'Deputized enforcer' },
         { label: "Driver's license", value: 'Confiscated' },
         { label: 'Issued', value: '20 July 2026, 08:40' },
       ],
@@ -410,7 +410,7 @@ const ticketIssuedSlot: SlotVariant[] = [
     label: 'Ticket issued',
     type: 'scenario_trigger',
     description:
-      "An LTO-deputized enforcer at the curb ahead flags you down, apprehends you and hands you a Temporary Operator's Permit. You do not dispute the violation.",
+      "A deputized enforcer at the curb ahead flags you down, apprehends you and hands you a Temporary Operator's Permit. You do not dispute the violation.",
     question: 'What happens if the fine is not paid within fifteen days?',
     choices: [
       { label: 'The license is suspended for thirty days, and the fine is still owed', action: 'stop' },
@@ -432,7 +432,7 @@ const ticketIssuedSlot: SlotVariant[] = [
       documentType: "Temporary Operator's Permit",
       holder: 'REYES, MARCO D.',
       fields: [
-        { label: 'Issued by', value: 'LTO-deputized enforcer' },
+        { label: 'Issued by', value: 'Deputized enforcer' },
         { label: 'Violation', value: 'Admitted' },
         { label: 'Issued', value: '20 July 2026, 08:40' },
       ],
@@ -446,7 +446,7 @@ const ticketIssuedSlot: SlotVariant[] = [
     label: 'Ticket issued',
     type: 'scenario_trigger',
     description:
-      "An LTO-deputized enforcer at the curb ahead flags you down, apprehends you and reads out your license record: six demerit points this license period, counting today's. The license is due for renewal next month.",
+      "A deputized enforcer at the curb ahead flags you down, apprehends you and reads out your license record: six demerit points this license period, counting today's. The license is due for renewal next month.",
     question: 'What will the renewal ask of you first?',
     choices: [
       { label: 'The Driving Enhancement Program and a theoretical exam', action: 'brake' },
@@ -573,10 +573,9 @@ const level12Base = {
   speedLimit: 30,
   // Spaced and measured at 60 on the dial; driven at 30 as it was at 60.
   pace: spacedPace(30, 60),
-  // 70%, 83% and 95% of 200: the marks Levels 2-11 set on their own totals.
+  // 70% of 200: the mark Levels 2-11 set on their own totals. Stars count
+  // mistakes, one rule for every level (domain/learner/stars).
   requiredScore: 140,
-  stars2: 166,
-  stars3: 190,
   /**
    * An ordinary two-way street, and this is load-bearing for the borrowed half
    * of the route rather than decoration.
@@ -606,8 +605,7 @@ const level12Base = {
  * double yellow. Each brings its line as a declaration (`declaredLine`), as
  * Level 4's markings do on their own level, and the road carries it over every
  * frame the scenario is graded. A road left broken yellow there showed a
- * driver a line that permits the pass and then failed them for making it
- *.
+ * driver a line that permits the pass and then failed them for making it.
  *
  * Exported for the dev tools that stage events by hand, so a staged exam is
  * painted the way a roll of it would be.

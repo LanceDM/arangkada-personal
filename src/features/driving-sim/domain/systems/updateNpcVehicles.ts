@@ -725,6 +725,8 @@ export const SHARED_LANE_HITBOX: Record<NpcVehicleSpec['vehicleKind'], { width: 
   // the same sprite at the same scale. Narrow enough that the clearance a
   // driver leaves beside one is the gap they can actually see.
   bicycle: { width: 16, height: 34 },
+  // The body a tricycle standing in the carriageway is given (roadActors.ts).
+  tricycle: { width: 34, height: 30 },
 };
 
 /** Axis-aligned box for the NPC's current transform, or null while it isn't active. */

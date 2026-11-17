@@ -234,6 +234,74 @@ const platePool: HotspotContent[] = [
   },
 ];
 
+// The driver's license, a third document point (2026-11-12), so a garage-only drive can give document_awareness its 3 scenarios.
+// Written only from what Level 12's source material quotes: T8 (RA
+// 4136, RO105, Duty to have License) and V4 (the fine for failure to carry
+// it), with the module's own line that the license authorizes the person and
+// registration the vehicle. Nothing here turns on a license's validity, code
+// or restrictions, which Level 1 grades.
+const licenseShell: HotspotShell = { id: 'license', label: "Wallet — Driver's License", area: 'Documents', x: 0.26, y: 0.5 };
+const licensePool: HotspotContent[] = [
+  {
+    observation:
+      "The OR and CR are in the glove box, but your driver's license is not in your wallet. You left it at home.",
+    question: "You are about to drive off. Do you have what you must carry to operate the vehicle?",
+    choices: [
+      { label: 'Go — the OR and CR in the glove box cover the driver too', action: 'accelerate' },
+      { label: "No-Go — the driver's license must be carried whenever you drive", action: 'stop' },
+      { label: 'Go — the license is needed only on long trips', action: 'brake' },
+    ],
+    correctAction: 'stop',
+    points: 20,
+    penaltyMessage:
+      "The license must be carried at all times when operating a motor vehicle. The OR and CR authorize the vehicle, not the driver.",
+    rewardMessage: 'Correct no-go. Go back for the license before the trip.',
+    lawCitation:
+      'Republic Act No. 4136 (RO105, Duty to have License): "The license must be carried at all times when operating a motor vehicle." Failure to carry a driver\'s license, CR or OR while driving: Php 1,000.00 (FDM Vol. 2).',
+    competency: 'document_awareness',
+    severity: 'minor',
+    document: {
+      officerLine: 'Check what you carry before you drive.',
+      documentType: "Driver's License",
+      holder: 'You, the driver',
+      fields: [
+        { label: 'License card', value: 'Not in your wallet, left at home' },
+        { label: 'OR / CR', value: 'In the glove box' },
+      ],
+      vehicle: 'Private passenger car — category M1',
+      tripPurpose: 'Private family trip',
+    },
+  },
+  {
+    observation: "Your driver's license is in your wallet, and the OR and CR are in the glove box.",
+    question: "You are about to drive off. Do you have what you must carry to operate the vehicle?",
+    choices: [
+      { label: "Go — the license is with you, and the vehicle's papers are on board", action: 'accelerate' },
+      { label: 'No-Go — only professional drivers need to carry a license', action: 'stop' },
+      { label: 'No-Go — the license is shown only at the licensing office, never carried', action: 'brake' },
+    ],
+    correctAction: 'accelerate',
+    points: 20,
+    penaltyMessage: 'The license was with you and the papers were on board. Refusing a trip you may lawfully make is also a wrong call.',
+    rewardMessage: 'Correct. The license authorizes the driver, the registration the vehicle, and both are in order.',
+    lawCitation:
+      'Republic Act No. 4136 (RO105, Duty to have License): "The license must be carried at all times when operating a motor vehicle and shall be shown and/or surrendered for cause and upon demand to any person with authority under this Republic Act No. 4136 to confiscate the same."',
+    competency: 'document_awareness',
+    severity: 'minor',
+    document: {
+      officerLine: 'Check what you carry before you drive.',
+      documentType: "Driver's License",
+      holder: 'You, the driver',
+      fields: [
+        { label: 'License card', value: 'In your wallet' },
+        { label: 'OR / CR', value: 'In the glove box' },
+      ],
+      vehicle: 'Private passenger car — category M1',
+      tripPurpose: 'Private family trip',
+    },
+  },
+];
+
 const tiresShell: HotspotShell = { id: 'tires', label: 'Front Left Tire', area: 'BLOWBAGETS — T (Tires)', x: 0.25, y: 0.24, detail: 'tire' };
 const tiresPool: HotspotContent[] = [
   {
@@ -526,7 +594,7 @@ const engineBayPool: HotspotContent[] = [
   },
 ];
 
-const trunkShell: HotspotShell = { id: 'trunk', label: 'Trunk — EWD, Spare & Tools', area: 'BLOWBAGETS — A, T (Tools)', x: 0.5, y: 0.74, detail: 'trunk' };
+const trunkShell: HotspotShell = { id: 'trunk', label: 'Trunk — EWD, Spare & Tools', area: 'BLOWBAGETS — A (Accessories)', x: 0.5, y: 0.74, detail: 'trunk' };
 const trunkPool: HotspotContent[] = [
   {
     observation:
@@ -761,6 +829,7 @@ const controlsPool: HotspotContent[] = [
 export const HOTSPOTS: { shell: HotspotShell; pool: HotspotContent[] }[] = [
   { shell: documentsShell, pool: documentsPool },
   { shell: plateShell, pool: platePool },
+  { shell: licenseShell, pool: licensePool },
   { shell: tiresShell, pool: tiresPool },
   { shell: brakesShell, pool: brakesPool },
   { shell: lightsShell, pool: lightsPool },
@@ -774,8 +843,15 @@ export const HOTSPOTS: { shell: HotspotShell; pool: HotspotContent[] }[] = [
 export const buildHotspots = (pick: (pool: HotspotContent[]) => HotspotContent): GarageHotspot[] =>
   HOTSPOTS.map(({ shell, pool }) => ({ ...shell, ...pick(pool) }));
 
-// ── Road events (drive out of the driveway) ─────
-export const SLOT_DISTANCES = [840, 1500, 2160];
+// ── The road: none. Retired road slots, kept as practice ──
+// Level 2 is the garage alone (2026-11-12). Its road is a
+// short, ungraded drive out, so the level still starts and ends through the
+// driving FSM (IDLE -> DRIVING -> level_end) and the routing FSM can still
+// append `+ practice(c)` to it. Its three driveway slots measured pedestrians,
+// right of way and speed on the same scenery three times over; they are kept
+// below as practice other levels borrow, never placed on Level 2's road.
+export const SLOT_DISTANCES: number[] = [];
+export const SLOTS: SlotVariant[][] = [];
 
 const driveOutSlot: SlotVariant[] = [
   {
@@ -797,6 +873,7 @@ const driveOutSlot: SlotVariant[] = [
   {
     id: 'level2.drive-out.schoolchildren',
     scenePrefab: { kind: 'driveway_crossing' },
+    pedestrians: [{ kind: 'child', solid: true }, { kind: 'child' }, { kind: 'child' }],
     type: 'pedestrian_crossing',
     description: 'Driveway mouth: a group of schoolchildren is crossing the footpath ahead.',
     correctAction: 'stop',
@@ -813,6 +890,7 @@ const driveOutSlot: SlotVariant[] = [
   {
     id: 'level2.drive-out.elderly',
     scenePrefab: { kind: 'driveway_crossing' },
+    pedestrians: [{ kind: 'elderly', solid: true }],
     type: 'pedestrian_crossing',
     description: 'Driveway mouth: an elderly pedestrian is crossing the footpath ahead.',
     correctAction: 'stop',
@@ -829,6 +907,7 @@ const driveOutSlot: SlotVariant[] = [
   {
     id: 'level2.drive-out.dog-walker',
     scenePrefab: { kind: 'driveway_crossing' },
+    pedestrians: [{ kind: 'adult', solid: true }, { kind: 'dog' }],
     type: 'pedestrian_crossing',
     description: 'Driveway mouth: someone walking a dog is crossing the footpath ahead.',
     correctAction: 'stop',
@@ -856,13 +935,13 @@ const mergeSlot: SlotVariant[] = [
       'Pushing into a moving traffic stream without signaling or yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded, and merged once a safe gap opened.',
     duration: 200,
-    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
   {
     id: 'level2.merge.jeepney',
-    scenePrefab: { kind: 'main_road_junction' },
+    scenePrefab: { kind: 'main_road_junction', crossing: { kind: 'jeepney', from: 'right' } },
     type: 'scenario_trigger',
     description: 'Main road junction ahead: a jeepney is approaching from the right.',
     correctAction: 'brake',
@@ -871,13 +950,13 @@ const mergeSlot: SlotVariant[] = [
       'Pulling out ahead of an approaching jeepney without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded to the jeepney, and merged once it had passed.',
     duration: 200,
-    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
   {
     id: 'level2.merge.tricycle',
-    scenePrefab: { kind: 'main_road_junction' },
+    scenePrefab: { kind: 'main_road_junction', crossing: { kind: 'tricycle', from: 'left' } },
     type: 'scenario_trigger',
     description: 'Main road junction ahead: a tricycle is approaching from the left.',
     correctAction: 'brake',
@@ -886,13 +965,13 @@ const mergeSlot: SlotVariant[] = [
       'Pulling out ahead of an approaching tricycle without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded to the tricycle, and merged once it had passed.',
     duration: 200,
-    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
   {
     id: 'level2.merge.delivery-motorcycle',
-    scenePrefab: { kind: 'main_road_junction' },
+    scenePrefab: { kind: 'main_road_junction', crossing: { kind: 'motorcycle', from: 'left' } },
     type: 'scenario_trigger',
     description: 'Main road junction ahead: a delivery motorcycle is weaving through the traffic.',
     correctAction: 'brake',
@@ -901,7 +980,7 @@ const mergeSlot: SlotVariant[] = [
       'Pushing out into a lane a weaving motorcycle is using without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded until the motorcycle cleared, and merged into a safe gap.',
     duration: 200,
-    lawCitation: 'RA 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -964,7 +1043,7 @@ const settleSlot: SlotVariant[] = [
     id: 'level2.settle.school-zone',
     type: 'speed_limit',
     speedRule: 'maximum',
-    // RA 4136 §35(b) row 4: "passing school zones", 20 km/h (speed-limits pack, L6).
+    // Republic Act No. 4136, Section 35(b) row 4: "passing school zones", 20 km/h (speed-limits pack, L6).
     postedSpeed: 20,
     description: 'Residential street: a school zone stretch begins here.',
     correctAction: 'brake',
@@ -974,35 +1053,40 @@ const settleSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You were at 20 km/h or less through the school zone stretch.',
     duration: 200,
     lawCitation:
-      'RA 4136 Section 35(b): the rate of speed shall not exceed 20 km per hour passing school zones.',
+      'Republic Act No. 4136, Section 35(b): the rate of speed shall not exceed 20 km per hour passing school zones.',
     competency: 'speed_control',
     severity: 'minor',
   },
 ];
 
-export const SLOTS: SlotVariant[][] = [driveOutSlot, mergeSlot, settleSlot];
+/**
+ * Level 2's former road scenarios, offered to later levels as `+ practice(c)`
+ * and as a course drive's borrowed items (`remediationPool`), as before.
+ * Without them Levels 3 and 4 have 2 speed_control scenarios each, short of
+ * their 3.
+ */
+export const LEVEL2_PRACTICE: SlotVariant[][] = [driveOutSlot, mergeSlot, settleSlot];
 
 const level2Base = {
   id: 2,
   name: levelModule.title,
   moduleId: levelModule.id,
   description: levelModule.desc,
-  // The bulk of this level is the garage stage; the road section is only the
-  // drive out of the driveway.
-  roadLength: 2560,
+  // The garage is the level. The drive out is the run-out the level always
+  // had after its last scenario (2,560 - 2,160 units); nothing on it is graded.
+  roadLength: 400,
   roadClass: 'city_street',
   speedLimit: 30,
-  // Garage is worth 200 and the drive 80. The pass mark sits above 200 on
-  // purpose, so a flawless inspection still has to be driven out properly.
-  requiredScore: 210,
-  stars2: 233,
-  stars3: 268,
+  // The garage is worth 220 and the drive nothing: 70% of 220, the share a
+  // course drive's displayed pass mark uses (composeDrive). Free play only; the
+  // course passes each topic at 2 of 3. Stars count mistakes (domain/learner/stars).
+  requiredScore: 154,
 } as const;
 
 /**
- * A fresh roll of the drive: one inspection finding per garage hotspot, plus
- * one road scenario per slot. No sign/marking catalogue here (this level's
- * content is vehicle-inspection and driveway scenarios, not signs), so
+ * A fresh roll of the drive: one inspection finding per garage hotspot, and
+ * the empty drive out. No sign/marking catalogue here (this level's content
+ * is vehicle inspection, not signs), so
  * `coverage` is accepted only for signature parity with the other pool-based
  * levels and is unused. A weakCompetency narrows each pool to variants tagged
  * with that competency first - a no-op for pools that are entirely one

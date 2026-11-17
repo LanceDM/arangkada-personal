@@ -25,12 +25,14 @@ import {
   boundsWithBay,
   laneBounds,
   laneOf,
+  resolveLaneRole,
   roadHeadingAt,
   CAR_WIDTH,
   SPEED_REPEAT_DELAY,
   SPEED_REPEAT_EVERY,
   SPEED_STEP,
   type CurveSpan,
+  type LaneIndex,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { drivableBounds } from '@/features/driving-sim/domain/world/routeGeometry';
 import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
@@ -56,6 +58,23 @@ const CURB_PUSH_PER_FRAME = 3.5;
  * before it becomes visible, never during its run.
  */
 export const CHASE_LOCK_RANGE = 340;
+
+/**
+ * The lane a following emergency vehicle comes up: the car's own lane at the
+ * lock, the lane it is asking the driver to leave. Never the lane the scenario
+ * tells the driver to move into. A car that is already in that lane when the
+ * lock is taken (pulled over at the curb for the scenario before, Level 12's
+ * traffic stop) would otherwise have the ambulance pass down the very lane the
+ * correct answer moves it into, and the driver who answered correctly would be
+ * the one who drove into it (T-0001's final exam, 2026-11-17). Then it comes up
+ * the lane beside it instead.
+ */
+export const chaseLaneFor = (event: ScenarioEvent, carLane: LaneIndex, oncomingLanes: number): LaneIndex => {
+  const wanted = event.requiredLane ? resolveLaneRole(event.requiredLane.lane, oncomingLanes) : null;
+  if (wanted === null || carLane !== wanted) return carLane;
+  const curb = resolveLaneRole('curb', oncomingLanes);
+  return wanted === curb ? resolveLaneRole('inner', oncomingLanes) : curb;
+};
 
 /**
  * The road effect the car is standing in, if any.
@@ -305,7 +324,7 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
   // little wider than its own approach span so the lane is fixed just
   // before it becomes visible, never during its run.
   {
-    const chaserAhead = context.liveLevel.events.some(candidate => {
+    const chaserAhead = context.liveLevel.events.find(candidate => {
       if (candidate.npc?.path !== 'closing_from_behind') return false;
       const gap = candidate.triggerAtDistance - car.distance;
       return gap <= CHASE_LOCK_RANGE && gap > -CHASE_LOCK_RANGE;
@@ -317,7 +336,7 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
       world.followerState.y = null;
       world.followerState.passing = false;
     } else if (world.chaseLane === null) {
-      world.chaseLane = car.lane;
+      world.chaseLane = chaseLaneFor(chaserAhead, car.lane, context.liveLevel.paint?.oncomingLanes ?? 2);
     }
   }
   // Lean into the bend. Without this the car tracks a curving road while

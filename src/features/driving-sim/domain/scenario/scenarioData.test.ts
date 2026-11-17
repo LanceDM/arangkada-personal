@@ -5,7 +5,8 @@ import { describe, it, expect } from 'vitest';
 import { LEVELS } from './levelCatalog';
 import { SLOTS as level12Slots } from '@/features/driving-sim/domain/scenario/content/levels/level12';
 import { SLOTS as level1Slots } from '@/features/driving-sim/domain/scenario/content/levels/level1';
-import { SLOTS as level2Slots } from '@/features/driving-sim/domain/scenario/content/levels/level2';
+// Level 2's road is empty; its former slots are still authored, as practice.
+import { LEVEL2_PRACTICE as level2Slots } from '@/features/driving-sim/domain/scenario/content/levels/level2';
 import { SLOTS as level3Slots } from '@/features/driving-sim/domain/scenario/content/levels/level3/pools';
 import { SLOTS as level4Slots } from '@/features/driving-sim/domain/scenario/content/levels/level4/pools';
 import { SLOTS as level5Slots } from '@/features/driving-sim/domain/scenario/content/levels/level5';
@@ -119,9 +120,11 @@ describe('scenario roster (LEVELS)', () => {
   });
 
   it('traces every borrowed event back to real content in the level that authored it', () => {
-    const authoredIds = new Set(
-      allEvents.filter(({ levelId, event }) => isAuthoredHere(event, levelId)).map(({ event }) => event.id)
-    );
+    const authoredIds = new Set([
+      ...allEvents.filter(({ levelId, event }) => isAuthoredHere(event, levelId)).map(({ event }) => event.id),
+      // Level 2's former road, borrowed by Level 12 and as practice.
+      ...level2Slots.flat().map(variant => variant.id),
+    ]);
     const borrowed = allEvents.filter(({ levelId, event }) => !isAuthoredHere(event, levelId));
 
     // Borrowing is a Level 12 mechanism. An event turning up anywhere else

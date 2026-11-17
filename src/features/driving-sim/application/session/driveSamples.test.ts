@@ -49,8 +49,11 @@ describe('a recorded drive', () => {
       perLevel.set(sample.levelId, graded);
     }
 
+    // Level 2 is the garage alone: its road grades nothing.
+    const roadless = new Set(LEVELS.filter(level => level.events.length === 0).map(level => level.id));
+    expect([...roadless]).toEqual([2]);
     const shallow = [...perLevel.entries()]
-      .filter(([, graded]) => graded.size < 2)
+      .filter(([levelId, graded]) => !roadless.has(levelId) && graded.size < 2)
       .map(([levelId, graded]) => `level ${levelId}: ${graded.size} graded across every sample`);
     expect(shallow).toEqual([]);
     // Every sample in the golden, replayed: minutes of simulated driving.

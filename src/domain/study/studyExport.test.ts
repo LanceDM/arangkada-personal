@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { consentRecords } from './consentRecords';
-import { STUDY_EXPORT_COLUMNS, studyExportRow, type StudyExportSource } from './studyExport';
+import { STUDY_EXPORT_COLUMNS, studyExportRow, studySummaryLine, type StudyExportSource } from './studyExport';
 
 const T = Date.UTC(2026, 10, 5, 8);
 const { marker } = consentRecords({ participantCode: 'P-0003', fullName: 'Juan dela Cruz', typedSignature: 'Juan dela Cruz', age: 27, language: 'en', at: T });
@@ -44,5 +44,31 @@ describe("the study's export row", () => {
       stage: 'consent', ageBand: null, gaming: null,
     });
     expect(studyExportRow(source({ withdrawnAt: T + 5 })).stage).toBe('withdrawn');
+  });
+});
+
+describe("the export's summary line", () => {
+  it("reads the participant's study row and course progress, never a routing frontier or the pilot post-test", () => {
+    // T-0001 on 2026-11-17: at the final exam, post-test not yet open. The old
+    // line read the frozen routing cursor ("frontier DRIVE(5)") and the pilot's
+    // post-test flag ("no-post-test").
+    const progress = { started: true, frontierLevel: 12, endReason: null };
+    const row = studyExportRow(source({ code: 'T-0001', cohort: 'test', course: progress }));
+    const line = studySummaryLine(row, progress, 31, ['timed-out']);
+    expect(line).toContain(`stage ${row.stage}`);
+    expect(line).toContain('level 12');
+    expect(line).toContain(`pre-test ${row.preTest}`);
+    expect(line).toContain(`post-test ${row.postTest}`);
+    expect(line).toContain('drives  31');
+    expect(line).toContain('[timed-out]');
+    expect(line).not.toMatch(/frontier|DRIVE\(|no-post-test/);
+  });
+
+  it('names a certified course, an unstarted one and a routed post-test', () => {
+    const certified = { started: true, frontierLevel: null, endReason: 'certified' as const };
+    const done = studyExportRow(source({ course: certified, postTest: { status: 'finished', finishedAt: T + 9, block: 'medium' } }));
+    expect(studySummaryLine(done, certified, 40)).toMatch(/certified .*post-test finished \(medium\)$/);
+    const fresh = { started: false, frontierLevel: 0, endReason: null };
+    expect(studySummaryLine(studyExportRow(source({ course: fresh })), fresh, 0)).toContain('not started');
   });
 });

@@ -6,7 +6,7 @@ export const level5Module = {
   id: 'lto_level_5',
   title: 'Intersections And Right-Of-Way',
   sourceLevel: 5,
-  desc: 'Learn to judge who goes first at an intersection: yielding correctly to pedestrians, other vehicles, emergency vehicles, and roundabout traffic under RA 4136.',
+  desc: 'Learn to judge who goes first at an intersection: yielding correctly to pedestrians, other vehicles, emergency vehicles, and roundabout traffic under Republic Act No. 4136.',
   lessons: [
     {
       id: 'level-5-mission-briefing',
@@ -29,7 +29,7 @@ export const level5Module = {
           type: 'list',
           ordered: false,
           items: [
-            'Apply the RA 4136 right-of-way rules for uncontrolled intersections, left-turning vehicles, and vehicles entering from a private road.',
+            'Apply the Republic Act No. 4136 right-of-way rules for uncontrolled intersections, left-turning vehicles, and vehicles entering from a private road.',
             'Decide who goes first at an intersection with no sign, a give-way sign, a stop sign, or a traffic signal.',
             'Yield correctly to pedestrians at crosswalks and know when a pedestrian must yield instead.',
             'Yield to police, fire, and ambulance vehicles operating on official business with audible signals.',
@@ -41,7 +41,7 @@ export const level5Module = {
     },
     {
       id: 'level-5-right-of-way-rules',
-      title: '1. The Right-Of-Way Rules Under RA 4136',
+      title: '1. The Right-Of-Way Rules Under Republic Act No. 4136',
       text: 'Republic Act No. 4136, the Land Transportation and Traffic Code, defines right-of-way with specific rules for specific situations. None of them reward speed or aggression.',
       blocks: [
         {

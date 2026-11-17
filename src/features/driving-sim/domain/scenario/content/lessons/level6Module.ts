@@ -45,7 +45,7 @@ export const level6Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'A turn is not just a change in direction, it is a position you must be in before the intersection, not during it. RA 4136 requires that when turning left from one highway to another, the vehicle be conducted to the right of the center of the intersection.',
+          text: 'A turn is not just a change in direction, it is a position you must be in before the intersection, not during it. Republic Act No. 4136 requires that when turning left from one highway to another, the vehicle be conducted to the right of the center of the intersection.',
         },
         {
           type: 'table',
