@@ -22,12 +22,31 @@ export const firebaseQuizBankRepository: QuizBankRepository = {
   },
   // The course's short quiz draws by competency across modules (2026-11-10).
   async loadAll() {
-    const snap = await getDocs(query(collection(db, 'quiz_items'), where('use', '==', 'quiz')));
-    return snap.docs
-      .map(d => readQuizItem(d.id, d.data()))
-      .filter((item): item is QuizItemDoc => item !== null);
+    const now = Date.now();
+    if (!bank || now - bank.at > BANK_FOR_MS) {
+      const at = now;
+      const loading = getDocs(query(collection(db, 'quiz_items'), where('use', '==', 'quiz'))).then(snap =>
+        snap.docs.map(d => readQuizItem(d.id, d.data())).filter((item): item is QuizItemDoc => item !== null)
+      );
+      bank = { at, loading };
+      // A failed read is not kept: the next quiz reads again.
+      loading.catch(() => {
+        if (bank?.loading === loading) bank = null;
+      });
+    }
+    return bank.loading;
   },
 };
+
+/**
+ * The whole bank, read once and kept for a while (2026-11-18). Every short quiz
+ * and every retake used to read all ~300 items again, which was most of a
+ * player's Firestore reads. The bank changes only when an admin edits it; a
+ * page reload, or this window running out, reads it fresh, and each sitting
+ * still records the revision of every item it asked.
+ */
+const BANK_FOR_MS = 30 * 60_000;
+let bank: { at: number; loading: Promise<QuizItemDoc[]> } | null = null;
 
 export const firebaseQuizSittingRepository: QuizSittingRepository = {
   async save(uid, sitting) {
