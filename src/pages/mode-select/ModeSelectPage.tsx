@@ -135,6 +135,92 @@ const ModeSelect = () => {
     },
   ];
 
+  const renderMode = (mode: (typeof modes)[number]) => {
+    const Icon = mode.icon;
+    const isLocked = mode.locked;
+    
+    return (
+      <button
+        key={mode.id}
+        onClick={() => {
+          if (user) void logUiAction(user.uid, 'menu_selected', { mode: mode.id, locked: isLocked });
+          if (!isLocked) navigate(mode.route);
+        }}
+        disabled={isLocked}
+        className={`relative text-left p-12 rounded-[3rem] border transition-all duration-500 group overflow-hidden shadow-2xl
+          ${mode.id === 'story'
+              ? `w-full min-h-64 flex items-center bg-gradient-to-r ${mode.color} ${mode.borderColor} hover:scale-[1.01] hover:border-primary/50`
+              : isLocked
+              ? 'bg-black border-destructive/10 opacity-60 cursor-not-allowed'
+              : `h-[22rem] bg-gradient-to-br ${mode.color} border-white/10 hover:scale-[1.02] ${mode.borderColor} cursor-pointer glow-yellow`
+          }`}
+      >
+        {/* CARD LAYOUT */}
+        {/* Icon */}
+        <div className="absolute bottom-[-30px] right-[-30px] opacity-10 group-hover:opacity-20 transition-all duration-1000 pointer-events-none -rotate-[15deg] group-hover:rotate-0">
+          <Icon className="w-80 h-80 text-white" />
+        </div> 
+        {/* Chevron */}
+        <div className="absolute top-12 right-12 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all">
+        {isLocked ? (
+          <Lock className="w-10 h-10 text-destructive" />
+        ) : (
+            <ChevronRight className="w-10 h-10 text-primary" />
+        )}
+        </div>
+
+        <div className="relative z-10 flex flex-col h-full">
+          <h2 className="text-5xl font-black italic uppercase text-white leading-none">
+            {mode.title}
+          </h2>
+          <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground mt-2">
+            {mode.subtitle}
+          </p>
+          <p className="text-sm italic text-muted-foreground mt-6 max-w-[280px]">
+            {mode.description}
+          </p>
+          {(examLock || (mode.id === 'eksamen' && isLocked)) && (
+            <div className="mt-4 flex items-center gap-2 text-red-400 text-xs font-black uppercase">
+              <ShieldAlert className="w-4 h-4" />
+              {examLock ? 'Take the pre-test first' : 'Story Mode: Level 3 required'}
+            </div>
+          )}
+          <div className="mt-auto pt-4 flex items-center gap-4">
+            {mode.badge && (
+              <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase">
+                {mode.badge}
+              </span>
+            )}
+            {/* Stars or completion badge */}
+            {mode.id === 'story' ? (
+              completedLevels === totalLevels ? (
+                <div className="flex items-center gap-1 text-yellow-400 text-glow-yellow font-black italic">
+                  <Trophy className="w-4 h-4" />
+                  Completed
+                </div>
+              ) : mode.stars > 0 && (
+                <div className="flex items-center gap-1 text-primary font-black italic">
+                  <Star className="w-4 h-4" />
+                  {mode.stars}
+                </div>
+              )
+            ) : (
+              mode.stars > 0 && (
+                <div className="flex items-center gap-1 text-primary font-black italic">
+                  <Star className="w-4 h-4" />
+                  {mode.stars}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </button>
+    );
+  };
+
+  const story = modes.find(mode => mode.id === 'story');
+  const others = modes.filter(mode => mode.id !== 'story');
+
   return (
     <AppLayout>
       <main className="max-w-6xl mx-auto px-6 py-10 min-h-screen">
@@ -186,31 +272,6 @@ const ModeSelect = () => {
           </p>
         </div>
 
-        {/* Survey: a full-width call to action, above everything to play. */}
-        <section className="mb-10">
-          <a
-            href={SURVEY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative flex w-full flex-col items-center gap-5 overflow-hidden rounded-[3rem] border-2 border-primary bg-gradient-to-r from-primary via-yellow-300 to-primary p-8 text-center text-primary-foreground shadow-[0_0_45px_rgba(250,204,21,0.45)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_70px_rgba(250,204,21,0.7)] md:flex-row md:p-10 md:text-left"
-          >
-            <span className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/25 blur-2xl" />
-            <span className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-black/85 shadow-xl">
-              <span className="absolute inset-0 animate-ping rounded-3xl bg-black/30" />
-              <ClipboardList className="relative h-10 w-10 text-primary" />
-            </span>
-            <span className="relative flex-1">
-              <span className="block text-[11px] font-black uppercase tracking-[0.3em] opacity-70">Tulungan kami · Help our study</span>
-              <span className="mt-1 block text-4xl font-black uppercase italic leading-none tracking-tight md:text-6xl">Take the survey!</span>
-              <span className="mt-3 block text-sm font-bold italic opacity-80">A few minutes of your feedback helps us improve Arangkada.</span>
-            </span>
-            <span className="relative flex shrink-0 items-center gap-2 rounded-2xl bg-black px-7 py-4 text-lg font-black uppercase italic text-primary shadow-xl transition-transform group-hover:translate-x-1">
-              Answer now
-              <ExternalLink className="h-5 w-5" />
-            </span>
-          </a>
-        </section>
-
         {/* The initial exam: taken first, from here; it opens the other modes. */}
         {exam.required && (
           <section className="mb-8">
@@ -252,99 +313,37 @@ const ModeSelect = () => {
           </section>
         )}
 
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-[auto_1fr] gap-8">
+        {/* Bagong Driver, full width */}
+        {story && renderMode(story)}
 
-          {modes.map((mode) => {
-            const Icon = mode.icon;
-            const isLocked = mode.locked;
-            
-            return (
-              <button
-                key={mode.id}
-                onClick={() => {
-                  if (user) void logUiAction(user.uid, 'menu_selected', { mode: mode.id, locked: isLocked });
-                  if (!isLocked) navigate(mode.route);
-                }}
-                disabled={isLocked}
-                className={`relative text-left p-12 rounded-[3rem] border transition-all duration-500 group overflow-hidden shadow-2xl
-                  ${mode.id === 'daily'
-                      ? `md:col-span-2 h-56 flex items-center bg-gradient-to-r ${mode.color} ${mode.borderColor} hover:scale-[1.01] hover:border-primary/50`
-                      : isLocked
-                      ? 'bg-black border-destructive/10 opacity-60 cursor-not-allowed'
-                      : `h-[22rem] bg-gradient-to-br ${mode.color} border-white/10 hover:scale-[1.02] ${mode.borderColor} cursor-pointer glow-yellow`
-                  }`}
-              >
-                {/* CARD LAYOUT */}
-                {/* Icon */}
-                <div className="absolute bottom-[-30px] right-[-30px] opacity-10 group-hover:opacity-20 transition-all duration-1000 pointer-events-none -rotate-[15deg] group-hover:rotate-0">
-                  <Icon className="w-80 h-80 text-white" />
-                </div> 
-                {/* Chevron */}
-                <div className="absolute top-12 right-12 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all">
-                {isLocked ? (
-                  <Lock className="w-10 h-10 text-destructive" />
-                ) : (
-                    <ChevronRight className="w-10 h-10 text-primary" />
-                )}
-                </div>
+        {/* Survey: a full-width call to action, between the story and the other modes. */}
+        <section className="my-8">
+          <a
+            href={SURVEY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative flex w-full flex-col items-center gap-5 overflow-hidden rounded-[3rem] border-2 border-primary bg-gradient-to-r from-primary via-yellow-300 to-primary p-8 text-center text-primary-foreground shadow-[0_0_45px_rgba(250,204,21,0.45)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_70px_rgba(250,204,21,0.7)] md:flex-row md:p-10 md:text-left"
+          >
+            <span className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/25 blur-2xl" />
+            <span className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-black/85 shadow-xl">
+              <span className="absolute inset-0 animate-ping rounded-3xl bg-black/30" />
+              <ClipboardList className="relative h-10 w-10 text-primary" />
+            </span>
+            <span className="relative flex-1">
+              <span className="block text-[11px] font-black uppercase tracking-[0.3em] opacity-70">Tulungan kami · Help our study</span>
+              <span className="mt-1 block text-4xl font-black uppercase italic leading-none tracking-tight md:text-6xl">Take the survey!</span>
+              <span className="mt-3 block text-sm font-bold italic opacity-80">A few minutes of your feedback helps us improve Arangkada.</span>
+            </span>
+            <span className="relative flex shrink-0 items-center gap-2 rounded-2xl bg-black px-7 py-4 text-lg font-black uppercase italic text-primary shadow-xl transition-transform group-hover:translate-x-1">
+              Answer now
+              <ExternalLink className="h-5 w-5" />
+            </span>
+          </a>
+        </section>
 
-                {examLock && (
-                  <div className="absolute bottom-12 left-12 flex items-center gap-2 text-red-400 text-xs font-black uppercase">
-                    <ShieldAlert className="w-4 h-4" />
-                    Take the pre-test first
-                  </div>
-                )}
-
-                {!examLock && mode.id === 'eksamen' && isLocked && (
-                  <div className="absolute bottom-12 left-12 flex items-center gap-2 text-red-400 text-xs font-black uppercase">
-                    <ShieldAlert className="w-4 h-4" />
-                    Story Mode: Level 3 required
-                  </div>
-                )}
-                
-                <div className="relative z-10 flex flex-col h-full">
-                  <h2 className="text-5xl font-black italic uppercase text-white leading-none">
-                    {mode.title}
-                  </h2>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground mt-2">
-                    {mode.subtitle}
-                  </p>
-                  <p className="text-sm italic text-muted-foreground mt-6 max-w-[280px]">
-                    {mode.description}
-                  </p>
-                  <div className="mt-auto flex items-center gap-4">
-                    {mode.badge && (
-                      <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase">
-                        {mode.badge}
-                      </span>
-                    )}
-                    {/* Stars or completion badge */}
-                    {mode.id === 'story' ? (
-                      completedLevels === totalLevels ? (
-                        <div className="flex items-center gap-1 text-yellow-400 text-glow-yellow font-black italic">
-                          <Trophy className="w-4 h-4" />
-                          Completed
-                        </div>
-                      ) : mode.stars > 0 && (
-                        <div className="flex items-center gap-1 text-primary font-black italic">
-                          <Star className="w-4 h-4" />
-                          {mode.stars}
-                        </div>
-                      )
-                    ) : (
-                      mode.stars > 0 && (
-                        <div className="flex items-center gap-1 text-primary font-black italic">
-                          <Star className="w-4 h-4" />
-                          {mode.stars}
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+        {/* Araw-Araw and Eksamen, side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {others.map(renderMode)}
         </div>
       </main>
     </AppLayout>
