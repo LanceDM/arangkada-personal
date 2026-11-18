@@ -131,7 +131,6 @@ describe('the consent step', () => {
   const fill = (age: string) => {
     type('#consent-name', 'Juan dela Cruz');
     type('#consent-age', age);
-    type('#consent-signature', 'Juan dela Cruz');
     act(() => (host!.querySelector('input[type="checkbox"]') as HTMLInputElement).click());
   };
   const submit = async () => act(async () => host!.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
@@ -153,8 +152,8 @@ describe('the consent step', () => {
 
   it('records the language its text was read in, on the record and its marker', async () => {
     render(<ConsentStep uid="u1" code="P-0004" username="juan_2026" onDone={() => {}} />, ready('consent'), 'fil');
-    expect(host!.textContent).toContain('Ano ang pag-aaral na ito');
-    expect(host!.textContent).not.toContain('What this study is');
+    expect(host!.textContent).toContain('Tungkol sa pag-aaral');
+    expect(host!.textContent).not.toContain('About the study');
     fill('24');
     await submit();
     expect(saveConsent).toHaveBeenCalledWith('u1', {

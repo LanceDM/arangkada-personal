@@ -23,7 +23,7 @@
 import type { Language, Localized } from '@/shared/lib/localized';
 
 /** The consent text's version: the record says which text was agreed to. */
-export const CONSENT_VERSION = 'draft-2026-11-04b';
+export const CONSENT_VERSION = '2026-11-19';
 
 /**
  * The youngest age the consent page accepts. Under it the page
@@ -138,8 +138,9 @@ export type ConsentCheck =
 
 /**
  * What the consent form's answers come to: a record to save, a minor whom
- * the page must stop for, or what to fix. The signature is the name typed
- * again, matched without regard to case or spacing.
+ * the page must stop for, or what to fix. The signature must match the name
+ * without regard to case or spacing; since 2026-11-19 the consent page passes
+ * the name itself, the ticked box with the typed name being the signature.
  */
 export const checkConsent = (input: { fullName: string; typedSignature: string; age: string; agreed: boolean }): ConsentCheck => {
   const fullName = tidy(input.fullName);
