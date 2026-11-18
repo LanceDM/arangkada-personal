@@ -1,7 +1,7 @@
 /** The bound implementations of Admin's ports. Provided by `app/dependencies`. */
 import type { IrtRepository } from './irtPorts';
 import type { PilotPoolRepository, PilotRecordsRepository, StudyInvitesRepository } from './pilotPorts';
-import type { AdminReportRepository, BktSetsRepository, ProgressResetRepository, QTableResetRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
+import type { AdminAccessRepository, AdminReportRepository, BktSetsRepository, ProgressResetRepository, QTableResetRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
 import type { QuizEditorRepository } from './quizPorts';
 
 export interface AdminDependencies {
@@ -25,6 +25,8 @@ export interface AdminDependencies {
   progressReset?: ProgressResetRepository;
   /** Resetting the shared Q-table; absent in tests (the panel says it is not wired). */
   qTableReset?: QTableResetRepository;
+  /** Granting admin access from the admin page; absent in tests (the panel says it is not wired). */
+  adminAccess?: AdminAccessRepository;
 }
 
 let bound: AdminDependencies | null = null;

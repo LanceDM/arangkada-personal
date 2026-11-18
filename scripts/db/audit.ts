@@ -42,7 +42,9 @@ const main = async () => {
   ]);
 
   // Admin accounts' play is test play: read from the table, never written to it.
+  // Admins by the claim, and (2026-11-18) by the admin page's list.
   const adminIds = new Set((await auth().listUsers(1000)).users.filter(u => u.customClaims?.admin === true).map(u => u.uid));
+  for (const d of (await firestore().collection('admins').get()).docs) adminIds.add(d.id);
 
   const logsOf = byOwner(courseLogs.docs, d => ({ id: d.id, ...d.data() }) as AuditCourseLog);
   const attemptsOf = byOwner(attempts.docs, d => d.data() as AuditUser['attempts'][number]);

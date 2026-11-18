@@ -26,3 +26,4 @@ export {
   studyUsernameOf,
   usernameProblem,
 } from './domain/studyIdentity';
+export { usernameOfIdentity } from './domain/accountIdentity';

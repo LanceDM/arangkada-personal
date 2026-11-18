@@ -19,6 +19,7 @@ import { accountActivity, directoryPlayers, playerHistory, searchPlayers, type D
 import { EmptyState, Legend, Notice, Panel, SearchField, SectionHeader } from './adminUi';
 import { toDateTime } from './formatDate';
 import { ProgressResetPanel } from './ProgressResetPanel';
+import { AdminAccessPanel } from './AdminAccessPanel';
 
 const KIND_STYLE: Record<EventKind, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   account: 'default',
@@ -100,6 +101,8 @@ const PlayerDetail = ({ player, course }: { player: DirectoryPlayer; course: Cou
       </Panel>
 
       <ProgressResetPanel target={{ uid: player.uid, label: player.label, code: player.code ?? null }} />
+
+      <AdminAccessPanel target={{ uid: player.uid, email: player.email || null, label: player.label, code: player.code ?? null }} />
 
       <Panel title="BKT now" description={mastery ? `Replayed from ${mastery.answers} graded answers with the player's value set.` : 'No graded answers yet.'}>
         {mastery && (

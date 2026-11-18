@@ -1,3 +1,4 @@
+import type { PageAdminEntry, RoleGrantRecord } from '@/features/admin/domain/adminAccess';
 import type { ProgressResetRecord } from '@/features/admin/domain/progressReset';
 import type { QTableResetRecord } from '@/features/admin/domain/qTableReset';
 import type { SiteStatus } from '@/features/admin/domain/siteStatus';
@@ -114,4 +115,18 @@ export interface BktSetsRepository {
    * players get. Refused, like `apply`, when another set was saved since.
    */
   editStart(record: StartEditRecord, expectedNumber: number, admin: { uid: string; email: string | null }): Promise<SavedValueSet>;
+}
+
+/**
+ * Admin access granted from the admin page (2026-11-18): `admins/{uid}` and the
+ * `roleGrants` records, followed live; a grant or revoke writes the entry and
+ * its record together.
+ */
+export interface AdminAccessRepository {
+  watch(
+    onChange: (state: { entries: PageAdminEntry[]; grants: RoleGrantRecord[] }) => void,
+    onError: (message: string) => void
+  ): () => void;
+  grant(target: { uid: string; email: string | null; name: string | null }, reason: string, by: { uid: string; email: string | null }): Promise<void>;
+  revoke(target: { uid: string; email: string | null }, reason: string, by: { uid: string; email: string | null }): Promise<void>;
 }

@@ -211,8 +211,15 @@ export const SCHEMA: SchemaEntry[] = [
     check: fields({ uid: is.string, consentVersion: is.string, consentedAt: is.number, enrolledAt: is.number, finishedAt: is.nullOr(is.number) }),
   },
   {
+    path: 'admins/{uid}',
+    description: 'Admin access granted from the admin page (2026-11-18)',
+    writer: 'app', writes: 'overwrite',
+    source: { kind: 'collection', path: 'admins' },
+    check: fields({ email: is.string, grantedBy: is.string, grantedAt: is.number, reason: is.string }),
+  },
+  {
     path: 'roleGrants/{id}',
-    description: 'Admin grants and revokes',
+    description: 'Admin grants and revokes, by db:role or (via: admin-page) the admin page',
     writer: 'script', writes: 'append-only', sqlInB: 'RoleGrant',
     source: { kind: 'collection', path: 'roleGrants' },
     check: fields({ uid: is.string, role: is.oneOf('admin'), action: is.oneOf('grant', 'revoke'), by: is.string, at: is.number }),

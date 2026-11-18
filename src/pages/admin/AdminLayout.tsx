@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 import { AdminShell } from '@/features/admin';
-import { signOut, useAuthSession } from '@/features/auth';
+import { signOut, useAuthSession, usernameOfIdentity } from '@/features/auth';
 import { logUiAction } from '@/features/driving-sim';
 import { AdminGate } from './AdminGate';
 
@@ -23,7 +23,7 @@ const AdminLayout = () => {
 
   return (
     <AdminGate>
-      <AdminShell userEmail={profile?.email || user?.email} onSignOut={handleSignOut}>
+      <AdminShell userEmail={profile?.email || usernameOfIdentity(user?.email) || user?.email} onSignOut={handleSignOut}>
         <Suspense fallback={<div className="h-48 animate-pulse rounded-xl bg-muted" />}>
           <Outlet />
         </Suspense>

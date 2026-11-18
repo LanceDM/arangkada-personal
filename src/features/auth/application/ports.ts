@@ -20,6 +20,11 @@ export interface AuthGateway {
    * profile, with no email and nothing sent to the address.
    */
   createStudyAccount(identity: string, password: string): Promise<AuthUser>;
+  /**
+   * Creates a regular account on a username's synthetic identity, with that
+   * username on its profile and no email (2026-11-18).
+   */
+  createUsernameAccount(identity: string, password: string, username: string): Promise<AuthUser>;
   /** Changes the signed-in account's password, after confirming its current one. */
   changePassword(currentPassword: string, newPassword: string): Promise<void>;
   signOut(): Promise<void>;

@@ -32,7 +32,8 @@ rules_version = '2';
 //   policy/config                                  the settings version in force (written by db:init)
 //   configVersions/{tag}                           every settings version (written by db:init)
 //   participants/{code}                            study enrolment (written by db:participant)
-//   roleGrants/{id}                                admin grants and revokes (written by db:role)
+//   roleGrants/{id}                                admin grants and revokes (db:role, or the admin page)
+//   admins/{uid}                                   admin access granted from the admin page
 //   meta/schema                                    which schema version the database was set up with
 //
 // Implementation B (VITE_DATABASE_MODE=firestore+sql) keeps participants,
@@ -107,8 +108,13 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // An admin: the `admin` claim (set by `npm run db:role`), or an entry in
+    // `admins/{uid}`, which an admin grants from the admin page (2026-11-18).
+    // The claim is checked first, so a claim admin costs no extra read.
     function isAdmin() {
-      return isSignedIn() && request.auth.token.get('admin', false) == true;
+      return isSignedIn()
+        && (request.auth.token.get('admin', false) == true
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
     }
 
     function isCount(value) {
@@ -1261,9 +1267,39 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Who has admin access by the admin page (2026-11-18). An admin adds one
+    // and takes one away, never their own (so nobody locks themselves out);
+    // each change is written with its roleGrants record in the same batch.
+    match /admins/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['email', 'name', 'grantedBy', 'grantedByEmail', 'grantedAt', 'reason'])
+        && request.resource.data.grantedBy == request.auth.uid
+        && request.resource.data.grantedAt is number
+        && request.resource.data.email is string
+        && request.resource.data.reason is string;
+      allow delete: if isAdmin() && uid != request.auth.uid;
+      allow update: if false;
+    }
+
+    // Every admin grant and revoke. `npm run db:role` writes them for the
+    // claim; the admin page writes them for `admins/{uid}`, and only with the
+    // matching change to that list in the same batch.
     match /roleGrants/{grantId} {
       allow read: if isAdmin();
-      allow write: if false;
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'role', 'action', 'by', 'byUid', 'at', 'reason', 'via'])
+        && request.resource.data.role == 'admin'
+        && request.resource.data.via == 'admin-page'
+        && request.resource.data.byUid == request.auth.uid
+        && request.resource.data.uid is string
+        && request.resource.data.at is number
+        && ((request.resource.data.action == 'grant'
+              && existsAfter(/databases/$(database)/documents/admins/$(request.resource.data.uid)))
+            || (request.resource.data.action == 'revoke'
+              && !existsAfter(/databases/$(database)/documents/admins/$(request.resource.data.uid))));
+      allow update, delete: if false;
     }
 
     match /meta/{docId} {

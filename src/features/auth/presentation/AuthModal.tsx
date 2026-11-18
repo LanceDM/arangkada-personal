@@ -20,11 +20,12 @@ const AuthModal = ({ isOpen, onSuccess, onClose, defaultView = 'login', reason }
         <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+          aria-label="Close"
+          className="absolute top-3 right-3 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
-        <div className="p-6 space-y-4">
+        <div className="px-6 pb-6 pt-11 space-y-4">
           {reason && (
             <p className="text-sm text-muted-foreground text-center">{reason}</p>
           )}

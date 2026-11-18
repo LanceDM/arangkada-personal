@@ -21,31 +21,17 @@ import {
   type User,
 } from 'firebase/auth';
 import { auth } from '@/shared/infrastructure/firebase/client';
+import { hasAdminAccess } from '@/shared/infrastructure/firebase/adminAccess';
 import { appUrl } from '@/shared/lib/appUrl';
 import type { AuthGateway } from '@/features/auth/application/ports';
 import type { AuthUser } from '@/features/auth/domain/userProfile';
 import { createUserProfile, getUserProfile } from './FirebaseUserRepository';
 
-/**
- * Admin is read from the token the session already holds, so a claim granted
- * since that token was issued arrives with the next sign-in, not this one.
- */
-const hasAdminClaim = async (user: User): Promise<boolean> => {
-  try {
-    const { claims } = await user.getIdTokenResult();
-    return claims.admin === true;
-  } catch {
-    // An expired token that cannot be refreshed, e.g. offline: the session
-    // still opens, without admin.
-    return false;
-  }
-};
-
 const toAuthUser = async (user: User): Promise<AuthUser> => ({
   uid: user.uid,
   email: user.email,
   emailVerified: user.emailVerified,
-  isAdmin: await hasAdminClaim(user),
+  isAdmin: await hasAdminAccess(user),
 });
 
 const NEW_ACCOUNT = {
@@ -97,6 +83,18 @@ const createStudyAccount = async (identity: string, password: string): Promise<A
   return toAuthUser(result.user);
 };
 
+/** A regular account made with a username alone: no email on its profile, nothing sent anywhere. */
+const createUsernameAccount = async (identity: string, password: string, username: string): Promise<AuthUser> => {
+  const result = await createUserWithEmailAndPassword(auth, identity, password);
+  await createUserProfile(result.user.uid, {
+    email: '',
+    username,
+    createdAt: Date.now(),
+    ...NEW_ACCOUNT,
+  });
+  return toAuthUser(result.user);
+};
+
 /**
  * Popup first, full-page redirect when the browser blocks it. The redirect
  * branch resolves to null: the page is about to navigate away, and the sign-in
@@ -132,6 +130,7 @@ export const firebaseAuthGateway: AuthGateway = {
   signIn,
   signUp,
   createStudyAccount,
+  createUsernameAccount,
   changePassword: async (currentPassword, newPassword) => {
     const user = auth.currentUser;
     if (!user?.email) throw new Error('No password account is signed in.');

@@ -16,6 +16,15 @@ import {
   studySignUpMessage,
   usernameProblem,
 } from '@/features/auth/domain/studyIdentity';
+import {
+  accountIdentity,
+  accountPasswordProblem,
+  accountSignInMessage,
+  accountSignUpMessage,
+  emailProblem,
+  isWrongCredentials,
+  signInCandidates,
+} from '@/features/auth/domain/accountIdentity';
 
 export const signIn = (email: string, password: string): Promise<AuthUser> =>
   authDeps().auth.signIn(email, password);
@@ -71,6 +80,71 @@ export const changeStudyPassword = async (currentPassword: string, newPassword: 
         ? { en: 'Your current password is wrong.', fil: 'Mali ang kasalukuyang password.' }
         : studySignInMessage(error)
     );
+  }
+};
+
+/** A refused sign-in or sign-up on the main form, whose text the form shows in the chosen language. */
+export class AccountAuthError extends Error {
+  readonly text: Localized;
+  constructor(text: Localized) {
+    super(text.en);
+    this.text = text;
+  }
+}
+
+/**
+ * Signs in with a username or an email and a password (2026-11-18). A username
+ * is tried as a regular account, then as a study account; only "wrong
+ * identity or password" moves on to the next, any other failure is reported.
+ */
+export const signInWithLogin = async (typed: string, password: string): Promise<AuthUser> => {
+  const candidates = signInCandidates(typed);
+  if (candidates.length === 0 || !password) throw new AccountAuthError(accountSignInMessage({ code: 'auth/invalid-credential' }));
+  let last: unknown = null;
+  for (const identity of candidates) {
+    try {
+      return await authDeps().auth.signIn(identity, password);
+    } catch (error) {
+      last = error;
+      if (!isWrongCredentials(error)) break;
+    }
+  }
+  throw new AccountAuthError(accountSignInMessage(last));
+};
+
+export interface NewAccount {
+  username: string;
+  /** Optional: with one, the account signs in with it and can reset its password. */
+  email: string;
+  password: string;
+}
+
+/** Makes a regular account from the sign-up form, every refusal in the form's words. */
+export const createAccount = async ({ username: typedUsername, email: typedEmail, password }: NewAccount): Promise<AuthUser> => {
+  const email = typedEmail.trim().toLowerCase();
+  const refused = usernameProblem(typedUsername) ?? emailProblem(email) ?? accountPasswordProblem(password);
+  if (refused) throw new AccountAuthError(refused);
+  const username = normalizeUsername(typedUsername)!;
+  try {
+    return email
+      ? await authDeps().auth.signUp(email, password, username)
+      : await authDeps().auth.createUsernameAccount(accountIdentity(username), password, username);
+  } catch (error) {
+    throw new AccountAuthError(accountSignUpMessage(error, email !== ''));
+  }
+};
+
+/**
+ * Whether the account still has to agree to the Terms and Data Use: a Google
+ * sign-in that has just made the account. An unreadable profile counts as
+ * agreed, so a failed read never blocks a returning player.
+ */
+export const needsTermsAcceptance = async (uid: string): Promise<boolean> => {
+  try {
+    const profile = await authDeps().userProfiles.get(uid);
+    return !profile?.termsVersion;
+  } catch {
+    return false;
   }
 };
 

@@ -111,7 +111,7 @@ describe('PilotDashboard', () => {
     }
     // Every control on the page is an invite's.
     const labels = [...view.querySelectorAll('button')].map(b => b.textContent?.trim());
-    expect(new Set(labels)).toEqual(new Set(['New invite', 'Copy join link', 'Close', 'Details']));
+    expect(new Set(labels)).toEqual(new Set(['New invite', 'Copy link', 'Copy code', 'Copy message', 'Email', 'Close', 'Details']));
   });
 
   it("opens a participant's details for the team: username, age, consent, background and device check, still no score", () => {
@@ -137,8 +137,10 @@ describe('PilotDashboard', () => {
     expect(view.textContent).toContain('7K3Q9-X2MT4');
     expect(view.textContent).toContain('ABCDE-12345');
     expect(view.textContent).toContain('No dry run invite yet.');
-    // A closed invite offers nothing.
-    expect(view.querySelectorAll('li button')).toHaveLength(2);
+    // An open invite offers its link, code, message, email and close; a closed one only its date (2026-11-18).
+    expect(view.querySelectorAll('li button')).toHaveLength(5);
+    expect(view.querySelector('input[aria-label^="Join link"]')).not.toBeNull();
+    expect(view.textContent).toContain('1 closed invite(s)');
 
     await act(async () => button(view, 'New invite')!.click());
     expect(value.create).toHaveBeenCalledWith('study');

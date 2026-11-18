@@ -2,7 +2,7 @@
  * `/admin`: the Overview. The pool followed live, today's sessions, where the
  * participants stand, and the health of their records.
  */
-import { OverviewSection, SiteStatusPanel, useAdminOverview } from '@/features/admin';
+import { AdminRosterPanel, OverviewSection, SiteStatusPanel, useAdminOverview } from '@/features/admin';
 import { useAuthSession } from '@/features/auth';
 
 const OverviewPage = () => {
@@ -12,6 +12,7 @@ const OverviewPage = () => {
     <div className="space-y-6">
       <SiteStatusPanel />
       <OverviewSection {...overview} />
+      <AdminRosterPanel />
     </div>
   );
 };

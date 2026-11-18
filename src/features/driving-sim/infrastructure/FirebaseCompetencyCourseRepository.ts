@@ -2,6 +2,7 @@ import { collection, doc, getDoc, getDocs, orderBy, query, runTransaction, serve
 import { CourseConflictError, OutdatedAppError } from '@/features/driving-sim/application/errors';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { auth, db } from '@/shared/infrastructure/firebase/client';
+import { hasAdminAccess } from '@/shared/infrastructure/firebase/adminAccess';
 import { COURSE_SCHEMA_VERSION, sameCursor, type CourseCursor } from '@/domain/competencyRouting/course';
 import { applyQLog, pairQOperations, statesOf } from '@/domain/study/qLog';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
@@ -21,11 +22,8 @@ const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 const cursorDoc = (uid: string) => doc(db, 'users', uid, 'routing', 'competencyCourse');
 const tableDoc = () => doc(db, 'policy', 'competencyQ');
 
-/** Whether the signed-in account carries the admin claim. */
-const isAdminSession = async (): Promise<boolean> => {
-  const token = await auth.currentUser?.getIdTokenResult();
-  return token?.claims.admin === true;
-};
+/** Whether the signed-in account has admin access: the claim, or the admin page's list. */
+const isAdminSession = (): Promise<boolean> => hasAdminAccess(auth.currentUser);
 const configDoc = () => doc(db, 'policy', 'config');
 const evidenceCounterDoc = (uid: string) => doc(db, 'users', uid, 'state', 'evidence');
 const activeDoc = (uid: string) => doc(db, 'users', uid, 'state', 'active');

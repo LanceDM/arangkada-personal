@@ -7,7 +7,7 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 
 const host = process.env.FIRESTORE_EMULATOR_HOST;
 
@@ -205,5 +205,40 @@ describe.skipIf(!host)('security rules for the study logs', () => {
     await assertFails(getDoc(doc(alice, 'bktPilots/alice')));
     await assertSucceeds(setDoc(doc(admin, 'bktPilotLog/l1'), { uid: 'alice', label: 'A', action: 'marked', at: 1, by: 'ada' }));
     await assertFails(updateDoc(doc(admin, 'bktPilotLog/l1'), { action: 'unmarked' }));
+  });
+
+  it('lets an admin grant admin access from the page, with its record, and the grantee act as one (2026-11-18)', async () => {
+    const claim = env.authenticatedContext('ada', { admin: true }).firestore();
+    const bob = env.authenticatedContext('bob').firestore();
+    const record = (action: 'grant' | 'revoke', byUid = 'ada') => ({
+      uid: 'bob', email: 'bob@example.com', role: 'admin', action, by: 'ada@example.com', byUid, at: 1, reason: null, via: 'admin-page',
+    });
+    const admission = { email: 'bob@example.com', name: 'Bob', grantedBy: 'ada', grantedByEmail: 'ada@example.com', grantedAt: 1, reason: 'team' };
+
+    // Not an admin yet: cannot read admin data or grant itself.
+    await assertFails(getDoc(doc(bob, 'roleGrants/x')));
+    await assertFails(setDoc(doc(bob, 'admins/bob'), { ...admission, grantedBy: 'bob' }));
+
+    // A record without its entry, or an entry by someone else's name, is refused.
+    await assertFails(setDoc(doc(claim, 'roleGrants/g0'), record('grant')));
+    await assertFails(setDoc(doc(claim, 'admins/bob'), { ...admission, grantedBy: 'someone' }));
+
+    const granted = writeBatch(claim);
+    granted.set(doc(claim, 'admins/bob'), admission);
+    granted.set(doc(collection(claim, 'roleGrants')), record('grant'));
+    await assertSucceeds(granted.commit());
+
+    // Bob is now an admin by the list: he can read admin data, and cannot teach the Q-table.
+    await assertSucceeds(getDoc(doc(bob, 'roleGrants/x')));
+    await assertSucceeds(getDoc(doc(bob, 'users/alice')));
+    // He cannot remove his own access, nor rewrite an entry or a record.
+    await assertFails(deleteDoc(doc(bob, 'admins/bob')));
+    await assertFails(updateDoc(doc(bob, 'admins/bob'), { reason: 'changed' }));
+
+    const revoked = writeBatch(claim);
+    revoked.delete(doc(claim, 'admins/bob'));
+    revoked.set(doc(collection(claim, 'roleGrants')), record('revoke'));
+    await assertSucceeds(revoked.commit());
+    await assertFails(getDoc(doc(bob, 'roleGrants/x')));
   });
 });

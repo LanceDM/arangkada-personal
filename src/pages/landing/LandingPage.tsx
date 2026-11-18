@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Shield, Brain, Trophy, ChevronRight, Gauge } from 'lucide-react';
+import { Car, Shield, Brain, Trophy, ChevronRight, Gauge, ClipboardList } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 
 const features = [
@@ -9,6 +9,9 @@ const features = [
   { icon: Shield, title: 'Learn From Mistakes', desc: 'Wrong decisions show the exact law citation — learn rules in context.' },
   { icon: Trophy, title: '3 Game Modes', desc: 'Story Mode, Mock Exam, and Daily Challenges keep you engaged and learning.' },
 ];
+
+/** The team's survey (2026-11-18): a Google Form, opened in a new tab. */
+const SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScp9jZxj269v6RtqZ_sxw-V7eWcbkBUYOdFMpMTtKYXcu6vIw/viewform';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -54,6 +57,12 @@ const Landing = () => {
               >
                 TARA NA!
                 <ChevronRight className={`ml-1 transition-transform duration-300 ${hovering ? 'translate-x-1' : ''}`} />
+              </Button>
+              <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 font-display font-bold">
+                <a href={SURVEY_URL} target="_blank" rel="noopener noreferrer">
+                  <ClipboardList className="mr-1" />
+                  TAKE THE SURVEY
+                </a>
               </Button>
             </div>
 

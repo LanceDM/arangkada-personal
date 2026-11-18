@@ -24,3 +24,4 @@ export { useEvaluationLogs } from './application/useEvaluationLogs';
 export { ScenariosSection } from './presentation/ScenariosSection';
 export { SiteStatusPanel } from './presentation/SiteStatusPanel';
 export { useSiteStatus } from './application/useSiteStatus';
+export { AdminRosterPanel } from './presentation/AdminAccessPanel';

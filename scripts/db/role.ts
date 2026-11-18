@@ -50,10 +50,13 @@ const main = async () => {
     const snap = await firestore().collection('roleGrants').orderBy('at').get();
     for (const d of snap.docs) {
       const g = d.data();
-      console.log(`${new Date(g.at).toISOString()}  ${g.action.padEnd(6)} ${g.role}  ${g.email ?? g.uid}  by ${g.by}${g.reason ? `  (${g.reason})` : ''}`);
+      console.log(`${new Date(g.at).toISOString()}  ${g.action.padEnd(6)} ${g.role}  ${g.email ?? g.uid}  by ${g.by}${g.via ? ` [${g.via}]` : ''}${g.reason ? `  (${g.reason})` : ''}`);
     }
     const admins = (await auth().listUsers(1000)).users.filter(u => u.customClaims?.admin === true);
-    console.log(`\nAdmins now: ${admins.map(u => u.email ?? u.uid).join(', ') || 'none'}`);
+    console.log(`\nAdmins by claim: ${admins.map(u => u.email ?? u.uid).join(', ') || 'none'}`);
+    // Granted from the admin page (2026-11-18): removed there, not here.
+    const pageAdmins = (await firestore().collection('admins').get()).docs.map(d => d.data().email || d.id);
+    console.log(`Admins by the admin page: ${pageAdmins.join(', ') || 'none'}`);
     return;
   }
   if ((command !== 'grant' && command !== 'revoke') || !email) fail('Usage: npm run db:role -- create|grant|revoke <email> [--reason "..."] | list');
