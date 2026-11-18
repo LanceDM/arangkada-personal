@@ -66,3 +66,17 @@ export const inviteMailto = (recipients: string[], message: InviteMessage): stri
   const query = params.toString().replace(/\+/g, '%20');
   return `mailto:${recipients.length === 1 ? encodeURIComponent(recipients[0]) : ''}?${query}`;
 };
+
+/**
+ * Gmail's compose window in the browser, with the invite written: for admins
+ * whose computer has no email app set up for mailto: links (most Windows PCs
+ * that use Gmail on the web). Same To / BCC rule as above.
+ */
+export const inviteGmailUrl = (recipients: string[], message: InviteMessage): string => {
+  const params = new URLSearchParams({ view: 'cm', fs: '1' });
+  if (recipients.length === 1) params.set('to', recipients[0]);
+  else if (recipients.length > 1) params.set('bcc', recipients.join(','));
+  params.set('su', message.subject);
+  params.set('body', message.body);
+  return `https://mail.google.com/mail/?${params.toString()}`;
+};

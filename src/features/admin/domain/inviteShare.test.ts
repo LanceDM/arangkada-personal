@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inviteMailto, inviteMessage, parseRecipients } from './inviteShare';
+import { inviteGmailUrl, inviteMailto, inviteMessage, parseRecipients } from './inviteShare';
 
 const link = 'https://example.github.io/app/study/join?invite=ABCDEFGHJK';
 
@@ -26,5 +26,18 @@ describe('sending an invite (2026-11-18)', () => {
     expect(many.searchParams.get('bcc')).toBe('a@x.com,b@x.com');
     expect(many.searchParams.get('body')).toContain(link);
     expect(inviteMailto(['a@x.com'], message)).not.toContain('+');
+  });
+
+  it("opens Gmail's compose window with the same To / BCC rule", () => {
+    const message = inviteMessage('ABCDEFGHJK', link);
+    const one = new URL(inviteGmailUrl(['a@x.com'], message));
+    expect(one.origin + one.pathname).toBe('https://mail.google.com/mail/');
+    expect(one.searchParams.get('view')).toBe('cm');
+    expect(one.searchParams.get('to')).toBe('a@x.com');
+    expect(one.searchParams.get('bcc')).toBeNull();
+    expect(one.searchParams.get('body')).toContain(link);
+    const many = new URL(inviteGmailUrl(['a@x.com', 'b@x.com'], message));
+    expect(many.searchParams.get('to')).toBeNull();
+    expect(many.searchParams.get('bcc')).toBe('a@x.com,b@x.com');
   });
 });

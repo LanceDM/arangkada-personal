@@ -6,7 +6,7 @@ import { STUDY_COHORTS, formatInviteCode, type StudyCohort } from '@/domain/stud
 import { appUrl } from '@/shared/lib/appUrl';
 import type { StudyInvites } from '@/features/admin/application/useStudyInvites';
 import type { InviteEntry } from '@/features/admin/application/pilotPorts';
-import { inviteMailto, inviteMessage, parseRecipients } from '@/features/admin/domain/inviteShare';
+import { inviteGmailUrl, inviteMailto, inviteMessage, parseRecipients } from '@/features/admin/domain/inviteShare';
 import { Notice, Panel } from './adminUi';
 
 const COHORT_LABEL: Record<StudyCohort, string> = { study: 'Study', dryrun: 'Dry run', test: 'Test' };
@@ -21,6 +21,26 @@ const COHORT_NOTE: Record<StudyCohort, string> = {
 const joinLink = (code: string) => `${window.location.origin}${appUrl('/study/join')}?invite=${code}`;
 
 const SMALL = 'h-8 px-2 text-xs';
+
+/** Copies text; falls back to a hidden textarea where the clipboard API is blocked. */
+const copyText = async (value: string) => {
+  try {
+    await navigator.clipboard.writeText(value);
+    return;
+  } catch {
+    // Fall through to the older way.
+  }
+  const area = document.createElement('textarea');
+  area.value = value;
+  area.setAttribute('readonly', '');
+  area.style.position = 'fixed';
+  area.style.opacity = '0';
+  document.body.appendChild(area);
+  area.select();
+  const ok = document.execCommand('copy');
+  area.remove();
+  if (!ok) throw new Error('copy refused');
+};
 
 /**
  * One open invite and every way to send it (2026-11-18): the link itself,
@@ -41,7 +61,7 @@ const OpenInvite = ({ invite, onClose, closing, busy }: { invite: InviteEntry; o
   const copy = async (what: string, value: string) => {
     setProblem(null);
     try {
-      await navigator.clipboard.writeText(value);
+      await copyText(value);
       setCopied(what);
       window.setTimeout(() => setCopied(current => (current === what ? null : current)), 2500);
     } catch {
@@ -57,18 +77,29 @@ const OpenInvite = ({ invite, onClose, closing, busy }: { invite: InviteEntry; o
     }
   };
 
-  const email = () => {
+  /** The addresses typed, or null after saying what is wrong with them. */
+  const readRecipients = (): string[] | null => {
     const { valid, invalid } = parseRecipients(recipients);
     if (invalid.length > 0) {
       setProblem(`Not an email: ${invalid.join(', ')}`);
-      return;
+      return null;
     }
     if (valid.length === 0) {
       setProblem('Type at least one email address.');
-      return;
+      return null;
     }
     setProblem(null);
-    window.location.href = inviteMailto(valid, message);
+    return valid;
+  };
+
+  const gmail = () => {
+    const valid = readRecipients();
+    if (valid) window.open(inviteGmailUrl(valid, message), '_blank', 'noopener,noreferrer');
+  };
+
+  const email = () => {
+    const valid = readRecipients();
+    if (valid) window.location.href = inviteMailto(valid, message);
   };
 
   return (
@@ -141,20 +172,25 @@ const OpenInvite = ({ invite, onClose, closing, busy }: { invite: InviteEntry; o
               value={recipients}
               onChange={event => setRecipients(event.target.value)}
               onKeyDown={event => {
-                if (event.key === 'Enter') email();
+                if (event.key === 'Enter') gmail();
               }}
               placeholder="juan@example.com, maria@example.com"
               className="h-8 rounded-md border border-input bg-background px-2 text-xs"
             />
           </label>
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" className={SMALL} onClick={email}>
-              Open in my email app
+            <Button size="sm" className={SMALL} onClick={gmail}>
+              <Mail className="h-3.5 w-3.5" />
+              Open in Gmail
             </Button>
-            <span className="text-[11px] text-muted-foreground">
-              Your email app opens with the invite written; press Send there. Several people go in BCC, so they do not see each other.
-            </span>
+            <Button size="sm" variant="outline" className={SMALL} onClick={email}>
+              Other email app
+            </Button>
           </div>
+          <p className="text-[11px] text-muted-foreground">
+            Gmail opens in a new tab with the invite written: check it and press Send there. Several people go in BCC, so they do not see each
+            other. Not on Gmail? "Other email app" opens your computer's own email app, if it has one set up; otherwise use Copy message.
+          </p>
         </div>
       )}
       {problem && <p className="text-xs text-destructive">{problem}</p>}
