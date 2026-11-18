@@ -23,7 +23,7 @@ import { databaseMode, fail, firestore, auth, flag, operator, sql } from './admi
 const createAccount = async (email: string) => {
   const password = process.env.ADMIN_PASSWORD;
   if (!password) fail("create needs the password in ADMIN_PASSWORD, e.g. ADMIN_PASSWORD='...' npm run db:role -- create <email>");
-  if (password!.length < 6) fail('Firebase needs a password of at least 6 characters.');
+  if (password!.length < 8) fail('Use a password of at least 8 characters.');
   const existing = await auth().getUserByEmail(email).catch(() => null);
   if (existing) fail(`${email} already has an account (${existing.uid}). Use: npm run db:role -- grant ${email}`);
   const user = await auth().createUser({ email, password, emailVerified: false, disabled: false });
