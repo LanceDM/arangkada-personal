@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Car, FileText, CalendarDays, Lock, Flame, Star, ChevronRight, Trophy, ShieldAlert, ClipboardCheck, CheckCircle2 } from 'lucide-react';
+import { Car, FileText, CalendarDays, Lock, Flame, Star, ChevronRight, Trophy, ShieldAlert, ClipboardCheck, CheckCircle2, ClipboardList } from 'lucide-react';
 import { useProgressStore } from '@/features/progression';
 import { getDailyKey } from '@/features/daily-challenge';
 import { getDailyStreak, loadGuestStreak, type StreakData } from '@/features/daily-challenge';
@@ -8,6 +8,7 @@ import { LEVELS, logUiAction } from '@/features/driving-sim';
 import { useInitialExam } from '@/app/initialExam/useInitialExam';
 import AppLayout from '@/app/layout/AppLayout';
 import { useAuthSession } from '@/features/auth';
+import { SURVEY_URL } from '@/shared/lib/survey';
 
 const EMPTY_STREAK: StreakData = {
   currentStreak: 0,
@@ -159,6 +160,17 @@ const ModeSelect = () => {
           ) : (
           <div />
           )}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+          {/* Survey */}
+          <a
+            href={SURVEY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/15 bg-white/5 text-foreground hover:border-primary/50 hover:text-primary transition-colors"
+          >
+            <ClipboardList className="w-5 h-5" />
+            <span className="font-black text-sm uppercase italic tracking-tight">Take the survey</span>
+          </a>
           {/* Streak */}
           {streak.currentStreak > 0 && (
             <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 text-primary shadow-[0_0_20px_rgba(var(--primary),0.15)]">
@@ -168,6 +180,7 @@ const ModeSelect = () => {
               </span>
             </div>
           )}
+          </div>
         </div>
 
         {/* Title */}

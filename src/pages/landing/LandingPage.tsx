@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { SURVEY_URL } from '@/shared/lib/survey';
 import { Car, Shield, Brain, Trophy, ChevronRight, Gauge, ClipboardList } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 
@@ -11,7 +12,6 @@ const features = [
 ];
 
 /** The team's survey (2026-11-18): a Google Form, opened in a new tab. */
-const SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScp9jZxj269v6RtqZ_sxw-V7eWcbkBUYOdFMpMTtKYXcu6vIw/viewform';
 
 const Landing = () => {
   const navigate = useNavigate();
