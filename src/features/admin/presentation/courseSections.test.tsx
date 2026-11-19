@@ -41,7 +41,7 @@ const bkt = (over: Partial<BktSets> = {}): BktSets => ({
 });
 
 provideAdminDependencies({
-  live: { watchTable: (on: (t: null) => void) => (on(null), () => {}), watchUpdates: (_: number, on: (r: []) => void) => (on([]), () => {}) },
+  live: { watchTable: (_id: string, on: (t: null) => void) => (on(null), () => {}), watchUpdates: (_id: string, _n: number, on: (r: []) => void) => (on([]), () => {}) },
   logs: {
     eventsOf: async () => [
       { seq: 1, at: Date.UTC(2026, 10, 13, 1), type: 'ui_action', payload: { action: 'signed_in' } },
@@ -90,6 +90,12 @@ describe('the course admin sections', () => {
     expect(text()).toContain('Double Explore-then-Commit');
     expect(text()).toContain('γ = 0.9');
     expect(text()).toContain('No table yet');
+    // Four tables (2026-11-19), each with its own reset; the public one can start from the study's.
+    for (const label of ['Study', 'Dry run', 'Test', 'Public']) expect(text()).toContain(label);
+    expect(text()).toContain('Reset the study Q-table');
+    await clickLabel('Public Q-table');
+    expect(text()).toContain('Reset the public Q-table');
+    expect(text()).toContain('from a copy of the study table');
     await pressTab('Decisions');
     expect(text()).toContain('No decisions yet');
     await act(async () => {});

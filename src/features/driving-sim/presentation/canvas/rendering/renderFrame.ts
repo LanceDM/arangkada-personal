@@ -12,10 +12,11 @@
  * it: callers paint that over the top from their own source.
  */
 import type { SceneFrame } from '@/features/driving-sim/domain/scene/SceneFrame';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import { drawCar, drawRoad } from './renderers/roadRenderer';
 import { renderScene } from './renderScene';
 
-export const renderFrame = (ctx: CanvasRenderingContext2D, frame: SceneFrame): void => {
+export const renderFrame = (ctx: CanvasRenderingContext2D, frame: SceneFrame, skin: VehicleSkin = 'car'): void => {
   drawRoad(
     ctx,
     frame.roadOffset,
@@ -26,5 +27,5 @@ export const renderFrame = (ctx: CanvasRenderingContext2D, frame: SceneFrame): v
     frame.level.route
   );
   renderScene(ctx, frame.nodes, frame.roadAt);
-  drawCar(ctx, frame.car);
+  drawCar(ctx, frame.car, skin);
 };

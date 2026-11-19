@@ -200,7 +200,8 @@ export interface ActiveActivity {
 export interface CompetencyCourseRepository {
   loadCursor(uid: string): Promise<CourseCursor | null>;
   /** The shared Q-table; empty until the first participant's first decision. */
-  loadQTable(): Promise<QTable>;
+  /** The table this account's decisions are made from (domain/competencyRouting/qTables). */
+  loadQTable(uid: string): Promise<QTable>;
   /**
    * Commits one course step atomically, in one transaction:
    *

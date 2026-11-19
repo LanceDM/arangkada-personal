@@ -1,6 +1,7 @@
 import type { PageAdminEntry, RoleGrantRecord } from '@/features/admin/domain/adminAccess';
 import type { ProgressResetRecord } from '@/features/admin/domain/progressReset';
-import type { QTableResetRecord } from '@/features/admin/domain/qTableReset';
+import type { QTableResetRecord, QTableStart } from '@/features/admin/domain/qTableReset';
+import type { QTableId } from '@/domain/competencyRouting/qTables';
 import type { SiteStatus } from '@/features/admin/domain/siteStatus';
 import type { BktSetsData, SavedValueSet, StartEditRecord } from '@/features/admin/domain/bktSetsAdmin';
 import type { CalibrationRecord, PilotRef } from '@/features/admin/domain/bktCalibration';
@@ -51,8 +52,8 @@ export interface StudyRecordsRepository {
 
 /** Live reads for the dashboard: each callback runs again whenever the data changes. Returns the unsubscribe. */
 export interface LiveQTableRepository {
-  watchTable(onChange: (table: LiveQTable | null) => void, onError: (error: Error) => void): () => void;
-  watchUpdates(limit: number, onChange: (rows: QUpdateRow[]) => void, onError: (error: Error) => void): () => void;
+  watchTable(tableId: QTableId, onChange: (table: LiveQTable | null) => void, onError: (error: Error) => void): () => void;
+  watchUpdates(tableId: QTableId, limit: number, onChange: (rows: QUpdateRow[]) => void, onError: (error: Error) => void): () => void;
 }
 
 /** The logged study records the export reads (Firestore in both implementations). */
@@ -60,7 +61,8 @@ export interface StudyLogRepository {
   /** Every participant's BKT update log entries. */
   bktUpdates(): Promise<Record<string, unknown>[]>;
   /** The shared Q-table's whole update log. */
-  qUpdates(): Promise<Record<string, unknown>[]>;
+  /** One table's whole update log, in order: the study's unless another is named. */
+  qUpdates(tableId?: QTableId): Promise<Record<string, unknown>[]>;
   /** Every participant's event stream. */
   events(): Promise<Record<string, unknown>[]>;
   /** One player's event stream, oldest first. */
@@ -87,14 +89,19 @@ export interface ProgressResetRepository {
 }
 
 /**
- * Resets the shared Q-table (domain/qTableReset.ts): keeps the table as it
- * stood under `policy/competencyQ/resets/{resetId}` and empties it, in one
- * transaction. The update log is not touched.
+ * Resets one Q-table (domain/qTableReset.ts): keeps the table as it stood
+ * under its `resets/{resetId}` and empties it, or starts it from a copy of the
+ * study's table, in one transaction. The update log is not touched.
  */
 export interface QTableResetRepository {
-  reset(admin: { uid: string; email: string | null }, note: string): Promise<QTableResetRecord & { resetId: string }>;
-  /** Past resets, newest first. */
-  history(): Promise<(QTableResetRecord & { resetId: string })[]>;
+  reset(
+    tableId: QTableId,
+    admin: { uid: string; email: string | null },
+    note: string,
+    start?: QTableStart
+  ): Promise<QTableResetRecord & { resetId: string }>;
+  /** Past resets of that table, newest first. */
+  history(tableId: QTableId): Promise<(QTableResetRecord & { resetId: string })[]>;
 }
 
 /**

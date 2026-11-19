@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import { VEHICLE_SKIN_NAMES } from '@/shared/lib/vehicleSkin';
 import { Badge } from '@/shared/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
@@ -41,6 +42,7 @@ const ParticipantDetails = ({ row }: { row: PilotRow }) => {
     ['Enrolled', dateTime(row.enrolledAt)],
     ['Plays video games', gamingLabel(profile.gaming)],
     ['Will play on', deviceLabel(profile.device)],
+    ['Prefers to drive', profile.preferredVehicle ? VEHICLE_SKIN_NAMES[profile.preferredVehicle].en : '—'],
     ['Device check', deviceCheckLabel(profile.deviceCheck)],
     ['Pre-test', testLabel(steps.preTest)],
     ['Post-test', testLabel(steps.postTest)],

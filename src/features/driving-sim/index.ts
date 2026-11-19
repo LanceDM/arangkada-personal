@@ -7,6 +7,7 @@
  * report all need to read the curriculum without owning it.
  */
 export { default as GameScreen } from './presentation/ui/GameScreen';
+export { VehicleSkinPicker } from './presentation/ui/VehicleSkinPicker';
 export { default as MissionBriefing } from './presentation/ui/MissionBriefing';
 export { default as LessonReader } from './presentation/ui/LessonReader';
 // Action words, shared with the after-action report so it says what the card said (2026-11-16).

@@ -11,6 +11,10 @@ import { getCompetencyLabel } from '@/domain/learner/profile';
 import { RUN_CONFIG, RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { legalActions, Q_STATES, stateKey } from '@/domain/competencyRouting/qLearning';
 import type { CourseAdmin } from '@/features/admin/application/useCourseAdmin';
+import { useQTableReset } from '@/features/admin/application/useQTableReset';
+import { decisionRows, stateActionStats, type DecisionRow, type StateActionStats } from '@/features/admin/domain/courseAdmin';
+import { taughtTable } from '@/features/admin/domain/adminReport';
+import { Q_TABLE_IDS, Q_TABLE_LABEL, Q_TABLE_NOTE, type QTableId } from '@/domain/competencyRouting/qTables';
 import { EmptyState, Legend, Notice, Panel, SectionHeader, SectionTabs } from './adminUi';
 import { QTablePanel } from './QTablePanel';
 import { toDateTime } from './formatDate';
@@ -79,7 +83,7 @@ const DECISIONS_LEGEND = [
   { term: 'Reward', meaning: 'r with its parts (A, pass, H) and where it was measured; "waiting" until the competency is measured again.' },
 ] as const;
 
-const EarnedPanel = ({ course }: { course: CourseAdmin }) => (
+const EarnedPanel = ({ stats }: { stats: readonly StateActionStats[] }) => (
   <Panel
     title="What each action has earned"
     description="Per state and legal action: how often it was chosen (explored, exploited, forced), and the rewards it received with their parts. Counts only what the table as it stands learned from: decisions since its last reset, and none from an admin's course. Compare actions within a state, never across states."
@@ -101,7 +105,7 @@ const EarnedPanel = ({ course }: { course: CourseAdmin }) => (
       <TableBody>
         {Q_STATES.flatMap(state =>
           legalActions(state).map(action => {
-            const row = course.stats.find(s => s.state === stateKey(state) && s.action === action)!;
+            const row = stats.find(s => s.state === stateKey(state) && s.action === action)!;
             return (
               <TableRow key={`${row.state}-${action}`}>
                 <TableCell className="font-mono text-xs">{row.state}</TableCell>
@@ -123,10 +127,10 @@ const EarnedPanel = ({ course }: { course: CourseAdmin }) => (
   </Panel>
 );
 
-const DecisionsPanel = ({ course }: { course: CourseAdmin }) => {
+const DecisionsPanel = ({ course, decisions }: { course: CourseAdmin; decisions: readonly DecisionRow[] }) => {
   const [player, setPlayer] = useState('');
-  const rows = useMemo(() => course.decisions.filter(d => !player || d.uid === player).slice(0, 200), [course.decisions, player]);
-  if (course.decisions.length === 0) {
+  const rows = useMemo(() => decisions.filter(d => !player || d.uid === player).slice(0, 200), [decisions, player]);
+  if (decisions.length === 0) {
     return <EmptyState icon={BrainCircuit} title="No decisions yet">The first decision is made after a player's first drive in Level 1.</EmptyState>;
   }
   return (
@@ -187,12 +191,26 @@ const DecisionsPanel = ({ course }: { course: CourseAdmin }) => {
 
 export const QLearningSection = ({ course }: { course: CourseAdmin }) => {
   const [view, setView] = useState<'table' | 'earned' | 'decisions'>('table');
+  const [tableId, setTableId] = useState<QTableId>('study');
+  // What the chosen table learned from: decisions since its last reset, from
+  // the course entries that taught it (2026-11-19).
+  const resets = useQTableReset(tableId);
+  const lastReset = useMemo(() => Math.max(0, ...(resets.history ?? []).map(record => record.at)), [resets.history]);
+  const stats = useMemo(
+    () => stateActionStats(course.courseLogs.filter(row => taughtTable(row, tableId)), lastReset),
+    [course.courseLogs, tableId, lastReset]
+  );
+  // The decisions made from the chosen table.
+  const decisions = useMemo(
+    () => decisionRows(course.courseLogs.filter(row => (row.qTable ?? 'study') === tableId), course.codes, course.users),
+    [course.courseLogs, course.codes, course.users, tableId]
+  );
   return (
     <div className="space-y-6">
       <SectionHeader
         title="Q-learning"
         description="The per-competency policy, learned online from real players only: an empty table at the start, no pre-training and no simulated data."
-        meta={course.loading ? 'Reading the course logs…' : `${course.decisions.length} decision(s) logged`}
+        meta={course.loading ? 'Reading the course logs…' : `${decisions.length} decision(s) made from the ${Q_TABLE_LABEL[tableId].toLowerCase()} table`}
         actions={
           <Button variant="outline" size="sm" onClick={course.refresh} disabled={course.loading}>
             <RefreshCw className="mr-2 h-4 w-4" />
@@ -202,6 +220,19 @@ export const QLearningSection = ({ course }: { course: CourseAdmin }) => {
       />
       {course.error && <Notice tone="error">{course.error}</Notice>}
       <SettingsPanel />
+      <Panel
+        title="Which Q-table"
+        description="Four tables, each learned from its own players: the study's, the dry run's, the test's, and the public one everyone else on the website uses. The public table also learns from the study participants; nothing reaches the study table from anyone else. Admin play teaches none of them."
+      >
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Q-table">
+          {Q_TABLE_IDS.map(id => (
+            <Button key={id} size="sm" variant={id === tableId ? 'default' : 'outline'} role="radio" aria-checked={id === tableId} aria-label={`${Q_TABLE_LABEL[id]} Q-table`} onClick={() => setTableId(id)}>
+              {Q_TABLE_LABEL[id]}
+            </Button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">{Q_TABLE_NOTE[tableId]}</p>
+      </Panel>
       <SectionTabs
         value={view}
         onChange={setView}
@@ -211,17 +242,17 @@ export const QLearningSection = ({ course }: { course: CourseAdmin }) => {
           { value: 'decisions', label: 'Decisions' },
         ]}
       />
-      {view === 'table' && <QTablePanel />}
+      {view === 'table' && <QTablePanel tableId={tableId} />}
       {view === 'earned' && (
         <>
           <Legend title="Legend: rewards" items={EARNED_LEGEND} />
-          <EarnedPanel course={course} />
+          <EarnedPanel stats={stats} />
         </>
       )}
       {view === 'decisions' && (
         <>
           <Legend title="Legend: decisions" items={DECISIONS_LEGEND} />
-          <DecisionsPanel course={course} />
+          <DecisionsPanel course={course} decisions={decisions} />
         </>
       )}
     </div>

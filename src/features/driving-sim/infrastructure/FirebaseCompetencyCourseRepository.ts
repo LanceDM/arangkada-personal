@@ -6,6 +6,8 @@ import { hasAdminAccess } from '@/shared/infrastructure/firebase/adminAccess';
 import { COURSE_SCHEMA_VERSION, sameCursor, type CourseCursor } from '@/domain/competencyRouting/course';
 import { applyQLog, pairQOperations, statesOf } from '@/domain/study/qLog';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
+import { qTableDocId, qTableRoute, type QTableId } from '@/domain/competencyRouting/qTables';
+import { isStudyCohort } from '@/domain/study/participantCode';
 import type {
   AssessmentRepository,
   ActiveActivity,
@@ -20,7 +22,15 @@ import type { BackgroundResponse } from '@/domain/study/backgroundForm';
 const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
 const cursorDoc = (uid: string) => doc(db, 'users', uid, 'routing', 'competencyCourse');
-const tableDoc = () => doc(db, 'policy', 'competencyQ');
+const tableDoc = (id: QTableId) => doc(db, 'policy', qTableDocId(id));
+const updatesOf = (id: QTableId) => collection(db, 'policy', qTableDocId(id), 'updates');
+const enrolmentDoc = (uid: string) => doc(db, 'users', uid, 'study', 'enrolment');
+
+/** The tables this account decides from and teaches, by the cohort it joined (none for a regular account). */
+const routeOf = (enrolment: DocumentSnapshot) => {
+  const cohort = enrolment.exists() ? enrolment.data().cohort : null;
+  return qTableRoute(isStudyCohort(cohort) ? cohort : null);
+};
 
 /** Whether the signed-in account has admin access: the claim, or the admin page's list. */
 const isAdminSession = (): Promise<boolean> => hasAdminAccess(auth.currentUser);
@@ -56,9 +66,47 @@ const writeEvidence = (transaction: Transaction, uid: string, evidence: Evidence
   transaction.set(evidenceCounterDoc(uid), { nextSeq: evidenceSeq + 1 });
 };
 
+/** Writes one table's change and its log entries, for the table `id`. */
+const writeTableChange = (
+  transaction: Transaction,
+  id: QTableId,
+  snap: DocumentSnapshot,
+  updates: number,
+  applied: { table: QTable; entries: readonly { eventId: string; globalSeq: number; kind: string; uid: string; participantCode: string | null; at: number; configVersion: string }[] }
+) => {
+  const last = applied.entries.at(-1)!;
+  // The log is never reset (an admin reset empties only the table): each settings version is recorded with the
+  // first update made under it, so the log can be split by version.
+  const versions = { ...((snap.exists() ? snap.data().versions : null) ?? {}) } as Record<string, { fromGlobalSeq: number; firstAt: number }>;
+  if (!versions[RUN_CONFIG_VERSION]) versions[RUN_CONFIG_VERSION] = { fromGlobalSeq: updates + 1, firstAt: Date.now() };
+  transaction.set(
+    tableDoc(id),
+    plain({
+      schemaVersion: 1,
+      table: applied.table,
+      updates: updates + applied.entries.length,
+      updatedAt: Date.now(),
+      states: statesOf(applied.table),
+      configVersion: RUN_CONFIG_VERSION,
+      versions,
+      // Kept across updates: where the table was last reset, for splitting its log.
+      lastReset: (snap.exists() ? snap.data().lastReset : null) ?? null,
+      lastUpdate: {
+        updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid,
+        participantCode: last.participantCode, at: last.at, configVersion: last.configVersion,
+      },
+    })
+  );
+  for (const entry of applied.entries) {
+    transaction.set(doc(updatesOf(id), entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
+  }
+};
+
 /**
  * `users/{uid}/routing/competencyCourse`, `users/{uid}/courseLog`, and the
- * shared table at `policy/competencyQ` with its log.
+ * Q-tables under `policy/` with their logs: the player's own table by cohort
+ * (domain/competencyRouting/qTables), and for a study participant the public
+ * table too, both in the same transaction so they never fall out of step.
  *
  * Every course step is one transaction: the participant's cursor is compared
  * with the one the step started from, the settings version with the one in
@@ -76,8 +124,9 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
     return snap.exists() ? storedCursor(snap.data() as CourseCursor & { updatedAt?: number }) : null;
   },
 
-  async loadQTable() {
-    const snap = await getDoc(tableDoc());
+  async loadQTable(uid) {
+    const route = routeOf(await getDoc(enrolmentDoc(uid)));
+    const snap = await getDoc(tableDoc(route.decides));
     return snap.exists() ? ((snap.data().table as QTable) ?? emptyQTable()) : emptyQTable();
   },
 
@@ -89,12 +138,16 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
     return runTransaction(
       db,
       async transaction => {
-        const [cursorSnap, tableSnap, configSnap, counterSnap] = await Promise.all([
+        const [cursorSnap, enrolmentSnap, configSnap, counterSnap] = await Promise.all([
           transaction.get(cursorDoc(uid)),
-          transaction.get(tableDoc()),
+          transaction.get(enrolmentDoc(uid)),
           transaction.get(configDoc()),
           transaction.get(evidenceCounterDoc(uid)),
         ]);
+        const route = routeOf(enrolmentSnap);
+        const tableSnaps = new Map<QTableId, DocumentSnapshot>();
+        for (const id of route.teaches) tableSnaps.set(id, await transaction.get(tableDoc(id)));
+        const tableSnap = tableSnaps.get(route.decides)!;
         requireCurrentSettings(configSnap);
         const stored = cursorSnap.exists() ? storedCursor(cursorSnap.data() as CourseCursor & { updatedAt?: number }) : null;
         // No stored cursor yet: the course starts here. Otherwise it must be
@@ -102,51 +155,42 @@ export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
         if (stored && !sameCursor(stored, plain(expected))) throw new CourseConflictError(stored);
 
         const current: QTable = tableSnap.exists() ? (tableSnap.data().table as QTable) : emptyQTable();
-        const updates = tableSnap.exists() ? Number(tableSnap.data().updates ?? 0) : 0;
         const step = compute(current);
         const items = learns ? pairQOperations(step.operations, step.decisions, step.rewards) : [];
-        const applied =
-          items.length > 0
-            ? applyQLog({ table: current, items, firstGlobalSeq: updates + 1, context, envelope })
-            : { table: current, entries: [] };
 
         let evidenceSeq: number | null = null;
         if (evidence) {
           evidenceSeq = nextEvidenceSeq(counterSnap);
           writeEvidence(transaction, uid, evidence, evidenceSeq);
         }
-        if (applied.entries.length > 0) {
-          const last = applied.entries.at(-1)!;
-          // The log is never reset (an admin reset empties only the table): each settings version is recorded with the
-          // first update made under it, so the log can be split by version.
-          const versions = { ...((tableSnap.exists() ? tableSnap.data().versions : null) ?? {}) } as Record<string, { fromGlobalSeq: number; firstAt: number }>;
-          if (!versions[RUN_CONFIG_VERSION]) versions[RUN_CONFIG_VERSION] = { fromGlobalSeq: updates + 1, firstAt: Date.now() };
-          transaction.set(
-            tableDoc(),
-            plain({
-              schemaVersion: 1,
-              table: applied.table,
-              updates: updates + applied.entries.length,
-              updatedAt: Date.now(),
-              states: statesOf(applied.table),
-              configVersion: RUN_CONFIG_VERSION,
-              versions,
-              // Kept across updates: where the table was last reset, for splitting its log.
-              lastReset: (tableSnap.exists() ? tableSnap.data().lastReset : null) ?? null,
-              lastUpdate: {
-                updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid,
-                participantCode: last.participantCode, at: last.at, configVersion: last.configVersion,
-              },
-            })
-          );
-          for (const entry of applied.entries) {
-            transaction.set(doc(collection(db, 'policy', 'competencyQ', 'updates'), entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
-          }
-        }
+
+        // The same decisions and rewards, applied to each table this account
+        // teaches, each from its own values and with its own numbering. The
+        // first is the table the decisions were made from.
+        const results = route.teaches.map(id => {
+          const snap = tableSnaps.get(id)!;
+          const table: QTable = snap.exists() ? (snap.data().table as QTable) : emptyQTable();
+          const updates = snap.exists() ? Number(snap.data().updates ?? 0) : 0;
+          const applied =
+            items.length > 0 ? applyQLog({ table, items, firstGlobalSeq: updates + 1, context, envelope }) : { table, entries: [] };
+          if (applied.entries.length > 0) writeTableChange(transaction, id, snap, updates, applied);
+          return applied;
+        });
+        const applied = results[0];
+
         if (step.log) {
           transaction.set(
             doc(collection(db, 'users', uid, 'courseLog')),
-            plain({ ...step.log, decisions: step.decisions, rewards: step.rewards, tableAfter: applied.table, learnsTable: learns })
+            plain({
+              ...step.log,
+              decisions: step.decisions,
+              rewards: step.rewards,
+              tableAfter: applied.table,
+              learnsTable: learns,
+              // Which table decided (2026-11-19), and the others the step also taught.
+              qTable: route.decides,
+              alsoTaught: learns ? route.teaches.slice(1) : [],
+            })
           );
         }
         transaction.set(cursorDoc(uid), plain({ ...step.cursor, updatedAt: Date.now() }));

@@ -35,7 +35,7 @@ const accounts: PilotAccountProgress[] = [
   {
     code: 'P-0001', name: 'Juan dela Cruz', cohort: 'study', uid: 'u1', enrolledAt: NOW - 60 * MIN, group: null, withdrawnAt: null,
     profile: {
-      username: 'juan_2026', age: 24, consentVersion: 'draft-2026-11-04b', gaming: 'weekly', device: 'phone',
+      username: 'juan_2026', age: 24, consentVersion: 'draft-2026-11-04b', gaming: 'weekly', device: 'phone', preferredVehicle: 'motorcycle',
       deviceCheck: { touch: true, medianFps: 58.4, slow: false, width: 844, height: 390 },
     },
     steps: { ...NO_STEPS, consentedAt: NOW - 59 * MIN, backgroundAt: NOW - 58 * MIN, deviceCheckedAt: NOW - 57 * MIN, preTest: 'finished' },
@@ -121,7 +121,7 @@ describe('PilotDashboard', () => {
     act(() => details().click());
     expect(details().getAttribute('aria-expanded')).toBe('true');
     const panel = rowOf(view, 'P-0001').nextElementSibling!.textContent!;
-    for (const fact of ['juan_2026', 'Age24', 'text draft-2026-11-04b', 'Every week', 'Phone', 'Touch · 58 fps · 844×390', 'Pre-testFinished', 'Post-testNot started']) {
+    for (const fact of ['juan_2026', 'Age24', 'text draft-2026-11-04b', 'Every week', 'Phone', 'Touch · 58 fps · 844×390', 'Prefers to driveMotorcycle', 'Pre-testFinished', 'Post-testNot started']) {
       expect(panel).toContain(fact);
     }
     for (const word of ['score', 'accuracy', 'passed', 'failed', 'correct', 'points', 'email']) {

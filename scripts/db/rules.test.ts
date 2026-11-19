@@ -58,26 +58,33 @@ describe.skipIf(!host)('security rules for the study logs', () => {
       lastUpdate: { updateId, globalSeq: updates, kind: 'visit', uid, participantCode: null, at: 1, configVersion: 'c' },
     });
     // Alone, neither is accepted.
-    await assertFails(setDoc(doc(alice, 'policy/competencyQ/updates/q1'), entry));
-    await assertFails(setDoc(doc(alice, 'policy/competencyQ'), table(1, 'q1')));
+    await assertFails(setDoc(doc(alice, 'policy/competencyQ_public/updates/q1'), entry));
+    await assertFails(setDoc(doc(alice, 'policy/competencyQ_public'), table(1, 'q1')));
     // Together, they are.
     const batch = writeBatch(alice);
-    batch.set(doc(alice, 'policy/competencyQ/updates/q1'), entry);
-    batch.set(doc(alice, 'policy/competencyQ'), table(1, 'q1'));
+    batch.set(doc(alice, 'policy/competencyQ_public/updates/q1'), entry);
+    batch.set(doc(alice, 'policy/competencyQ_public'), table(1, 'q1'));
     await assertSucceeds(batch.commit());
     // The counter never goes back, and a change cannot be attributed to someone else.
-    await assertFails(setDoc(doc(alice, 'policy/competencyQ'), table(1, 'q1')));
+    await assertFails(setDoc(doc(alice, 'policy/competencyQ_public'), table(1, 'q1')));
     const forged = writeBatch(alice);
-    forged.set(doc(alice, 'policy/competencyQ/updates/q2'), { ...entry, ...envelope('alice', 'q2'), globalSeq: 2 });
-    forged.set(doc(alice, 'policy/competencyQ'), table(2, 'q2', 'bob'));
+    forged.set(doc(alice, 'policy/competencyQ_public/updates/q2'), { ...entry, ...envelope('alice', 'q2'), globalSeq: 2 });
+    forged.set(doc(alice, 'policy/competencyQ_public'), table(2, 'q2', 'bob'));
     await assertFails(forged.commit());
     // A tab running settings older than the ones in force cannot change the table.
     const stale = writeBatch(alice);
-    stale.set(doc(alice, 'policy/competencyQ/updates/q3'), { ...entry, ...envelope('alice', 'q3'), globalSeq: 2, configVersion: 'old' });
-    stale.set(doc(alice, 'policy/competencyQ'), { ...table(2, 'q3'), lastUpdate: { ...table(2, 'q3').lastUpdate, configVersion: 'old' } });
+    stale.set(doc(alice, 'policy/competencyQ_public/updates/q3'), { ...entry, ...envelope('alice', 'q3'), globalSeq: 2, configVersion: 'old' });
+    stale.set(doc(alice, 'policy/competencyQ_public'), { ...table(2, 'q3'), lastUpdate: { ...table(2, 'q3').lastUpdate, configVersion: 'old' } });
     await assertFails(stale.commit());
-    await assertFails(getDoc(doc(alice, 'policy/competencyQ/updates/q1')));
-    await assertSucceeds(getDoc(doc(env.authenticatedContext('lance', { admin: true }).firestore(), 'policy/competencyQ/updates/q1')));
+    await assertFails(getDoc(doc(alice, 'policy/competencyQ_public/updates/q1')));
+    await assertSucceeds(getDoc(doc(env.authenticatedContext('lance', { admin: true }).firestore(), 'policy/competencyQ_public/updates/q1')));
+    // A regular account (no enrolment) teaches the public table only (2026-11-19): never the study's, the dry run's or the test's.
+    for (const tableId of ['competencyQ', 'competencyQ_dryrun', 'competencyQ_test']) {
+      const other = writeBatch(alice);
+      other.set(doc(alice, `policy/${tableId}/updates/q1`), entry);
+      other.set(doc(alice, `policy/${tableId}`), table(1, 'q1'));
+      await assertFails(other.commit());
+    }
   });
 
   it('keeps an admin\'s play out of the table, and lets an admin reset it only with the old table kept', async () => {

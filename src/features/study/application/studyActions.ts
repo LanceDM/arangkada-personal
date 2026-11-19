@@ -4,6 +4,7 @@
  * the background form, the device check, the survey at the end, a
  * withdrawal once.
  */
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import {
   consentRecords,
   type DeviceCheckDoc,
@@ -20,7 +21,11 @@ export const giveConsent = (
   now: () => number = Date.now
 ) => studyDeps().records.saveConsent(uid, consentRecords({ ...input, at: now() }));
 
-export const saveBackground = (uid: string, answers: { gaming: GamingFrequency; device: DeviceType }, now: () => number = Date.now) =>
+export const saveBackground = (
+  uid: string,
+  answers: { gaming: GamingFrequency; device: DeviceType; preferredVehicle: VehicleSkin },
+  now: () => number = Date.now
+) =>
   studyDeps().records.saveBackground(uid, { schemaVersion: 1, ...answers, answeredAt: now() });
 
 export const saveDeviceCheck = (uid: string, check: DeviceCheckDoc) => studyDeps().records.saveDevice(uid, check);

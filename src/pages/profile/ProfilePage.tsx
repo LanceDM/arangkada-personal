@@ -6,12 +6,13 @@
  */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Gauge, Settings as SettingsIcon, User } from 'lucide-react';
+import { ArrowLeft, Bike, Gauge, Settings as SettingsIcon, User } from 'lucide-react';
 
 import AppLayout from '@/app/layout/AppLayout';
 import { useInitialExam } from '@/app/initialExam/useInitialExam';
-import { useAuthSession } from '@/features/auth';
-import { LEVELS, loadCompetencyCourseProgress, loadMasteryReport, type MasteryRow } from '@/features/driving-sim';
+import { useAuthSession, useVehicleSkin } from '@/features/auth';
+import { LEVELS, loadCompetencyCourseProgress, loadMasteryReport, VehicleSkinPicker, type MasteryRow } from '@/features/driving-sim';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import { competencyText } from '@/domain/learner/profile';
 import { Say } from '@/shared/i18n/language';
 import { useText } from '@/shared/i18n/useText';
@@ -80,6 +81,17 @@ const ProfilePage = () => {
   const [rows, setRows] = useState<MasteryRow[] | null>(null);
   const [progress, setProgress] = useState<CourseProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const vehicle = useVehicleSkin();
+  const [skinNote, setSkinNote] = useState<'saving' | 'saved' | 'failed' | null>(null);
+
+  const pickSkin = (skin: VehicleSkin) => {
+    if (skin === vehicle.skin) return;
+    setSkinNote('saving');
+    vehicle.choose(skin).then(
+      () => setSkinNote('saved'),
+      () => setSkinNote('failed')
+    );
+  };
 
   useEffect(() => {
     if (!uid) return;
@@ -132,6 +144,31 @@ const ProfilePage = () => {
               {text(stageName(progress))}
             </p>
           </div>
+        </section>
+
+        <section className="space-y-3">
+          <div className="flex items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <Bike className="h-4 w-4 text-yellow-400" />
+              <h2 className="text-sm font-black uppercase tracking-[0.2em]"><Say en="Vehicle" fil="Sasakyan" /></h2>
+            </div>
+            {skinNote && (
+              <span className={`text-xs ${skinNote === 'failed' ? 'text-destructive' : 'text-muted-foreground'}`}>
+                {skinNote === 'saving'
+                  ? text({ en: 'Saving…', fil: 'Sine-save…' })
+                  : skinNote === 'saved'
+                    ? text({ en: 'Saved', fil: 'Na-save' })
+                    : text({ en: 'Saved on this device only', fil: 'Sa device na ito lang na-save' })}
+              </span>
+            )}
+          </div>
+          <p className="px-1 text-xs text-muted-foreground">
+            <Say
+              en="Choose what you drive in the game. It changes only how your vehicle looks: the roads, rules and scoring are the same."
+              fil="Piliin ang sasakyan mo sa laro. Ang itsura lang nito ang nagbabago: pareho ang mga daan, patakaran at pagmamarka."
+            />
+          </p>
+          <VehicleSkinPicker value={vehicle.skin} onChange={pickSkin} />
         </section>
 
         <section className="space-y-3">

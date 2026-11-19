@@ -7,7 +7,7 @@ import { scenarioSupport } from '@/features/driving-sim/domain/scenario/scenario
 import GameHUD from './GameHUD';
 import FSMDiagram from './FSMDiagram';
 import FeedbackStack from '@/features/driving-sim/presentation/ui/feedback/FeedbackStack';
-import { useAuthSession } from '@/features/auth';
+import { useAuthSession, useVehicleSkin } from '@/features/auth';
 import CheckpointInspection from '@/features/driving-sim/presentation/ui/decisions/CheckpointInspection';
 import RoadDecision from '@/features/driving-sim/presentation/ui/decisions/RoadDecision';
 import EmergencyDecision from '@/features/driving-sim/presentation/ui/decisions/EmergencyDecision';
@@ -188,6 +188,7 @@ const GameScreen = ({
   // The FSM diagram is an instructor/analysis tool: admins only. Players get the
   // same run described in plain language instead.
   const { isAdmin } = useAuthSession();
+  const { skin: vehicleSkin } = useVehicleSkin();
 
   const reducedMotion = useReducedMotion();
   const { fsm, fsmState, snapshot, prevFsmState, transitionLabel } = useFSM();
@@ -303,6 +304,7 @@ const GameScreen = ({
     releaseHeldKeys,
     touch: touchInput,
     touchControls: touch,
+    vehicleSkin,
     scoreRef,
     logsRef,
     tracesRef,

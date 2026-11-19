@@ -8,6 +8,11 @@
  * it is, and its counter is not reset either, so `fromGlobalSeq` marks the
  * first log entry that belongs to the fresh table. An analysis splits the log
  * there, the way it splits it by settings version.
+ *
+ * Four tables since 2026-11-19 (domain/competencyRouting/qTables), each reset
+ * on its own. A reset starts the table empty, or (the public table's option)
+ * from a copy of the study's table as it stands: `start` keeps the table it
+ * started from, so its log can still be replayed and checked from there.
  */
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
 
@@ -23,7 +28,14 @@ export interface QTableResetRecord {
   statesBefore: Record<string, unknown> | null;
   versionsBefore: Record<string, unknown> | null;
   configVersionBefore: string | null;
+  /** What the table started from after the reset (2026-11-19); absent on older resets, which emptied it. */
+  startedFrom?: QTableStart;
+  /** The table it started from: empty, or the copy. */
+  start?: QTable;
 }
+
+/** Where a reset leaves a table: empty, or a copy of the study's table. */
+export type QTableStart = 'empty' | 'study';
 
 export const qTableResetIdAt = (at: number): string => `reset-${at}`;
 
@@ -32,12 +44,14 @@ export const qTableReset = (
   current: { table?: QTable; updates?: number; states?: Record<string, unknown> | null; versions?: Record<string, unknown> | null; configVersion?: string | null } | null,
   admin: { uid: string; email: string | null },
   note: string,
-  at: number
+  at: number,
+  start: { from: QTableStart; table?: QTable | null } = { from: 'empty' }
 ): { resetId: string; record: QTableResetRecord; table: QTable } => {
   const updates = Number(current?.updates ?? 0);
+  const table = start.from === 'study' ? { ...emptyQTable(), ...(start.table ?? {}) } : emptyQTable();
   return {
     resetId: qTableResetIdAt(at),
-    table: emptyQTable(),
+    table,
     record: {
       at,
       by: admin,
@@ -48,6 +62,8 @@ export const qTableReset = (
       statesBefore: current?.states ?? null,
       versionsBefore: current?.versions ?? null,
       configVersionBefore: current?.configVersion ?? null,
+      startedFrom: start.from,
+      start: table,
     },
   };
 };

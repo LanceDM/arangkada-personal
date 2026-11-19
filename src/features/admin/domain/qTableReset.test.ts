@@ -22,4 +22,12 @@ describe('resetting the shared Q-table', () => {
     expect(tableIsEmpty(null)).toBe(true);
     expect(tableIsEmpty(learned)).toBe(false);
   });
+
+  it('can start the public table from a copy of the study table (2026-11-19)', () => {
+    const { record, table } = qTableReset({ table: emptyQTable(), updates: 0 }, admin, 'launch', 1800, { from: 'study', table: learned });
+    expect(table).toEqual(learned);
+    expect(record.startedFrom).toBe('study');
+    expect(record.start).toEqual(learned);
+    expect(record.fromGlobalSeq).toBe(1);
+  });
 });

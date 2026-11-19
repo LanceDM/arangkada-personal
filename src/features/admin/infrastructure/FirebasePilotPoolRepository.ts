@@ -16,6 +16,7 @@
  * and logs are downloaded with it - Firestore sends whole documents - and
  * dropped at this boundary, so nothing above can show them.
  */
+import { VEHICLE_SKINS } from '@/shared/lib/vehicleSkin';
 import { collection, doc, getDoc, onSnapshot, type FirestoreError, type Unsubscribe } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
 import { isStudyCohort } from '@/domain/study/participantCode';
@@ -120,6 +121,7 @@ const watch: PilotPoolRepository['watch'] = (onChange, onError) => {
               ...tracked.progress.profile,
               gaming: oneOf(GAMING_FREQUENCIES, data('background')?.gaming),
               device: oneOf(DEVICE_TYPES, data('background')?.device),
+              preferredVehicle: oneOf(VEHICLE_SKINS, data('background')?.preferredVehicle),
               deviceCheck: deviceCheckOf(data('device')),
             },
           });

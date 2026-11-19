@@ -17,6 +17,7 @@
  *   or the one after it once the frontier is passed, since the move is made
  *   at Continue.
  */
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import { compareParticipantCodes, type StudyCohort } from '@/domain/study/participantCode';
 import { FINAL_EXAM_LEVEL, studyStage, type CourseProgress, type StudyStage, type TestProgress } from '@/domain/study/studyStage';
 import type { DeviceType, GamingFrequency } from '@/domain/study/consentRecords';
@@ -86,10 +87,12 @@ export interface PilotProfile {
   consentVersion: string | null;
   gaming: GamingFrequency | null;
   device: DeviceType | null;
+  /** The vehicle they said they prefer (2026-11-19). */
+  preferredVehicle: VehicleSkin | null;
   deviceCheck: PilotDeviceCheck | null;
 }
 
-export const NO_PROFILE: PilotProfile = { username: null, age: null, consentVersion: null, gaming: null, device: null, deviceCheck: null };
+export const NO_PROFILE: PilotProfile = { username: null, age: null, consentVersion: null, gaming: null, device: null, preferredVehicle: null, deviceCheck: null };
 
 export interface PilotAccountProgress {
   code: string;

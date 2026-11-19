@@ -37,6 +37,7 @@ export interface StudyExportRow {
   ageBand: string | null;
   gaming: string | null;
   device: string | null;
+  preferredVehicle: string | null;
   deviceTouch: boolean | null;
   deviceLandscape: boolean | null;
   deviceMedianFps: number | null;
@@ -56,7 +57,7 @@ export interface StudyExportRow {
 export const STUDY_EXPORT_COLUMNS: ReadonlyArray<keyof StudyExportRow> = [
   'code', 'cohort', 'stage', 'enrolledAt',
   'consentVersion', 'consentedAt', 'ageBand',
-  'gaming', 'device',
+  'gaming', 'device', 'preferredVehicle',
   'deviceTouch', 'deviceLandscape', 'deviceMedianFps', 'deviceSlow', 'deviceCheckedAt',
   'preTest', 'preTestFinishedAt', 'courseEndReason', 'postTest', 'postTestBlock', 'postTestFinishedAt',
   'surveyOpenedAt', 'surveyConfirmedAt', 'withdrawnAt',
@@ -83,6 +84,7 @@ export const studyExportRow = (source: StudyExportSource): StudyExportRow => ({
   ageBand: source.consent?.ageBand ?? null,
   gaming: source.background?.gaming ?? null,
   device: source.background?.device ?? null,
+  preferredVehicle: source.background?.preferredVehicle ?? null,
   deviceTouch: source.device?.touch ?? null,
   deviceLandscape: source.device?.landscape ?? null,
   deviceMedianFps: source.device?.medianFps ?? null,

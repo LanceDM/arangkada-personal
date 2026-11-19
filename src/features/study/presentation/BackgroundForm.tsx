@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { DEVICE_TYPES, GAMING_FREQUENCIES, type DeviceType, type GamingFrequency } from '@/domain/study/consentRecords';
+import { chooseVehicleSkin } from '@/features/auth';
+import { VEHICLE_SKIN_NAMES, VEHICLE_SKINS, type VehicleSkin } from '@/shared/lib/vehicleSkin';
 import { ActionBar } from '@/shared/ui/ActionBar';
 import { saveBackground } from '@/features/study/application/studyActions';
 import { Say } from '@/shared/i18n/language';
@@ -52,7 +54,9 @@ const Choice = <T extends string>({
 );
 
 /**
- * About the participant: two questions, the covariates
+ * About the participant: three questions. The preferred vehicle (2026-11-19)
+ * also sets the in-game skin, which they can change on their profile page;
+ * the other two are the covariates
  * the learning curve is adjusted for besides the pre-test. The age band comes
  * from the age given at consent, so it is not asked again. Every participant
  * is a licence applicant, so neither a licence nor driving hours is asked.
@@ -60,20 +64,23 @@ const Choice = <T extends string>({
 export const BackgroundForm = ({ uid, onDone }: { uid: string; onDone: () => void }) => {
   const [gaming, setGaming] = useState<GamingFrequency | null>(null);
   const [device, setDevice] = useState<DeviceType | null>(null);
+  const [vehicle, setVehicle] = useState<VehicleSkin | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<Localized | null>(null);
   const text = useText();
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!gaming || !device) {
+    if (!gaming || !device || !vehicle) {
       setError(m.answerBothQuestions);
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      await saveBackground(uid, { gaming, device });
+      await saveBackground(uid, { gaming, device, preferredVehicle: vehicle });
+      // The skin follows the answer; a failed save of it leaves the device's copy.
+      await chooseVehicleSkin(uid, vehicle).catch(() => {});
       onDone();
     } catch {
       setError(m.yourAnswersCouldNot);
@@ -103,6 +110,17 @@ export const BackgroundForm = ({ uid, onDone }: { uid: string; onDone: () => voi
         value={device}
         onChange={setDevice}
       />
+      <div className="space-y-1">
+        <Choice
+          name="vehicle"
+          legend={m.whichVehicleDoYou}
+          options={VEHICLE_SKINS}
+          labels={VEHICLE_SKIN_NAMES}
+          value={vehicle}
+          onChange={setVehicle}
+        />
+        <p className="text-xs text-muted-foreground">{text(m.vehicleSetsYourSkin)}</p>
+      </div>
       <ErrorNote message={error} />
       <ActionBar className="-mx-6 px-6 sm:-mx-8 sm:px-8 bg-card">
         <SubmitButton busy={busy}>{text(m.save)}</SubmitButton>

@@ -9,6 +9,7 @@
  * entry's verdict settles the cursor, and the old practice policy, which the
  * suggestion reads, is never consulted.
  */
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import type { Language, Localized } from '@/shared/lib/localized';
 import type { LevelResult } from '@/domain/learner/attempt';
 import { POLICY_TABLE_ID } from '@/domain/learner/adaptive/qLearningPolicy';
@@ -43,6 +44,8 @@ export interface AttemptStart {
   level: LevelConfig;
   /** The language the player had chosen when the attempt began. */
   language?: Language;
+  /** The vehicle skin the drive was drawn with (looks only). */
+  vehicleSkin?: VehicleSkin;
 }
 
 export interface CompleteMissionInput {
@@ -94,6 +97,7 @@ const saveAttempt = async (
       : {}),
     ...(result.timedOut ? { timedOut: true as const } : {}),
     ...(start?.language ? { language: start.language } : {}),
+    ...(start?.vehicleSkin ? { vehicleSkin: start.vehicleSkin } : {}),
   });
   const legacy = routing.group.groupInEffect === 'legacy';
   const plan = start?.plan;

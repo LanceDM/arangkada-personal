@@ -6,6 +6,8 @@
  * reads, not what anyone writes — which is why they live here rather than being
  * borrowed from the writing feature's persistence types.
  */
+import type { QTableId } from '@/domain/competencyRouting/qTables';
+import type { QTableStart } from './qTableReset';
 import type { ActionLog } from '@/domain/learner/attempt';
 import type { DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
 import type { QTable } from '@/domain/competencyRouting/qLearning';
@@ -155,7 +157,15 @@ export interface CourseLogRow {
    * learned. Absent on entries written before it was recorded.
    */
   learnsTable?: boolean;
+  /** The Q-table this entry's decisions were made from (2026-11-19); absent before the split, which was the study's. */
+  qTable?: QTableId;
+  /** The other tables its decisions and rewards also taught: the public one, for a study participant. */
+  alsoTaught?: QTableId[];
 }
+
+/** Whether a course-log entry taught table `id`. */
+export const taughtTable = (row: Pick<CourseLogRow, 'qTable' | 'alsoTaught' | 'learnsTable'>, id: QTableId): boolean =>
+  row.learnsTable !== false && ((row.qTable ?? 'study') === id || (row.alsoTaught ?? []).includes(id));
 
 /**
  * One sitting of `users/{uid}/assessmentSittings`: quiz, diagnostic or
@@ -243,7 +253,7 @@ export interface LiveQTable {
   states: Record<string, { phase: string; tag: 'exploring' | 'exploiting' | 'no_choice'; leader: string | null }>;
   lastUpdate: { updateId: string; globalSeq: number; kind: 'visit' | 'learn'; uid: string; participantCode: string | null; at: number } | null;
   /** The table's last reset (2026-11-16): updates from `fromGlobalSeq` on belong to the table as it is now. */
-  lastReset?: { resetId: string; at: number; fromGlobalSeq: number; by: string } | null;
+  lastReset?: { resetId: string; at: number; fromGlobalSeq: number; by: string; startedFrom?: QTableStart } | null;
 }
 
 /** One entry of `policy/competencyQ/updates`, as the dashboard reads it. */

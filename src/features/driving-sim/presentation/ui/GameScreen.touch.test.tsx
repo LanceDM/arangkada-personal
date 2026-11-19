@@ -13,7 +13,7 @@ import { courseStandIns, memoryCourseStore } from '@/features/driving-sim/applic
 import { recordingCanvasContext } from '@/features/driving-sim/presentation/canvas/rendering/recordingCanvas';
 import GameScreen from './GameScreen';
 
-vi.mock('@/features/auth', () => ({ useAuthSession: () => ({ isAdmin: false }) }));
+vi.mock('@/features/auth', () => ({ useAuthSession: () => ({ isAdmin: false }), useVehicleSkin: () => ({ skin: 'car', choose: async () => {} }) }));
 
 provideDrivingSimDependencies({
   learnerHistory: { load: async () => ({ source: 'local', attempts: [] }) },

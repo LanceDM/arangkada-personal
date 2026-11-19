@@ -6,7 +6,7 @@
  *                                  never in any export, apart from every game record
  *   users/{uid}/study/consent      ConsentMarker: that it was given, which text, and the age
  *                                  band. No name and no exact age
- *   users/{uid}/study/background   BackgroundDoc: gaming and device
+ *   users/{uid}/study/background   BackgroundDoc: gaming, device and preferred vehicle
  *   users/{uid}/study/device       DeviceCheckDoc
  *   users/{uid}/study/survey       SurveyDoc: when the form was opened, and confirmed
  *   participants/{code}.withdrawal Withdrawal
@@ -20,6 +20,7 @@
  * records and exports name the code alone.
  */
 
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import type { Language, Localized } from '@/shared/lib/localized';
 
 /** The consent text's version: the record says which text was agreed to. */
@@ -94,6 +95,8 @@ export interface BackgroundDoc {
   schemaVersion: 1;
   gaming: GamingFrequency;
   device: DeviceType;
+  /** The vehicle the participant prefers (2026-11-19); it also sets their in-game skin. Absent on older records. */
+  preferredVehicle?: VehicleSkin;
   answeredAt: number;
 }
 

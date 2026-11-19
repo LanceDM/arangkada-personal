@@ -7,10 +7,13 @@ import type { ActionLog } from '@/domain/learner/attempt';
 import type { FsmMetrics, ReactionLatency } from '@/features/driving-sim/domain/fsm/fsmMetrics';
 import type { TransitionLogEntry } from '@/features/driving-sim/domain/fsm/fsmTypes';
 import type { Language } from '@/shared/lib/localized';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 
 export interface LevelAttempt {
   /** The language the player had chosen when the attempt began; absent on older attempts. */
   language?: Language;
+  /** The vehicle skin the drive was drawn with (looks only); absent on older attempts. */
+  vehicleSkin?: VehicleSkin;
   levelId: number;
   timestamp: number;
   finalScore: number;

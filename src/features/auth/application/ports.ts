@@ -8,6 +8,7 @@
  * the boundary.
  */
 import type { Language } from '@/shared/lib/localized';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import type { AuthUser, UserProfile } from '@/features/auth/domain/userProfile';
 
 export interface AuthGateway {
@@ -46,6 +47,14 @@ export interface UserProfileRepository {
   saveLanguage(uid: string, language: Language): Promise<void>;
   /** Merges the Terms and Data Use the account agreed to into its profile. */
   saveTermsAcceptance(uid: string, version: string, at: number): Promise<void>;
+  /** Merges the account's vehicle skin into its profile. */
+  saveVehicleSkin(uid: string, skin: VehicleSkin): Promise<void>;
+}
+
+/** The vehicle skin chosen on this device, for a guest and before the profile is read. */
+export interface DeviceVehicleSkinRepository {
+  load(): VehicleSkin | null;
+  save(skin: VehicleSkin): void;
 }
 
 /** The language chosen on this device, before any sign-in and for a guest. */

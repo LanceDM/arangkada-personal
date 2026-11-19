@@ -26,9 +26,10 @@ rules_version = '2';
 //   bktSets/{setId}                                each applied calibration (cal-N) or edited start (set-N): its values, never edited (admin writes)
 //   bktSetLogs/{setId}                             its log: pilot players, fit or the start changed, who applied it (admin only)
 //   bktPilots/{uid}, bktPilotLog/{id}              pilot players and every mark/unmark (admin)
-//   policy/competencyQ                             the shared Q-table, learned online by every participant
-//   policy/competencyQ/updates/{updateId}          QLogEntry: every table change, append-only
-//   policy/competencyQ/resets/{resetId}            the table as it stood before an admin reset it
+//   policy/{table}                                 the four Q-tables (2026-11-19): competencyQ (study),
+//                                                  competencyQ_dryrun, competencyQ_test, competencyQ_public
+//   policy/{table}/updates/{updateId}              QLogEntry: every table change, append-only
+//   policy/{table}/resets/{resetId}                the table as it stood before an admin reset it
 //   policy/config                                  the settings version in force (written by db:init)
 //   configVersions/{tag}                           every settings version (written by db:init)
 //   participants/{code}                            study enrolment (written by db:participant)
@@ -124,7 +125,7 @@ service cloud.firestore {
     // ── Shapes ─────────────────────────────────────────────
 
     function profileKeys() {
-      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore', 'language', 'termsVersion', 'termsAcceptedAt'];
+      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore', 'language', 'termsVersion', 'termsAcceptedAt', 'vehicleSkin'];
     }
 
     // Checks only the keys a write sets, so a field an old profile already
@@ -140,7 +141,9 @@ service cloud.firestore {
         && (!keys.hasAny(['language']) || data.language in ['en', 'fil'])
         // The Terms and Data Use the account agreed to at sign-up, and when.
         && (!keys.hasAny(['termsVersion']) || data.termsVersion is string)
-        && (!keys.hasAny(['termsAcceptedAt']) || data.termsAcceptedAt is number);
+        && (!keys.hasAny(['termsAcceptedAt']) || data.termsAcceptedAt is number)
+        // How the player's vehicle is drawn: a skin, nothing else.
+        && (!keys.hasAny(['vehicleSkin']) || data.vehicleSkin in ['car', 'motorcycle']);
     }
 
     function isProgressSummary(data) {
@@ -163,7 +166,9 @@ service cloud.firestore {
         // Written only when the run's driving time ran out.
         && (!data.keys().hasAny(['timedOut']) || data.timedOut == true)
         // The language the player had chosen when the attempt began.
-        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil']);
+        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil'])
+        // The vehicle skin the attempt was drawn with (looks only).
+        && (!data.keys().hasAny(['vehicleSkin']) || data.vehicleSkin in ['car', 'motorcycle']);
     }
 
     function isFsmTelemetry(data) {
@@ -354,9 +359,27 @@ service cloud.firestore {
           && getAfter(counter).data.nextSeq == data.evidenceSeq + 1);
     }
 
-    function isLoggedTableChange(previousUpdates) {
+    // The four Q-tables (2026-11-19, src/domain/competencyRouting/qTables.ts).
+    function isQTableId(tableId) {
+      return tableId in ['competencyQ', 'competencyQ_dryrun', 'competencyQ_test', 'competencyQ_public'];
+    }
+
+    // Whose play may teach a table: the study's, the dry run's and the test's
+    // table only their own cohort's; the public table every signed-in account
+    // that is in none of those, and the study's participants too (one way:
+    // the study's table never hears of the public's players).
+    function mayTeach(tableId) {
+      let enrolment = enrolmentPath(request.auth.uid);
+      let cohort = exists(enrolment) ? get(enrolment).data.cohort : null;
+      return tableId == 'competencyQ' ? cohort == 'study'
+        : tableId == 'competencyQ_dryrun' ? cohort == 'dryrun'
+        : tableId == 'competencyQ_test' ? cohort == 'test'
+        : (cohort == null || cohort == 'study');
+    }
+
+    function isLoggedTableChange(tableId, previousUpdates) {
       let next = request.resource.data;
-      let entryPath = /databases/$(database)/documents/policy/competencyQ/updates/$(next.lastUpdate.updateId);
+      let entryPath = /databases/$(database)/documents/policy/$(tableId)/updates/$(next.lastUpdate.updateId);
       return next.updates > previousUpdates
         && next.lastUpdate is map
         && next.lastUpdate.uid == request.auth.uid
@@ -369,15 +392,18 @@ service cloud.firestore {
         && getAfter(entryPath).data.uid == request.auth.uid;
     }
 
-    function isQTableReset(next, previous) {
-      let resetPath = /databases/$(database)/documents/policy/competencyQ/resets/$(next.lastReset.resetId);
+    // A reset keeps the table's update counter: `previousUpdates` is 0 for a
+    // table never written, which an admin may also create by a reset (the
+    // public table started from the study's, 2026-11-19).
+    function isQTableReset(tableId, next, previousUpdates) {
+      let resetPath = /databases/$(database)/documents/policy/$(tableId)/resets/$(next.lastReset.resetId);
       return isQTableDoc(next)
-        && next.updates == previous.updates
+        && next.updates == previousUpdates
         && next.lastReset is map
         && next.lastReset.resetId is string
-        && next.lastReset.fromGlobalSeq == previous.updates + 1
+        && next.lastReset.fromGlobalSeq == previousUpdates + 1
         && existsAfter(resetPath)
-        && getAfter(resetPath).data.updatesBefore == previous.updates;
+        && getAfter(resetPath).data.updatesBefore == previousUpdates;
     }
 
     function isQTableDoc(data) {
@@ -812,11 +838,13 @@ service cloud.firestore {
     }
 
     function isBackground(data) {
-      return data.keys().hasOnly(['schemaVersion', 'gaming', 'device', 'answeredAt'])
+      return data.keys().hasOnly(['schemaVersion', 'gaming', 'device', 'preferredVehicle', 'answeredAt'])
         && data.keys().hasAll(['schemaVersion', 'gaming', 'device', 'answeredAt'])
         && data.schemaVersion == 1
         && data.gaming in ['never', 'less-than-monthly', 'monthly', 'weekly', 'daily']
         && data.device in ['phone', 'tablet', 'laptop', 'desktop']
+        // The vehicle they prefer (2026-11-19); older records have none.
+        && (!data.keys().hasAny(['preferredVehicle']) || data.preferredVehicle in ['car', 'motorcycle'])
         && data.answeredAt is number;
     }
 
@@ -1204,31 +1232,36 @@ service cloud.firestore {
       allow read: if isAdmin();
     }
 
-    // ── The shared Q-table ─────────────────────────────────
-    // Learned online from the participants themselves: any signed-in player's
-    // drive updates it, in a transaction. The rules check its shape only; a
-    // value cannot be checked here, as with every score.
-    match /policy/competencyQ {
-      allow read: if isSignedIn();
-      // A participant's change must come with its log: the counter only moves
-      // forward, the last change names this participant, and the log entry it
+    // ── The Q-tables ───────────────────────────────────────
+    // Four since 2026-11-19 (src/domain/competencyRouting/qTables.ts): the
+    // study's, the dry run's, the test's and the public one. Each is learned
+    // online from its own players, in a transaction; `mayTeach` says whose.
+    // The rules check the shape only; a value cannot be checked here, as with
+    // every score.
+    match /policy/{tableId} {
+      allow read: if isSignedIn() && isQTableId(tableId);
+      // A player's change must come with its log: the counter only moves
+      // forward, the last change names this player, and the log entry it
       // names exists in the same transaction under the new counter. Every
-      // change to the table is therefore attributed and on the record. (The
+      // change to a table is therefore attributed and on the record. (The
       // values themselves cannot be checked here; see DATABASE.md.)
-      // An admin's course teaches the table nothing (2026-11-16): their play is
-      // a check of the game, not a learner's decisions.
-      allow create: if isSignedIn() && !isAdmin() && isQTableDoc(request.resource.data) && isLoggedTableChange(0);
-      allow update: if isSignedIn() && !isAdmin() && isQTableDoc(request.resource.data) && isLoggedTableChange(resource.data.updates);
-      // An admin's reset (Admin > Q-learning): the table emptied, its update
-      // counter unchanged, and the table as it stood kept under resets/ in the
-      // same transaction.
-      allow update: if isAdmin() && isQTableReset(request.resource.data, resource.data);
+      // An admin's course teaches no table (2026-11-16): their play is a check
+      // of the game, not a learner's decisions.
+      allow create: if isSignedIn() && !isAdmin() && isQTableId(tableId) && mayTeach(tableId)
+        && isQTableDoc(request.resource.data) && isLoggedTableChange(tableId, 0);
+      allow update: if isSignedIn() && !isAdmin() && isQTableId(tableId) && mayTeach(tableId)
+        && isQTableDoc(request.resource.data) && isLoggedTableChange(tableId, resource.data.updates);
+      // An admin's reset (Admin > Q-learning): the table emptied or started
+      // from another, its update counter unchanged, and the table as it stood
+      // kept under resets/ in the same transaction.
+      allow update: if isAdmin() && isQTableId(tableId) && isQTableReset(tableId, request.resource.data, resource.data.updates);
+      allow create: if isAdmin() && isQTableId(tableId) && isQTableReset(tableId, request.resource.data, 0);
       allow delete: if false;
 
       // The table as it stood before each reset, with who reset it and why.
       match /resets/{resetId} {
-        allow read: if isAdmin();
-        allow create: if isAdmin()
+        allow read: if isAdmin() && isQTableId(tableId);
+        allow create: if isAdmin() && isQTableId(tableId)
           && request.resource.data.keys().hasAll(['at', 'by', 'note', 'updatesBefore', 'fromGlobalSeq', 'tableBefore'])
           && request.resource.data.by.uid == request.auth.uid
           && request.resource.data.tableBefore is map
@@ -1237,14 +1270,14 @@ service cloud.firestore {
       }
 
       // Every change to the table, written in the same transaction by the
-      // participant whose decision or reward caused it.
+      // player whose decision or reward caused it.
       match /updates/{updateId} {
-        allow read: if isAdmin();
+        allow read: if isAdmin() && isQTableId(tableId);
         // Written only together with the table: the table after the
         // transaction must already count this entry.
-        allow create: if isSignedIn() && isQLogEntry(request.resource.data, updateId)
-          && getAfter(/databases/$(database)/documents/policy/competencyQ).data.updates >= request.resource.data.globalSeq;
-        allow update: if isSignedIn() && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
+        allow create: if isSignedIn() && isQTableId(tableId) && isQLogEntry(request.resource.data, updateId)
+          && getAfter(/databases/$(database)/documents/policy/$(tableId)).data.updates >= request.resource.data.globalSeq;
+        allow update: if isSignedIn() && isQTableId(tableId) && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
         allow delete: if false;
       }
     }

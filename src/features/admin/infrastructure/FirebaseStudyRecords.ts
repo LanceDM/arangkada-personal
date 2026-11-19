@@ -4,11 +4,12 @@
  * implementations.
  *
  * - `participants/{code}`, `roleGrants/{id}`, `configVersions/{tag}`;
- * - `policy/competencyQ` and `policy/competencyQ/updates` (live);
+ * - each Q-table under `policy/` and its `updates` (live; domain/competencyRouting/qTables);
  * - every participant's `bktUpdates` and `events` (collection-group reads).
  */
 import { collection, collectionGroup, doc, getDocs, limit, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
+import { qTableDocId } from '@/domain/competencyRouting/qTables';
 import type {
   LiveQTableRepository,
   StudyLogRepository,
@@ -32,16 +33,16 @@ export const firebaseStudyRecords: StudyRecordsRepository = {
 };
 
 export const firebaseLiveQTable: LiveQTableRepository = {
-  watchTable(onChange, onError) {
+  watchTable(tableId, onChange, onError) {
     return onSnapshot(
-      doc(db, 'policy', 'competencyQ'),
+      doc(db, 'policy', qTableDocId(tableId)),
       snap => onChange(snap.exists() ? (snap.data() as LiveQTable) : null),
       error => onError(error)
     );
   },
-  watchUpdates(count, onChange, onError) {
+  watchUpdates(tableId, count, onChange, onError) {
     return onSnapshot(
-      query(collection(db, 'policy', 'competencyQ', 'updates'), orderBy('globalSeq', 'desc'), limit(count)),
+      query(collection(db, 'policy', qTableDocId(tableId), 'updates'), orderBy('globalSeq', 'desc'), limit(count)),
       snap =>
         onChange(
           snap.docs.map(d => {
@@ -61,8 +62,8 @@ export const firebaseStudyLogs: StudyLogRepository = {
     const snap = await getDocs(collectionGroup(db, 'bktUpdates'));
     return snap.docs.map(d => ({ ...d.data(), uid: ownerIdOf(d.ref) }));
   },
-  async qUpdates() {
-    const snap = await getDocs(query(collection(db, 'policy', 'competencyQ', 'updates'), orderBy('globalSeq', 'asc')));
+  async qUpdates(tableId = 'study') {
+    const snap = await getDocs(query(collection(db, 'policy', qTableDocId(tableId), 'updates'), orderBy('globalSeq', 'asc')));
     return snap.docs.map(d => d.data());
   },
   async events() {

@@ -23,6 +23,7 @@
  * Strict Mode's setup -> cleanup -> setup replay: teardown cancels the frame
  * and the timers, and the next setup puts them back.
  */
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
@@ -81,6 +82,8 @@ interface UseDrivingSimulationOptions {
   touch?: TouchInput;
   /** Whether the on-screen controls are shown, for the attempt's record. */
   touchControls?: boolean;
+  /** How the player's vehicle is drawn: a skin only, the car's in every other way. */
+  vehicleSkin?: VehicleSkin;
   /**
    * Held false while a pre-drive stage is running, or while a touch device is
    * held upright, so the drive stays idle.
@@ -149,6 +152,7 @@ export const useDrivingSimulation = ({
   releaseHeldKeys,
   touch,
   touchControls = false,
+  vehicleSkin = 'car',
   enabled = true,
   initialDistance,
   priorLogs,
@@ -245,6 +249,10 @@ export const useDrivingSimulation = ({
   /** When the frame loop last stopped, so the time until it runs again is spent. Null while it runs. */
   const stoppedAtRef = useRef<number | null>(null);
   const usageRef = useRef(unusedInput());
+  const skinRef = useRef(vehicleSkin);
+  useEffect(() => {
+    skinRef.current = vehicleSkin;
+  }, [vehicleSkin]);
   const touchControlsRef = useRef(touchControls);
   useEffect(() => {
     touchControlsRef.current = touchControls;
@@ -325,7 +333,7 @@ export const useDrivingSimulation = ({
 
         const frame = session.getFrame();
         if (frame) {
-          renderFrame(ctx, frame.scene);
+          renderFrame(ctx, frame.scene, skinRef.current);
           if (frame.flash > 0) {
             ctx.fillStyle = `rgba(220,38,38,${frame.flash})`;
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);

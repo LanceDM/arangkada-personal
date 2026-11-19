@@ -17,7 +17,9 @@ import type { DocumentSnapshot } from 'firebase-admin/firestore';
 import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import type { QLogEntry } from '@/domain/study/qLog';
 import type { BKTProfileDoc, BKTUpdateRecord } from '@/domain/study/bktLog';
-import { auditStudy, type AuditCourseLog, type AuditUser } from './auditCore';
+import { auditStudy, type AuditCourseLog, type AuditTable, type AuditUser } from './auditCore';
+import { qTableDocId, type QTableId } from '@/domain/competencyRouting/qTables';
+import type { QTable } from '@/domain/competencyRouting/qLearning';
 import { auth, firestore, flag } from './admin';
 
 const ownerOf = (snap: DocumentSnapshot) => snap.ref.parent.parent?.id ?? '';
@@ -28,11 +30,30 @@ const byOwner = <T>(docs: DocumentSnapshot[], map: (d: DocumentSnapshot) => T): 
   return grouped;
 };
 
+/** One Q-table, its log, and what its last reset started it from (2026-11-19). */
+const readTable = async (db: ReturnType<typeof firestore>, id: QTableId): Promise<AuditTable> => {
+  const path = `policy/${qTableDocId(id)}`;
+  const [doc, updates] = await Promise.all([db.doc(path).get(), db.collection(`${path}/updates`).get()]);
+  const lastReset = doc.exists ? (doc.get('lastReset') ?? null) : null;
+  let lastResetStart: QTable | null = null;
+  if (lastReset?.resetId) {
+    const record = await db.doc(`${path}/resets/${lastReset.resetId}`).get();
+    lastResetStart = record.exists ? ((record.get('start') as QTable | undefined) ?? null) : null;
+  }
+  return {
+    id,
+    table: doc.exists ? doc.get('table') : null,
+    tableUpdates: doc.exists ? doc.get('updates') : null,
+    qUpdates: updates.docs.map(d => d.data() as QLogEntry),
+    lastReset,
+    lastResetStart,
+  };
+};
+
 const main = async () => {
   const db = firestore();
-  const [tableDoc, updates, users, courseLogs, attempts, sittings, bktUpdates, bktDocs] = await Promise.all([
-    db.doc('policy/competencyQ').get(),
-    db.collection('policy/competencyQ/updates').get(),
+  const [studyTable, ...otherTables] = await Promise.all((['study', 'dryrun', 'test', 'public'] as const).map(id => readTable(db, id)));
+  const [users, courseLogs, attempts, sittings, bktUpdates, bktDocs] = await Promise.all([
     db.collection('users').get(),
     db.collectionGroup('courseLog').get(),
     db.collectionGroup('attempts').get(),
@@ -53,9 +74,11 @@ const main = async () => {
   const profiles = new Map(bktDocs.docs.filter(d => d.id === 'profile').map(d => [ownerOf(d), d.data() as BKTProfileDoc]));
 
   const report = auditStudy({
-    table: tableDoc.exists ? tableDoc.get('table') : null,
-    tableUpdates: tableDoc.exists ? tableDoc.get('updates') : null,
-    qUpdates: updates.docs.map(d => d.data() as QLogEntry),
+    table: studyTable.table,
+    tableUpdates: studyTable.tableUpdates,
+    qUpdates: studyTable.qUpdates,
+    lastResetStart: studyTable.lastResetStart,
+    otherTables,
     users: users.docs.map(u => ({
       uid: u.id,
       admin: adminIds.has(u.id),
@@ -66,7 +89,7 @@ const main = async () => {
       bktProfile: profiles.get(u.id) ?? null,
     })),
     configVersion: RUN_CONFIG_VERSION,
-    lastReset: tableDoc.exists ? (tableDoc.get('lastReset') ?? null) : null,
+    lastReset: studyTable.lastReset,
   });
 
   for (const line of report.summary) console.log(line);

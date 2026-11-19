@@ -174,7 +174,7 @@ export const buildStudyExport = (
     exportedAt,
     notes: {
       bkt: `Per participant: each trajectory is replayed from that participant's own answers with bktModel. predictedCorrect is the prediction made before each answer (for next-answer AUC/RMSE). Level 4 needs ${MIN_DRIVE_EVIDENCE_FOR_BENCHMARKING} drive answers.`,
-      qTable: 'Shared: one table updated by every participant. sharedQTable is the table now; each courseLog entry carries tableAfter, the table right after it.',
+      qTable: "The study's own table (policy/competencyQ), learned from study participants only since 2026-11-19; the dry run, test and public tables are separate. sharedQTable is the study table now; each courseLog entry carries tableAfter (the table it decided from, right after it), qTable (which table that was) and alsoTaught.",
       irt: 'Excluded: no Rasch ability, standard error, item difficulty or IRT scoring of the post-exam, until the group decides what IRT uses.',
     },
     bktModel: DEFAULT_BKT_MODEL,

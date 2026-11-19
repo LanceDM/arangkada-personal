@@ -8,6 +8,7 @@ import { tableIsEmpty } from '@/features/admin/domain/qTableReset';
 import type { QTable } from '@/domain/competencyRouting/qLearning';
 import { Legend } from './adminUi';
 import { DEFAULT_WARM_UP } from '@/domain/competencyRouting/qLearning';
+import { Q_TABLE_LABEL, qTableDocId, type QTableId } from '@/domain/competencyRouting/qTables';
 
 const w = DEFAULT_WARM_UP;
 
@@ -44,8 +45,8 @@ const fmt = (value: unknown, digits = 3) => (typeof value === 'number' ? value.t
  * state's warm-up phase and whether it is exploring or exploiting; and the
  * newest update-log entries as they land.
  */
-export const QTablePanel = () => {
-  const { table, updates, error } = useLiveQTable(true);
+export const QTablePanel = ({ tableId = 'study' }: { tableId?: QTableId }) => {
+  const { table, updates, error } = useLiveQTable(true, tableId);
   const exploring = table ? Object.values(table.states ?? {}).filter(s => s.tag === 'exploring').length : 0;
   // The log is never cleared and its numbering carries on through a reset
   // (2026-11-16): what came before the last reset is kept, but it is not this
@@ -60,7 +61,7 @@ export const QTablePanel = () => {
       <Legend title="Legend: the live table" items={Q_TABLE_LEGEND} />
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Shared Q-table (live)</CardTitle>
+          <CardTitle className="text-sm">{Q_TABLE_LABEL[tableId]} Q-table (live)</CardTitle>
           <p className="text-xs text-muted-foreground">
             {table
               ? `${sinceReset} update${sinceReset === 1 ? '' : 's'}${
@@ -73,7 +74,7 @@ export const QTablePanel = () => {
                       ? ' (the reset)'
                       : ''
                 }`
-              : 'No table yet: it appears with the first participant decision.'}
+              : 'No table yet: it appears with the first decision that teaches it.'}
           </p>
           {error && <p className="text-xs text-destructive">{error}</p>}
         </CardHeader>
@@ -130,7 +131,7 @@ export const QTablePanel = () => {
         <CardHeader>
           <CardTitle className="text-sm">Newest updates</CardTitle>
           <p className="text-xs text-muted-foreground">
-            Every entry is kept in policy/competencyQ/updates with its full detail; the export has them all.
+            Every entry is kept in policy/{qTableDocId(tableId)}/updates with its full detail.
             {table?.lastReset ? ' Listed here: only the updates since the last reset.' : ''}
           </p>
         </CardHeader>
@@ -176,7 +177,7 @@ export const QTablePanel = () => {
           </Table>
         </CardContent>
       </Card>
-      <QTableResetPanel empty={tableIsEmpty(table?.table as QTable | undefined)} />
+      <QTableResetPanel tableId={tableId} empty={tableIsEmpty(table?.table as QTable | undefined)} exists={table !== null} />
     </div>
   );
 };

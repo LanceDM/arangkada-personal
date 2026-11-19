@@ -2,6 +2,8 @@ import { CANVAS_WIDTH, CANVAS_HEIGHT, ROAD_WIDTH, LANE_WIDTH, CAR_WIDTH, CAR_HEI
 import type { LongitudinalArt, RoadPaint, RouteLayout } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import { auxiliaryAt } from '@/features/driving-sim/domain/world/routeGeometry';
 import type { EnvObject } from '@/features/driving-sim/domain/world/roadsideScenery';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
+import { drawMotorcycle } from './vehicleRenderer';
 
 
 /**
@@ -739,8 +741,9 @@ const drawExpresswayFurniture = (
   ctx.fill();
 };
 
-export const drawCar = (ctx: CanvasRenderingContext2D, car: CarState) => {
+export const drawCar = (ctx: CanvasRenderingContext2D, car: CarState, skin: VehicleSkin = 'car') => {
   const { speed } = car;
+  const body = skin === 'motorcycle' ? drawPlayerMotorcycle : drawCarBody;
 
   // While a turn is being executed the whole car is drawn rotated about its
   // own centre, so the body, lights and shadow swing together.
@@ -748,12 +751,35 @@ export const drawCar = (ctx: CanvasRenderingContext2D, car: CarState) => {
     ctx.save();
     ctx.translate(car.x, car.y);
     ctx.rotate(car.heading);
-    drawCarBody(ctx, 0, 0, speed);
+    body(ctx, 0, 0, speed);
     ctx.restore();
     return;
   }
 
-  drawCarBody(ctx, car.x, car.y, speed);
+  body(ctx, car.x, car.y, speed);
+};
+
+/** The player's vehicle, still, at a point: what a skin preview shows. */
+export const drawPlayerVehicle = (ctx: CanvasRenderingContext2D, x: number, y: number, skin: VehicleSkin) =>
+  (skin === 'motorcycle' ? drawPlayerMotorcycle : drawCarBody)(ctx, x, y, 0);
+
+/** The traffic motorcycle's sprite is 42 long; the player's is drawn as long as the car. */
+const PLAYER_MOTORCYCLE_SCALE = CAR_HEIGHT / 42;
+
+/**
+ * The motorcycle skin (2026-11-19): looks only. Drawn the car's length and in
+ * the car's blue, centred where the car is, so the vehicle the player steers
+ * still fills the outline the world collides against.
+ */
+const drawPlayerMotorcycle = (ctx: CanvasRenderingContext2D, cx: number, cy: number, speed: number) => {
+  drawMotorcycle(ctx, cx, cy, PLAYER_MOTORCYCLE_SCALE, {}, ['#60a5fa', '#3b82f6', '#1d4ed8']);
+  if (speed > 0) {
+    // The headlamp's glow when moving, as the car's lights brighten.
+    ctx.fillStyle = 'rgba(254,240,138,0.18)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - CAR_HEIGHT / 2 - 4, 8, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
 };
 
 const drawCarBody = (
