@@ -8,7 +8,8 @@ import { useStoryRun } from './storyRunContext';
  * The level ladder. In Legacy, choosing a level starts a fresh attempt and
  * hands off to its briefing - the map itself never opens a drive directly. In
  * a New group the routing FSM chooses the course's next entry, so the map
- * offers Continue, and a level already passed as a free replay.
+ * offers Continue, and a level already passed as a free replay (for everyone,
+ * study participants included, since 2026-11-20).
  */
 const LevelMapPage = () => {
   const navigate = useNavigate();
@@ -32,7 +33,10 @@ const LevelMapPage = () => {
             frontierLevelId: course.frontierLevelId,
             certified: course.certified,
             openAll: course.openAll,
-            replays: !routing.participant,
+            // Every finished level stays open to replay, for study participants too
+            // (2026-11-20): a replay moves no course step and teaches no Q-table;
+            // it is marked FREE_REPLAY in the records, and BKT reads it as practice.
+            replays: true,
             backTo: routing.participant ? '/study' : undefined,
             loading: course.loading,
             onContinue: course.continueCourse,
