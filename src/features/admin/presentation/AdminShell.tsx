@@ -6,20 +6,20 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import {
+  Activity,
   BrainCircuit,
   ClipboardList,
-  Gauge,
   FlaskConical,
   Gamepad2,
   History,
   LayoutDashboard,
   ListChecks,
-  Signpost,
   LogOut,
   Route,
   Shield,
   Sigma,
   Users,
+  LineChart,
   UserSearch,
   type LucideIcon,
 } from 'lucide-react';
@@ -49,11 +49,10 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
     heading: 'Reports',
     items: [
       { to: '/admin/replay', label: 'Replay', icon: History },
-      { to: '/admin/course-flow', label: 'Course flow', icon: Route },
-      { to: '/admin/course-q-learning', label: 'Q-learning', icon: BrainCircuit },
-      { to: '/admin/course-bkt', label: 'BKT', icon: Gauge },
-      { to: '/admin/routing', label: 'Routing flow (pilot)', icon: Route },
-      { to: '/admin/q-learning', label: 'Q-learning (pilot)', icon: BrainCircuit },
+      { to: '/admin/routing', label: 'Course flow', icon: Route },
+      { to: '/admin/q-learning', label: 'Q-learning', icon: BrainCircuit },
+      { to: '/admin/course', label: 'BKT & export', icon: Activity },
+      { to: '/admin/evaluation', label: 'Model evaluation', icon: LineChart },
       { to: '/admin/irt', label: 'IRT', icon: Sigma },
       { to: '/admin/report', label: 'Player report', icon: Users },
     ],
@@ -62,7 +61,7 @@ const ADMIN_SECTIONS: ReadonlyArray<{ heading: string; items: readonly NavItem[]
     heading: 'Content',
     items: [
       { to: '/admin/quiz', label: 'Quiz items', icon: ListChecks },
-      { to: '/admin/scenarios', label: 'Scenarios', icon: Signpost },
+      { to: '/admin/scenarios', label: 'Scenarios', icon: Route },
     ],
   },
   {

@@ -5,11 +5,9 @@
 import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { garageHotspotSlots, labelForEvent, POOLED_LEVEL_IDS } from '@/dev/fixtures/scenarioCatalog';
 import type { StagedLevel } from '@/dev/fixtures/useStagedLevel';
-import { isCompetencyStage } from '@/domain/learner/stageCompetencies';
 
 const MODE_BUTTONS: { key: StagedLevel['mode']; label: string }[] = [
   { key: 'seeded',  label: 'Seeded' },
-  { key: 'course',  label: 'Course draw' },
   { key: 'single',  label: 'Single event' },
   { key: 'exact',   label: 'All slots' },
 ];
@@ -39,8 +37,7 @@ const LevelStagingControls = ({ staged }: { staged: StagedLevel }) => {
         </select>
       </label>
 
-      {/* A course stage that does not pool (Level 7) still has a course draw. */}
-      {(isPooled || isCompetencyStage(levelId)) && (
+      {isPooled && (
         <div className="grid gap-3 rounded-lg border border-border bg-card/60 p-4">
           <div className="flex flex-wrap gap-2">
             {MODE_BUTTONS.map(({ key, label }) => (
@@ -54,7 +51,7 @@ const LevelStagingControls = ({ staged }: { staged: StagedLevel }) => {
             ))}
           </div>
 
-          {(mode === 'seeded' || mode === 'course') && (
+          {mode === 'seeded' && (
             <label className="grid gap-1.5 text-sm">
               <span className="font-semibold">Seed</span>
               <div className="flex gap-2">
@@ -72,9 +69,7 @@ const LevelStagingControls = ({ staged }: { staged: StagedLevel }) => {
                 </button>
               </div>
               <span className="text-xs text-muted-foreground">
-                {mode === 'course'
-                  ? 'The drive the course composes for this seed: 3 scenarios per competency, borrowed ones included.'
-                  : 'Same seed always rolls the same content - use it to reproduce a specific run.'}
+                Same seed always rolls the same content - use it to reproduce a specific run.
               </span>
             </label>
           )}

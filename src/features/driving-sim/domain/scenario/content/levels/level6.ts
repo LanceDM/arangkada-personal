@@ -1,7 +1,6 @@
 import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
-import { qaVariant } from './qaVariant';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 
 const levelModule = getLevelModule(6);
@@ -80,7 +79,7 @@ const rightTurnCurbLaneSlot: SlotVariant[] = [
     rewardMessage: 'Correct. curb lane before the junction, then round with the rear wheel close to the curb.',
     duration: 200,
     lawCitation:
-      'Republic Act No. 4136: proceed to the right lane well in advance, reduce to a safe speed, signal your intention, and keep the rear right wheel nearest the curb or edge of the highway through the turn.',
+      'RA 4136, Sec. 45(a): proceed to the right lane well in advance, reduce to a safe speed, signal your intention, and keep the rear right wheel nearest the curb or edge of the highway through the turn.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {
@@ -92,7 +91,7 @@ const rightTurnCurbLaneSlot: SlotVariant[] = [
   },
 ];
 
-// 2. Left turn — module section 1, the Republic Act No. 4136 positioning rule. Driven, and
+// 2. Left turn — module section 1, the RA 4136 positioning rule. Driven, and
 // graded from the lane nearest the centre line rather than the curb, which is
 // the whole difference between this and the event above.
 const leftTurnCentreLaneSlot: SlotVariant[] = [
@@ -106,17 +105,17 @@ const leftTurnCentreLaneSlot: SlotVariant[] = [
     correctAction: 'turn_left',
     points: 25,
     warningDistance: 380,
-    penaltyMessage: `A left turn is taken from the lane nearest the center line, and the vehicle must be conducted to the right of the center of the intersection. Turning from the curb side swings you across every lane beside you.`,
-    rewardMessage: 'Correct. Positioned nearest the center line, right of the center of the intersection, then through.',
+    penaltyMessage: `A left turn is taken from the lane nearest the center line, into the lane nearest the center line. Turning from the curb side swings you across every lane beside you.`,
+    rewardMessage: 'Correct. Positioned nearest the center line, and into the lane nearest the center line.',
     duration: 200,
     lawCitation:
-      'Republic Act No. 4136: when turning left from one highway to another, the vehicle shall be conducted to the right of the center of the intersection, and shall turn into the lane nearest the center line.',
+      'RA 4136, Sec. 45(b): a driver intending to turn left approaches the intersection in the lane to the right of and nearest the center line of the highway. Driver\'s Manual Vol. 1, Ch. III: make the turn into the lane nearest the center line.',
     competency: 'lane_discipline',
     severity: 'major',
     maneuver: {
       direction: 'left',
       // `inner` is the lane nearest the centre line on your own side, which is
-      // exactly the position Republic Act No. 4136 names. On this two-by-two carriageway it
+      // exactly the position RA 4136 names. On this two-by-two carriageway it
       // resolves to lane 2 — the left half of the road belongs to oncoming
       // traffic, so the leftmost lane on screen is emphatically not the answer.
       lane: 'inner',
@@ -138,15 +137,15 @@ const laneChangeSlowBusSlot: SlotVariant[] = [
     type: 'obstacle_ahead',
     // Where the bus is, and nothing about the lane the scenario grades: whether
     // the lane beside it is clear is for the driver to look at.
-    description: 'A provincial bus has slowed almost to a stop in your lane, the one beside the center line.',
+    description: 'On a business-district street with two lanes running your way, a provincial bus has slowed almost to a stop in your lane, the one beside the center line.',
     correctAction: 'accelerate',
     points: 20,
     warningDistance: 340,
-    penaltyMessage: `With two or more lanes running your way, changing lanes to the right to pass a slower vehicle is allowed — and it is the only safe option here. Crossing the center line into oncoming traffic is not a lane change, and sitting behind the bus blocks everyone behind you.`,
+    penaltyMessage: `In a business or residential district with two or more lanes running your way, changing lanes to the right to pass a slower vehicle is allowed — and it is the only safe option here. Crossing the center line into oncoming traffic is not a lane change, and sitting behind the bus blocks everyone behind you.`,
     rewardMessage: 'Correct. Mirrors, blind spot, signal, and across into the clear curb lane.',
     duration: 200,
     lawCitation:
-      'Changing lanes: check ahead, behind and to the sides, check your mirrors, glance at the blind spot, signal, then steer across and cancel the signal. Overtaking or changing lanes on the right is allowed where two or more lanes run in the same direction.',
+      'Changing lanes: check ahead, behind and to the sides, check your mirrors, glance at the blind spot, signal, then steer across and cancel the signal. RA 4136, Sec. 39: overtaking on the right is allowed on a road in a business or residential district with two or more lanes running in the same direction.',
     competency: 'lane_discipline',
     severity: 'major',
     requiredLane: {
@@ -182,7 +181,7 @@ const noOvertakeDoubleYellowSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stayed on your side of the line and waited it out.',
     duration: 200,
     lawCitation:
-      'Republic Act No. 4136: do not drive to the left of the center line of a highway to overtake unless that side is clearly visible and free of oncoming traffic for a sufficient distance to pass safely. Overtaking is prohibited on a solid yellow or solid white line, at intersections, on bridges, curves, crests and railroad crossings.',
+      'RA 4136, Sec. 41(a): do not drive to the left of the center line of a highway to overtake unless that side is clearly visible and free of oncoming traffic for a sufficient distance to pass safely. Overtaking is prohibited on a solid yellow or solid white line, at intersections, on bridges, curves, crests and railroad crossings.',
     competency: 'lane_discipline',
     severity: 'critical',
     requiredLane: {
@@ -218,17 +217,17 @@ const redCurbNoParkingSlot: SlotVariant[] = [
     correctAction: 'accelerate',
     points: 20,
     warningDistance: 340,
-    penaltyMessage: `A red-painted curb prohibits stopping, standing and parking outright — there is no brief-stop exception and staying with the vehicle changes nothing. Coming to rest here is a parking violation.`,
+    penaltyMessage: `A red-painted curb means No Loading and Unloading, so you may not stop here to pick up, drop off or wait, and staying with the vehicle changes nothing. Coming to rest here is a violation.`,
     rewardMessage: 'Correct. You recognized the red curb and carried on to find a legal space.',
     duration: 200,
     lawCitation:
-      'Painted curb markings: a red curb prohibits stopping, standing or parking at any time. A yellow curb permits loading and unloading only.',
+      'Pavement marking standard (DPWH DO 41, s. 2012): Painted curbs: a red-painted curb means No Loading and Unloading; a yellow-painted curb means No Parking.',
     competency: 'parking',
     severity: 'major',
     marking: {
       name: 'Red Painted Curb',
       category: 'E. Painted Curb',
-      meaning: 'No stopping, standing or parking at any time.',
+      meaning: 'No loading and unloading.',
       art: 'red_curb',
       side: 'right',
     },
@@ -267,7 +266,7 @@ const hydrantAtTheCurbSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You did not stop within four meters of the hydrant.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1, Parking Prohibitions In Specified Places: "No driver shall park a vehicle, or permit it to stand, whether attended or unattended, upon a highway in any of the following places: … Within four meters of a fire hydrant." RO102: "Within 4 meters from a fire hydrant." FDM Vol. 1\'s review item: never park or stop at the side of the road within 4 meters from a fire hydrant, pursuant to Republic Act No. 4136.',
+      'RA 4136, Sec. 46(e): no driver shall park a vehicle, or permit it to stand, attended or unattended, within four meters of a fire hydrant. Never park or stop at the side of the road within 4 meters of a hydrant.',
     competency: 'parking',
     severity: 'major',
   },
@@ -295,7 +294,7 @@ const towAwayZoneSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You read the sign and did not stop at it.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1, Parking Prohibitions In Specified Places: "No driver shall park a vehicle, or permit it to stand, whether attended or unattended, upon a highway in any of the following places: … At any place where official signs have been displayed prohibiting parking." The sign, in FDM Vol. 1 and RO102: "NO PARKING: TOW-AWAY ZONE -- parked vehicle will be towed."',
+      'RA 4136, Sec. 46(h): no driver shall park a vehicle, or permit it to stand, at any place where official signs prohibit parking. The sign reads: NO PARKING, TOW-AWAY ZONE; a parked vehicle will be towed.',
     competency: 'parking',
     severity: 'major',
     sign: {
@@ -340,7 +339,7 @@ const parallelParkingBaySlot: SlotVariant[] = [
       'Correct. Level with the car in front, then reversed in and straightened up against the curb — parallel parking, done the way the space required.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1, parallel parking: "driving slightly past the parking space, parallel to the parked vehicles in front of that space, keeping a safe distance, then followed by reversing into that space." Angle parking sits at about 45 degrees to the curb with one front wheel within a foot of it; perpendicular parking sits square to a wall or curb.',
+      'Parallel parking: drive slightly past the space, parallel to the vehicle parked in front of it and at a safe distance, then reverse into the space. Angle parking sits at about 45 degrees to the curb with one front wheel within a foot of it; perpendicular parking sits square to a wall or curb.',
     competency: 'parking',
     severity: 'major',
     marking: {
@@ -367,290 +366,6 @@ const parallelParkingBaySlot: SlotVariant[] = [
 // others get. The tow-away zone has 810: the hydrant's zone stays open until
 // the car is four meters past it, and the extra 60 keeps the room a widened
 // theta asks for (`thetaRoom.test.ts`). The bay keeps its place at 6210.
-
-/* -------------------------------------------------------------------------
- * Pooled versions (2026-11-16, future work, draft for the team's check)
- *
- * Each slot keeps its driven scenario and gains two frozen questions on the
- * same competency, each a different rule from the Level 6 module
- * (`level6Module.ts`) or the parking source material, cited by section or
- * tag. The junctions, the bays
- * and the hydrant are unique scenes, so their other versions are asked
- * (`qaVariant`). Nothing here grades the red curb's colour (pack 2c).
- * ---------------------------------------------------------------------- */
-
-rightTurnCurbLaneSlot.push(
-  qaVariant(rightTurnCurbLaneSlot[0], {
-    id: 'level6.right-turn-curb-lane.rear-wheel',
-    label: 'Turning right',
-    description: 'You are in the right lane, slowed and signaling, at the point where you begin a right turn.',
-    question: 'Where should the car be as you turn?',
-    correct: 'With the rear right wheel nearest the curb or edge of the highway',
-    wrong: ['Swung out toward the center line first', 'In the middle of the lane, away from the curb'],
-    penaltyMessage:
-      'Right turn: proceed to the right lane well in advance, slow and signal, and at the turn position keep your rear right wheel nearest to the curb or edge of the highway.',
-    rewardMessage: 'Correct. Tight to the curb through the turn.',
-    lawCitation:
-      'Level 6 module, section 1, Right Turn: "Proceed to the right lane well in advance. Reduce to a safe speed and signal your intention to turn. … At the turn position, keep your rear right wheel nearest to the curb or edge of the highway."',
-  }),
-  // Driven: a red signal where no sign permits a turn on red. The stop is the
-  // answer, read off the car (Level 6 module, section 1, one-way to one-way on a
-  // red signal: "If no, stop and wait for green.").
-  {
-    id: 'level6.right-turn-curb-lane.turn-on-red',
-    label: 'Red light at your turn',
-    type: 'red_light',
-    scene: 'signal',
-    description: 'Your right turn is at the signal ahead, and it shows red. No sign here permits a turn on red.',
-    sign: {
-      name: 'Traffic Signal, Red',
-      category: 'Traffic Signal',
-      meaning: 'Stop and wait for green.',
-      art: 'signal_head',
-      aspect: 'red',
-    },
-    correctAction: 'stop',
-    points: 20,
-    warningDistance: 340,
-    penaltyMessage:
-      'A turn on red is only for an intersection where it is allowed. Where it is not, stop and wait for green.',
-    rewardMessage: 'Correct. No turn on red here, so you stopped and waited for green.',
-    duration: 200,
-    lawCitation:
-      'Level 6 module, section 1, Turning From A One-Way Street, one-way to one-way on a red signal: "Check whether a turn on red is allowed at this intersection. If yes, proceed only when safe. If no, stop and wait for green."',
-    competency: 'traffic_signals',
-    severity: 'major',
-  },
-);
-
-leftTurnCentreLaneSlot.push(
-  qaVariant(leftTurnCentreLaneSlot[0], {
-    id: 'level6.left-turn-centre-lane.wheels-straight',
-    label: 'Waiting to turn left',
-    description: 'You have stopped at the junction to turn left, waiting for oncoming traffic to clear.',
-    question: 'Which way do your front wheels point while you wait?',
-    correct: 'Straight ahead, until it is time to cross',
-    wrong: ['Already turned left, ready to go', 'Turned right, away from the oncoming lane'],
-    penaltyMessage: 'Left turn: if stopped, keep your wheels pointed straight ahead until it is time to cross.',
-    rewardMessage: 'Correct. Wheels straight until you go.',
-    lawCitation:
-      'Level 6 module, section 1, Left Turn: "Advance to the intersection in the correct lane and reduce to a safe speed while signaling. If stopped, keep your wheels pointed straight ahead until it is time to cross."',
-  }),
-  qaVariant(leftTurnCentreLaneSlot[0], {
-    id: 'level6.left-turn-centre-lane.u-turn',
-    label: 'A U-turn',
-    description: 'You missed your street and want to make a U-turn across a double solid yellow line.',
-    question: 'May you?',
-    correct: 'No: a U-turn is never allowed on a double solid yellow line',
-    wrong: ['Yes, if no car is coming', 'Yes, from the right side of the innermost lane'],
-    penaltyMessage:
-      'A U-turn is never allowed on a double solid yellow line, where a No U-Turn sign is posted, or inside a yellow box.',
-    rewardMessage: 'Correct. Go on to where a U-turn is allowed.',
-    lawCitation:
-      'Level 6 module, section 1, Making A U-Turn: "A U-turn is never allowed on a double solid yellow line or where a No U-Turn sign is posted, and it is never allowed inside a yellow box."',
-  }),
-);
-
-laneChangeSlowBusSlot.push(
-  qaVariant(laneChangeSlowBusSlot[0], {
-    id: 'level6.lane-change-slow-bus.left-turner-ahead',
-    label: 'Turning left ahead',
-    description: 'On a two-way street with one lane your way, the car ahead stops with its left signal on to turn.',
-    question: 'May you pass it on the right?',
-    correct: 'Yes: passing on the right is allowed when the vehicle ahead is visibly turning left',
-    wrong: ['No: never pass on the right', 'Only by sounding the horn first'],
-    penaltyMessage:
-      'Overtaking or changing lanes on the right is allowed when the vehicle in front is visibly turning left, since it has committed to leaving your lane.',
-    rewardMessage: 'Correct. It is leaving your lane, so you may pass on its right.',
-    lawCitation:
-      'Level 6 module, section 3, lane changing: "Overtaking or changing lanes on the right when the vehicle in front is visibly turning left — Allowed, since the vehicle ahead has committed to leaving your lane." "Changing lanes when it is not safe to do so — Not allowed."',
-  }),
-  // Driven: a motorcycle filters past while you wait to change lanes in heavy
-  // traffic. Graded on holding your line while it is beside you, as Level 8's
-  // rider alongside is (Level 6 module, section 3, In Heavy Traffic).
-  {
-    id: 'level6.lane-change-slow-bus.heavy-traffic',
-    label: 'Rider filtering past',
-    type: 'scenario_trigger',
-    description: 'You want the next lane over. A motorcycle comes up behind you, filtering along the line between the lanes.',
-    recommendedMove: 'Hold your line until the rider is past.',
-    correctAction: 'accelerate',
-    points: 20,
-    warningDistance: 340,
-    penaltyMessage:
-      'Watch for motorcyclists filtering between vehicles before you change lanes. Moving across while one is beside you leaves them nowhere to go.',
-    rewardMessage: 'Correct. You held your line and let the rider through before moving.',
-    duration: 200,
-    lawCitation:
-      'Level 6 module, section 3, In Heavy Traffic: "When changing lanes in heavy traffic, watch specifically for cyclists and motorcyclists filtering between vehicles; they are easy to miss in a mirror check alone." Section 3: "Changing lanes when it is not safe to do so — Not allowed."',
-    competency: 'lane_discipline',
-    severity: 'major',
-    lineHold: {
-      maxDrift: 16,
-      driftedMessage: 'You moved across while the rider was beside you. Wait until they are past, then change lanes.',
-    },
-    npc: {
-      path: 'filtering_past',
-      vehicleKind: 'motorcycle',
-      label: 'a motorcycle filtering past you',
-      mirror: true,
-    },
-  },
-);
-
-noOvertakeDoubleYellowSlot.push(
-  qaVariant(noOvertakeDoubleYellowSlot[0], {
-    id: 'level6.no-overtake-double-yellow.being-overtaken',
-    label: 'Being overtaken',
-    description: 'A car behind you signals and pulls out to overtake you on a clear stretch.',
-    question: 'What do you do?',
-    correct: 'Give way, and do not speed up until it has completely passed',
-    wrong: ['Speed up so it can pass sooner', 'Move toward the center line to block it'],
-    penaltyMessage:
-      'A driver about to be overtaken must give way, and shall not increase speed until the overtaking vehicle has completely passed.',
-    rewardMessage: 'Correct. Hold your speed and let it by.',
-    lawCitation:
-      'Level 6 module, section 4, How To Overtake: "A driver about to be overtaken must give way to the overtaking vehicle once a suitable, audible signal has been given." "The driver being overtaken shall not increase speed until the overtaking vehicle has completely passed."',
-  }),
-  qaVariant(noOvertakeDoubleYellowSlot[0], {
-    id: 'level6.no-overtake-double-yellow.on-the-shoulder',
-    label: 'The empty shoulder',
-    description: 'A slow tractor is ahead of you, and the road shoulder beside it is wide and empty.',
-    question: 'May you overtake on the shoulder?',
-    correct: 'No: overtaking on the shoulder of the road is not allowed',
-    wrong: ['Yes, if the shoulder is paved', 'Yes, at low speed'],
-    penaltyMessage:
-      'Overtaking is not allowed on the shoulder of the road, at intersections, near bridges, curves and crests, on a solid line, or at a railroad crossing.',
-    rewardMessage: 'Correct. Not on the shoulder.',
-    lawCitation:
-      'Level 6 module, section 4, Where Overtaking Is Not Allowed: "On the shoulder of the road." "At intersections, and when approaching a bridge, curve, or the crest of a grade." "At a railroad crossing."',
-  }),
-);
-
-redCurbNoParkingSlot.push(
-  qaVariant(redCurbNoParkingSlot[0], {
-    id: 'level6.red-curb-no-parking.near-the-corner',
-    label: 'Close to the corner',
-    description: 'There is an open space at the curb just three meters from the corner of an intersection.',
-    question: 'May you park there?',
-    correct: 'No: not within six meters of the intersection of curb lines',
-    wrong: ['Yes, if you stay with the car', 'Yes, for less than five minutes'],
-    penaltyMessage:
-      'No driver shall park a vehicle, or permit it to stand, attended or unattended, within six meters of the intersection of curb lines.',
-    rewardMessage: 'Correct. Six meters back from the corner at least.',
-    lawCitation:
-      'Parking pack P1 (FDM Vol. 1, Parking Prohibitions In Specified Places): "No driver shall park a vehicle, or permit it to stand, whether attended or unattended, upon a highway in any of the following places: … c. Within six meters of the intersection of curb lines". P2: "c. Within 6 meters of the intersection".',
-  }),
-  // Driven: coming to rest inside the junction fails; driving through it
-  // passes. Nothing crosses, so nothing asks for a stop (parking pack P1a, P2a).
-  {
-    id: 'level6.red-curb-no-parking.inside-the-intersection',
-    label: 'Waiting in the junction',
-    type: 'scenario_trigger',
-    scene: 'intersection',
-    description: 'You are picking someone up, and they are not at the corner yet. The crossroads ahead is empty.',
-    correctAction: 'accelerate',
-    avoid: ['stop'],
-    recommendedMove: 'Do not stop inside the intersection to wait.',
-    points: 20,
-    warningDistance: 340,
-    penaltyMessage:
-      'You came to rest inside the intersection. No driver may park a vehicle, or let it stand, attended or unattended, within an intersection.',
-    rewardMessage: 'Correct. You did not wait in the intersection.',
-    duration: 200,
-    lawCitation:
-      'Parking pack P1: "No driver shall park a vehicle, or permit it to stand, whether attended or unattended, upon a highway in any of the following places: a. Within an intersection". P2: "a. In an intersection".',
-    competency: 'parking',
-    severity: 'major',
-  },
-);
-
-hydrantAtTheCurbSlot.push(
-  qaVariant(hydrantAtTheCurbSlot[0], {
-    id: 'level6.hydrant-at-the-curb.uphill-with-curb',
-    label: 'Parking on a slope',
-    description: 'You are parking on a steep street that has a curb.',
-    question: 'How do you leave the front wheels?',
-    correct: 'Turned into the curb, with the parking brake on',
-    wrong: ['Straight ahead', 'Turned out toward the road'],
-    penaltyMessage:
-      'Parking uphill or downhill with a curb: turn the front wheels into the curb or toward the sidewalk, always engage the parking brake, and leave the vehicle in gear if possible.',
-    rewardMessage: 'Correct. Into the curb, brake on.',
-    lawCitation:
-      'Level 6 module, section 5, Uphill And Downhill Parking, with a curb: "Turn the front wheels into the curb or toward the sidewalk. Always engage the parking brake, and leave the vehicle in gear if possible."',
-  }),
-  qaVariant(hydrantAtTheCurbSlot[0], {
-    id: 'level6.hydrant-at-the-curb.slope-without-curb',
-    label: 'A slope with no curb',
-    description: 'You are parking on a sloping road with no curb, only a grass edge.',
-    question: 'How do you turn the wheels?',
-    correct: 'So that if the brake slips, the car rolls off the road, not into it',
-    wrong: ['Toward the road, ready to pull out', 'Straight, so the car stays in line'],
-    penaltyMessage:
-      'Without a curb, turn the wheels so that if the parking brake is inadvertently released, the vehicle rolls off the road rather than into it.',
-    rewardMessage: 'Correct. Off the road if it ever rolls.',
-    lawCitation:
-      'Level 6 module, section 5, Uphill And Downhill Parking, without a curb: "Turn the wheels so that if the parking brake is inadvertently released, the vehicle rolls off the road rather than into it."',
-  }),
-);
-
-towAwayZoneSlot.push(
-  qaVariant(towAwayZoneSlot[0], {
-    id: 'level6.tow-away-zone.staying-with-the-car',
-    label: 'Staying with the car',
-    description: 'You stop beside a NO PARKING: TOW-AWAY ZONE sign and stay in the driver\'s seat.',
-    question: 'Does staying with the car make it allowed?',
-    correct: 'No: no parking or standing there, attended or unattended',
-    wrong: ['Yes: an attended car is not parked', 'Yes, with the engine running'],
-    penaltyMessage:
-      'Where official signs prohibit parking, no driver may park a vehicle or let it stand, whether attended or unattended; a parked vehicle there will be towed.',
-    rewardMessage: 'Correct. Attended or not, you may not stand there.',
-    lawCitation:
-      'Parking pack P1: "No driver shall park a vehicle, or permit it to stand, whether attended or unattended, upon a highway in any of the following places: … h. At any place where official signs have been displayed prohibiting parking". S3: "NO PARKING: TOW-AWAY ZONE- parked vehicle will be towed."',
-  }),
-  qaVariant(towAwayZoneSlot[0], {
-    id: 'level6.tow-away-zone.motorcycle',
-    label: 'Leaving the motorcycle',
-    description: 'You have parked your motorcycle in a legal space for a long errand.',
-    question: 'What do you do before you leave it?',
-    correct: 'Put it on the center stand and lock the handlebar',
-    wrong: ['Leave it on the side stand, unlocked', 'Park it facing downhill'],
-    penaltyMessage:
-      'Motorcycle riders: use the center stand when parking for longer periods, always lock the handlebar before leaving, and never park downhill.',
-    rewardMessage: 'Correct. Center stand, handlebar locked.',
-    lawCitation:
-      'Level 6 module, section 5, For Motorcycle Riders: "Never park downhill." "Use the center stand when parking for longer periods." "Always lock the handlebar before leaving the motorcycle."',
-  }),
-);
-
-parallelParkingBaySlot.push(
-  qaVariant(parallelParkingBaySlot[0], {
-    id: 'level6.parallel-parking-bay.angle-parking',
-    label: 'Angle parking',
-    description: 'The street ahead has angled parking spaces along the curb.',
-    question: 'How do you park in one?',
-    correct: 'At about 45 degrees, one front wheel touching or within a foot of the curb',
-    wrong: ['Parallel to the curb', 'Square to the curb, a meter away from it'],
-    penaltyMessage:
-      'Angle parking: park at an angle of about 45 degrees to the curb, with one front wheel touching or within one foot of the curb.',
-    rewardMessage: 'Correct. About 45 degrees, close to the curb.',
-    lawCitation:
-      'Level 6 module, section 5, Angle Parking: "Park at an angle of about 45 degrees to the curb, with one front wheel touching or within one foot of the curb."',
-  }),
-  qaVariant(parallelParkingBaySlot[0], {
-    id: 'level6.parallel-parking-bay.maneuvering-space',
-    label: 'In a mall bay',
-    description: 'You are parking your motorcycle in a mall\'s marked bay, with others on both sides.',
-    question: 'What do you leave?',
-    correct: 'Enough maneuvering space for others and for yourself',
-    wrong: ['As little room as possible, to fit more cars', 'Nothing: the lines are all that matter'],
-    penaltyMessage: 'If parking in a mall or bay, leave enough maneuvering space for others and for yourself.',
-    rewardMessage: 'Correct. Room for everyone to get in and out.',
-    lawCitation:
-      'Level 6 module, section 5, For Motorcycle Riders: "If parking in a mall or bay, leave enough maneuvering space for others and for yourself." Perpendicular Parking: "Park beside another vehicle, perpendicular to a wall or curb; common in malls or garages with limited space."',
-  }),
-);
-
 export const SLOT_DISTANCES = [810, 1560, 2310, 3060, 3810, 4560, 5370, 6210];
 export const SLOTS: SlotVariant[][] = [
   rightTurnCurbLaneSlot,
@@ -691,6 +406,8 @@ export const level6: LevelConfig = {
   speedLimit: 30,
   pace: spacedPace(30, 40),
   requiredScore: 121,
+  stars2: 145,
+  stars3: 166,
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
   /**
    * A two-way city carriageway: one lane of opposing traffic at the left, then

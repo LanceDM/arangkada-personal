@@ -14,7 +14,7 @@
 import { bodyAt, type WorldBody } from '@/features/driving-sim/domain/world/WorldBody';
 import type { NpcTransform } from '@/features/driving-sim/domain/systems/updateNpcVehicles';
 import type { NpcVehicleSpec } from '@/features/driving-sim/domain/scenario/scenarioScene';
-import { crossingPedestrianPositions } from '@/features/driving-sim/domain/world/sceneGeometry';
+import { crossingPedestrianPositions, crossingWalkerPositions } from '@/features/driving-sim/domain/world/sceneGeometry';
 import { ROAD_ACTORS } from '@/features/driving-sim/domain/world/roadActors';
 import { ownLaneX } from '@/features/driving-sim/domain/world/eventPlacement';
 import type { CrossingPedestrian, RoadActorSpec } from '@/features/driving-sim/domain/scenario/scenarioScene';
@@ -88,16 +88,55 @@ export const gantryNode = (
 export const pedestrianGroupNode = (
   roadX: number,
   y: number,
-  people: CrossingPedestrian[]
-): SceneNode => ({
-  kind: 'pedestrian-group',
-  roadX,
-  y,
-  people,
-  solids: crossingPedestrianPositions(roadX, people)
-    .filter((_, index) => people[index].solid)
-    .map(x => bodyAt(x, y - 4, 18, 34, 'pedestrian', 'a pedestrian on the crossing')),
-});
+  people: CrossingPedestrian[],
+  /** The crossing's walk this frame (`crossingWalk`); absent, they stand still beside the scene. */
+  walk?: { walkIn: number; walkedOff: number },
+  /** Standing beside the road: each one's step along the footpath this frame (`millAbout`). */
+  dys?: number[]
+): SceneNode => {
+  if (!walk) {
+    return {
+      kind: 'pedestrian-group',
+      roadX,
+      y,
+      people,
+      ...(dys ? { dys } : {}),
+      solids: crossingPedestrianPositions(roadX, people)
+        .filter((_, index) => people[index].solid)
+        .map(x => bodyAt(x, y - 4, 18, 34, 'pedestrian', 'a pedestrian on the crossing')),
+    };
+  }
+  // Off the road once they have walked clear, so nothing is left to hit or draw.
+  const xs = crossingWalkerPositions(roadX, people, walk.walkIn, walk.walkedOff).map(x =>
+    walk.walkedOff >= 1 ? null : x
+  );
+  return {
+    kind: 'pedestrian-group',
+    roadX,
+    y,
+    people,
+    xs,
+    walking: (walk.walkIn > 0 && walk.walkIn < 1) || (walk.walkedOff > 0 && walk.walkedOff < 1),
+    // Solid until the event is answered. Walking off they cross lanes the car
+    // may be in, and a driver already judged for this crossing - stopped and
+    // moving off, or gone through - is not then run into by its people.
+    solids:
+      walk.walkedOff > 0
+        ? []
+        : xs.flatMap((x, index) =>
+            x !== null && people[index].solid ? [bodyAt(x, y - 4, 18, 34, 'pedestrian', 'a pedestrian on the crossing')] : []
+          ),
+  };
+};
+
+/**
+ * How far each of a group standing beside the road has stepped along the
+ * footpath this frame (2026-11-16): a slow few paces up and back, each out of
+ * step with the next, so a school gate or a jeepney stop has people on it
+ * rather than cut-outs. Drawn only; their bodies stay where they stand.
+ */
+export const millAbout = (count: number, now: number): number[] =>
+  Array.from({ length: count }, (_, index) => Math.sin(now / 900 + index * 1.9) * 7);
 
 /**
  * A scripted vehicle after the world has posed it for this frame.

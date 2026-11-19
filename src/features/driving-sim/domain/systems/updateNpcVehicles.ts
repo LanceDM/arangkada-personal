@@ -118,6 +118,19 @@ export interface NpcRoadContext {
    */
   followerPassing?: boolean;
   /**
+   * This event's vehicle's own clock (2026-11-16), so a junction vehicle keeps
+   * moving while the player waits for it. Every pose here is a function of how
+   * far the player has driven, so a car crossing in front of a driver who had
+   * stopped for it froze mid-junction and only moved while they drove forward.
+   * `extra` is road the vehicle has covered on its own: a crossing car moves at
+   * least `NPC_MIN_UNITS_PER_FRAME` a frame however slowly the player goes, and
+   * a car that was stuck in the box or waiting to pull out goes on its way once
+   * the player has answered. `tick` is set on the one frame per step that
+   * advances it; any other frame reads it without moving it.
+   */
+  clock?: NpcClock;
+  tick?: boolean;
+  /**
    * Where this event's own self-driving vehicle has got to, for the one path
    * that carries its own road distance rather than deriving one from the
    * player's.
@@ -307,6 +320,47 @@ const CROSS_LANE_OFFSET = 30;
  * derives its row from a virtual distance instead, the same way every other
  * road object derives its row from the player's actual distance.
  */
+/** A junction vehicle's own progress, carried between frames (see `NpcRoadContext.clock`). */
+export interface NpcClock {
+  extra: number;
+  lastDistance: number | null;
+}
+
+export const newNpcClock = (): NpcClock => ({ extra: 0, lastDistance: null });
+
+/**
+ * The slowest a vehicle crossing a junction moves, in road units a frame
+ * (about 22 km/h of the player's own pace): slower than any approach that
+ * reaches the junction in time to matter, so a driver who does not yield still
+ * meets it in the box, and fast enough that one who waits sees it go by.
+ */
+export const NPC_MIN_UNITS_PER_FRAME = 1.5;
+/** How fast a vehicle released by the player's answer goes on its way, in road units a frame. */
+const NPC_RELEASED_UNITS_PER_FRAME = 2.2;
+
+/**
+ * Advances a junction vehicle's clock by one frame and returns the distance to
+ * the junction as the vehicle sees it: the player's, less the road it has
+ * covered on its own. `moving` says whether this frame it keeps going whatever
+ * the player does, and `floor` how fast it does.
+ */
+const ownRelDist = (
+  relDist: number,
+  playerDistance: number,
+  road: NpcRoadContext,
+  moving: (rel: number) => boolean,
+  floor: number
+): number => {
+  const clock = road.clock;
+  if (!clock) return relDist;
+  if (road.tick && !road.frozen) {
+    const moved = clock.lastDistance === null ? floor : Math.max(0, playerDistance - clock.lastDistance);
+    clock.lastDistance = playerDistance;
+    if (moving(relDist - clock.extra)) clock.extra += Math.max(0, floor - moved);
+  }
+  return relDist - clock.extra;
+};
+
 export const npcTransform = (
   spec: NpcVehicleSpec,
   triggerAtDistance: number,
@@ -400,10 +454,13 @@ export const npcTransform = (
         if (spec.yields && !handled) {
           return { x: mouthX, y: anchorY, heading: approachHeading, active: true };
         }
-        if (relDist >= 0) {
+        // Let out, it pulls out and drives away on its own clock rather than
+        // only as the player creeps forward.
+        const own = handled ? ownRelDist(relDist, playerDistance, road, () => true, NPC_RELEASED_UNITS_PER_FRAME) : relDist;
+        if (own >= 0) {
           // The turn: a smooth arc from facing east to facing north, curving up
           // into the player's near lane. Never leaves the carriageway.
-          const s = smooth(clamp01((EMERGE_TURN - relDist) / EMERGE_TURN));
+          const s = smooth(clamp01((EMERGE_TURN - own) / EMERGE_TURN));
           return {
             x: lerp(mouthX, nearLaneX, s),
             y: lerp(anchorY, turnEndY, s),
@@ -413,7 +470,7 @@ export const npcTransform = (
         }
         // Exit: settled in the lane, driving on up the road and away, same
         // direction as the player, until it leaves the top of the frame.
-        const upY = turnEndY - (-relDist) * EMERGE_EXIT_RATE;
+        const upY = turnEndY - (-own) * EMERGE_EXIT_RATE;
         return { x: nearLaneX, y: upY, heading: 0, active: upY > -70 };
       }
 
@@ -422,11 +479,13 @@ export const npcTransform = (
       // so it is unmistakably there while the decision is made, and only pulls
       // clear once the player has arrived.
       if (spec.inBox) {
-        const clearing = clamp01((INBOX_CLEAR_FROM - relDist) / (INBOX_CLEAR_FROM - INBOX_CLEAR_TO));
+        // Once the player has answered (stopped short of it), it clears on its own.
+        const own = ownRelDist(relDist, playerDistance, road, () => handled, NPC_RELEASED_UNITS_PER_FRAME);
+        const clearing = clamp01((INBOX_CLEAR_FROM - own) / (INBOX_CLEAR_FROM - INBOX_CLEAR_TO));
         return {
           x: lerp(boxCentreX, endX, smooth(clearing)),
           y, heading,
-          active: relDist <= INBOX_APPEAR && clearing < 1,
+          active: own <= INBOX_APPEAR && clearing < 1,
         };
       }
 
@@ -435,7 +494,9 @@ export const npcTransform = (
       // driving in without yielding is a collision, not a near miss — and
       // clears out beyond it. Symmetric about the junction so the centre moment
       // lands exactly at arrival.
-      const cross = clamp01((CROSS_LEAD - relDist) / (2 * CROSS_LEAD));
+      const crossAt = (rel: number) => clamp01((CROSS_LEAD - rel) / (2 * CROSS_LEAD));
+      const own = ownRelDist(relDist, playerDistance, road, rel => crossAt(rel) > 0 && crossAt(rel) < 1, NPC_MIN_UNITS_PER_FRAME);
+      const cross = crossAt(own);
       return { x: lerp(startX, endX, cross), y, heading, active: cross > 0 && cross < 1 };
     }
 

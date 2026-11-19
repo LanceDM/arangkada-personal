@@ -46,7 +46,7 @@ describe('the 8-state table', () => {
   });
 });
 
-describe('the warm-up (two tries per legal action, then a 0.1 floor)', () => {
+describe('the warm-up (Double Explore-then-Commit, 2 / 6 / 2, floor 0.1)', () => {
   const fallback = { state: passedHigh, masteryP: 0.85, failedBefore: false };
 
   it('skips the policy when only one action is legal', () => {
@@ -65,13 +65,12 @@ describe('the warm-up (two tries per legal action, then a 0.1 floor)', () => {
     for (const action of ['none', 'none', 'practice', 'practice'] as const) table = recordVisit(table, passedHigh, action);
     table = updateQ(table, passedHigh, 'practice', 1.2, null).table;
     const decision = chooseAction(table, passedHigh, fallback, () => 0.05);
-    // Commit I and Explore II are off by default: two tries each lead straight to the floor.
-    expect(decision.phase).toBe('final_commit');
+    expect(decision.phase).toBe('commit_1');
     expect(decision.leader).toBe('practice');
     expect(decision.probabilities).toEqual({ none: 0.1, practice: 0.9 });
   });
 
-  it('finishes a 2-action state after 4 visits', () => {
+  it('finishes a 2-action state after 10 visits', () => {
     let table: QTable = emptyQTable();
     const rng = sequence([0.05, 0.55, 0.95, 0.35]);
     let visits = 0;
@@ -80,7 +79,7 @@ describe('the warm-up (two tries per legal action, then a 0.1 floor)', () => {
       table = recordVisit(table, passedHigh, decision.action);
       visits += 1;
     }
-    expect(visits).toBe(4);
+    expect(visits).toBeGreaterThanOrEqual(10);
     expect(warmUpFinished(table, passedHigh, DEFAULT_WARM_UP)).toBe(true);
   });
 
@@ -100,23 +99,15 @@ describe('learning', () => {
     expect(table['M1-failed'].practice).toMatchObject({ q: 0.5, n: 2 });
   });
 
-  it('bootstraps from the best legal action of the next state at gamma 1', () => {
+  it('bootstraps from the best legal action of the next state at gamma 0.9', () => {
     let table = emptyQTable();
     table = updateQ(table, passedHigh, 'none', 2, null).table;
-    const { target } = updateQ(table, failedLow, 'practice', -0.06, passedHigh);
-    expect(target).toBeCloseTo(-0.06 + 2, 10);
+    const { target } = updateQ(table, failedLow, 'practice', 1, passedHigh);
+    expect(target).toBeCloseTo(1 + 0.9 * 2, 10);
   });
 
-  it('rewards a step its cost and a terminal decision A_next - 0.02 H (Option 2)', () => {
-    expect(rewardOf({ accuracy: 2 / 3, passed: true }, 3, undefined, 'step')).toBeCloseTo(-0.06, 10);
-    expect(rewardOf({ accuracy: 2 / 3, passed: true }, 3)).toBeCloseTo(2 / 3 - 0.06, 10);
-    expect(rewardOf({ accuracy: 1, passed: true }, 0)).toBe(1);
-  });
-
-  it('values moving on above practise-then-move-on for a perfect player', () => {
-    const moveOn = rewardOf({ accuracy: 1, passed: true }, 0);
-    const practiseThenMoveOn = rewardOf({ accuracy: 1, passed: true }, 3, undefined, 'step') + moveOn;
-    expect(moveOn).toBe(1);
-    expect(practiseThenMoveOn).toBeCloseTo(0.94, 10);
+  it('rewards r = A_next + 0.5 Pass - 0.02 H', () => {
+    expect(rewardOf({ accuracy: 2 / 3, passed: true }, 3)).toBeCloseTo(2 / 3 + 0.5 - 0.06, 10);
+    expect(rewardOf({ accuracy: 1 / 3, passed: false }, 0)).toBeCloseTo(1 / 3, 10);
   });
 });

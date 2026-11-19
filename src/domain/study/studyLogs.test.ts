@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ActionLog } from '@/domain/learner/attempt';
-import { buildEvidenceBKTProfile as buildBKTProfile } from '@/domain/learner/mastery/evidenceBKT';
+import { buildBKTProfile } from '@/domain/learner/mastery/buildBKTProfile';
 import { applyQOperations, type DecisionRecord, type QOperation, type RewardRecord } from '@/domain/competencyRouting/course';
 import { chooseAction, emptyQTable, recordVisit, statePhase, type QState } from '@/domain/competencyRouting/qLearning';
 import { buildBKTLog, type EvidenceOrigin } from './bktLog';
@@ -37,7 +37,7 @@ describe('exploration and exploitation tags', () => {
       table = recordVisit(table, failed, 'practice');
       table = recordVisit(table, failed, 'review');
     }
-    expect(statePhase(table, failed)).toMatchObject({ phase: 'final_commit', tag: 'exploiting' });
+    expect(statePhase(table, failed)).toMatchObject({ phase: 'commit_1', tag: 'exploiting' });
     const ctx = { state: failed, masteryP: 0.6, failedBefore: false };
     const leaderPick = chooseAction(table, failed, ctx, () => 0.05);
     expect(leaderPick.selection).toBe('exploit');
@@ -56,11 +56,11 @@ describe('the Q-table update log', () => {
     selection: 'explore', draw: 0.6, snapshot: {}, timestamp: 1,
   });
   const reward: RewardRecord = {
-    decisionId: '2:parking:0', competency: 'parking', state, action: 'practice', reward: -0.06, accuracy: 0.76, passed: true,
-    addedDecisions: 3, next: { mastery: 4, result: 'passed' }, measuredBy: 'quiz', kind: 'step', timestamp: 2,
+    decisionId: '2:parking:0', competency: 'parking', state, action: 'practice', reward: 1.2, accuracy: 0.76, passed: true,
+    addedDecisions: 3, next: { mastery: 4, result: 'passed' }, measuredBy: 'quiz', timestamp: 2,
   };
   const operations: QOperation[] = [
-    { kind: 'update', state, action: 'practice', reward: -0.06, next: { mastery: 4, result: 'passed' }, gamma: 1 },
+    { kind: 'update', state, action: 'practice', reward: 1.2, next: { mastery: 4, result: 'passed' }, gamma: 0.9 },
     { kind: 'visit', state, action: 'practice' },
   ];
 
@@ -69,7 +69,7 @@ describe('the Q-table update log', () => {
     const { table, entries } = applyQLog({ table: emptyQTable(), items, firstGlobalSeq: 7, context: { participantCode: 'P01', levelId: 2, phase: 'DRIVE(2)', attemptId: 'a' }, envelope });
     expect(table).toEqual(applyQOperations(emptyQTable(), operations));
     expect(entries.map(e => [e.globalSeq, e.kind])).toEqual([[7, 'learn'], [8, 'visit']]);
-    expect(entries[0].learning).toMatchObject({ qBefore: 0, qAfter: -0.06, alpha: 1, target: -0.06, nBefore: 0, nAfter: 1, measuredBy: 'quiz', nextStateKey: 'M4-passed' });
+    expect(entries[0].learning).toMatchObject({ qBefore: 0, qAfter: 1.2, alpha: 1, target: 1.2, nBefore: 0, nAfter: 1, measuredBy: 'quiz', nextStateKey: 'M4-passed' });
     expect(entries[1].decision).toMatchObject({ selection: 'explore', draw: 0.6, visitsBefore: 0, visitsAfter: 1 });
     expect(entries[1].decisionId).toBe('2:parking:1');
     expect(entries[1].tableAfter).toEqual(table);
@@ -100,12 +100,12 @@ describe('the BKT log', () => {
     timestamp: t, action: correct ? 'brake' : 'go', result: correct ? 'correct' : 'violation', points: 0, competency: 'parking', ...extra,
   });
   const logs = [
-    log(1, true, { source: 'pre_test', itemId: 'q1', reactionTime: 900 }),
+    log(1, true, { source: 'diagnostic', itemId: 'q1', reactionTime: 900 }),
     log(2, false, { scenarioId: 's1', reactionTime: 1200 }),
     log(3, true, { scenarioId: 's2', expectedAction: 'brake' }),
   ];
   const origins: EvidenceOrigin[] = [
-    { kind: 'pre_test', levelId: null, ref: null, attempt: null },
+    { kind: 'diagnostic', levelId: null, ref: null, attempt: null },
     { kind: 'attempt', levelId: 6, ref: null, attempt: null },
     { kind: 'attempt', levelId: 6, ref: null, attempt: null },
   ];
@@ -113,18 +113,51 @@ describe('the BKT log', () => {
   it('writes one entry per answer with the raw answer and every computed value, and a matching profile', () => {
     const { profile, entries } = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 0, envelope, now: 10, configVersion: 'c' });
     expect(entries.map(e => e.userSeq)).toEqual([1, 2, 3]);
-    expect(entries[0]).toMatchObject({ source: 'pre_test', itemId: 'q1', responseMs: 900, pInit: 0.5, levelBefore: 2 });
+    expect(entries[0]).toMatchObject({ source: 'diagnostic', itemId: 'q1', responseMs: 900, pInit: 0.3, levelBefore: 1 });
     expect(entries[0].params.pTransit).toBe(0);
     expect(entries[1]).toMatchObject({ scenarioId: 's1', correct: false, action: 'go', origin: { levelId: 6 }, pInit: null });
     expect(entries[1].pBefore).toBe(entries[0].pAfter);
     expect(profile.competencies.parking.p).toBeCloseTo(buildBKTProfile(logs).parking, 12);
     expect(profile.competencies.parking.startP).toBe(entries[0].pAfter);
-    expect(profile.competencies.parking.answers).toEqual({ drive: 2, quiz: 0, pre_test: 1 });
+    expect(profile.competencies.parking.answers).toEqual({ drive: 2, quiz: 0, diagnostic: 1, post_exam: 0 });
     expect(profile.updates).toBe(3);
+  });
+
+  it('marks the profile and every entry with the player\'s set of values, when given one', () => {
+    const marked = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 0, envelope, now: 10, configVersion: 'c', modelSet: 'pilot' });
+    expect(marked.profile.modelSet).toBe('pilot');
+    expect(marked.entries.every(e => e.modelSet === 'pilot')).toBe(true);
+    // The pilot set is today's values: the mark changes nothing else.
+    const plain = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 0, envelope, now: 10, configVersion: 'c' });
+    expect(plain.profile.modelSet).toBeUndefined();
+    expect(marked.entries.map(e => e.pAfter)).toEqual(plain.entries.map(e => e.pAfter));
   });
 
   it('writes only the answers not yet logged', () => {
     const { entries } = buildBKTLog({ uid: 'u', logs, origins, alreadyLogged: 2, envelope, now: 10, configVersion: 'c' });
     expect(entries.map(e => e.userSeq)).toEqual([3]);
+    // Its chain links still count the answers before it.
+    expect(entries[0]).toMatchObject({ chainSeq: 3, prevUserSeq: 2 });
+  });
+
+  it('links each competency into its own chain, start to latest', () => {
+    const mixed = [
+      log(1, true, { source: 'diagnostic' }),
+      log(2, true, { source: 'diagnostic', competency: 'right_of_way' }),
+      log(3, false, { scenarioId: 's1' }),
+      log(4, true, { scenarioId: 's2', competency: 'right_of_way' }),
+    ];
+    const at = (levelId: number | null): EvidenceOrigin => ({ kind: levelId === null ? 'diagnostic' : 'attempt', levelId, ref: null, attempt: null });
+    const { entries } = buildBKTLog({ uid: 'u', logs: mixed, origins: [at(null), at(null), at(6), at(6)], alreadyLogged: 0, envelope, now: 10, configVersion: 'c' });
+    expect(entries.map(e => [e.competency, e.chainSeq, e.prevUserSeq, e.pInit])).toEqual([
+      ['parking', 1, null, 0.3],
+      ['right_of_way', 1, null, 0.3],
+      ['parking', 2, 1, null],
+      ['right_of_way', 2, 2, null],
+    ]);
+    // Each link carries the chain on: the previous entry's P(L) after is this one's P(L) before.
+    for (const entry of entries.filter(e => e.prevUserSeq !== null)) {
+      expect(entry.pBefore).toBe(entries[entry.prevUserSeq! - 1].pAfter);
+    }
   });
 });

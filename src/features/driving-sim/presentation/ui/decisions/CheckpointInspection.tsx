@@ -105,7 +105,7 @@ const CheckpointInspection = ({ event, onAnswer, hintText, choiceSeed }: Checkpo
               id="checkpoint-title"
               className="truncate font-display text-[13px] font-black uppercase tracking-[0.12em] text-primary"
             >
-              {say(inspection.pullOver ? p.trafficStop : p.roadsideCheckpoint)}
+              {say(inspection.pullOver ? p.trafficStop : p.ltoCheckpoint)}
             </p>
           </div>
           <p className="shrink-0 font-display text-[12px] font-bold uppercase tracking-wide text-muted-foreground">

@@ -474,8 +474,10 @@ const drawRockfall = (
   ctx.fillStyle = 'rgba(18,14,10,0.55)';
   ctx.beginPath();
   ctx.moveTo(faceWidth, screenY - 130);
-  for (let y = screenY - 130; y <= screenY + 130; y += 26) {
-    ctx.lineTo(faceWidth - (y % 52 === 0 ? 9 : 3), y + 13);
+  // Alternates by step along the face, not by screen row: a test on the row
+  // itself flickered the lip as the face scrolled (2026-11-18).
+  for (let i = 0, y = screenY - 130; y <= screenY + 130; i += 1, y += 26) {
+    ctx.lineTo(faceWidth - (i % 2 === 0 ? 9 : 3), y + 13);
   }
   ctx.lineTo(faceWidth, screenY + 130);
   ctx.closePath();

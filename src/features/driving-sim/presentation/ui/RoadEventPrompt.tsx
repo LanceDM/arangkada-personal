@@ -255,7 +255,7 @@ const RoadEventPrompt = ({
       return (
         <RoadPrompt
           tone={reacting ? 'react' : 'approach'}
-          label={say(m.roadsideCheckpoint)}
+          label={say(m.ltoCheckpoint)}
           instruction={null}
           cue={shown.cue}
           urgent={reacting}
@@ -267,7 +267,7 @@ const RoadEventPrompt = ({
     return (
       <RoadPrompt
         tone="checkpoint"
-        label={say(m.roadsideCheckpoint)}
+        label={say(m.ltoCheckpoint)}
         instruction={say(reacting ? m.brakeAtLine : m.startSlowing)}
         urgent={reacting}
         approach={eventApproach}

@@ -35,15 +35,13 @@ export const recordWithdrawal = (db: Firestore, code: string, withdrawal: Withdr
 
 /** Which of the participant's own steps are recorded. Reads no consent record. */
 export const loadStudyRecords = async (db: Firestore, uid: string, code: string) => {
-  const [consent, background, device, survey, participant, deadline] = await Promise.all([
+  const [consent, background, device, survey, participant] = await Promise.all([
     getDoc(studyDoc(db, uid, 'consent')),
     getDoc(studyDoc(db, uid, 'background')),
     getDoc(studyDoc(db, uid, 'device')),
     getDoc(studyDoc(db, uid, 'survey')),
     getDoc(doc(db, 'participants', code)),
-    getDoc(doc(db, 'study_settings', 'deadline')),
   ]);
-  const deadlineAt = deadline.exists() ? (deadline.data() as { at?: unknown }).at : null;
   const surveyData = survey.exists() ? (survey.data() as Partial<SurveyDoc>) : null;
   return {
     consented: consent.exists(),
@@ -54,6 +52,5 @@ export const loadStudyRecords = async (db: Firestore, uid: string, code: string)
       confirmedAt: typeof surveyData?.confirmedAt === 'number' ? surveyData.confirmedAt : null,
     },
     withdrawn: participant.exists() && (participant.data() as { withdrawal?: unknown }).withdrawal != null,
-    deadlineAt: typeof deadlineAt === 'number' ? deadlineAt : null,
   };
 };

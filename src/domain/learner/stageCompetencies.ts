@@ -15,12 +15,6 @@
  *    over stages supports retention (Carpenter, Pan & Butler, 2022) and every
  *    stage adds graded opportunities (Koedinger et al., 2023).
  *
- * Amended 2026-11-12: Level 2 is the garage alone, the
- * BLOWBAGETS readiness check, so it lists only what the garage grades.
- * right_of_way, pedestrians and speed_control left it; each still appears in
- * at least 3 stages (right_of_way 5-8, pedestrians 3, 4, 5, 8, 11,
- * speed_control 3, 4, 7, 10).
- *
  * The final exam (L12) is not counted and is not in this table; the tutorial
  * (L0) teaches the controls and grades no competency.
  */
@@ -50,9 +44,22 @@ export const QUIZ_PASS_CORRECT = 2;
 /** Short-quiz attempts before the learner is sent to review the module. */
 export const QUIZ_ATTEMPT_CAP = 3;
 
+/**
+ * TENTATIVE: seconds to answer an in-drive question (checkpoint, right-of-way,
+ * emergency, parking). Running out leaves it unanswered: it fails the scenario
+ * and is not BKT evidence. Since the team's merge (2026-11-10) the drive's
+ * panel clock runs at one minute per question (PANEL_SECONDS, the quiz's
+ * pace); this is that value, recorded in the settings (timeLimit.test.ts
+ * holds the two together).
+ */
+export const IN_DRIVE_QUESTION_LIMIT_SEC = 60;
+
+/** Diagnostic pre-test items per competency (55 for the 11). */
+export const DIAGNOSTIC_ITEMS_PER_COMPETENCY = 5;
+
 export const STAGE_COMPETENCIES: Readonly<Record<CompetencyStage, readonly DrivingCompetency[]>> = {
   1: ['driver_legality', 'document_awareness'],
-  2: ['document_awareness', 'hazard_awareness', 'general_rules'],
+  2: ['document_awareness', 'right_of_way', 'pedestrians', 'speed_control', 'hazard_awareness', 'general_rules'],
   3: ['traffic_signals', 'road_signs', 'pedestrians', 'lane_discipline', 'speed_control'],
   4: ['lane_discipline', 'pedestrians', 'speed_control'],
   5: ['traffic_signals', 'right_of_way', 'pedestrians', 'lane_discipline', 'road_signs'],

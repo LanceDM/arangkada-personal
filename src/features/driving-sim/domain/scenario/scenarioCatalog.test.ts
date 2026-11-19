@@ -28,8 +28,9 @@ describe('the scenario catalogue', () => {
     expect(silent.map(r => r.id)).toEqual([]);
   });
 
-  it('lists the speed target the full instruction names', () => {
-    const speed = rows.filter(r => r.targets.some(t => t.includes('km/h')) && r.instruction.includes('Target:'));
-    expect(speed.length).toBeGreaterThan(0);
+  it('shows the targets in the instruction the player reads', () => {
+    for (const row of rows.filter(r => r.targets.length > 0)) {
+      for (const target of row.targets) expect(row.instruction).toContain(target);
+    }
   });
 });

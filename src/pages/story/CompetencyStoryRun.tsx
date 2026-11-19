@@ -1,352 +1,466 @@
+/**
+ * Story Mode as the per-competency course (redesign of 2026-10-27/28).
+ *
+ * Every participant plays the same flow, signed in: the study's 60-item
+ * pre-test (its answers set each competency's starting BKT), the tutorial, then
+ * each stage's module, short quiz (the gate; items from the admin-edited bank)
+ * and drive, with repeat drives for the competencies not yet done, the final
+ * exam, and the study's 30-item post-test (the course's last measurement).
+ * Continue goes wherever the routing FSM's cursor is.
+ *
+ * The run state is held here across the briefing, drive and results URLs, as
+ * in the other runs. Everything decided is a call into Driving Sim's public
+ * API; the routing FSM, the simulation and persistence live there.
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useLanguage } from '@/shared/i18n/useText';
-import type { Language, Localized } from '@/shared/lib/localized';
-import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
-import { competencyText } from '@/domain/learner/profile';
-import { mistakesIn, starsForMistakes } from '@/domain/learner/stars';
-import { QUIZ_PASS_CORRECT } from '@/domain/learner/stageCompetencies';
-import { phaseLevel, reviewsDue, type CourseCursor } from '@/domain/competencyRouting/course';
 import { useProgressStore } from '@/features/progression';
 import {
   LEVELS,
-
-  competencyCourseProgressOf,
-  courseDepsFor,
-  finishCourseDrive,
+  completeCourseDrive,
+  completeFreeReplayDrive,
+  drivePreview,
   finishCourseQuizReview,
-  loadCourse,
+  loadCompetencyCourse,
+  CourseConflictError,
+  OutdatedAppError,
+  openCourseQuiz,
+  coursePosition,
+  logUiAction,
+  logAnswerGiven,
+  logDriveStarted,
+  logDriveExited,
   markCourseLessonsRead,
   markCourseReviewShown,
-  openCourseQuiz,
+  nextAttemptSeed,
   planCourseDrive,
-  playableLevel,
+  planFreeReplay,
+  drawPracticeQuiz,
+  submitPracticeQuiz,
+  reviewLessons,
   submitCourseQuiz,
-  type BriefingCourse,
-  type CourseAccount,
+  type BriefingGate,
   type CourseDriveRun,
-  type CourseNote,
+  type CourseState,
   type LevelConfig,
   type LevelFsmTelemetry,
   type PlayConditions,
-  type QuizItemDoc,
-  type QuizSittingDoc,
-
 } from '@/features/driving-sim';
-import { storyMessages as m } from './messages';
-import type { StoryCourse, StoryRouting, StoryRunContext } from './storyRunContext';
+import type { Localized } from '@/shared/lib/localized';
+import { useLanguage } from '@/shared/i18n/useText';
+import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
+import type { QuizDraw } from '@/domain/assessment/drawQuiz';
+import { getCompetencyLabel } from '@/domain/learner/profile';
+import {
+  COMPETENCY_ATTEMPT_CAP,
+  phaseId,
+  phaseLevel,
+  reviewsDue,
+  type CourseCursor,
+} from '@/domain/competencyRouting/course';
+import { QUIZ_ATTEMPT_CAP, STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
+import type { StoryRouting, StoryRunContext } from './storyRunContext';
 
 const NO_PRIOR_LOGS: readonly ActionLog[] = [];
 
-/** A stage's topics the course has not finished: what a repeat drive asks. */
-const stillOpen = (cursor: CourseCursor): string[] =>
-  Object.entries(cursor.stage).filter(([, progress]) => progress && !progress.done).map(([competency]) => competency);
-
-const topicsOf = (competencies: readonly string[]) => competencies.map(c => competencyText(c).en).join(', ');
-
-/** The course's quiz rule, read the way the course grades it: 2 of 3 for every competency asked. */
-/** A stage's quiz is behind the participant once its drive or a repeat is reached. */
-const quizBehind = (cursor: CourseCursor | null, level: number | null): boolean =>
-  cursor !== null && level !== null && level !== 0 && level !== 12 &&
-  (cursor.phase.kind === 'DRIVE' || cursor.phase.kind === 'REPEAT') && phaseLevel(cursor.phase) === level;
-
-const passesCourseQuiz = (answers: Readonly<Record<string, number>>, items: readonly QuizItemDoc[]) => {
-  const correct = new Map<string, number>();
-  for (const item of items) correct.set(item.competency, (correct.get(item.competency) ?? 0) + (answers[item.id] === item.correctIndex ? 1 : 0));
-  return [...correct.values()].every(n => n >= QUIZ_PASS_CORRECT);
-};
-
-interface PlannedDrive {
-  levelId: number;
-  /** The cursor the drive was planned at: the one its completion commits from. */
-  cursor: CourseCursor;
-  drive: CourseDriveRun;
-  language: Language;
+interface PlannedRun {
   attempt: number;
-  /** An admin's free replay: outside the course, so it moves no cursor and trains no table. */
-  free?: boolean;
+  run: CourseDriveRun;
+  /** Played from the map outside the course: nothing moves on the cursor. */
+  free: boolean;
+  /** The cursor position the drive was composed for; a plan for any other position is stale. */
+  forCursor: string | null;
 }
 
-type QuizState = BriefingCourse['quiz'];
+/** Where the course is: the phase and the decision count, which every drive moves. */
+const cursorKey = (cursor: CourseCursor) => `${phaseId(cursor.phase)}#${cursor.seq}#${Object.keys(cursor.seen).length}`;
 
 interface CompetencyStoryRunProps {
   routing: StoryRouting;
-  account: CourseAccount;
+  uid: string;
 }
 
-/**
- * Story Mode as the per-competency course: Continue
- * takes the participant to wherever their course stands. A stage is its module,
- * its Short Quiz (the gate: 2 of 3 per competency, three attempts, then the
- * module again), its drive and the repeat drives the course decides, then the
- * next stage; after Level 11, the final exam. No free replay: the course is the
- * whole of Story Mode for an account on it.
- */
-const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
+const staticLevel = (levelId: number): LevelConfig | null => LEVELS.find(level => level.id === levelId) ?? null;
+
+const CompetencyStoryRun = ({ routing, uid }: CompetencyStoryRunProps) => {
   const { levelId: levelIdParam } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const requestedLevelId = levelIdParam === undefined ? null : Number(levelIdParam);
   const isValidLevel =
     requestedLevelId !== null && Number.isInteger(requestedLevelId) && LEVELS.some(level => level.id === requestedLevelId);
   const activeLevel = isValidLevel ? requestedLevelId : null;
 
   const { saveLevelResult, totalScore, levelResults } = useProgressStore();
-  const { language } = useLanguage();
-  const deps = useMemo(() => courseDepsFor(account), [account]);
-  const uid = account.uid;
 
-  const [cursor, setCursor] = useState<CourseCursor | null>(null);
-  const [error, setError] = useState<Localized | null>(null);
-  const [briefed, setBriefed] = useState<{ levelId: number; note: CourseNote } | null>(null);
-  const [run, setRun] = useState<PlannedDrive | null>(null);
-  const [quiz, setQuiz] = useState<QuizState>({ kind: 'loading' });
-  // The open quiz's draw seed, recorded with the sitting (what was shown).
-  const quizDrawSeed = useRef<number | null>(null);
-  const [finished, setFinished] = useState<{ levelId: number; level: LevelConfig; topics?: string[] } | null>(null);
+  // session_started and page_viewed are logged app-wide (app/sync/StudyActivityLog).
+  const { pathname } = useLocation();
+
+  const [state, setState] = useState<CourseState | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { language } = useLanguage();
+  const [planned, setPlanned] = useState<PlannedRun | null>(null);
+  const [finished, setFinished] = useState<{ levelId: number; level: LevelConfig } | null>(null);
   const [levelResult, setLevelResult] = useState<LevelResult | null>(null);
-  const [resultNote, setResultNote] = useState<Localized | null>(null);
-  const [verdicts, setVerdicts] = useState<StoryCourse['verdicts']>(null);
-  const [coursePassed, setCoursePassed] = useState<boolean | null>(null);
+  const [resultNote, setResultNote] = useState<string | null>(null);
+  const en = (text: string | null): Localized | null => (text === null ? null : { en: text });
   const [saving, setSaving] = useState(false);
   const [startedRun, setStartedRun] = useState<number | null>(null);
+  const startedAt = useRef<number | null>(null);
   const attempts = useRef(0);
   const busy = useRef(false);
 
+  const cursor = state?.cursor ?? null;
+  const setCursor = (next: CourseCursor) => setState(current => (current ? { ...current, cursor: next } : current));
+
   useEffect(() => {
     let cancelled = false;
-    loadCourse(deps, uid)
-      .then(loaded => !cancelled && setCursor(loaded))
+    loadCompetencyCourse(uid)
+      .then(loaded => !cancelled && setState(loaded))
       .catch(failure => {
         console.error('Failed to load the course:', failure);
-        if (!cancelled) setError(m.courseNotLoaded);
+        if (!cancelled) setError('Your course could not be loaded. Check your connection and reload.');
       });
     return () => {
       cancelled = true;
     };
-  }, [deps, uid]);
+  }, [uid]);
 
-  const note = (lines: Localized[]): CourseNote => ({ heading: m.courseHeading, lines });
-
-  /** Plans the drive the cursor is at and opens its briefing. */
-  const planDrive = useCallback(
-    async (at: CourseCursor, lines: Localized[]) => {
-      const drive = await planCourseDrive(deps, uid, at);
-      setRun({ levelId: drive.levelId, cursor: at, drive, language, attempt: ++attempts.current });
-      setBriefed({ levelId: drive.levelId, note: note(lines) });
-      setQuiz({ kind: 'no-quiz' });
-      setStartedRun(null);
-      navigate(`/play/story/${drive.levelId}/briefing`);
-    },
-    [deps, uid, language, navigate]
-  );
-
-  /** Takes the participant to wherever their course stands, moving it only through its own steps. */
-  const enter = useCallback(
-    async (from: CourseCursor) => {
-      const { phase } = from;
-      if (phase.kind === 'CERTIFIED') return setResultNote(m.courseDone);
-      if (phase.kind === 'FINAL') return planDrive(from, [m.courseFinal]);
-      if (phase.kind === 'MODULE' && phase.level === 0) {
-        const next = await markCourseLessonsRead(deps, uid, from);
-        setCursor(next);
-        return planDrive(next, [m.courseTutorial]);
-      }
-      if (phase.kind === 'DRIVE' && phase.level === 0) return planDrive(from, [m.courseTutorial]);
-      if (phase.kind === 'MODULE' || phase.kind === 'QUIZ') {
-        setRun(null);
-        setQuiz({ kind: 'loading' });
-        setBriefed({ levelId: phase.level, note: note([m.courseModuleThenQuiz]) });
-        setStartedRun(null);
-        navigate(`/play/story/${phase.level}/briefing`);
-        return;
-      }
-      if (phase.kind === 'QUIZ_REVIEW') {
-        const next = await finishCourseQuizReview(deps, uid, from);
-        setCursor(next);
-        return planDrive(next, [m.courseQuizReview]);
-      }
-      // DRIVE or REPEAT: any module section the course chose to review is shown first.
-      const due = reviewsDue(from);
-      const ready = due.length > 0 ? await markCourseReviewShown(deps, uid, from) : from;
-      if (ready !== from) setCursor(ready);
-      const lines = [phase.kind === 'REPEAT' ? m.courseRepeat(topicsOf(stillOpen(ready))) : m.courseDriveNow];
-      if (due.length > 0) lines.push(m.courseReview(topicsOf(due)));
-      return planDrive(ready, lines);
-    },
-    [deps, uid, navigate, planDrive]
-  );
-
-  const guarded = useCallback(async (work: () => Promise<void>) => {
+  /** Runs one async step of the course, one at a time, reporting failures. */
+  const step = useCallback(async (what: string, action: () => Promise<void>) => {
     if (busy.current) return;
     busy.current = true;
     try {
       setError(null);
-      await work();
+      await action();
     } catch (failure) {
-      console.error('Course step failed:', failure);
-      setError(m.levelNotPrepared);
-      setCursor(await loadCourse(deps, uid).catch(() => null));
+      if (failure instanceof OutdatedAppError) {
+        // A tab left open across an update: nothing was saved.
+        setError(failure.message);
+        return;
+      }
+      if (failure instanceof CourseConflictError) {
+        // Another tab, or a second click, moved the course on first: show
+        // where the course really is rather than saving this step twice.
+        setError('Your course had already moved on (another tab or a second click). It has been reloaded.');
+        setPlanned(null);
+        const reloaded = await loadCompetencyCourse(uid).catch(() => null);
+        if (reloaded) setState(reloaded);
+        return;
+      }
+      console.error(`Failed to ${what}:`, failure);
+      setError(`Could not ${what}. Check your connection and try again.`);
     } finally {
       busy.current = false;
     }
-  }, [deps, uid]);
+  }, [uid]);
 
-  const continueCourse = useCallback(
-    () => void guarded(async () => enter(cursor ?? (await loadCourse(deps, uid)))),
-    [guarded, enter, cursor, deps, uid]
+  /** Plans the drive the cursor is now at, so the briefing can start it. */
+  const planDrive = useCallback(
+    async (at: CourseCursor) => {
+      // The seed is the one this position's drive was first opened with: a reload plans the same drive.
+      const run = await planCourseDrive(uid, at);
+      setPlanned({ attempt: ++attempts.current, run, free: false, forCursor: cursorKey(at) });
+      setStartedRun(null);
+      return run;
+    },
+    [uid]
   );
 
-  const continueOnArrival = Boolean((location.state as { continueCourse?: boolean } | null)?.continueCourse);
-  const arrivalTaken = useRef(false);
-  useEffect(() => {
-    if (!continueOnArrival || cursor === null || activeLevel !== null || arrivalTaken.current) return;
-    arrivalTaken.current = true;
-    navigate(location.pathname, { replace: true, state: null });
-    continueCourse();
-  }, [continueOnArrival, cursor, activeLevel, continueCourse, navigate, location.pathname]);
-
-  // The quiz of a stage being briefed: lessons are marked read as the briefing opens, then the draw is made.
-  const quizPhase = cursor && (cursor.phase.kind === 'MODULE' || cursor.phase.kind === 'QUIZ') && cursor.phase.level !== 0;
-  const loadQuiz = useCallback(
-    (at: CourseCursor, level: LevelConfig) =>
-      void guarded(async () => {
-        setQuiz({ kind: 'loading' });
-        try {
-          const ready = at.phase.kind === 'MODULE' ? await markCourseLessonsRead(deps, uid, at) : at;
-          if (ready !== at) setCursor(ready);
-          const draw = await openCourseQuiz(deps, uid, ready, level);
-          quizDrawSeed.current = draw.seed;
-          setQuiz(
-            draw.items.length === 0
-              ? { kind: 'empty' }
-              : { kind: 'quiz', quiz: { moduleId: level.moduleId, items: draw.items, itemsPerSitting: draw.items.length, passingScore: draw.items.length } }
-          );
-        } catch (failure) {
-          // The briefing's quiz step shows the retry.
-          setQuiz({ kind: 'failed' });
-          throw failure;
-        }
-      }),
-    [guarded, deps, uid]
-  );
-
-  const briefedLevel = useMemo(() => {
-    if (!briefed || briefed.levelId !== activeLevel) return null;
-    if (run && run.levelId === activeLevel) return run.drive.level;
-    return LEVELS.find(level => level.id === activeLevel) ?? null;
-  }, [briefed, run, activeLevel]);
-
-  useEffect(() => {
-    if (!quizPhase || !cursor || !briefedLevel || run || quiz.kind !== 'loading') return;
-    loadQuiz(cursor, briefedLevel);
-  }, [quizPhase, cursor, briefedLevel, run, quiz.kind, loadQuiz]);
-
-  const onQuizFinish = (sitting: QuizSittingDoc) => {
-    if (!cursor || quiz.kind !== 'quiz') return;
-    const items = quiz.quiz.items;
-    const chosen = new Map(sitting.answers.map(answer => [answer.itemId, answer.chosen]));
-    void guarded(async () => {
-      const { cursor: next } = await submitCourseQuiz(deps, uid, cursor, items, items.map(item => chosen.get(item.id) ?? null),
-        quizDrawSeed.current === null ? undefined : { drawSeed: quizDrawSeed.current, sitting });
-      setCursor(next);
-      if (next.phase.kind === 'DRIVE') await planDrive(next, [m.courseDriveNow]);
-      else if (next.phase.kind === 'QUIZ_REVIEW') {
-        const reviewed = await finishCourseQuizReview(deps, uid, next);
-        setCursor(reviewed);
-        await planDrive(reviewed, [m.courseQuizReview]);
+  const continueCourse = () =>
+    void step('continue your course', async () => {
+      if (!state) return;
+      const { cursor: at } = state;
+      // The initial exam (and the background form, when asked) is taken from
+      // the main menu; the course does not start without it. An admin's own
+      // account (`openAll`: never a study account) is not held by it, as
+      // everywhere else (useInitialExam): its pre-test is a preview that saves
+      // nothing, so it would otherwise never reach the course or its quiz.
+      if (!routing.openAll && ((state.backgroundRequired && !state.backgroundDone) || !state.diagnosticDone)) {
+        void logUiAction(uid, 'continue_blocked', { reason: 'initial_exam_not_taken' });
+        navigate(routing.participant ? '/study' : '/play/pre-test');
+        return;
       }
+      void logUiAction(uid, 'continue_course', { phase: phaseId(at.phase) });
+      if (at.phase.kind === 'CERTIFIED') {
+        navigate(routing.participant ? '/study' : '/play/post-test');
+        return;
+      }
+      setLevelResult(null);
+      setResultNote(null);
+      if (at.phase.kind === 'DRIVE' || at.phase.kind === 'REPEAT' || at.phase.kind === 'FINAL') {
+        const fresh = planned && !planned.free && planned.forCursor === cursorKey(at) ? planned.run : await planDrive(at);
+        navigate(`/play/story/${fresh.levelId}/briefing`);
+        return;
+      }
+      setPlanned(null);
+      navigate(`/play/story/${phaseLevel(at.phase)}/briefing`);
     });
-  };
 
-  const onQuizRetry = () => {
-    if (cursor && briefedLevel && cursor.phase.kind === 'QUIZ') loadQuiz(cursor, briefedLevel);
-  };
+  const playFreeReplay = (levelId: number) =>
+    void step('prepare that level', async () => {
+      void logUiAction(uid, 'free_replay_selected', { levelId });
+      const run = await planFreeReplay(uid, levelId, nextAttemptSeed());
+      setPlanned({ attempt: ++attempts.current, run, free: true, forCursor: null });
+      setStartedRun(null);
+      setLevelResult(null);
+      setResultNote(null);
+      navigate(`/play/story/${levelId}/briefing`);
+    });
 
   const completeRun = (result: LevelResult, telemetry?: LevelFsmTelemetry, play?: PlayConditions) => {
     setLevelResult(result);
     saveLevelResult(result);
-    if (!run) return;
-    if (run.free) {
-      setFinished({ levelId: run.levelId, level: run.drive.level });
-      setResultNote(m.replayOutside);
-      return;
-    }
-    setFinished({ levelId: run.levelId, level: run.drive.level, topics: run.drive.composed ? [...new Set(run.drive.composed.items.map(item => item.competency))] : undefined });
+    if (!planned || !cursor) return;
+    setFinished({ levelId: planned.run.levelId, level: planned.run.plan.level! });
     setSaving(true);
     setResultNote(null);
-    setVerdicts(null);
-    setCoursePassed(null);
-    finishCourseDrive(account, run.cursor, run.drive, result, telemetry, run.language, play)
-      .then(settled => {
-        setCursor(settled.cursor);
-        setVerdicts(settled.verdicts.map(v => ({ competency: v.competency, correct: v.correct, total: v.total, passed: v.passed })));
-        setCoursePassed(settled.passed);
-        // The map keeps the stars the course's own verdict gives, by the one rule.
-        saveLevelResult({ ...result, stars: starsForMistakes(settled.passed, mistakesIn(result.logs)) });
-        const { phase } = settled.cursor;
-        const next =
-          phase.kind === 'CERTIFIED' ? m.courseCertified
-          : phase.kind === 'FINAL' ? (run.levelId === 12 ? m.courseFinalAgain : m.courseNextFinal)
-          : phase.kind === 'REPEAT' ? m.courseNextRepeat(topicsOf(stillOpen(settled.cursor)))
-          : m.courseNextStage(phaseLevel(phase) ?? 0);
-        setResultNote(next);
-      })
+    const done = planned.free
+      ? completeFreeReplayDrive(uid, result, telemetry).then(() =>
+          setResultNote('A replay outside your course: Continue picks your course up where you left it.')
+        )
+      : completeCourseDrive({ uid, cursor, run: planned.run, result, telemetry, startedAt: startedAt.current ?? undefined }).then(settled => {
+          setCursor(settled.cursor);
+          setResultNote([...settled.lines, settled.note].join('\n'));
+          if (play) void logUiAction(uid, 'drive_play_conditions', { levelId: planned.run.levelId, ...play });
+        });
+    done
       .catch(async failure => {
-        console.error('Failed to save the course drive:', failure);
-        setResultNote(m.resultNotSaved);
-        setCursor(await loadCourse(deps, uid).catch(() => null));
+        if (failure instanceof OutdatedAppError) {
+          setResultNote(`${failure.message} This drive was not saved.`);
+          return;
+        }
+        if (failure instanceof CourseConflictError) {
+          setResultNote('This drive was already saved, or your course moved on in another tab. Continue picks it up where it is.');
+        } else {
+          console.error('Failed to save the attempt:', failure);
+          setResultNote('Your result could not be saved. Continue will give you this drive again.');
+        }
+        setState(await loadCompetencyCourse(uid).catch(() => state));
       })
       .finally(() => setSaving(false));
   };
 
-  const current = run && run.levelId === activeLevel ? run : null;
-  const rolled = current?.drive.level ?? (finished && finished.levelId === activeLevel ? finished.level : briefedLevel);
-  const shownLanguage = current?.language ?? language;
-  const levelConfig = useMemo(() => (rolled ? playableLevel(rolled, shownLanguage) : null), [rolled, shownLanguage]);
+  // --- the briefing gate ---------------------------------------------------------
+
+  // The quiz open at this course position, drawn from the seed it was first
+  // opened with: a reload shows the same items. A new position (the next
+  // attempt) opens a new quiz.
+  const [openQuiz, setOpenQuiz] = useState<{ key: string; draw: QuizDraw } | null>(null);
+  const quizKey = cursor && cursor.phase.kind === 'QUIZ' && cursor.quiz ? coursePosition(cursor) : null;
+  useEffect(() => {
+    if (!quizKey || !cursor) return;
+    let cancelled = false;
+    openCourseQuiz(uid, cursor, undefined, language)
+      .then(draw => !cancelled && setOpenQuiz({ key: quizKey, draw }))
+      .catch(failure => {
+        console.error('Failed to open the quiz:', failure);
+        if (!cancelled) setError('The quiz could not be opened. Check your connection and reload.');
+      });
+    return () => {
+      cancelled = true;
+    };
+    // The position (quizKey) decides the quiz; the cursor object itself changes with it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid, quizKey, language]);
+  const quizDraw = openQuiz && openQuiz.key === quizKey ? openQuiz.draw : null;
+
+  // The stage's short quiz as practice, outside the course: recorded, never evidence (drawPracticeQuiz).
+  const practiceFor = useCallback(
+    (levelId: number): NonNullable<BriefingGate['practice']> => ({
+      open: async () => {
+        const quiz = await drawPracticeQuiz(levelId, language);
+        return {
+          items: quiz.items,
+          onSubmit: async choices => {
+            const results = await submitPracticeQuiz(uid, quiz, choices, language);
+            void logUiAction(uid, 'practice_quiz_submitted', {
+              levelId,
+              items: quiz.items.map(item => item.id),
+              results: results.map(r => ({ competency: r.competency, correct: r.correct, total: r.total })),
+            });
+            return results;
+          },
+        };
+      },
+    }),
+    [uid, language]
+  );
+
+  const gate: BriefingGate | null = useMemo(() => {
+    if (!cursor || activeLevel === null) return null;
+    if (planned?.free) {
+      const practising = isCompetencyStage(activeLevel);
+      return {
+        log: (action, detail = {}) => void logUiAction(uid, action, { levelId: activeLevel, phase: 'FREE_REPLAY', ...detail }),
+        lessonsRead: true, onLessonsRead: async () => {}, quiz: null, hasQuiz: practising, quizPassed: false, review: null,
+        practice: practising ? practiceFor(activeLevel) : null,
+        canDrive: true, driveDetail: 'A replay outside your course', notes: ['A replay of a finished stage: it does not move your course.'],
+        preview: planned.run.plan.level
+          ? drivePreview(planned.run.plan.level, planned.run.composed ? new Set(planned.run.composed.items.map(item => item.scenarioId)) : undefined)
+          : null,
+      };
+    }
+    const { phase } = cursor;
+    const phaseLevelId = phaseLevel(phase);
+    if (phaseLevelId !== activeLevel) return null;
+    const stageCompetencies = isCompetencyStage(activeLevel) ? STAGE_COMPETENCIES[activeLevel] : [];
+    const labels = (list: readonly string[]) => list.map(getCompetencyLabel).join(', ');
+    const inModule = phase.kind === 'MODULE';
+    const due = reviewsDue(cursor);
+
+    const notes: string[] = [];
+    if (stageCompetencies.length > 0) notes.push(`This stage: ${labels(stageCompetencies)}.`);
+    if (phase.kind === 'QUIZ' && cursor.quiz && cursor.quiz.attempt > 1) notes.push(`Retake: ${labels(cursor.quiz.remaining)} only, with new items.`);
+    if (phase.kind === 'QUIZ_REVIEW') notes.push(`Quiz attempts used up. Review the module for ${labels(phase.competencies)}, then drive.`);
+    if (phase.kind === 'REPEAT') {
+      const left = STAGE_COMPETENCIES[phase.level].filter(c => !cursor.stage[c]?.done);
+      notes.push(`Repeat drive: ${labels(left)}, 3 new scenarios each.`);
+      const flagged = left.filter(c => (cursor.stage[c]?.attempts ?? 0) >= COMPETENCY_ATTEMPT_CAP - 1);
+      if (flagged.length > 0) notes.push(`Last attempt for ${labels(flagged)}: after it, the stage moves on.`);
+    }
+    if (phase.kind === 'FINAL') notes.push('The final exam: one scenario per competency, 70% to pass.');
+    // Progress per competency in this stage: done, or which attempt comes next.
+    if ((phase.kind === 'DRIVE' || phase.kind === 'REPEAT') && stageCompetencies.length > 0) {
+      notes.push(
+        'Progress: ' +
+          stageCompetencies
+            .map(c => {
+              const progress = cursor.stage[c];
+              if (progress?.done) return `${getCompetencyLabel(c)} done${progress.flagged ? ' (flagged)' : ''}`;
+              return `${getCompetencyLabel(c)} attempt ${(progress?.attempts ?? 0) + 1} of ${COMPETENCY_ATTEMPT_CAP}`;
+            })
+            .join(' · ')
+      );
+    }
+
+    const review =
+      phase.kind === 'QUIZ_REVIEW'
+        ? {
+            title: 'Module Review',
+            lessons: reviewLessons(phase.level, phase.competencies),
+            onDone: () =>
+              step('save your review', async () => {
+                const next = await finishCourseQuizReview(uid, cursor);
+                setCursor(next);
+                await planDrive(next);
+              }),
+          }
+        : phase.kind === 'REPEAT' && due.length > 0
+          ? {
+              title: `Review: ${labels(due)}`,
+              lessons: reviewLessons(phase.level, due),
+              onDone: () =>
+                step('save your review', async () => {
+                  setCursor(await markCourseReviewShown(uid, cursor));
+                }),
+            }
+          : null;
+
+    const drivePhase = phase.kind === 'DRIVE' || phase.kind === 'REPEAT' || phase.kind === 'FINAL';
+    return {
+      log: (action, detail = {}) => void logUiAction(uid, action, { levelId: activeLevel, phase: phaseId(phase), ...detail }),
+      lessonsRead: !inModule,
+      onLessonsRead: () =>
+        step('save your progress', async () => {
+          if (!inModule) return;
+          const next = await markCourseLessonsRead(uid, cursor);
+          setCursor(next);
+          if (next.phase.kind === 'DRIVE') await planDrive(next);
+        }),
+      hasQuiz: isCompetencyStage(activeLevel) && phase.kind !== 'FINAL',
+      quizPassed: drivePhase || phase.kind === 'QUIZ_REVIEW',
+      // Once the stage's own quiz is behind the player, it can be practised as often as they like.
+      practice:
+        isCompetencyStage(activeLevel) && phase.kind !== 'FINAL' && (drivePhase || phase.kind === 'QUIZ_REVIEW')
+          ? practiceFor(activeLevel)
+          : null,
+      quiz:
+        phase.kind === 'QUIZ' && cursor.quiz && quizDraw
+          ? {
+              items: quizDraw.items,
+              attempt: cursor.quiz.attempt,
+              cap: QUIZ_ATTEMPT_CAP,
+              onSubmit: async (choices, responseMs) => {
+                const submitted = await submitCourseQuiz(uid, cursor, quizDraw.items, choices, responseMs);
+                setCursor(submitted.cursor);
+                if (submitted.cursor.phase.kind === 'DRIVE') await planDrive(submitted.cursor);
+                return submitted.results;
+              },
+              onAnswer: (position, item, choice, responseMs) =>
+                void logAnswerGiven(uid, {
+                  sitting: 'quiz', attempt: cursor.quiz?.attempt ?? null, levelId: activeLevel, phase: phaseId(phase),
+                  position, item, choice, responseMs,
+                }),
+              onDone: () => {},
+            }
+          : null,
+      review,
+      canDrive:
+        drivePhase &&
+        planned !== null &&
+        !planned.free &&
+        planned.forCursor === cursorKey(cursor) &&
+        planned.run.levelId === activeLevel &&
+        review === null,
+      preview:
+        planned && planned.run.levelId === activeLevel && planned.run.plan.level
+          ? drivePreview(
+              planned.run.plan.level,
+              planned.run.composed ? new Set(planned.run.composed.items.map(item => item.scenarioId)) : undefined
+            )
+          : null,
+      driveDetail:
+        (planned?.run.composed
+          ? `${planned.run.composed.items.length} scenarios: 3 per competency${phase.kind === 'FINAL' ? '' : ', 2 of 3 to pass each'}`
+          : planned
+            ? `${planned.run.plan.level?.events.length ?? 0} road events`
+            : // Said for what it waits on (2026-11-16): before the module or
+              // the quiz is done there is no drive to prepare yet.
+              inModule
+              ? 'Opens once the learning module is read'
+              : phase.kind === 'QUIZ'
+                ? 'Opens once the short quiz is passed'
+                : 'Preparing your drive…') + (review ? ' · opens once the review above is read' : ''),
+      notes,
+    };
+  }, [cursor, activeLevel, planned, quizDraw, uid, step, planDrive, practiceFor]);
+
+  // A drive phase's briefing always has a plan for where the course is now:
+  // after a reload, or once a drive has moved the cursor to a repeat drive,
+  // the old plan is stale and a new drive is composed (never a stale one).
+  const planning = useRef<string | null>(null);
+  useEffect(() => {
+    // Only on the briefing: the results screen keeps showing the drive it scored.
+    if (!cursor || activeLevel === null || planned?.free || !pathname.endsWith('/briefing')) return;
+    const drivePhase = cursor.phase.kind === 'DRIVE' || cursor.phase.kind === 'REPEAT' || cursor.phase.kind === 'FINAL';
+    if (!drivePhase || phaseLevel(cursor.phase) !== activeLevel) return;
+    const key = cursorKey(cursor);
+    if (planned?.forCursor === key || planning.current === key) return;
+    planning.current = key;
+    void step('prepare your drive', async () => {
+      await planDrive(cursor);
+    }).finally(() => {
+      planning.current = null;
+    });
+  }, [cursor, activeLevel, planned, planDrive, step, pathname]);
+
+  // Landing on the map ends whatever was being briefed or shown.
+  const [routedFrom, setRoutedFrom] = useState(activeLevel);
+  if (activeLevel !== routedFrom) {
+    setRoutedFrom(activeLevel);
+    if (activeLevel === null) {
+      setStartedRun(null);
+      setLevelResult(null);
+    }
+  }
 
   if (levelIdParam !== undefined && !isValidLevel) return <Navigate to="/play/story" replace />;
 
-  const progress = competencyCourseProgressOf(cursor);
-  const finishedTopics = finished && finished.levelId === activeLevel ? finished.topics : undefined;
-  const course: StoryCourse = {
-    frontierLevelId: progress.frontierLevel,
-    certified: progress.endReason === 'certified',
-    loading: cursor === null,
-    openAll: routing.openAll,
-    note: briefed && briefed.levelId === activeLevel ? briefed.note : null,
-    resultNote,
-    saving,
-    error,
-    continueCourse,
-    topics: current?.drive.composed ? [...new Set(current.drive.composed.items.map(item => item.competency))] : finishedTopics,
-    verdicts,
-    passed: coursePassed,
-    playFreeReplay: (levelId: number) => {
-      if (!routing.openAll) return;
-      const level = LEVELS.find(entry => entry.id === levelId) ?? null;
-      if (!level || !cursor) return;
-      setRun({ levelId, cursor, drive: { levelId, level, composed: null, attemptSeed: Date.now() }, language, attempt: ++attempts.current, free: true });
-      setBriefed({ levelId, note: { heading: m.courseHeading, lines: [m.replayOutside] } });
-      setQuiz({ kind: 'no-quiz' });
-      setStartedRun(null);
-      navigate(`/play/story/${levelId}/briefing`);
-    },
-  };
-
-  const courseBriefing: BriefingCourse | null =
-    briefed && briefed.levelId === activeLevel
-      ? {
-          quiz,
-          passes: passesCourseQuiz,
-          onQuizFinish,
-          onQuizRetry,
-          retryLoad: () => setQuiz({ kind: 'loading' }),
-          driveReady: current !== null,
-          quizDone: quizBehind(cursor, activeLevel),
-          countedScenarios: current?.drive.composed?.items.length ?? null,
-        }
-      : null;
+  const current = planned && planned.run.levelId === activeLevel ? planned : null;
+  const levelConfig =
+    current?.run.plan.level ??
+    (finished && finished.levelId === activeLevel ? finished.level : activeLevel !== null ? staticLevel(activeLevel) : null);
+  const frontierLevelId = cursor ? phaseLevel(cursor.phase) : null;
 
   const context: StoryRunContext = {
     activeLevel,
@@ -354,8 +468,8 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
     weakArea: null,
     practice: null,
     support: 'full',
-    attemptSeed: current?.drive.attemptSeed ?? null,
-    priorLogs: NO_PRIOR_LOGS,
+    attemptSeed: current?.run.attemptSeed ?? null,
+    priorLogs: current?.run.plan.priorLogs ?? NO_PRIOR_LOGS,
     decisionSettled: current !== null,
     levelResult,
     recommendation: null,
@@ -366,13 +480,39 @@ const CompetencyStoryRun = ({ routing, account }: CompetencyStoryRunProps) => {
     totalScore,
     completedLevels: Object.values(levelResults).filter(r => r.completed).length,
     nextLevelId: null,
-    beginDrive: setStartedRun,
+    beginDrive: levelId => {
+      startedAt.current = Date.now();
+      setStartedRun(levelId);
+      if (current) void logDriveStarted(uid, current.run, current.free ? 'FREE_REPLAY' : cursor ? phaseId(cursor.phase) : 'unknown');
+    },
     completeRun,
+    exitRun: partial => {
+      if (current && partial) void logDriveExited(uid, current.run, current.free ? 'FREE_REPLAY' : cursor ? phaseId(cursor.phase) : 'unknown', partial);
+    },
+    abandonRun: partial => {
+      if (current) void logDriveExited(uid, current.run, current.free ? 'FREE_REPLAY' : cursor ? phaseId(cursor.phase) : 'unknown', partial);
+    },
     restartAttempt: () => {},
     routing,
-    course,
+    course: {
+      frontierLevelId: frontierLevelId === null ? null : Math.min(frontierLevelId, 12),
+      certified: cursor?.phase.kind === 'CERTIFIED',
+      loading: state === null,
+      openAll: routing.openAll,
+      note: null,
+      resultNote: en(resultNote),
+      saving,
+      error: en(error),
+      continueCourse,
+      playFreeReplay,
+      gate,
+      assessments: state && {
+        diagnosticDone: state.diagnosticDone,
+        postExamOpen: state.cursor.phase.kind === 'CERTIFIED',
+        postExamDone: state.postExamDone,
+      },
+    },
     liveReroll: false,
-    courseBriefing,
   };
 
   return <Outlet context={context} />;

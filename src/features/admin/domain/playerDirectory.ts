@@ -1,66 +1,46 @@
 /**
- * Admin > Players: find any account by name, email, study code or id, and
- * read it in one place. Ported from the groupmate's repository
- * (arangkada-personal, playerDirectory) and adapted to the records this
- * repository keeps: his history is an event stream of sign-ins, sign-outs and
- * page views (`users/{uid}/events`) that nothing here writes, so the history
- * below is built from the saved attempts and the course log instead.
+ * Admin > Players (2026-11-13): find any account by name, email, study code or
+ * id, and read its history as the event stream logged it, sign-ins and
+ * sign-outs included.
  */
-import type { CourseLogRow } from './courseAdmin';
-
-/** A profile as the directory reads it: `users/{uid}`. */
-export interface DirectoryUser {
-  id: string;
-  username?: string;
-  email?: string;
-  createdAt?: number;
-  language?: string;
-}
-
-/** A study registry entry: `participants/{code}`. */
-export interface DirectoryEnrolment {
-  uid: string;
-  code: string;
-  cohort: string;
-}
+import type { UserRow } from './adminReport';
 
 export interface DirectoryPlayer {
   uid: string;
-  /** The study code for an enrolled account, else the username, else the id's start. */
   label: string;
   username: string | null;
   email: string | null;
   code: string | null;
-  cohort: string | null;
   createdAt: number | null;
-  language: string | null;
+  user: UserRow | null;
 }
 
-/** Every account the admin can see: each profile, and any enrolment without one. Newest first. */
-export const directoryPlayers = (users: readonly DirectoryUser[], enrolments: readonly DirectoryEnrolment[]): DirectoryPlayer[] => {
-  const byUid = new Map(users.map(user => [user.id, user]));
-  const enrolled = new Map(enrolments.map(entry => [entry.uid, entry]));
-  const ids = [...new Set([...users.map(user => user.id), ...enrolments.map(entry => entry.uid)])];
+/** Every account the admin can see: the users, and anyone with study records but no user document. */
+export const directoryPlayers = (
+  users: readonly UserRow[],
+  codes: ReadonlyMap<string, string>,
+  otherUids: readonly string[],
+  label: (uid: string) => string
+): DirectoryPlayer[] => {
+  const byId = new Map(users.map(user => [user.id, user]));
+  const ids = [...new Set([...users.map(user => user.id), ...otherUids])];
   return ids
-    .map((uid): DirectoryPlayer => {
-      const user = byUid.get(uid);
-      const entry = enrolled.get(uid);
-      const username = user?.username || null;
+    .map(uid => {
+      const user = byId.get(uid) ?? null;
       return {
         uid,
-        label: entry?.code ?? username ?? `${uid.slice(0, 6)}…`,
-        username,
+        label: label(uid),
+        username: user?.username || null,
         email: user?.email || null,
-        code: entry?.code ?? null,
-        cohort: entry?.cohort ?? null,
-        createdAt: typeof user?.createdAt === 'number' ? user.createdAt : null,
-        language: user?.language ?? null,
+        code: codes.get(uid) ?? null,
+        createdAt: user?.createdAt ?? null,
+        user,
       };
     })
     .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0) || a.label.localeCompare(b.label));
 };
 
-/** Accounts whose name, email, study code or id contains every word typed (any case). */
+/** Players whose name, email, study code or id contains every word typed (any case). */
 export const searchPlayers = (players: readonly DirectoryPlayer[], query: string): DirectoryPlayer[] => {
   const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return [...players];
@@ -70,52 +50,68 @@ export const searchPlayers = (players: readonly DirectoryPlayer[], query: string
   });
 };
 
-/** A saved attempt, cut to where and when: the history names no score. */
-export interface DirectoryAttempt {
-  id: string;
-  savedAt: number;
-  levelId: number | null;
-}
-
-export const directoryAttemptOf = (id: string, savedAt: number, data: unknown): DirectoryAttempt => {
-  const row = data && typeof data === 'object' ? (data as Record<string, unknown>) : {};
-  return { id, savedAt, levelId: typeof row.levelId === 'number' ? row.levelId : null };
-};
+export type EventKind = 'account' | 'course' | 'navigation' | 'error' | 'other';
 
 export interface HistoryRow {
-  at: number;
-  kind: 'drive' | 'course';
+  seq: number | null;
+  at: number | null;
+  type: string;
+  kind: EventKind;
+  /** One line a person reads. */
   title: string;
   detail: string;
 }
 
-/**
- * One account's history, newest first: each saved drive (its level and when),
- * and each course step (a quiz, a drive or the final, with the decisions it
- * took). No score is shown.
- */
-export const playerHistory = (attempts: readonly DirectoryAttempt[], courseLogs: readonly CourseLogRow[]): HistoryRow[] =>
-  [
-    ...attempts.map(
-      (attempt): HistoryRow => ({
-        at: attempt.savedAt,
-        kind: 'drive',
-        title: attempt.levelId === null ? 'Drive saved' : `Drive saved: Level ${attempt.levelId}`,
-        detail: attempt.id,
-      })
-    ),
-    ...courseLogs.map(
-      (row): HistoryRow => ({
-        at: row.timestamp,
-        kind: 'course',
-        title: `Course: ${row.kind} · ${row.phase || `Level ${row.levelId}`}`,
-        detail:
-          [
-            row.decisions.map(d => `${d.competency} → ${d.action}`).join(', '),
-            row.endReason ? `ended: ${row.endReason}` : '',
-          ]
-            .filter(Boolean)
-            .join(' · ') || '–',
-      })
-    ),
-  ].sort((a, b) => b.at - a.at);
+const ACTION_TITLE: Record<string, string> = {
+  signed_in: 'Signed in',
+  signed_up: 'Signed up',
+  signed_out: 'Signed out',
+};
+
+const COURSE_TYPES = new Set([
+  'course_transition', 'sitting_submitted', 'item_answered', 'background_submitted', 'drive_planned', 'activity_opened', 'answer_given',
+  'drive_started', 'drive_exited', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision', 'reward_computed',
+]);
+
+const humanize = (value: string) => value.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase());
+const str = (value: unknown) => (typeof value === 'string' ? value : typeof value === 'number' ? String(value) : null);
+
+/** One logged event as a line of history. */
+export const historyRow = (event: Record<string, unknown>): HistoryRow => {
+  const type = String(event.type ?? 'unknown');
+  const payload = (event.payload && typeof event.payload === 'object' ? event.payload : {}) as Record<string, unknown>;
+  const where = [str(event.phase), event.levelId !== null && event.levelId !== undefined ? `Level ${event.levelId}` : null].filter(Boolean).join(' · ');
+  const base = { seq: typeof event.seq === 'number' ? event.seq : null, at: typeof event.at === 'number' ? event.at : null, type };
+  if (type === 'ui_action') {
+    const action = str(payload.action) ?? 'action';
+    const account = action in ACTION_TITLE;
+    return {
+      ...base,
+      kind: account ? 'account' : 'other',
+      title: ACTION_TITLE[action] ?? humanize(action),
+      detail: [str(payload.from) ? `from ${str(payload.from)}` : null, where].filter(Boolean).join(' · '),
+    };
+  }
+  if (type === 'session_started') {
+    return {
+      ...base,
+      kind: 'account',
+      title: payload.restored ? 'Session restored (already signed in)' : 'Session started',
+      detail: [str(payload.language), str(payload.userAgent)?.slice(0, 80)].filter(Boolean).join(' · '),
+    };
+  }
+  if (type === 'page_viewed') return { ...base, kind: 'navigation', title: 'Page viewed', detail: str(payload.path) ?? '' };
+  if (type === 'app_error') return { ...base, kind: 'error', title: 'App error', detail: (str(payload.message) ?? '').slice(0, 160) };
+  return { ...base, kind: COURSE_TYPES.has(type) ? 'course' : 'other', title: humanize(type), detail: where };
+};
+
+/** The history, newest first, with page views left out unless asked for. */
+export const playerHistory = (events: readonly Record<string, unknown>[], includePages: boolean): HistoryRow[] =>
+  events
+    .map(historyRow)
+    .filter(row => includePages || row.kind !== 'navigation')
+    .sort((a, b) => (b.seq ?? -1) - (a.seq ?? -1) || (b.at ?? 0) - (a.at ?? 0));
+
+/** The account's sign-ins, sign-ups and sign-outs, newest first. */
+export const accountActivity = (events: readonly Record<string, unknown>[]): HistoryRow[] =>
+  playerHistory(events, false).filter(row => row.kind === 'account');

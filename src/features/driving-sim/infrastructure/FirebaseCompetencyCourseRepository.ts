@@ -1,45 +1,46 @@
-/**
- * The per-competency course's store, adapted from
- * the groupmate's (arangkada-personal) to this repository's paths:
- *
- * - `users/{uid}/course/cursor`, `active`, `evidence` (the counter), `preTestSeed`;
- * - `users/{uid}/attempts/{id}` and `users/{uid}/courseQuizSittings/{id}`;
- * - `users/{uid}/courseLog/{auto}`;
- * - `q_tables/{table}` and `q_tables/{table}/updates/{eventId}`;
- * - `users/{uid}/bkt/profile` and `users/{uid}/bktUpdates/{id}`.
- *
- * `firestore.rules` holds every one of them: a table change only with its log
- * entry, a record only with the counter that numbers it, a seed only with the
- * pre-test it comes from.
- */
-import { collection, doc, getDoc, getDocs, runTransaction, serverTimestamp, writeBatch, type Transaction } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query, runTransaction, serverTimestamp, setDoc, type DocumentSnapshot, type Transaction } from 'firebase/firestore';
+import { CourseConflictError, OutdatedAppError } from '@/features/driving-sim/application/errors';
+import { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
 import { auth, db } from '@/shared/infrastructure/firebase/client';
-import { contendedCommit } from './contendedCommit';
-import { CourseConflictError } from '@/features/driving-sim/application/errors';
+import { hasAdminAccess } from '@/shared/infrastructure/firebase/adminAccess';
 import { COURSE_SCHEMA_VERSION, sameCursor, type CourseCursor } from '@/domain/competencyRouting/course';
+import { applyQLog, pairQOperations, statesOf } from '@/domain/study/qLog';
 import { emptyQTable, type QTable } from '@/domain/competencyRouting/qLearning';
-import { applyQLog, learningItems, statesOf } from '@/domain/study/qLog';
-import type { EvidenceRecord, PreTestSeed } from '@/domain/study/evidence';
-import type { BKTProfileDoc } from '@/domain/study/bktLog';
-import type { LevelAttempt } from '@/features/driving-sim/domain/scoring/levelAttempt';
+import { qTableDocId, qTableRoute, type QTableId } from '@/domain/competencyRouting/qTables';
+import { isStudyCohort } from '@/domain/study/participantCode';
 import type {
+  AssessmentRepository,
   ActiveActivity,
-  BKTLogRepository,
+  AssessmentSitting,
+  BackgroundFormRepository,
   CompetencyCourseRepository,
-  CourseQuizSitting,
   EvidenceWrite,
-  QTableId,
 } from '@/features/driving-sim/application/ports';
+import type { BackgroundResponse } from '@/domain/study/backgroundForm';
 
-/** Firestore takes no `undefined`: written values go through JSON first. */
+/** Firestore rejects `undefined`; every payload here is plain data, so a JSON round trip drops it. */
 const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
-const courseDoc = (uid: string, id: 'cursor' | 'active' | 'evidence' | 'preTestSeed') => doc(db, 'users', uid, 'course', id);
-const tableDoc = (table: QTableId) => doc(db, 'q_tables', table);
-const recordDoc = (uid: string, evidence: EvidenceWrite) =>
-  doc(db, 'users', uid, evidence.kind === 'attempt' ? 'attempts' : 'courseQuizSittings', evidence.id);
+const cursorDoc = (uid: string) => doc(db, 'users', uid, 'routing', 'competencyCourse');
+const tableDoc = (id: QTableId) => doc(db, 'policy', qTableDocId(id));
+const updatesOf = (id: QTableId) => collection(db, 'policy', qTableDocId(id), 'updates');
+const enrolmentDoc = (uid: string) => doc(db, 'users', uid, 'study', 'enrolment');
 
-/** Every participant's step changes the same table, so a commit may be retried while others write. */
+/** The tables this account decides from and teaches, by the cohort it joined (none for a regular account). */
+const routeOf = (enrolment: DocumentSnapshot) => {
+  const cohort = enrolment.exists() ? enrolment.data().cohort : null;
+  return qTableRoute(isStudyCohort(cohort) ? cohort : null);
+};
+
+/** Whether the signed-in account has admin access: the claim, or the admin page's list. */
+const isAdminSession = (): Promise<boolean> => hasAdminAccess(auth.currentUser);
+const configDoc = () => doc(db, 'policy', 'config');
+const evidenceCounterDoc = (uid: string) => doc(db, 'users', uid, 'state', 'evidence');
+const activeDoc = (uid: string) => doc(db, 'users', uid, 'state', 'active');
+const recordDoc = (uid: string, evidence: EvidenceWrite) =>
+  doc(db, 'users', uid, evidence.kind === 'attempt' ? 'attempts' : 'assessmentSittings', evidence.id);
+
+/** How often a step is retried when other participants keep changing the table under it. */
 const MAX_COMMIT_ATTEMPTS = 12;
 
 const storedCursor = (data: (CourseCursor & { updatedAt?: number }) | undefined): CourseCursor | null => {
@@ -49,135 +50,199 @@ const storedCursor = (data: (CourseCursor & { updatedAt?: number }) | undefined)
   return cursor;
 };
 
-const writeEvidence = (transaction: Transaction, uid: string, evidence: EvidenceWrite, evidenceSeq: number) => {
-  const data = evidence.kind === 'attempt' ? evidence.attempt : evidence.sitting;
-  transaction.set(recordDoc(uid, evidence), plain({ ...data, evidenceSeq }));
-  transaction.set(courseDoc(uid, 'evidence'), { nextSeq: evidenceSeq + 1 });
+/** The settings version in force must be this app's: an old tab writes nothing. */
+const requireCurrentSettings = (config: DocumentSnapshot) => {
+  const tag = config.exists() ? (config.data().tag as string | undefined) : undefined;
+  if (!tag) throw new Error('The database has no settings version (policy/config): run npm run db:init.');
+  if (tag !== RUN_CONFIG_VERSION) throw new OutdatedAppError(RUN_CONFIG_VERSION, tag);
 };
 
-/** Whether the signed-in account carries the admin claim: checked here too, whatever the caller said. */
-const isAdminSession = async (): Promise<boolean> => (await auth.currentUser?.getIdTokenResult())?.claims.admin === true;
+const nextEvidenceSeq = (counter: DocumentSnapshot): number => (counter.exists() ? Number(counter.data().nextSeq ?? 1) : 1);
 
+/** Writes a record of graded answers with its evidence number, and moves the counter on. */
+const writeEvidence = (transaction: Transaction, uid: string, evidence: EvidenceWrite, evidenceSeq: number) => {
+  const data = evidence.kind === 'attempt' ? evidence.attempt : evidence.sitting;
+  transaction.set(recordDoc(uid, evidence), plain({ ...data, evidenceSeq, savedAt: serverTimestamp() }));
+  transaction.set(evidenceCounterDoc(uid), { nextSeq: evidenceSeq + 1 });
+};
+
+/** Writes one table's change and its log entries, for the table `id`. */
+const writeTableChange = (
+  transaction: Transaction,
+  id: QTableId,
+  snap: DocumentSnapshot,
+  updates: number,
+  applied: { table: QTable; entries: readonly { eventId: string; globalSeq: number; kind: string; uid: string; participantCode: string | null; at: number; configVersion: string }[] }
+) => {
+  const last = applied.entries.at(-1)!;
+  // The log is never reset (an admin reset empties only the table): each settings version is recorded with the
+  // first update made under it, so the log can be split by version.
+  const versions = { ...((snap.exists() ? snap.data().versions : null) ?? {}) } as Record<string, { fromGlobalSeq: number; firstAt: number }>;
+  if (!versions[RUN_CONFIG_VERSION]) versions[RUN_CONFIG_VERSION] = { fromGlobalSeq: updates + 1, firstAt: Date.now() };
+  transaction.set(
+    tableDoc(id),
+    plain({
+      schemaVersion: 1,
+      table: applied.table,
+      updates: updates + applied.entries.length,
+      updatedAt: Date.now(),
+      states: statesOf(applied.table),
+      configVersion: RUN_CONFIG_VERSION,
+      versions,
+      // Kept across updates: where the table was last reset, for splitting its log.
+      lastReset: (snap.exists() ? snap.data().lastReset : null) ?? null,
+      lastUpdate: {
+        updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid,
+        participantCode: last.participantCode, at: last.at, configVersion: last.configVersion,
+      },
+    })
+  );
+  for (const entry of applied.entries) {
+    transaction.set(doc(updatesOf(id), entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
+  }
+};
+
+/**
+ * `users/{uid}/routing/competencyCourse`, `users/{uid}/courseLog`, and the
+ * Q-tables under `policy/` with their logs: the player's own table by cohort
+ * (domain/competencyRouting/qTables), and for a study participant the public
+ * table too, both in the same transaction so they never fall out of step.
+ *
+ * Every course step is one transaction: the participant's cursor is compared
+ * with the one the step started from, the settings version with the one in
+ * force, the decisions are taken on the table as it is inside the transaction,
+ * and the step's record (drive or sitting), the table, its log, the
+ * course-log entry and the cursor are written together. Firestore retries the
+ * transaction when another participant changed the table first, so updates are
+ * applied one after another in `globalSeq` order and none is lost; a step from
+ * a stale cursor (a second tab, a double submit, a retry after a lost reply)
+ * is refused and writes nothing.
+ */
 export const firebaseCompetencyCourseRepository: CompetencyCourseRepository = {
   async loadCursor(uid) {
-    const snap = await getDoc(courseDoc(uid, 'cursor'));
+    const snap = await getDoc(cursorDoc(uid));
     return snap.exists() ? storedCursor(snap.data() as CourseCursor & { updatedAt?: number }) : null;
   },
 
-  async loadQTable(table) {
-    const snap = await getDoc(tableDoc(table));
+  async loadQTable(uid) {
+    const route = routeOf(await getDoc(enrolmentDoc(uid)));
+    const snap = await getDoc(tableDoc(route.decides));
     return snap.exists() ? ((snap.data().table as QTable) ?? emptyQTable()) : emptyQTable();
   },
 
-  async loadEvidence(uid) {
-    const [attempts, sittings] = await Promise.all([
-      getDocs(collection(db, 'users', uid, 'attempts')),
-      getDocs(collection(db, 'users', uid, 'courseQuizSittings')),
-    ]);
-    return [
-      ...attempts.docs.map((d): EvidenceRecord => {
-        const a = d.data() as LevelAttempt & { evidenceSeq?: number };
-        return { kind: 'attempt', levelId: a.levelId, attempt: null, evidenceSeq: a.evidenceSeq ?? null, timestamp: a.timestamp ?? 0, logs: a.logs ?? [], ref: d.id };
-      }),
-      ...sittings.docs.map((d): EvidenceRecord => {
-        const s = d.data() as CourseQuizSitting & { evidenceSeq?: number };
-        return { kind: 'quiz', levelId: s.levelId, attempt: s.attempt, evidenceSeq: s.evidenceSeq ?? null, timestamp: s.timestamp, logs: s.answers ?? [], ref: d.id };
-      }),
-    ];
-  },
-
-  async loadPreTestSeed(uid) {
-    const snap = await getDoc(courseDoc(uid, 'preTestSeed'));
-    return snap.exists() ? (snap.data() as PreTestSeed) : null;
-  },
-
-  async commitStep(uid, { table, expected, compute, context, envelope, evidence, teachesTable }) {
-    // An admin's course teaches the shared table nothing; the rules refuse it too.
-    const teaches = teachesTable && !(await isAdminSession());
-    return contendedCommit(() => runTransaction(
+  async commitStep(uid, { expected, compute, context, envelope, evidence }) {
+    // An admin's course is a check of the game, not a learner: its decisions
+    // are still made from the shared table, but it teaches the table nothing
+    // (2026-11-16). The rules refuse an admin's change to the table too.
+    const learns = !(await isAdminSession());
+    return runTransaction(
       db,
       async transaction => {
-        const [cursorSnap, tableSnap, counterSnap] = await Promise.all([
-          transaction.get(courseDoc(uid, 'cursor')),
-          transaction.get(tableDoc(table)),
-          transaction.get(courseDoc(uid, 'evidence')),
+        const [cursorSnap, enrolmentSnap, configSnap, counterSnap] = await Promise.all([
+          transaction.get(cursorDoc(uid)),
+          transaction.get(enrolmentDoc(uid)),
+          transaction.get(configDoc()),
+          transaction.get(evidenceCounterDoc(uid)),
         ]);
+        const route = routeOf(enrolmentSnap);
+        const tableSnaps = new Map<QTableId, DocumentSnapshot>();
+        for (const id of route.teaches) tableSnaps.set(id, await transaction.get(tableDoc(id)));
+        const tableSnap = tableSnaps.get(route.decides)!;
+        requireCurrentSettings(configSnap);
         const stored = cursorSnap.exists() ? storedCursor(cursorSnap.data() as CourseCursor & { updatedAt?: number }) : null;
+        // No stored cursor yet: the course starts here. Otherwise it must be
+        // exactly the cursor this step was computed from.
         if (stored && !sameCursor(stored, plain(expected))) throw new CourseConflictError(stored);
 
         const current: QTable = tableSnap.exists() ? (tableSnap.data().table as QTable) : emptyQTable();
-        const updates = tableSnap.exists() ? Number(tableSnap.data().updates ?? 0) : 0;
         const step = compute(current);
-        const items = learningItems(teaches, step.operations, step.decisions, step.rewards);
-        const applied = items.length > 0
-          ? applyQLog({ table: current, items, firstGlobalSeq: updates + 1, context, envelope })
-          : { table: current, entries: [] };
+        const items = learns ? pairQOperations(step.operations, step.decisions, step.rewards) : [];
 
         let evidenceSeq: number | null = null;
         if (evidence) {
-          evidenceSeq = counterSnap.exists() ? Number(counterSnap.data().nextSeq ?? 1) : 1;
+          evidenceSeq = nextEvidenceSeq(counterSnap);
           writeEvidence(transaction, uid, evidence, evidenceSeq);
         }
-        if (applied.entries.length > 0) {
-          const last = applied.entries.at(-1)!;
-          transaction.set(tableDoc(table), plain({
-            schemaVersion: 1,
-            table: applied.table,
-            updates: updates + applied.entries.length,
-            updatedAt: Date.now(),
-            states: statesOf(applied.table),
-            configVersion: last.configVersion,
-            lastUpdate: {
-              updateId: last.eventId, globalSeq: last.globalSeq, kind: last.kind, uid: last.uid,
-              participantCode: last.participantCode, at: last.at, configVersion: last.configVersion,
-            },
-          }));
-          for (const entry of applied.entries) {
-            transaction.set(doc(db, 'q_tables', table, 'updates', entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
-          }
-        }
+
+        // The same decisions and rewards, applied to each table this account
+        // teaches, each from its own values and with its own numbering. The
+        // first is the table the decisions were made from.
+        const results = route.teaches.map(id => {
+          const snap = tableSnaps.get(id)!;
+          const table: QTable = snap.exists() ? (snap.data().table as QTable) : emptyQTable();
+          const updates = snap.exists() ? Number(snap.data().updates ?? 0) : 0;
+          const applied =
+            items.length > 0 ? applyQLog({ table, items, firstGlobalSeq: updates + 1, context, envelope }) : { table, entries: [] };
+          if (applied.entries.length > 0) writeTableChange(transaction, id, snap, updates, applied);
+          return applied;
+        });
+        const applied = results[0];
+
         if (step.log) {
-          transaction.set(doc(collection(db, 'users', uid, 'courseLog')), plain({
-            ...step.log, decisions: step.decisions, rewards: step.rewards, tableAfter: applied.table, ...(teaches ? {} : { teachesTable: false }),
-          }));
+          transaction.set(
+            doc(collection(db, 'users', uid, 'courseLog')),
+            plain({
+              ...step.log,
+              decisions: step.decisions,
+              rewards: step.rewards,
+              tableAfter: applied.table,
+              learnsTable: learns,
+              // Which table decided (2026-11-19), and the others the step also taught.
+              qTable: route.decides,
+              alsoTaught: learns ? route.teaches.slice(1) : [],
+            })
+          );
         }
-        transaction.set(courseDoc(uid, 'cursor'), plain({ ...step.cursor, updatedAt: Date.now() }));
+        transaction.set(cursorDoc(uid), plain({ ...step.cursor, updatedAt: Date.now() }));
         return { step, entries: applied.entries, table: applied.table, evidenceSeq };
       },
       { maxAttempts: MAX_COMMIT_ATTEMPTS }
-    ));
+    );
+  },
+
+  async saveEvidence(uid, evidence) {
+    return runTransaction(db, async transaction => {
+      const [configSnap, counterSnap, existing] = await Promise.all([
+        transaction.get(configDoc()),
+        transaction.get(evidenceCounterDoc(uid)),
+        transaction.get(recordDoc(uid, evidence)),
+      ]);
+      requireCurrentSettings(configSnap);
+      if (existing.exists()) return 'exists' as const;
+      writeEvidence(transaction, uid, evidence, nextEvidenceSeq(counterSnap));
+      return 'saved' as const;
+    });
   },
 
   async openActivity(uid, fresh) {
     return runTransaction(db, async transaction => {
-      const snap = await transaction.get(courseDoc(uid, 'active'));
+      const snap = await transaction.get(activeDoc(uid));
       const open = snap.exists() ? (snap.data() as ActiveActivity) : null;
       const activity: ActiveActivity =
         open && open.kind === fresh.kind && open.position === fresh.position ? { ...open, opens: open.opens + 1 } : { ...fresh, opens: 1 };
-      transaction.set(courseDoc(uid, 'active'), plain(activity));
+      transaction.set(activeDoc(uid), plain(activity));
       return activity;
     });
   },
 };
 
-/** At most 500 writes go in one batch; a long backlog of BKT entries is written in parts. */
-const BATCH_LIMIT = 450;
-
-export const firebaseBKTLogRepository: BKTLogRepository = {
-  async loadProfile(uid) {
-    const snap = await getDoc(doc(db, 'users', uid, 'bkt', 'profile'));
-    return snap.exists() ? (snap.data() as BKTProfileDoc) : null;
+/** `users/{uid}/assessmentSittings`: written with their step (see commitStep and saveEvidence), never changed. */
+export const firebaseAssessmentRepository: AssessmentRepository = {
+  async load(uid) {
+    const snap = await getDocs(query(collection(db, 'users', uid, 'assessmentSittings'), orderBy('timestamp', 'asc')));
+    return snap.docs.map(d => ({ ...(d.data() as AssessmentSitting), id: d.id }));
   },
+};
 
-  async save(uid, profile, entries) {
-    for (let start = 0; start < entries.length; start += BATCH_LIMIT) {
-      const batch = writeBatch(db);
-      for (const entry of entries.slice(start, start + BATCH_LIMIT)) {
-        batch.set(doc(db, 'users', uid, 'bktUpdates', entry.eventId), { ...plain(entry), serverAt: serverTimestamp() });
-      }
-      // The profile goes with the last part, so it never claims entries not yet written.
-      if (start + BATCH_LIMIT >= entries.length) batch.set(doc(db, 'users', uid, 'bkt', 'profile'), plain(profile));
-      await batch.commit();
-    }
+const backgroundDoc = (uid: string) => doc(db, 'users', uid, 'study', 'background');
+
+/** `users/{uid}/study/background`, written once. */
+export const firebaseBackgroundFormRepository: BackgroundFormRepository = {
+  async load(uid) {
+    const snap = await getDoc(backgroundDoc(uid));
+    return snap.exists() ? (snap.data() as BackgroundResponse) : null;
+  },
+  async save(uid, response) {
+    await setDoc(backgroundDoc(uid), plain(response));
   },
 };

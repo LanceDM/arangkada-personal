@@ -62,7 +62,7 @@ const IMG = 'arangkada_extracted_images/level7/';
  *
  * ## What stays in the module and off the road
  *
- * The under-400cc ban and Republic Act No. 4136's default speed table are both real and both
+ * The under-400cc ban and RA 4136's default speed table are both real and both
  * stay in the lesson and the quiz. A drawing of a motorcycle cannot state its
  * displacement, and a city street is not on this route; asking either here
  * would be asking a learner to act on something the screen does not show.
@@ -81,14 +81,6 @@ const MERGE_POINT = 2190;
 const MERGE_OPENING = 1490;
 /** Where the exit leaves the expressway: the gore, the marker and the grade. */
 const EXIT_POINT = 9580;
-/**
- * Where a course drive inserts expressway for the stage's own extra scenarios:
- * the Lane 1 yield slot, the last scenario before the exit. They stand on the
- * open expressway after it, and the exit, the ramp and the plaza move on by the
- * length they take (`stretchLevel`), so the last of them has the yield slot's
- * own 1,710 units to the exit. The static level inserts nothing.
- */
-export const MAINLINE_STRETCH_AT = 7870;
 /** Where the ramp sets the driver down on the toll approach. */
 /**
  * Where the ramp stops being crossable and starts being a road of its own.
@@ -254,7 +246,7 @@ const followingDistanceLeadVanSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You kept a full two-second gap to the van the whole way in.',
     duration: 200,
     lawCitation:
-      'Keep a two-to-three second following gap, measured in time rather than meters, and widen it for higher speed, a heavier load or reduced visibility. Total stopping distance is perception and reaction distance plus braking distance: about 80 meters at 100 km/h.',
+      'RA 4136, Sec. 35(a): Keep a two-to-three second following gap, measured in time rather than meters, and widen it for higher speed, a heavier load or reduced visibility. Total stopping distance is perception and reaction distance plus braking distance: about 80 meters at 100 km/h.',
     competency: 'hazard_awareness',
     severity: 'critical',
     npc: {
@@ -356,14 +348,12 @@ const lane1YieldToFasterTrafficSlot: SlotVariant[] = [
     correctAction: 'accelerate',
     points: 20,
     warningDistance: 700,
-    penaltyMessage: `You held Lane 1 with a faster vehicle behind you. Lane 1 is for overtaking, and an overtaking vehicle does not have right-of-way.`,
+    penaltyMessage: `You held Lane 1 with a faster vehicle behind you. The overtaking lane is not yours for as long as you want it, and a driver who has to go round you on the right is being forced into the one move the lane assignment exists to prevent.`,
     rewardMessage: 'Correct. You stayed out of Lane 1 and let the faster car take it.',
     duration: 200,
     lawCitation:
-      'FDM Vol. 1, Expressway Rules and Regulations: "6. Lane No. 1 (innermost lane) or the lane nearest the Median Barrier or Median shall be used only for overtaking another vehicle but within the allowed speed. Overtaking vehicles, however, do not have right-of-way."',
-    // Right of way since 2026-11-17 (expressway pack X6), in the rule's own
-    // words. Lane discipline keeps the keep-right, overtake and toll slots.
-    competency: 'right_of_way',
+      'RA 2000 (Limited Access Highway Act) and expressway rules: The innermost lane (Lane 1), nearest the median barrier, is for overtaking only, within the allowed speed. An overtaking vehicle does not have right-of-way and must return to its own lane once clear.',
+    competency: 'lane_discipline',
     severity: 'major',
     npc: {
       path: 'closing_from_behind',
@@ -384,7 +374,7 @@ const lane1YieldToFasterTrafficSlot: SlotVariant[] = [
       lane: 'middle',
       hint: 'Leave Lane 1 clear for the faster car',
       strict: true,
-      wrongLaneMessage: `You were still in Lane 1 as the faster car came up behind you. Lane 1 is for overtaking only, and an overtaking vehicle does not have right-of-way.`,
+      wrongLaneMessage: `You were still in Lane 1 as the faster car came up behind you. Finishing a pass means giving the lane back, not keeping it until somebody else has to go round.`,
     },
   },
 ];
@@ -412,7 +402,7 @@ const expresswayExitSlot: SlotVariant[] = [
     rewardMessage: 'Correct. Into the exit lane in good time, down to the posted 60, and onto the ramp under control.',
     duration: 200,
     lawCitation:
-      'A posted sign always overrides the default speed table. Check Brakes, Reduce Speed Now is posted in conjunction with a merge or descent on the expressway: test your brakes and slow down before the situation demands it. Special signs appear as early as 200 meters before an exit to give you time to move into the correct lane.',
+      'Road sign standard (DPWH DO 41, s. 2012): A posted sign always overrides the default speed table. Check Brakes, Reduce Speed Now is posted in conjunction with a merge or descent on the expressway: test your brakes and slow down before the situation demands it. Special signs appear as early as 200 meters before an exit to give you time to move into the correct lane.',
     competency: 'speed_control',
     severity: 'major',
     maneuver: {
@@ -491,17 +481,6 @@ const tollPlazaClosedGatesSlot: SlotVariant[] = [
   },
 ];
 
-/*
- * Level 7 is not pooled (2026-11-16, future work). Slots 1, 2, 4, 6 and 7 are
- * route-bound (`scene: 'route'`): the acceleration lane, Lane 1, the overtake,
- * the exit and the toll plaza are the carriageway itself, so a slot variant
- * would change the road rather than what stands on it. Slot 5 reads the pass
- * slot 4 just finished, so it has no honest second form. Slot 3, the lead
- * van, is the one free slot, and the frozen practice policy's tests
- * (`practiceSelection.test.ts`) hold Level 7 to exactly one portable item.
- * Frozen questions are not added either: the level's slots are driven
- * manoeuvres on a road where stopping is the thing it teaches against.
- */
 export const SLOT_DISTANCES = [MERGE_POINT, 3490, 4900, 6760, 7870, EXIT_POINT, TOLL_PLAZA];
 export const SLOTS: SlotVariant[][] = [
   accelerationLaneMergeSlot,
@@ -562,6 +541,8 @@ export const level7: LevelConfig = {
     brakingScale: 0.7,
   },
   requiredScore: 114,
+  stars2: 137,
+  stars3: 157,
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
   /**
    * A four-lane, one-way expressway: no opposing traffic at all.

@@ -62,17 +62,17 @@ const failingAllButOne = (): SignCoverage =>
 const SEED = 0x5eed1e;
 
 /**
- * Two competencies tied at BKT 15: `road_signs` missed once, `driver_legality`
- * right once and then missed twice. List order picks `driver_legality`, the
+ * Two competencies tied at BKT 8 (default model): `road_signs` missed once,
+ * `driver_legality` missed, right, missed. List order picks `driver_legality`, the
  * first in COMPETENCIES; least-observed picks `road_signs`.
  */
-const tiedAt15 = (): ActionLog[] => [
+const tiedAt8 = (): ActionLog[] => [
   ...COMPETENCIES.filter(c => c !== 'road_signs' && c !== 'driver_legality').flatMap((c, i) => [
     graded(c, 'correct', i * 2),
     graded(c, 'correct', i * 2 + 1),
   ]),
-  graded('driver_legality', 'correct', 100),
-  graded('driver_legality', 'violation', 101),
+  graded('driver_legality', 'violation', 100),
+  graded('driver_legality', 'correct', 101),
   graded('driver_legality', 'violation', 102),
   graded('road_signs', 'violation', 103),
 ];
@@ -144,7 +144,7 @@ describe('the route a level entry drives, and the record of how it was chosen', 
   });
 
   it('breaks a tie for the weakest competency toward the least observed, and records the one it read', async () => {
-    provide(tiedAt15());
+    provide(tiedAt8());
     const plan = await buildAdaptivePlan(null, 3, SEED);
     expect(plan.weakArea?.competency).toBe('road_signs');
     expect(plan.record.weakest).toBe('road_signs');
@@ -156,9 +156,9 @@ describe('the route a level entry drives, and the record of how it was chosen', 
   });
 
   it('carries the history it read, oldest first, for the live estimate in the drive', async () => {
-    provide(tiedAt15());
+    provide(tiedAt8());
     const plan = await buildAdaptivePlan(null, 3, SEED);
-    expect(plan.priorLogs).toEqual(tiedAt15());
+    expect(plan.priorLogs).toEqual(tiedAt8());
   });
 
   it('rolls the same route and picks the same item for the same seed', async () => {

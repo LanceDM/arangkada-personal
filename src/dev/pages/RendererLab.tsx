@@ -47,6 +47,8 @@ const wrapEvent = (event: ScenarioEvent): LevelConfig => ({
   speedLimit: 30,
   events: [event],
   requiredScore: 0,
+  stars3: 0,
+  stars2: 0,
   moduleId: '',
 });
 

@@ -56,8 +56,7 @@ import {
   transitionId,
 } from '@/domain/routing/routingTypes';
 import { attemptStream } from '@/features/driving-sim/domain/scenario/attemptSeed';
-import { withRemediation } from '@/features/driving-sim/domain/scenario/levelCatalog';
-import { buildPlayLevel } from '@/features/driving-sim/domain/scenario/playLevel';
+import { buildLevelConfig, withRemediation } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { GAME_OPTIONS } from './adaptiveOptions';
 import { levelSupport } from './practiceSelection';
@@ -75,7 +74,8 @@ export type GroupInEffect = 'legacy' | RoutingGroup;
 
 /**
  * The learned policy as the fifth experiment recorded it: the designated table and the budget it was
- * trained at, in graded decisions. Read from the fifth experiment's results file, never retrained.
+ * trained at, in graded decisions. Read from the fifth experiment's results file, never retrained
+ *.
  */
 export interface OptimizedRouting {
   table: RoutingTable;
@@ -186,7 +186,7 @@ export const courseProgressOf = (cursor: RoutingCursor): CourseProgress => ({
 
 /** A level as an entry rolls it: the attempt's roll stream over the coverage it read, and no weak area. */
 const rollLevel = (levelId: number, coverage: SignCoverage, attemptSeed: number): LevelConfig => {
-  const rolled = buildPlayLevel(levelId, { ...coverage }, null, attemptStream(attemptSeed, 'roll'));
+  const rolled = buildLevelConfig(levelId, { ...coverage }, null, attemptStream(attemptSeed, 'roll'));
   if (!rolled) throw new Error(`level ${levelId} has no content`);
   return rolled;
 };

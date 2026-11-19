@@ -283,8 +283,8 @@ describe('the prompt on the levels that were not redesigned', () => {
 });
 
 /**
- * The prompt after the read phase withholds exactly what the read phase did.
- * If it showed the move, its keys or live advice the instant the
+ * The prompt after the read phase withholds exactly what the read phase did
+ *. If it showed the move, its keys or live advice the instant the
  * drive resumed, a briefing at `none` would have hidden nothing.
  */
 describe('the prompt at each support level', () => {

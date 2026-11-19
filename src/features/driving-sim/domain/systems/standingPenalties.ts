@@ -140,7 +140,7 @@ export const WRONG_SIDE_PENALTY: StandingPenaltyConfig = {
 /**
  * Over the road's limit on clear road.
  *
- * Republic Act No. 4136, Section 35 binds on every highway, not only at a sign, so the limit is
+ * RA 4136 §35 binds on every highway, not only at a sign, so the limit is
  * charged everywhere a scenario is not already measuring the driving. The
  * offence is any speed above the limit: the law gives no tolerance, and a
  * tolerance exists to absorb measurement error, which the game does not have —

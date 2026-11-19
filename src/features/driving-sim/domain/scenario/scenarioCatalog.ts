@@ -12,21 +12,15 @@
  * 60 · v · distancePerSpeed units a second, which is v / 3.6 m/s, so a metre
  * is 216 · distancePerSpeed units (10.8 at the default pace). Seconds at the
  * limit are the same distance over the level's speed limit.
- *
- * Ported from the groupmate's repository (arangkada-personal, 2026-11-16).
- * It reads content and changes nothing: the player's screens are untouched.
  */
 import { COMPETENCIES } from '@/domain/learner/profile';
 import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
 import { computeWarningDistances } from '@/features/driving-sim/domain/systems/eventScheduler';
-import { speedFor, speedTarget, speedTargetText } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
-import { UNITS_PER_METER } from '@/features/driving-sim/domain/world/routeGeometry';
-import { CRAWL_SPEED_SHARE } from '@/features/driving-sim/domain/systems/standingPenalties';
+import { speedFor } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import { timeLimitSecondsFor } from './levelTimeLimits';
-import { getPooledSlots, LEVELS } from './levelCatalog';
+import { LEVELS } from './levelCatalog';
 import { poolFor, type PoolEntry } from './composeDrive';
-import { hotspotScenarioId } from './hotspotScenarioId';
-import { scenarioSupport } from './scenarioSupport';
+import { scenarioSupport, scenarioTargets } from './scenarioSupport';
 import type { GarageHotspot, LevelConfig, ScenarioEvent } from './scenarioDefinition';
 
 export interface LevelConfigRow {
@@ -71,10 +65,6 @@ export interface ScenarioConfigRow {
   postedSpeed: number | null;
   /** The speed the scenario applies (posted, else the limit). */
   appliesSpeed: number;
-  /**
-   * Every number it is graded against, read from the fields the grader reads.
-   * The player's instruction names only the speed target, at h = full.
-   */
   targets: string[];
   instruction: string;
   description: string;
@@ -82,30 +72,6 @@ export interface ScenarioConfigRow {
   points: number;
   lawCitation: string | null;
 }
-
-const metreText = (m: number): string => (m < 10 ? `${Math.round(m * 10) / 10} m` : `${Math.round(m)} m`);
-const metres = (units: number): string => metreText(units / UNITS_PER_METER);
-/** Metres across the road from canvas pixels: the car is drawn half a pixel per route unit. */
-const metresAcross = (px: number): string => metreText(px / (UNITS_PER_METER / 2));
-
-/** Every number a scenario is graded against, as short target sentences. Empty where nothing numeric decides it. */
-export const gradedTargets = (event: ScenarioEvent, level: LevelConfig): string[] => {
-  const out: string[] = [];
-  const target = speedTarget(event, level);
-  if (target) out.push(`Target: ${speedTargetText(target)}.`);
-  if (event.maneuver?.maxSpeed !== undefined) out.push(`Target: make the turn at ${Math.round(event.maneuver.maxSpeed)} km/h or less.`);
-  if (event.following) out.push(`Target: at least ${event.following.seconds} seconds behind the vehicle ahead, the whole way through.`);
-  if (event.lineHold) {
-    const side = event.lineHold.toward ? ` toward the ${event.lineHold.toward}` : '';
-    out.push(`Target: drift no more than ${metresAcross(event.lineHold.maxDrift)} sideways${side} while it lasts.`);
-  }
-  if (event.coast) out.push(`Target: no long brake above ${Math.round(event.coast.brakeBelow)} km/h (taps are fine); at or below it, brake to a stop.`);
-  if (event.effect?.stuckThrottle) out.push(`Target: hold the brake until the speed is ${Math.round(level.speedLimit * CRAWL_SPEED_SHARE)} km/h or less.`);
-  if (event.merge) out.push(`Target: at least ${Math.round(event.merge.minSpeed)} km/h, and at least ${event.merge.safeGapSeconds} seconds behind the car you join.`);
-  if (event.overtake) out.push(`Target: be ${metres(event.overtake.clearBy)} past the vehicle before you move back.`);
-  if (event.noStandingWithin !== undefined) out.push(`Target: do not come to rest within ${metres(event.noStandingWithin * UNITS_PER_METER)} of it.`);
-  return out;
-};
 
 const UNITS_PER_METRE_AT = (level: LevelConfig) => 216 * paceOf(level).distancePerSpeed;
 const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -152,7 +118,7 @@ const roadRow = (level: LevelConfig, event: ScenarioEvent, source: string, warni
     speedLimit: level.speedLimit,
     postedSpeed: event.postedSpeed ?? null,
     appliesSpeed: applies,
-    targets: gradedTargets(event, level),
+    targets: scenarioTargets(event, level),
     instruction: shown.instruction ?? '',
     description: event.description,
     severity: event.severity ?? null,
@@ -163,7 +129,7 @@ const roadRow = (level: LevelConfig, event: ScenarioEvent, source: string, warni
 
 const pointRow = (level: LevelConfig, point: GarageHotspot, place: 'garage' | 'aftermath', source: string): ScenarioConfigRow => ({
   levelId: level.id,
-  id: hotspotScenarioId(point),
+  id: point.scenarioId ?? point.id,
   label: point.label,
   competency: point.competency ?? null,
   place,
@@ -209,13 +175,13 @@ export const scenarioConfigRows = (): ScenarioConfigRow[] => {
       rows.push(roadRow(level, event, 'level road', warnings.get(event.triggerAtDistance) ?? null));
     }
     for (const point of level.garage?.hotspots ?? []) {
-      const id = hotspotScenarioId(point);
+      const id = point.scenarioId ?? point.id;
       if (seen.has(id)) continue;
       seen.add(id);
       rows.push(pointRow(level, point, level.garage?.scene === 'crash_scene' ? 'aftermath' : 'garage', 'level garage'));
     }
     for (const point of level.aftermath?.hotspots ?? []) {
-      const id = hotspotScenarioId(point);
+      const id = point.scenarioId ?? point.id;
       if (seen.has(id)) continue;
       seen.add(id);
       rows.push(pointRow(level, point, 'aftermath', 'level crash scene'));
@@ -232,19 +198,6 @@ export const scenarioConfigRows = (): ScenarioConfigRow[] => {
         }
       }
     }
-    // Kept in the code, never played: the road does not draw their situation
-    // (`offRoad`). Listed so the team can see them, labelled as not in play.
-    for (const pool of getPooledSlots(level.id)?.slots ?? []) {
-      for (const variant of pool.filter(entry => entry.offRoad)) {
-        if (seen.has(variant.id)) continue;
-        seen.add(variant.id);
-        const event = { triggerAtDistance: 0, ...variant } as ScenarioEvent;
-        rows.push(roadRow(level, event, NOT_IN_PLAY, event.warningDistance ?? null));
-      }
-    }
   }
   return rows;
 };
-
-/** The source a scenario the road does not draw is listed under. */
-export const NOT_IN_PLAY = 'not in play (the road does not draw it)';

@@ -11,7 +11,7 @@
  * So the assertions below are mostly about measurement and declaration: every
  * road user the prose names is on the road, every motorcycle carries what its
  * scenario is about, every verdict names only what the grader watched, and each
- * beat is measured by something that fits the move the source material gives a
+ * beat is measured by something that fits the move the LTO material gives a
  * driver who meets it.
  */
 import { describe, expect, it } from 'vitest';
@@ -335,7 +335,7 @@ describe('the Level 11 curriculum', () => {
     }
   });
 
-  it('claims nothing the LTO sources leave open', () => {
+  it('claims nothing the source notes leave open', () => {
     // An image-only fact is a gap, and a rule is applied only to the
     // vehicles its source names.
     const cited = events.map(event => `${event.id}: ${event.lawCitation ?? ''} ${event.penaltyMessage}`);
@@ -350,12 +350,10 @@ describe('the Level 11 curriculum', () => {
     expect(claimed).toEqual([]);
   });
 
-  it('grades the competencies the simulation reads', () => {
+  it('grades the competencies the simulation reads, as recorded', () => {
     // What the learner model and the routing FSM's review guard read. Slot 3
     // moved from general_rules to lane_discipline with the cyclist; the set of
-    // competencies Level 11 presents is the same four it always was. Slot 6, the
-    // tricycle in the yellow box, is graded on keeping out of the box: lane
-    // discipline (the groupmate's catalogue review).
+    // competencies Level 11 presents is the same four it always was.
     expect(events.map(event => event.competency)).toEqual([
       'lane_discipline',
       'hazard_awareness',
@@ -381,9 +379,9 @@ describe('what the simulation reads, held where it was left', () => {
     ]);
   });
 
-  it('is three versions per slot, every driven one portable', () => {
-    expect(SLOTS.every(slot => slot.length === 3)).toBe(true);
-    expect(SLOTS.map(slot => slot[0]).filter(variant => !isPortableRemediation(variant)).map(variant => variant.id)).toEqual([]);
+  it('is one variant per slot, every one of them portable', () => {
+    expect(SLOTS.every(slot => slot.length === 1)).toBe(true);
+    expect(SLOTS.flat().filter(variant => !isPortableRemediation(variant)).map(variant => variant.id)).toEqual([]);
   });
 });
 

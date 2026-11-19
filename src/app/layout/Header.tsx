@@ -5,14 +5,17 @@ import ThemeToggle from './ThemeToggle';
 import { signOut, useAuthModal, useAuthSession } from '@/features/auth';
 import { useText } from '@/shared/i18n/useText';
 import { headerMessages as m } from './messages';
+import { logUiAction } from '@/features/driving-sim';
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, profile, loading } = useAuthSession();
+  const { isLoggedIn, profile, loading, user } = useAuthSession();
   const { open } = useAuthModal();
   const t = useText();
 
   const handleSignOut = async () => {
+    // Logged first: once signed out, nothing more can be written for this participant.
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'header' }).catch(() => {});
     await signOut();
     navigate('/');
   };
@@ -41,7 +44,7 @@ const Header = () => {
           <div className="flex items-center gap-2">
             {/* USER + SETTINGS BUTTON */}
             <button
-              onClick={() => navigate('/settings')}
+              onClick={() => navigate('/profile')}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border border-border hover:border-primary/40 hover:bg-muted/70 transition"
             >
               <User className="w-3.5 h-3.5 text-muted-foreground" />

@@ -1,5 +1,7 @@
 /**
- * Story Mode's layout route, and the Legacy / New switch.
+ * Story Mode's layout route, and the Legacy / New switch. Under New every
+ * signed-in participant plays the per-competency course (`CompetencyStoryRun`);
+ * the old two-group run (`RoutedStoryRun`) is no longer mounted.
  *
  * It decides which game this player's Story Mode runs as, then hands the run
  * to it: `LegacyStoryRun`, today's game, or `RoutedStoryRun`, the routing FSM
@@ -13,19 +15,16 @@
  */
 import { Say } from '@/shared/i18n/language';
 import { storyMessages as m } from './messages';
-import { useEffect, useMemo, useState } from 'react';
-import { useEnrolment } from '@/features/study';
-import { useAuthSession } from '@/features/auth';
+import { useEffect, useState } from 'react';
+import { useAuthModal, useAuthSession } from '@/features/auth';
 import {
   adminTestModeAllowed,
   loadRoutingOverride,
   resolveRoutingGroup,
   routingGroupNow,
-  type CourseAccount,
   type RoutingGroupResolution,
 } from '@/features/driving-sim';
 import LegacyStoryRun from './LegacyStoryRun';
-import RoutedStoryRun from './RoutedStoryRun';
 import CompetencyStoryRun from './CompetencyStoryRun';
 import type { StoryRouting } from './storyRunContext';
 
@@ -36,17 +35,6 @@ const StoryModeLayout = () => {
   // never a study participant's.
   const canOverride = adminTestModeAllowed({ isAdmin, studyAccount });
   const override = loadRoutingOverride(canOverride);
-
-  // A signed-in account plays the per-competency course: a participant on their cohort's shared table, anyone else (the
-  // team) on `test`. A guest saves nothing and keeps the old game.
-  const enrolment = useEnrolment(uid);
-  const account = useMemo<CourseAccount | null>(() => {
-    if (!uid) return null;
-    // An admin's course play draws from the table and never changes it.
-    if (enrolment.status === 'enrolled') return { uid, participantCode: enrolment.enrolment.code, table: enrolment.enrolment.cohort, isAdmin };
-    if (enrolment.status === 'not-enrolled') return { uid, participantCode: null, table: 'test', isAdmin };
-    return null;
-  }, [uid, enrolment, isAdmin]);
 
   const immediate = routingGroupNow({ uid, canOverride, authLoading: loading });
   const key = `${uid ?? 'guest'}:${canOverride}:${override}`;
@@ -73,12 +61,11 @@ const StoryModeLayout = () => {
   }, [needsLoad, key, uid, canOverride]);
 
   const resolution = immediate ?? (loaded?.key === key ? loaded.resolution : null);
-  const enrolmentPending = uid !== null && account === null;
-  if (!resolution || enrolmentPending) {
+  if (!resolution) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center">
         <p className="font-display text-sm uppercase tracking-widest text-muted-foreground">
-          <Say {...(failed === key || enrolment.status === 'error' ? m.courseNotLoaded : m.loadingCourse)} />
+          <Say {...(failed === key ? m.courseNotLoaded : m.loadingCourse)} />
         </p>
       </div>
     );
@@ -91,17 +78,29 @@ const StoryModeLayout = () => {
     participant: studyAccount,
   };
 
-  if (account) return <CompetencyStoryRun key={account.uid} routing={routing} account={account} />;
+  if (resolution.groupInEffect === 'legacy') return <LegacyStoryRun routing={routing} />;
 
-  return resolution.groupInEffect === 'legacy' ? (
-    <LegacyStoryRun routing={routing} />
-  ) : (
-    <RoutedStoryRun
-      key={`${uid ?? 'guest'}:${resolution.groupInEffect}`}
-      routing={routing}
-      uid={uid}
-      group={resolution.groupInEffect}
-    />
+  // The New switch is the per-competency course, for every participant (no
+  // comparison group). It is part of the study, so it is played signed in:
+  // a guest's play would not be saved.
+  if (!uid) return <SignInFirst />;
+  return <CompetencyStoryRun key={uid} routing={routing} uid={uid} />;
+};
+
+const SignInFirst = () => {
+  const openAuth = useAuthModal(state => state.open);
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
+      <p className="font-display text-sm uppercase tracking-widest text-muted-foreground">
+        Sign in to start your course: your answers and drives are saved to your account.
+      </p>
+      <button
+        onClick={() => openAuth({ reason: 'Sign in to start your course.' })}
+        className="rounded-xl bg-primary px-8 py-3 font-display text-sm tracking-wider text-primary-foreground"
+      >
+        SIGN IN →
+      </button>
+    </div>
   );
 };
 

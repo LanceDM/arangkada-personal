@@ -342,11 +342,16 @@ describe('the pre-test screen', () => {
     expect(serverAnswers).toEqual({});
   });
 
-  it('is for participants only', async () => {
+  it('asks a guest or an unenrolled account to sign in, never starts without a code', async () => {
     for (const who of [{ participantCode: 'P01' }, { participantCode: null }, { uid: null, participantCode: null }]) {
       await open(who);
-      expect(text()).toContain("for the study's participants");
+      expect(text()).toContain('Sign in to take the pre-test');
       expect(button('Start')).toBeUndefined();
     }
+  });
+
+  it('lets any signed-in account sit it under its open-access code (2026-11-10)', async () => {
+    await open({ participantCode: 'U-abc123XYZ' });
+    expect(button('Start')).toBeDefined();
   });
 });

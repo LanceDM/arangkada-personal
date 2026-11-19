@@ -15,8 +15,7 @@ describe('scenario formats', () => {
 
 describe('the drive overview', () => {
   it('lists the garage, then the road in route order, then the aftermath, and never the answer', () => {
-    // A level with a garage and a road (Level 10; Level 2 is a garage alone).
-    const withStages = LEVELS.find(l => l.garage && l.aftermath) ?? LEVELS.find(l => l.garage && l.events.length > 0)!;
+    const withStages = LEVELS.find(l => l.garage && l.aftermath) ?? LEVELS.find(l => l.garage)!;
     const preview = drivePreview(withStages);
     expect(preview.scenarios.map(s => s.order)).toEqual(preview.scenarios.map((_, i) => i + 1));
     const stages = preview.scenarios.map(s => s.stage);

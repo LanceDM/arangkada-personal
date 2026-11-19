@@ -23,10 +23,6 @@ export interface CompetencyVerdict {
   accuracy: number;
 }
 
-/** Whether the drive graded any of the topic's scenarios before it ended. */
-export const wasAsked = (verdict: Pick<CompetencyVerdict, 'total' | 'ungraded'>): boolean =>
-  verdict.ungraded < verdict.total;
-
 /**
  * Reads the drive's logs against the scenarios it counted. A scenario's first
  * graded decision is its answer; standing penalties and route-bound scenarios
@@ -55,23 +51,4 @@ export const competencyVerdicts = (
     passed: verdict.correct >= Math.min(passCorrect, verdict.total),
     accuracy: verdict.total > 0 ? verdict.correct / verdict.total : 0,
   }));
-};
-
-/**
- * The final exam's pass mark: 70% of its counted scenarios, the mark
- * set for the final exam and Levels 2-11. Every final item is worth the same,
- * so it is a count of right answers (8 of 11), never a points total.
- */
-export const FINAL_PASS_SHARE = 0.7;
-
-/**
- * Whether the final exam passed: it was not ended early (a crash or a
- * timeout), and at least `FINAL_PASS_SHARE` of the scenarios it counted were
- * answered right. A scenario never answered counts as wrong. Standing
- * penalties and wrong answers' points never decide it.
- */
-export const finalExamPassed = (verdicts: readonly CompetencyVerdict[], endedEarly: boolean): boolean => {
-  const total = verdicts.reduce((sum, v) => sum + v.total, 0);
-  const correct = verdicts.reduce((sum, v) => sum + v.correct, 0);
-  return !endedEarly && total > 0 && correct >= Math.ceil(total * FINAL_PASS_SHARE);
 };

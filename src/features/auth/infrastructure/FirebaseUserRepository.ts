@@ -2,6 +2,7 @@
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
 import type { Language } from '@/shared/lib/localized';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import type { UserProfileRepository } from '@/features/auth/application/ports';
 import type { UserProfile } from '@/features/auth/domain/userProfile';
 
@@ -19,7 +20,17 @@ export const saveUserLanguage = async (uid: string, language: Language) => {
   await setDoc(doc(db, 'users', uid), { language }, { merge: true });
 };
 
+export const saveTermsAcceptance = async (uid: string, version: string, at: number) => {
+  await setDoc(doc(db, 'users', uid), { termsVersion: version, termsAcceptedAt: at }, { merge: true });
+};
+
+export const saveUserVehicleSkin = async (uid: string, vehicleSkin: VehicleSkin) => {
+  await setDoc(doc(db, 'users', uid), { vehicleSkin }, { merge: true });
+};
+
 export const firebaseUserProfileRepository: UserProfileRepository = {
   get: getUserProfile,
   saveLanguage: saveUserLanguage,
+  saveTermsAcceptance,
+  saveVehicleSkin: saveUserVehicleSkin,
 };

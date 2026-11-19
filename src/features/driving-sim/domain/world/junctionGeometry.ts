@@ -52,7 +52,7 @@ export const junctionCentreY = (screenY: number): number =>
  * Right turns take the nearest lane — the curb lane of the near half, which is
  * what "keep the rear right wheel nearest the curb" leaves you in. Left turns
  * take the lane nearest the centre line of the road being joined, the rule
- * Republic Act No. 4136 states outright and the one Level 6 grades.
+ * RA 4136 states outright and the one Level 6 grades.
  */
 export const junctionExitY = (screenY: number, direction: 'left' | 'right'): number => {
   const centre = junctionCentreY(screenY);

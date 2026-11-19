@@ -5,23 +5,19 @@ import type { SupportLevel } from '@/domain/learner/competency';
 import { evaluateWeightedRule } from './ruleEngine';
 import { NO_REACTION, type ReactionObservation } from './reactionTiming';
 import { englishText, type Localized, type TextOf } from '@/shared/lib/localized';
-import { hotspotScenarioId } from '@/features/driving-sim/domain/scenario/hotspotScenarioId';
-import { labelFromId } from '@/features/driving-sim/domain/scenario/scenarioCopy';
 
 /**
  * Garage hotspots are scored through the same pipeline as road events, so they
  * are adapted into the shape the evaluator already understands.
- *
- * The event takes the point's scenario id, which the decision log records and a
- * course drive counts the point under (`hotspotScenarioId`). Its label stays the
- * one the point's own id gives, as the feedback card always showed it.
  */
 export const garageHotspotToEvent = (hotspot: GarageHotspot): ScenarioEvent => ({
-  id: hotspotScenarioId(hotspot),
-  label: labelFromId(hotspot.id),
+  id: hotspot.scenarioId ?? hotspot.id,
   triggerAtDistance: 0,
   type: 'scenario_trigger',
   description: hotspot.label,
+  // The point's own name on its verdict ("The smoking car"), not one read
+  // off its id ("Burning vehicle") (2026-11-16).
+  label: hotspot.label,
   correctAction: hotspot.correctAction,
   points: hotspot.points,
   penaltyMessage: hotspot.penaltyMessage,
@@ -134,8 +130,8 @@ export const evaluatePlayerAction = (
       result: result.isCorrect ? 'correct' : 'violation',
       points: result.points,
       ruleId: result.trace.ruleId,
-      // The scenario answered, so a repeat drive draws unseen ones and a
-      // competency's drive verdict is read per scenario.
+      // The scenario answered, so a repeat drive can draw ones not yet seen
+      // and a competency's drive result can be read per scenario.
       scenarioId: event.id,
       competency: result.trace.competency,
       severity: result.trace.severity,

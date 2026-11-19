@@ -38,6 +38,39 @@ export type ScenarioResultState = {
    */
   move?: string;
   realWorldNote?: string;
+  /**
+   * On a correction to a question (a garage or crash-scene point, a
+   * checkpoint, a cutscene): the answer given and the right one, in the
+   * question's own words. "You kept going — this one wanted a full stop" is a
+   * driving sentence, and nobody drove anywhere to answer about a child seat
+   * (2026-11-16).
+   */
+  answered?: string;
+  rightAnswer?: string;
+};
+
+/** The answer given and the right one, where the scenario was a question with choices. */
+export const answerWords = (
+  event: Pick<ScenarioEvent, 'choices' | 'correctAction'>,
+  playerAction: string
+): { answered?: string; rightAnswer: string } | null => {
+  const right = event.choices?.find(choice => choice.action === event.correctAction);
+  if (!right) return null;
+  const given = event.choices?.find(choice => choice.action === playerAction);
+  return given ? { answered: given.label, rightAnswer: right.label } : { rightAnswer: right.label };
+};
+
+/**
+ * What a wrong-lane verdict shows as wanted: the lane, not the action the
+ * scenario grades (a lane direction sign grades carrying on). Display only;
+ * the log keeps the scenario's own expected action.
+ */
+export const wantedLaneKey = (
+  event: Pick<ScenarioEvent, 'maneuver' | 'requiredLane'>
+): string | undefined => {
+  if (event.maneuver) return `lane:${event.maneuver.lane}`;
+  if (!event.requiredLane) return undefined;
+  return event.requiredLane.strict ? 'lane:stay' : `lane:${event.requiredLane.lane}`;
 };
 
 /** One scored decision, kept in state so the player panel can show a live feed. */
@@ -140,7 +173,7 @@ export const useScenarioEvaluation = ({
     // Only a scenario answered with the car was presented at a support level;
     // a question, a tutorial step and a standing penalty were not.
     const presented = !isStandingPenalty && answeredWithTheCar(settlement);
-    const result = evaluatePlayerAction(
+    const evaluated = evaluatePlayerAction(
       event,
       playerAction,
       isStandingPenalty ? 0 : violationStreakRef.current,
@@ -148,6 +181,17 @@ export const useScenarioEvaluation = ({
       presented ? support : undefined,
       say
     );
+    // A question whose time ran out fails its scenario like a wrong answer,
+    // and is flagged so BKT leaves it out (TENTATIVE).
+    const timedOut = settlement === 'question_timeout';
+    const result = timedOut
+      ? {
+          ...evaluated,
+          isCorrect: false,
+          message: 'Time ran out before an answer: counted as not passed.',
+          log: { ...evaluated.log, result: 'violation' as const, questionTimedOut: true as const },
+        }
+      : evaluated;
 
     // The level's requiredScore/stars thresholds were calibrated against its
     // own authored events, and a practice item is appended on some runs and
@@ -181,6 +225,10 @@ export const useScenarioEvaluation = ({
     const logIndex = logsRef.current.length - 1;
     // One verdict, carrying what the score actually did. The card decides how
     // long it stays up; this only says what happened.
+    const shownExpected =
+      (result.log.action === 'wrong_lane' ? wantedLaneKey(event) : undefined) ??
+      result.log.expectedAction ??
+      event.correctAction;
     if (!quiet) {
       setResult({
         label: scenarioLabel(event),
@@ -188,13 +236,14 @@ export const useScenarioEvaluation = ({
         message: result.message,
         points: scoreDelta,
         action: result.log.action,
-        expectedAction: result.log.expectedAction ?? event.correctAction,
+        expectedAction: shownExpected,
         citation: result.lawCitation ?? event.lawCitation,
         // Built from the event alone, never from `support`, so a correction is
         // the same at every level.
         ...(presented && !result.isCorrect
           ? { move: scenarioInstruction(event, say), realWorldNote: event.realWorldNote }
           : {}),
+        ...(!presented && !isStandingPenalty && !result.isCorrect ? (answerWords(event, playerAction) ?? {}) : {}),
       });
     }
     setDecisions(prev => [
@@ -203,7 +252,7 @@ export const useScenarioEvaluation = ({
         isCorrect: result.isCorrect,
         competency: result.log.competency,
         action: result.log.action,
-        expectedAction: result.log.expectedAction ?? event.correctAction,
+        expectedAction: shownExpected,
         kind,
         title: event.description,
       },

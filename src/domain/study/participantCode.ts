@@ -37,6 +37,18 @@ export const isParticipantCode = (code: string | null | undefined): code is stri
   return match !== null && Number(match[2]) >= 1;
 };
 
+/**
+ * The code of an account that is not a study account (2026-11-10): the
+ * reviewer is for everyone, so every account sits the pre-test and the
+ * post-test, under `U-` and its account id. Pseudonymous like a participant's
+ * code; `firestore.rules` builds the same string from the signed-in uid.
+ */
+export const openAccessCode = (uid: string): string => `U-${uid}`;
+
+const OPEN_CODE = /^U-[A-Za-z0-9]{1,30}$/;
+
+export const isOpenAccessCode = (code: string | null | undefined): code is string => !!code && OPEN_CODE.test(code);
+
 export const cohortOfCode = (code: string): StudyCohort | null => {
   if (!isParticipantCode(code)) return null;
   return STUDY_COHORTS.find(cohort => COHORT_LETTER[cohort] === code[0]) ?? null;

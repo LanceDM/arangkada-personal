@@ -7,14 +7,13 @@
  * report all need to read the curriculum without owning it.
  */
 export { default as GameScreen } from './presentation/ui/GameScreen';
+export { VehicleSkinPicker } from './presentation/ui/VehicleSkinPicker';
 export { default as MissionBriefing } from './presentation/ui/MissionBriefing';
 export { default as LessonReader } from './presentation/ui/LessonReader';
+// Action words, shared with the after-action report so it says what the card said (2026-11-16).
+export { actionLabel, expectedLabel } from './presentation/ui/actionCopy';
 
 export { LEVELS } from './domain/scenario/levelCatalog';
-// Admin > Scenarios: every scenario's configuration, and one played alone. Read only.
-export { levelConfigRows, scenarioConfigRows } from './domain/scenario/scenarioCatalog';
-export type { LevelConfigRow, ScenarioConfigRow } from './domain/scenario/scenarioCatalog';
-export { singleScenarioDrive } from './domain/scenario/singleScenarioDrive';
 export { playableLevel, playableLevelName, playableModule } from './application/use-cases/playableLevel';
 export { getLevelModule, LEVEL_MODULES } from './domain/scenario/content/lessons/lessonCatalog';
 export { buildAdaptivePlan } from './application/use-cases/buildAdaptivePlan';
@@ -68,28 +67,10 @@ export {
   startPostTest,
 } from './application/use-cases/startCourseEntry';
 export { courseProgressOf, cursorFrontierLevel } from './domain/adaptive/courseRouting';
-export { competencyCourseProgressOf } from './domain/adaptive/competencyCourseProgress';
-// The per-competency course.
-export {
-  finishCourseQuizReview,
-  loadCourse,
-  markCourseLessonsRead,
-  markCourseReviewShown,
-  openCourseQuiz,
-  planCourseDrive,
-  submitCourseQuiz,
-  type CourseDriveRun,
-  type QuizCompetencyResult,
-} from './application/use-cases/competencyCourse';
-export { courseDepsFor, finishCompetencyCourse, finishCourseDrive, loadCompetencyCourseCursor, type CourseAccount } from './application/use-cases/courseSession';
-export type { BriefingCourse } from './presentation/ui/MissionBriefing';
-export type { QTableId } from './application/ports';
-export type { QuizSittingDoc } from './domain/scenario/quizBank';
 // What the study's device check measures against.
 export { useTouchDevice, usePortrait } from './presentation/input/useTouchDevice';
 export { KEEPS_UP_AT_FPS } from './presentation/drive/frameSteps';
 export { isTutorial } from './domain/systems/tutorial';
-export { choiceLabel, scenarioChoices } from './domain/scenario/scenarioChoices';
 export { POST_TEST_SEED, postTestNote } from './domain/adaptive/pilotPostTest';
 
 // The pilot's participant definitions: one copy, read by the export and the admin dashboard.
@@ -99,7 +80,6 @@ export {
   PARTICIPANT_FLAGS,
   attemptDurationMs,
   attemptKind,
-  courseRecordsExpected,
   fsmAsRead,
   participantExport,
   participantSourceOf,
@@ -131,9 +111,61 @@ export type { RoutingCursor, GroupInEffect } from './domain/adaptive/courseRouti
 export type { CourseNote } from './domain/adaptive/routingBriefing';
 export { freeReplayNote } from './domain/adaptive/routingBriefing';
 
+// The per-competency course (2026-10-28): everyone plays it, signed in.
+export { default as BankQuiz } from './presentation/ui/BankQuiz';
+export type { BankQuizResult } from './presentation/ui/BankQuiz';
+export type { BriefingGate } from './presentation/ui/MissionBriefing';
+export {
+  completeCourseDrive,
+  completeFreeReplayDrive,
+  completePostExam,
+  diagnosticItems,
+  finishCourseQuizReview,
+  openCourseQuiz,
+  coursePosition,
+  loadCompetencyCourse,
+  markCourseLessonsRead,
+  markCourseReviewShown,
+  planCourseDrive,
+  planFreeReplay,
+  drawPracticeQuiz,
+  submitPracticeQuiz,
+  postExamItems,
+  saveDiagnostic,
+  saveBackground,
+  logStudyEvent,
+  logUiAction,
+  logAnswerGiven,
+  logDriveStarted,
+  logDriveExited,
+  loadInitialExamStatus,
+  loadCompetencyCourseProgress,
+  recordStudyTest,
+  loadMasteryReport,
+  initialExamRequired,
+  submitCourseQuiz,
+} from './application/use-cases/competencyCourse';
+export type { CourseDriveRun, PracticeQuiz, CourseState, FinishedStudyTest, InitialExamStatus, MasteryRow } from './application/use-cases/competencyCourse';
+export type { DriveExit } from './domain/telemetry/controlInputs';
+export { CourseConflictError, OutdatedAppError } from './application/errors';
+export { reviewLessons } from './domain/scenario/content/lessons/lessonCompetencies';
+// In-memory ports, for tests that click through the course from outside the feature.
+export { memoryCourseStore, provideInMemoryDrivingSim } from './application/testDependencies';
+export type { MemoryCourseStore } from './application/testDependencies';
+
 export type { LevelConfig, ScenarioEvent } from './domain/scenario/scenarioDefinition';
 export type { LevelFsmTelemetry } from './domain/fsm/fsmMetrics';
 export type { PlayConditions } from './domain/telemetry/routingTelemetry';
 export type { AdaptivePlan } from './application/use-cases/buildAdaptivePlan';
 export type { AttemptStart } from './application/use-cases/completeMission';
 export type { LevelRecommendation, PracticeChoice } from './domain/adaptive/practiceSelection';
+export { BACKGROUND_QUESTIONS, isCompleteBackground } from '@/domain/study/backgroundForm';
+export type { BackgroundQuestion } from '@/domain/study/backgroundForm';
+export { RUN_CONFIG_VERSION } from '@/domain/study/runConfig';
+export { drivePreview } from './domain/scenario/drivePreview';
+export type { DrivePreview, PreviewScenario } from './domain/scenario/drivePreview';
+export { scenarioFormat, SCENARIO_FORMAT_LABEL } from './domain/scenario/scenarioFormat';
+export type { ScenarioFormat } from './domain/scenario/scenarioFormat';
+export { levelConfigRows, scenarioConfigRows } from './domain/scenario/scenarioCatalog';
+export { singleScenarioDrive, wholeDriveForCheck, type SingleScenarioDrive } from './domain/scenario/singleScenarioDrive';
+export type { LevelConfigRow, ScenarioConfigRow } from './domain/scenario/scenarioCatalog';

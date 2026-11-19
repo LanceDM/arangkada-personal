@@ -59,7 +59,7 @@ import {
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { CAR_LENGTH } from '@/features/driving-sim/domain/world/routeGeometry';
 import type { GameEvent } from '@/features/driving-sim/domain/world/GameEvent';
-import { createDrivingSession, NO_INPUT, type DrivingSession, type InputState } from './DrivingSession';
+import { createDrivingSession, NO_INPUT, type InputState } from './DrivingSession';
 import { DRIVE_EPOCH, FRAME_MS, rng } from './driveSamples';
 
 /** The states the `answer_correct` / `answer_incorrect` edges leave. */
@@ -240,8 +240,20 @@ export const driveReference = (
   try {
     const fsm = new DrivingFSM();
     const session = createDrivingSession({ level, fsm, signCoverage: {}, support: 'full', timeLimitSteps });
-    const pilot = createReferencePilot(level, session, trace ? { trace, state: () => fsm.getState() } : {});
+    const cruise = referenceCruise(level);
+    const decided = new Set<string>();
+    /** Steps spent at rest for each scenario that asks for a stop. */
+    const rested = new Map<string, number>();
+    let previous: InputState = NO_INPUT;
     let ended = false;
+    /** The lane the drive starts in, which it keeps whenever no scenario asks for another. */
+    let ownLane: LaneIndex | null = null;
+    let blockedSteps = 0;
+    /** A way round something stopped in the car's path: across the road from its edge, and how far. */
+    let detour: { offset: number; until: number } | null = null;
+    /** Overtakes whose vehicle is already clear behind, so the car is back in its lane. */
+    const overtaken = new Set<string>();
+
     const settleFsm = (correct: boolean) => {
       if (!GRADEABLE.includes(fsm.getState())) return;
       fsm.transition(correct ? 'answer_correct' : 'answer_incorrect');
@@ -258,7 +270,7 @@ export const driveReference = (
           case 'decision': {
             const { isCorrect } = evaluateWeightedRule(event.event, event.action, 0);
             trace?.(`decision ${event.event.id}: ${event.action} (${isCorrect ? 'correct' : 'wrong'}) at ${Math.round(session.getFrame()?.scene.car.distance ?? 0)}, ${session.getSnapshot().speed.toFixed(1)} km/h`);
-            pilot.decided(event.event.id);
+            decided.add(event.event.id);
             result.decisions.push({
               id: event.event.id,
               action: event.action,
@@ -304,57 +316,6 @@ export const driveReference = (
       if (waiting.inspectionEvent) drain(session.answerInspection(waiting.inspectionEvent.correctAction));
       else if (waiting.cutsceneEvent) drain(session.answerCutscene(waiting.cutsceneEvent.correctAction));
 
-      const input = pilot.input();
-      drain(session.update(input));
-      result.drivenSteps = session.getDrivenSteps();
-    }
-    return result;
-  } finally {
-    performance.now = realPerformanceNow;
-    Date.now = realDateNow;
-    Math.random = realRandom;
-  }
-};
-
-/** What a reference pilot reads from the drive it steers: the screen's snapshot and the composed frame. */
-export type PilotView = Pick<DrivingSession, 'getSnapshot' | 'getFrame'>;
-
-export interface ReferencePilot {
-  /** The input for the next step, read from the drive as it stands now. */
-  input(): InputState;
-  /** A scenario was decided: the pilot stops setting up for it. */
-  decided(id: string): void;
-}
-
-/**
- * The reference driver's hands on the wheel, one step at a time: what
- * `driveReference` does each frame to the car, apart from answering panels
- * and settling decisions. It is shared so that a harness driving the game
- * through its React host drives the car as
- * the reference drive does, and tells it which scenarios were decided.
- */
-export const createReferencePilot = (
-  level: LevelConfig,
-  session: PilotView,
-  { trace, state }: { trace?: (line: string) => void; state?: () => string } = {}
-): ReferencePilot => {
-  const cruise = referenceCruise(level);
-  const decided = new Set<string>();
-  /** Steps spent at rest for each scenario that asks for a stop. */
-  const rested = new Map<string, number>();
-  let previous: InputState = NO_INPUT;
-  let frame = 0;
-  /** The lane the drive starts in, which it keeps whenever no scenario asks for another. */
-  let ownLane: LaneIndex | null = null;
-  let blockedSteps = 0;
-  /** A way round something stopped in the car's path: across the road from its edge, and how far. */
-  let detour: { offset: number; until: number } | null = null;
-  /** Overtakes whose vehicle is already clear behind, so the car is back in its lane. */
-  const overtaken = new Set<string>();
-
-  return {
-    decided: id => void decided.add(id),
-    input: () => {
       const snapshot = session.getSnapshot();
       const scene = session.getFrame()?.scene;
       const car = scene?.car;
@@ -524,12 +485,17 @@ export const createReferencePilot = (
         const blocker = (scene?.colliders.length ?? 0) > 0
           ? `${blocked ? 'BLOCKED' : 'near'} ${(scene?.colliders ?? []).map(body => `${body.label}@${Math.round(body.x)},${Math.round(body.y)} ${body.width}x${body.height}`).join('; ')} car ${Math.round(car?.x ?? 0)},${Math.round(car?.y ?? 0)}`
           : '';
-        trace(`${frame} d=${Math.round(distance)} v=${snapshot.speed.toFixed(1)} lane=${lane} focus=${focus?.id ?? '-'} want=${JSON.stringify(want)} ${blocker} state=${state?.() ?? '-'}`);
+        trace(`${frame} d=${Math.round(distance)} v=${snapshot.speed.toFixed(1)} lane=${lane} focus=${focus?.id ?? '-'} want=${JSON.stringify(want)} ${blocker} state=${fsm.getState()}`);
       }
-      frame += 1;
-      return input;
-    },
-  };
+      drain(session.update(input));
+      result.drivenSteps = session.getDrivenSteps();
+    }
+    return result;
+  } finally {
+    performance.now = realPerformanceNow;
+    Date.now = realDateNow;
+    Math.random = realRandom;
+  }
 };
 
 /** What the driver does about the scenario in play. */

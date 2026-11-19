@@ -27,6 +27,9 @@ export interface ScenarioResult {
   move?: string;
   /** What a real vehicle would also need, beside the rule. Corrections only. */
   realWorldNote?: string;
+  /** On a correction to a question: the answer given, and the right one, in its own words. */
+  answered?: string;
+  rightAnswer?: string;
 }
 
 /** How long each verdict stays up before it makes way for the road again. */
@@ -132,7 +135,22 @@ const ResultCard = ({
         <div className="grid gap-2 p-3">
           <p className="text-[14px] font-medium leading-5 text-foreground">{result.message}</p>
 
-          {!result.correct && result.action && result.expectedAction && (
+          {!result.correct && result.rightAnswer && (
+            <dl className="grid gap-1 text-[13px] leading-5" data-testid="result-answers">
+              {result.answered && (
+                <div>
+                  <dt className="inline text-muted-foreground">{say(m.youAnswered)} </dt>
+                  <dd className="inline font-semibold text-destructive">{result.answered}</dd>
+                </div>
+              )}
+              <div>
+                <dt className="inline text-muted-foreground">{say(m.rightAnswer)} </dt>
+                <dd className="inline font-semibold text-accent">{result.rightAnswer}</dd>
+              </div>
+            </dl>
+          )}
+
+          {!result.correct && !result.rightAnswer && result.action && result.expectedAction && (
             <div className="flex flex-wrap items-baseline gap-x-1.5 text-[13px] leading-5">
               <span className="text-muted-foreground">{say(m.you)}</span>
               <span className="font-semibold text-destructive">{actionLabel(result.action, say)}</span>

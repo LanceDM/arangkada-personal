@@ -1,9 +1,7 @@
 import { spacedPace } from '@/features/driving-sim/domain/world/DrivingPace';
 import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
 import { buildEvents, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
-import { qaVariant } from './qaVariant';
-import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
-import { declaredLineSpans } from '@/features/driving-sim/domain/scenario/roadLine';
+import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 
 const levelModule = getLevelModule(8);
 
@@ -132,8 +130,8 @@ const holdYourLineSlot: SlotVariant[] = [
     duration: 200,
     lawCitation:
       'Give courtesy and respect to active-transport and light-mobility users. Check your blind spots before any movement that could affect a rider beside you, and do not blow the horn annoyingly or excessively — it is listed among the habits of an aggressive driver.',
-    // Graded on holding the lane while a rider filters past: lane discipline,
-    // not pedestrians (the groupmate's catalogue review).
+    // Graded on holding the lane while a rider filters past, so lane discipline
+    // rather than pedestrians (catalogue review 2026-10-28).
     competency: 'lane_discipline',
     severity: 'critical',
     // A third of the room between a centred car and the rider's line. Enough
@@ -336,7 +334,7 @@ const bothAtOnceSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You stopped for the child and let the car behind wait.',
     duration: 200,
     lawCitation:
-      "Don't be a victim of road rage: avoid retaliation, since it takes at least two people to have a fight; keep your distance; put away your pride, because driving is not a contest; and call the traffic authorities, who are the proper party to deal with a dangerous driver. Give extra care and right-of-way to children.",
+      "A school service stopped with its hazard lights on means students may cross: slow down and prepare to stop, and give way to it. Give extra care and right-of-way to children. The car closing up behind does not change that duty: don't be a victim of road rage; keep your distance and put away your pride, because driving is not a contest.",
     competency: 'pedestrians',
     severity: 'critical',
     // Sounding the horn fails this outright. It is the one place in the level
@@ -371,263 +369,6 @@ const bothAtOnceSlot: SlotVariant[] = [
     },
   },
 ];
-
-
-/* -------------------------------------------------------------------------
- * Pooled versions (2026-11-16, future work, draft for the team's check)
- *
- * Each slot keeps its driven scenario and gains two frozen questions on the
- * same competency, each a different rule from the Level 8 module
- * (`level8Module.ts`), cited by section. The scene vocabulary has no second
- * driven form for these rules, so they are asked (`qaVariant`).
- * ---------------------------------------------------------------------- */
-
-schoolGateSlot.push(
-  // Driven: children at the very edge of the footpath, not yet in the road.
-  // Graded on the speed carried past them, as the school gate is (Level 8
-  // module, section 2, SIPDE: predict what other road users are likely to do).
-  {
-    id: 'level8.school-gate.sipde-predict',
-    label: 'Children by the road',
-    type: 'scenario_trigger',
-    scene: 'open_road',
-    pedestrians: [
-      { kind: 'child', position: 1.03 },
-      { kind: 'child', position: 1.12 },
-    ],
-    description: 'Two children are playing at the very edge of the footpath ahead, and one keeps glancing at the road.',
-    recommendedMove: 'Be under 20 km/h before you reach them.',
-    correctAction: 'brake',
-    points: 25,
-    warningDistance: 500,
-    penaltyMessage:
-      'You reached the children at speed. Predict what other road users are likely to do: a child at the edge of the road may step into it.',
-    rewardMessage: 'Correct. You predicted the child might step out, and had your speed down.',
-    duration: 200,
-    lawCitation:
-      'Level 8 module, section 2, SIPDE: "Identify — Identify potential and immediate hazards on the road." "Predict — Predict what other road users are likely to do." "Decide — Decide what action avoids the unsafe situation." Section 1: "Give the right-of-way to pedestrians such as PWDs, senior citizens, children, pregnant women, and road workers."',
-    competency: 'hazard_awareness',
-    severity: 'major',
-  },
-  // Driven: a man steps into the road, away from any crossing. His mistake,
-  // and the driver still has room to avoid him (Level 8 module, section 3).
-  {
-    id: 'level8.school-gate.last-clear-chance',
-    label: "Somebody else's mistake",
-    type: 'scenario_trigger',
-    scene: 'open_road',
-    pedestrians: [{ kind: 'adult', solid: true, position: 0.2 }],
-    description: 'A man steps off the curb ahead and starts across the road without looking, nowhere near a crossing.',
-    recommendedMove: 'Slow down and let him get across.',
-    correctAction: 'brake',
-    points: 25,
-    warningDistance: 500,
-    penaltyMessage:
-      'It was his mistake, and you still had room to avoid him. A person who has the last clear chance of avoiding a road crash, and neglects to avoid it, may be jointly held liable.',
-    rewardMessage: 'Correct. His mistake did not excuse you, and you slowed in time.',
-    duration: 200,
-    lawCitation:
-      'Level 8 module, section 3, the doctrine of last clear chance: "A person who has the last clear chance, or opportunity, of avoiding a road crash, and neglects to avoid it, may be jointly held liable."',
-    competency: 'hazard_awareness',
-    severity: 'critical',
-  },
-);
-
-holdYourLineSlot.push(
-  // Driven: a painted bicycle lane with a cyclist in it. Graded on keeping out
-  // of the lane and easing off to pass, as Level 4's bicycle lane is (Level 8
-  // module, section 8).
-  {
-    id: 'level8.hold-your-line.bike-lane',
-    label: 'The bike lane',
-    type: 'road_marking',
-    description: 'A solid line marks the curb-side lane ahead as a bicycle lane, and a cyclist is riding in it.',
-    marking: {
-      name: 'Bicycle Lane',
-      image: 'arangkada_extracted_images/level4/bicycle-lane.jpg',
-      category: 'D. Shared Lane',
-      meaning: 'Painted on the pavement with a solid line along the side of the road, for bicycle use.',
-      art: 'bicycle_lane',
-      side: 'right',
-    },
-    npc: { path: 'travelling_ahead', vehicleKind: 'bicycle', lane: 'curb', label: 'a cyclist in the bike lane' },
-    recommendedMove: 'Stay out of the bike lane, and slow down to pass.',
-    correctAction: 'brake',
-    points: 30,
-    warningDistance: 480,
-    penaltyMessage:
-      'Do not travel in a bicycle lane, and give a cyclist sufficient clearance and watch your speed when passing.',
-    rewardMessage: 'Correct. You kept out of the bike lane and eased off to pass the cyclist.',
-    duration: 200,
-    lawCitation:
-      'Level 8 module, section 8, Guidelines For Drivers Of Motorcycles, Cars, Trucks, And Other Motorized Vehicles: "Do not travel or park in a bicycle or pedestrian lane." "Give cyclists sufficient clearance and watch your speed when passing."',
-    competency: 'lane_discipline',
-    severity: 'critical',
-    requiredLane: {
-      lane: 'inner',
-      hint: 'Keep out of the bike lane and leave the cyclist room.',
-      wrongLaneMessage: 'You drove in the bicycle lane. Motor vehicles are not allowed to use it.',
-    },
-  },
-  qaVariant(holdYourLineSlot[0], {
-    id: 'level8.hold-your-line.turn-across-bike-lane',
-    label: 'Turning across a bike lane',
-    description: 'You are about to turn right at the junction ahead, across a bicycle lane that runs along the curb.',
-    question: 'What does the turn ask of you?',
-    correct: 'Extra care: check for cyclists in the lane before you turn across it',
-    wrong: ['Nothing extra: cyclists must stop for turning cars', 'Turn quickly to spend less time in their lane'],
-    penaltyMessage: 'Be extra careful when turning at intersections where a bike or motorcycle lane crosses your path.',
-    rewardMessage: 'Correct. Check the lane, then turn.',
-    lawCitation:
-      'Level 8 module, section 8: "Be extra careful when turning at intersections where a bike or motorcycle lane crosses your path." "Check your blind spots before any movement that could affect a cyclist or active-transport user."',
-  }),
-);
-
-blindBendSlot.push(
-  qaVariant(blindBendSlot[0], {
-    id: 'level8.blind-bend.signal-ahead',
-    label: 'Changing lanes',
-    description: 'You need to move one lane to the left before the junction ahead.',
-    question: 'When do you signal?',
-    correct: 'Ahead of the move, early enough for your speed',
-    wrong: ['As you begin to steer across', 'Only if a car is close behind you'],
-    penaltyMessage: 'Signal your intentions ahead of your actions, according to your speed, and avoid obstructing other motorists.',
-    rewardMessage: 'Correct. The signal comes before the move.',
-    lawCitation:
-      'Level 8 module, section 2, Common Driving Habits That Lead To A Crash, carelessness in changing lanes, turning and overtaking: "Signal your intentions ahead of your actions, according to your speed. Avoid obstructing or inconveniencing other motorists."',
-  }),
-  qaVariant(blindBendSlot[0], {
-    id: 'level8.blind-bend.no-enforcer',
-    label: 'Nobody watching',
-    description: 'Late at night, the street is empty: no signal, no sign and no enforcer in sight.',
-    question: 'Do the lane-change and turning rules still apply?',
-    correct: 'Yes, even without signals, signs or enforcers present',
-    wrong: ['No, they apply only where they are enforced', 'Only the speed limit still applies'],
-    penaltyMessage:
-      'Follow the rules on changing lanes, turning, stopping and parking even without traffic signals, signs or enforcers present.',
-    rewardMessage: 'Correct. The rules do not need an audience.',
-    lawCitation:
-      'Level 8 module, section 1, Tips For Defensive Driving: "Follow the rules on changing lanes, turning, stopping, and parking, even without traffic signals, signs, or enforcers present."',
-  }),
-);
-
-letThemOutSlot.push(
-  qaVariant(letThemOutSlot[0], {
-    id: 'level8.let-them-out.thank-you',
-    label: 'Let in',
-    description: 'A driver in the next lane slows to let you in ahead of them.',
-    question: 'What is the courteous thing to do?',
-    correct: 'Say or signal "thank you"',
-    wrong: ['Nothing: they only did what the rules require', 'Sound the horn so they know you are coming in'],
-    penaltyMessage: 'Say or signal "thank you" if another driver gives you the right-of-way.',
-    rewardMessage: 'Correct. A small courtesy that matters.',
-    lawCitation:
-      'Level 8 module, section 4, Small Courtesies That Matter: "Say or signal "thank you" if another driver gives you the right-of-way." "Say or signal "sorry" if you make a mistake."',
-  }),
-  qaVariant(letThemOutSlot[0], {
-    id: 'level8.let-them-out.headlight-glare',
-    label: 'Oncoming headlights',
-    description: 'At night, an oncoming car comes toward you with bright headlights.',
-    question: 'Where do you look?',
-    correct: 'Away from its headlights: staring into them worsens your own night vision',
-    wrong: ['Straight into the lights, to judge its distance', 'At the other driver, so they dim them'],
-    penaltyMessage: 'Never stare at the headlights of an oncoming vehicle at night; it worsens your own night vision.',
-    rewardMessage: 'Correct. Eyes off the glare, on your own side of the road.',
-    lawCitation:
-      'Level 8 module, section 4, Small Courtesies That Matter: "Never stare at the headlights of an oncoming vehicle at night; it worsens your own night vision."',
-  }),
-);
-
-twoSecondsSlot.push(
-  qaVariant(twoSecondsSlot[0], {
-    id: 'level8.two-seconds.vehicle-size',
-    label: 'A loaded van',
-    description: 'Today you are driving a fully loaded van instead of your usual small car.',
-    question: 'How does that change your following distance?',
-    correct: "Judge it by this vehicle's length, width and weight: more room",
-    wrong: ['It does not: the gap is the same for every vehicle', 'Less room: a heavy van holds the road better'],
-    penaltyMessage: "Consider your vehicle's length, width, and weight when judging a safe following distance.",
-    rewardMessage: 'Correct. A bigger, heavier vehicle needs the room to match.',
-    lawCitation:
-      'Level 8 module, section 1, Tips For Defensive Driving: "Consider your vehicle\'s length, width, and weight when judging a safe following distance." Section 2, tailgating: "Maintain a suitable braking distance when following a vehicle."',
-  }),
-  qaVariant(twoSecondsSlot[0], {
-    id: 'level8.two-seconds.angry-driver',
-    label: 'An angry driver',
-    description: 'A driver who has been flashing their lights at you pulls level, gesturing.',
-    question: 'What do you do?',
-    correct: 'Keep your distance, avoid eye contact and let them pass you by',
-    wrong: ['Hold level with them until they calm down', 'Brake hard in front of them to make a point'],
-    penaltyMessage:
-      'Let the angry driver pass you by rather than staying alongside them, avoid eye contact, and never retaliate.',
-    rewardMessage: 'Correct. Refusing to engage ends it before it starts.',
-    lawCitation:
-      'Level 8 module, section 7, Don\'t Be A Victim: "Keep distance — Let the angry driver pass you by rather than staying alongside them." "Avoid eye contact — Eye contact with an angry driver can read as a provocation." "Avoid retaliation."',
-  }),
-);
-
-bothAtOnceSlot.push(
-  // Driven: a work zone closes the curb lane, with its crew at work in it.
-  // Graded on moving across and slowing past them (Level 8 module, section 1).
-  {
-    id: 'level8.both-at-once.road-workers',
-    label: 'Road workers',
-    type: 'scenario_trigger',
-    scene: 'roadwork',
-    pedestrians: [
-      { kind: 'adult', position: 0.9 },
-      { kind: 'adult', position: 0.96 },
-    ],
-    description: 'A road crew is working in the curb lane ahead, behind a line of cones.',
-    recommendedMove: 'Move across, and slow down past the crew.',
-    correctAction: 'brake',
-    points: 30,
-    warningDistance: 500,
-    penaltyMessage:
-      'Road workers are owed the right-of-way and extra care. Give them room, and pass them slowly.',
-    rewardMessage: 'Correct. You gave the crew room and passed them slowly.',
-    duration: 200,
-    lawCitation:
-      'Level 8 module, section 1, Tips For Defensive Driving: "Give the right-of-way to pedestrians such as PWDs, senior citizens, children, pregnant women, and road workers."',
-    competency: 'pedestrians',
-    severity: 'critical',
-    sign: {
-      image: 'arangkada_extracted_images/level3/roadwork-road-construction-ahead.png',
-      name: 'Roadwork / Road Construction Ahead',
-      category: 'G. Roadwork Sign',
-      meaning: 'Official warning triangle; construction or maintenance activity is ahead.',
-      art: 'triangle_up',
-      glyph: '!',
-    },
-    effect: { narrowsTo: 0.75, openSide: 'left', grip: 0.85, span: 80 },
-    requiredLane: {
-      lane: 'inner',
-      hint: 'The curb lane is closed. Move to the lane nearest the center line.',
-      wrongLaneMessage: 'You drove at the closed lane, where the crew is working. Move across before the cones.',
-    },
-  },
-  // Driven: a woman crosses well away from any crosswalk (Level 8 module,
-  // section 6: let a pedestrian pass even if not in the correct crosswalk).
-  {
-    id: 'level8.both-at-once.wrong-place-to-cross',
-    label: 'Crossing in the wrong place',
-    type: 'scenario_trigger',
-    scene: 'open_road',
-    pedestrians: [{ kind: 'adult', solid: true, position: 0.25 }],
-    description: 'A woman starts across the street ahead, well away from any crosswalk.',
-    recommendedMove: 'Slow down and let her pass.',
-    correctAction: 'brake',
-    points: 30,
-    warningDistance: 500,
-    penaltyMessage: 'Be humble and patient: let a pedestrian pass even if they are not in the correct crosswalk.',
-    rewardMessage: 'Correct. You slowed and let her cross.',
-    duration: 200,
-    lawCitation:
-      'Level 8 module, section 6, How To Handle Stress, undisciplined motorists and pedestrians: "Be humble and patient: slow down and yield to an aggressive overtaking driver, and let a pedestrian pass even if they are not in the correct crosswalk."',
-    competency: 'pedestrians',
-    severity: 'critical',
-  },
-);
 
 export const SLOT_DISTANCES = [990, 1790, 2600, 3400, 4200, 5010];
 export const SLOTS: SlotVariant[][] = [
@@ -665,7 +406,7 @@ export const level8: LevelConfig = {
   // Six events 800 to 810 apart, plus a runway past the last one long enough
   // for its measurement window to close before the road ends.
   roadLength: ROUTE_END,
-  // A city street, matching Levels 5 and 6: Republic Act No. 4136, Section 35(b)'s city or municipal
+  // A city street, matching Levels 5 and 6: RA 4136 §35(b)'s city or municipal
   // street. Its first stretch is a barangay street, which a DPWH memorandum
   // puts at 20; §35 has no such row, and the level is held at 30, which the
   // penalty charges above under both readings (speed-limits pack, O2). Spaced
@@ -679,6 +420,8 @@ export const level8: LevelConfig = {
   // the bend, the gap, the child — costs sixty and misses it by ten. That is
   // the level saying which mistakes it is prepared to forgive.
   requiredScore: 120,
+  stars2: 142,
+  stars3: 162,
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
   /**
    * An ordinary two-way city street: four lanes, the left two carrying
@@ -719,15 +462,3 @@ export const level8: LevelConfig = {
     ],
   },
 };
-
-/**
- * Level 8 as a roll of these events, painted for them: its own solid line
- * through the bend, plus any line a rolled version declares (the bike lane's
- * stretch of solid edge line), over that version's graded zone
- * (`declaredLineSpans`), as Levels 4 and 12 are painted.
- */
-export const assembleLevel8 = (events: ScenarioEvent[]): LevelConfig => ({
-  ...level8,
-  events,
-  paint: { ...level8.paint!, spans: [...level8.paint!.spans, ...declaredLineSpans(events)] },
-});

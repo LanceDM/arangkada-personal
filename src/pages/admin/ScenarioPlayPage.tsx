@@ -55,6 +55,15 @@ const ScenarioPlayPage = () => {
   }
 
   const mine = result?.logs.filter(log => log.scenarioId === scenarioId) ?? [];
+  // A question's answers in its own words: "action stop" says nothing about a child seat.
+  const point = [...(drive.level.garage?.hotspots ?? []), ...(drive.level.aftermath?.hotspots ?? [])].find(
+    h => (h.scenarioId ?? h.id) === scenarioId
+  );
+  const choices = (drive.level.events.find(e => e.id === scenarioId)?.choices ?? point?.choices ?? []) as Array<{
+    label: string;
+    action: string;
+  }>;
+  const choiceFor = (action: string | undefined) => choices.find(choice => choice.action === action)?.label;
   return (
     <div className="space-y-4 p-6 text-sm">
       <h1 className="text-lg font-semibold">Scenario check</h1>
@@ -64,14 +73,20 @@ const ScenarioPlayPage = () => {
       {result ? (
         <div className="space-y-1">
           <p>
-            {result.crashReason ? `Ended in a crash: ${result.crashReason}.` : result.timedOut ? 'Ran out of time.' : 'Drive finished.'}
+            {result.crashReason ? `Ended in a crash: ${result.crashReason}` : result.timedOut ? 'Ran out of time.' : 'Drive finished.'}
           </p>
           {mine.length === 0 && <p>This scenario was not graded on that run.</p>}
           {mine.map((log, i) => (
-            <p key={i}>
-              Graded <span className="font-semibold">{log.result}</span>: action {log.action}
-              {log.expectedAction ? `, expected ${log.expectedAction}` : ''} ({log.points} points)
-            </p>
+            <div key={i} className="space-y-0.5">
+              <p>
+                Graded <span className="font-semibold">{log.result}</span>: action {log.action}
+                {log.expectedAction ? `, expected ${log.expectedAction}` : ''} ({log.points} points)
+              </p>
+              {choiceFor(log.action) && <p className="text-muted-foreground">Answered: {choiceFor(log.action)}</p>}
+              {log.result !== 'correct' && choiceFor(log.expectedAction) && (
+                <p className="text-muted-foreground">Right answer: {choiceFor(log.expectedAction)}</p>
+              )}
+            </div>
           ))}
         </div>
       ) : (

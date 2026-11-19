@@ -27,7 +27,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'Slow down, check mirrors, and carefully pass when safe', correct: true, explanation: 'Correct! Always slow down, check your mirrors, and pass safely with adequate clearance.' },
       { label: 'Stop and wait indefinitely', correct: false, explanation: 'While safer than swerving blindly, you should carefully pass when the lane is clear.' },
     ],
-    lawCitation: 'Republic Act No. 4136 — Exercise caution when passing stopped vehicles.',
+    lawCitation: 'RA 4136, Section 41 — Exercise caution when passing stopped vehicles.',
   },
   {
     id: 'drunk-driving',
@@ -57,7 +57,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'Check your right mirror and blind spot, then turn slowly', correct: true, explanation: 'Correct! Always check mirrors and blind spots before turning, especially on narrow streets.' },
       { label: 'Honk twice and turn', correct: false, explanation: 'Honking doesn\'t make it safe. You must visually confirm the path is clear.' },
     ],
-    lawCitation: 'Republic Act No. 4136, Section 44 — Drivers must signal and check before turning.',
+    lawCitation: 'RA 4136, Section 43 — Drivers must signal and check before turning.',
   },
   {
     id: 'flooded-road',
@@ -67,7 +67,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'No, find an alternate route', correct: true, explanation: 'Correct! Never drive through flood water you can\'t gauge the depth of. Find a safer route.' },
       { label: 'Yes, if I speed through quickly', correct: false, explanation: 'Speeding through floodwater causes hydroplaning and can damage your vehicle severely.' },
     ],
-    lawCitation: 'Road safety advisory — Avoid flooded roads. Water above tire level can stall engines and cause accidents.',
+    lawCitation: 'RA 4136, Sec. 48 (reckless driving): avoid flooded roads. Water above tire level can stall engines and cause accidents.',
   },
   {
     id: 'distracted-driving',
@@ -97,7 +97,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'All mirrors and do a shoulder check', correct: true, explanation: 'Correct! Motorcycles are small and fast — always check all mirrors and blind spots.' },
       { label: 'Nothing, motorcycles should watch for cars', correct: false, explanation: 'Regardless of others\' behavior, you\'re responsible for safe lane changes.' },
     ],
-    lawCitation: 'Republic Act No. 4136 — Drivers must check before changing lanes.',
+    lawCitation: 'RA 4136, Section 41 — Drivers must check before changing lanes.',
   },
   {
     id: 'loading-zone',
@@ -107,7 +107,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'Find a proper loading zone even if farther', correct: true, explanation: 'Correct! Always use designated loading/unloading zones. Brief stops in no-loading zones are still violations.' },
       { label: 'Turn on hazard lights and do it quickly', correct: false, explanation: 'Hazard lights don\'t override traffic rules. No loading means no loading.' },
     ],
-    lawCitation: 'Republic Act No. 4136 — Loading/unloading only in designated zones.',
+    lawCitation: 'RA 4136, Section 46 — Loading/unloading only in designated zones.',
   },
   {
     id: 'foggy-mountain',
@@ -117,7 +117,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'Use low beams/fog lights and reduce speed', correct: true, explanation: 'Correct! Low beams and fog lights cut through fog better than high beams.' },
       { label: 'Follow the car ahead closely to use their lights', correct: false, explanation: 'Following closely in low visibility is extremely dangerous — you won\'t have time to brake.' },
     ],
-    lawCitation: 'Republic Act No. 4136, Section 34(c) — Use appropriate lights in conditions of reduced visibility.',
+    lawCitation: 'RA 4136, Section 34(d) — Use appropriate lights in conditions of reduced visibility.',
   },
   {
     id: 'provincial-bus',
@@ -127,7 +127,7 @@ export const DAILY_SCENARIOS: DailyScenario[] = [
       { label: 'Maintain 80 km/h and keep safe following distance', correct: true, explanation: 'Correct! Follow the posted speed limit regardless of other vehicles\' speed.' },
       { label: 'Overtake the bus since it\'s speeding', correct: false, explanation: 'Overtaking would require exceeding the speed limit yourself.' },
     ],
-    lawCitation: 'Republic Act No. 4136, Section 35 — Maximum 80 km/h on national highways.',
+    lawCitation: 'RA 4136, Section 35 — Maximum 80 km/h on national highways.',
   },
 ];
 

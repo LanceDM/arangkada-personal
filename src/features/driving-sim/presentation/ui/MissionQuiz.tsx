@@ -9,11 +9,11 @@ import {
   drawSitting,
   quizSittingRecord,
   type LevelQuiz,
-  type QuizItemDoc,
   type QuizSittingDoc,
 } from '@/features/driving-sim/domain/scenario/quizBank';
 import { nextAttemptSeed } from '@/features/driving-sim/application/attemptSeed';
 import { ActionBar } from '@/shared/ui/ActionBar';
+import { imageUrl } from '@/shared/lib/publicAsset';
 
 interface MissionQuizProps {
   quiz: LevelQuiz;
@@ -28,15 +28,6 @@ interface MissionQuizProps {
    * answers. The gallery passes 0, the bank's order.
    */
   newSeed?: () => number;
-  /**
-   * The per-competency course's quiz: it decides
-   * the pass itself (2 of 3 per competency), and a retry is the course's next
-   * attempt, drawn anew, not a reshuffle of this one.
-   */
-  course?: {
-    passes: (answers: Readonly<Record<string, number>>, items: readonly QuizItemDoc[]) => boolean;
-    onRetry: () => void;
-  };
 }
 
 /**
@@ -49,7 +40,7 @@ const CLOCK_WARNING_SECONDS = 30;
 const clockText = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
-const MissionQuiz = ({ quiz, levelId, onPass, onClose, onFinish, newSeed = nextAttemptSeed, course }: MissionQuizProps) => {
+const MissionQuiz = ({ quiz, levelId, onPass, onClose, onFinish, newSeed = nextAttemptSeed }: MissionQuizProps) => {
   const t = useText();
   // Taken once: a sitting's words and its record do not change part-way.
   const [language] = useState(useLanguage().language);
@@ -146,7 +137,7 @@ const MissionQuiz = ({ quiz, levelId, onPass, onClose, onFinish, newSeed = nextA
 
   if (finished) {
     const score = sitting.reduce((acc, { item }) => acc + (answers[item.id] === item.correctIndex ? 1 : 0), 0);
-    const passed = course ? course.passes(answers, sitting.map(({ item }) => item)) : score >= passingScore;
+    const passed = score >= passingScore;
 
     return (
       <div className="fixed inset-0 bg-[#0F0F1A] z-[120] overflow-y-auto">
@@ -225,10 +216,10 @@ const MissionQuiz = ({ quiz, levelId, onPass, onClose, onFinish, newSeed = nextA
             ) : (
               <div className="space-y-3">
                 <p className="text-destructive text-xs font-bold uppercase text-center">
-                  {t(course ? m.courseQuizRule : m.scoreAtLeast(passingScore, sitting.length))}
+                  {t(m.scoreAtLeast(passingScore, sitting.length))}
                 </p>
                 <button
-                  onClick={course ? course.onRetry : reset}
+                  onClick={reset}
                   className="w-full py-4 bg-muted border border-border rounded-2xl text-foreground font-display font-black uppercase text-sm tracking-widest hover:bg-secondary transition-all flex items-center justify-center gap-2"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -311,7 +302,7 @@ const MissionQuiz = ({ quiz, levelId, onPass, onClose, onFinish, newSeed = nextA
         {/* Question */}
         {current.item.image && (
           <img
-            src={current.item.image}
+            src={imageUrl(current.item.image)}
             alt={t(m.pictureAlt)}
             className="mx-auto max-h-48 w-auto object-contain"
           />

@@ -1,10 +1,10 @@
-/** `/admin/players`: find any account and read it in one place. Reads only. */
-import { PlayersSection } from '@/features/admin';
+/** `/admin/players`: search any account and read its history. */
+import { PlayersSection, useCourseAdmin } from '@/features/admin';
 import { useAuthSession } from '@/features/auth';
 
 const PlayersPage = () => {
   const { isAdmin } = useAuthSession();
-  return <PlayersSection enabled={isAdmin} />;
+  return <PlayersSection course={useCourseAdmin(isAdmin)} />;
 };
 
 export default PlayersPage;

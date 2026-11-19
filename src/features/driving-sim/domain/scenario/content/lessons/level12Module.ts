@@ -69,7 +69,7 @@ export const level12Module = {
           rows: [
             ['DOTr', 'The primary policy, planning, and regulatory body for a dependable, coordinated transportation network.'],
             ['LTFRB', 'Issues the Certificate of Public Convenience for public utility vehicles and enforces the Public Service Law.'],
-            ['PNP-HPG', 'Enforces Republic Act No. 4136, the Land Transportation and Traffic Code.'],
+            ['PNP-HPG', 'Enforces RA 4136, the Land Transportation and Traffic Code.'],
             ['MMDA / LGUs', 'Responsible for traffic direction and control within Metro Manila and their own localities.'],
             ['DPWH', 'Responsible for road engineering, infrastructure, and installation of signs, signals, and pavement markings.'],
           ],
@@ -80,7 +80,7 @@ export const level12Module = {
         },
         {
           type: 'paragraph',
-          text: 'Expressway traffic regulation officers are deputized (covering NLEX, SCTEX, SFEX, TPLEX, SLEX, Skyway, Star Tollway, CAVITEX, MCEX, CALAEX, and the C5 Extension Expressway) to enforce Republic Act No. 4136 and related regulations. Only deputized traffic enforcers are authorized to confiscate a driver\'s license.',
+          text: 'Deputized expressway traffic regulation officers (covering NLEX, SCTEX, SFEX, TPLEX, SLEX, Skyway, Star Tollway, CAVITEX, MCEX, CALAEX, and the C5 Extension Expressway) enforce RA 4136 and related regulations. Only deputized traffic enforcers are authorized to confiscate a driver\'s license.',
         },
         {
           type: 'heading',
@@ -90,7 +90,7 @@ export const level12Module = {
           type: 'table',
           headers: ['Document', 'Meaning'],
           rows: [
-            ['Temporary Operator\'s Permit (TOP)', 'Issued by deputized enforcers for traffic and administrative violations.'],
+            ['Temporary Operator\'s Permit (TOP)', 'Issued by deputized enforcers for traffic and administrative violations (JAO 2014-01).'],
             ['Traffic Violation Receipt (TVR)', 'Issued as a receipt acknowledging a recorded traffic violation.'],
             ['Traffic Citation Ticket (TCT)', 'Issued by an LGU under PD 1605.'],
             ['Ordinance Violation Receipt (OVR)', 'Issued for a violation of a local traffic ordinance.'],
@@ -144,7 +144,7 @@ export const level12Module = {
             'All apprehensions are deemed admitted unless contested in writing within 5 days of the apprehension.',
             'The driver has 15 days from the date of apprehension to settle the fine.',
             'Failure to settle within 15 days causes an automatic 30-day suspension of the driver\'s license, in addition to the fine itself.',
-            'A contested case is resolved within 5 days of receiving the written contest.',
+            'A contested case is resolved within 5 days of receiving the written contest (JAO 2014-01).',
           ],
         },
         {
@@ -276,7 +276,7 @@ export const level12Module = {
         },
         {
           type: 'heading',
-          text: 'Common Traffic Violations (Republic Act No. 4136)',
+          text: 'Common Traffic Violations (RA 4136)',
         },
         {
           type: 'list',

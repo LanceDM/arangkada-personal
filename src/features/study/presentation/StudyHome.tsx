@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { useEffect } from 'react';
+import { ChevronRight, ClipboardList, ExternalLink } from 'lucide-react';
+import { SURVEY_URL } from '@/shared/lib/survey';
 import { Button } from '@/shared/ui/button';
 import { useStudyProgress } from '@/features/study/application/studyProgress';
-import { finishStudyCourse } from '@/features/study/application/studyActions';
-import { finishOffer } from '@/domain/study/studyStage';
 import { nextStepOf, type NextStep } from '@/features/study/domain/studyRoutes';
 import { Say } from '@/shared/i18n/language';
 import { useText } from '@/shared/i18n/useText';
@@ -18,14 +17,15 @@ import { studyMessages as m } from './messages';
  * withdrawal. Every step comes back here, and it reads where the participant
  * stands each time it opens, so closing the app and coming back resumes at
  * the same step.
+ *
+ * The survey's Google Form is open from every stage (2026-11-19), like the
+ * homepage's: a participant need not finish the course to answer it. The
+ * in-app survey step keeps its place in the order.
  */
 export const StudyHome = ({ uid, onNext, onSignOut }: { uid: string; onNext: (step: NextStep) => void; onSignOut: () => void }) => {
   const progress = useStudyProgress();
   const { refresh } = progress;
   const text = useText();
-  const [finishing, setFinishing] = useState<'idle' | 'busy' | 'failed'>('idle');
-  // The deadline is read against the moment the home opened; it reopens after every step.
-  const [openedAt] = useState(() => Date.now());
 
   // Read afresh every time the home opens: it is where every step returns.
   useEffect(() => {
@@ -61,22 +61,8 @@ export const StudyHome = ({ uid, onNext, onSignOut }: { uid: string; onNext: (st
     );
   }
 
-  const { enrolment, stage, facts } = progress;
-  const offer = finishOffer(facts, openedAt);
-  // After the failed finals the Next step stays the final, beside the offer to finish.
+  const { enrolment, stage } = progress;
   const next = nextStepOf(stage);
-  const finish = async () => {
-    if (!offer) return;
-    setFinishing('busy');
-    try {
-      await finishStudyCourse({ uid, participantCode: enrolment.code, cohort: enrolment.cohort }, offer);
-      setFinishing('idle');
-      await refresh();
-    } catch (failure) {
-      console.error('Could not finish the study:', failure);
-      setFinishing('failed');
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -103,14 +89,20 @@ export const StudyHome = ({ uid, onNext, onSignOut }: { uid: string; onNext: (st
         )
       )}
 
-      {offer && (
-        <div className="space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-center">
-          <p className="text-sm">{text(offer === 'deadline' ? m.finishAtDeadline : m.finishAfterFinals)}</p>
-          <Button variant="outline" className="w-full" disabled={finishing === 'busy'} onClick={() => void finish()}>
-            {text(m.finishTheStudy)}
-          </Button>
-          {finishing === 'failed' && <p className="text-sm text-destructive">{text(m.finishFailed)}</p>}
-        </div>
+      {stage !== 'withdrawn' && (
+        <a
+          href={SURVEY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 rounded-xl border-2 border-primary/60 bg-primary/10 p-3 transition-colors hover:bg-primary/20"
+        >
+          <ClipboardList className="h-6 w-6 shrink-0 text-primary" />
+          <span className="flex-1">
+            <span className="block font-display text-sm font-bold">{text(m.takeTheSurvey)}</span>
+            <span className="block text-xs text-muted-foreground">{text(m.surveyAnyTime)}</span>
+          </span>
+          <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+        </a>
       )}
 
       {stage !== 'withdrawn' && <StudyTracker stage={stage} />}

@@ -35,7 +35,7 @@ const accounts: PilotAccountProgress[] = [
   {
     code: 'P-0001', name: 'Juan dela Cruz', cohort: 'study', uid: 'u1', enrolledAt: NOW - 60 * MIN, group: null, withdrawnAt: null,
     profile: {
-      username: 'juan_2026', age: 24, consentVersion: 'draft-2026-11-04b', gaming: 'weekly', device: 'phone',
+      username: 'juan_2026', age: 24, consentVersion: 'draft-2026-11-04b', gaming: 'weekly', device: 'phone', preferredVehicle: 'motorcycle',
       deviceCheck: { touch: true, medianFps: 58.4, slow: false, width: 844, height: 390 },
     },
     steps: { ...NO_STEPS, consentedAt: NOW - 59 * MIN, backgroundAt: NOW - 58 * MIN, deviceCheckedAt: NOW - 57 * MIN, preTest: 'finished' },
@@ -111,7 +111,7 @@ describe('PilotDashboard', () => {
     }
     // Every control on the page is an invite's.
     const labels = [...view.querySelectorAll('button')].map(b => b.textContent?.trim());
-    expect(new Set(labels)).toEqual(new Set(['New invite', 'Copy join link', 'Close', 'Details']));
+    expect(new Set(labels)).toEqual(new Set(['New invite', 'Copy link', 'Copy code', 'Copy message', 'Email', 'Close', 'Details']));
   });
 
   it("opens a participant's details for the team: username, age, consent, background and device check, still no score", () => {
@@ -121,7 +121,7 @@ describe('PilotDashboard', () => {
     act(() => details().click());
     expect(details().getAttribute('aria-expanded')).toBe('true');
     const panel = rowOf(view, 'P-0001').nextElementSibling!.textContent!;
-    for (const fact of ['juan_2026', 'Age24', 'text draft-2026-11-04b', 'Every week', 'Phone', 'Touch · 58 fps · 844×390', 'Pre-testFinished', 'Post-testNot started']) {
+    for (const fact of ['juan_2026', 'Age24', 'text draft-2026-11-04b', 'Every week', 'Phone', 'Touch · 58 fps · 844×390', 'Prefers to driveMotorcycle', 'Pre-testFinished', 'Post-testNot started']) {
       expect(panel).toContain(fact);
     }
     for (const word of ['score', 'accuracy', 'passed', 'failed', 'correct', 'points', 'email']) {
@@ -137,8 +137,10 @@ describe('PilotDashboard', () => {
     expect(view.textContent).toContain('7K3Q9-X2MT4');
     expect(view.textContent).toContain('ABCDE-12345');
     expect(view.textContent).toContain('No dry run invite yet.');
-    // A closed invite offers nothing.
-    expect(view.querySelectorAll('li button')).toHaveLength(2);
+    // An open invite offers its link, code, message, email and close; a closed one only its date (2026-11-18).
+    expect(view.querySelectorAll('li button')).toHaveLength(5);
+    expect(view.querySelector('input[aria-label^="Join link"]')).not.toBeNull();
+    expect(view.textContent).toContain('1 closed invite(s)');
 
     await act(async () => button(view, 'New invite')!.click());
     expect(value.create).toHaveBeenCalledWith('study');

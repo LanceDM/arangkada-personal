@@ -22,7 +22,7 @@ export interface LevelModule {
 
 /**
  * The Short Quiz's pace: one countdown per sitting, this many seconds per item.
- * Its basis is fidelity to the written license exam, which is timed; the exam's own
+ * Its basis is fidelity to the LTO written exam, which is timed; the LTO's own
  * per-item pace is not confirmed by an official source, so 60 s is an
  * assumption until it is. No study shows a timer
  * helps a low-stakes quiz teach, so the allowance stays generous.

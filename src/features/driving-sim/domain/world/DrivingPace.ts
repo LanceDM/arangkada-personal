@@ -64,7 +64,7 @@ export const DEFAULT_PACE: DrivingPace = {
  *
  * A level's road — where its scenarios stand, how many seconds a warning gives,
  * how far a stop takes, how long the drive lasts — was spaced and measured at
- * the dial it had before its limit was set to Republic Act No. 4136, Section 35. Changing only the
+ * the dial it had before its limit was set to RA 4136 §35. Changing only the
  * dial would rescale all of it. With k = limit / spacedFor, a km/h is worth 1/k
  * the road, and every change of speed (the brake, coasting, a gradient, the
  * traffic) is k times the km/h, so in road units per second the car, its

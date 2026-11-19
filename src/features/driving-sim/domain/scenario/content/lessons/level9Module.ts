@@ -178,7 +178,8 @@ export const level9Module = {
           type: 'list',
           ordered: false,
           items: [
-            'Be aware, calm, and ready.',
+            // FDM Vol. 1 p. 142
+            'Be aware, calm, and ready. If the water is deep, such as knee-deep in an underpass, do not cross; find another route.',
             'Avoid stepping on the brake as much as possible while in the water.',
             'Reduce speed by releasing the accelerator pedal.',
             'Gently step on the brake pedal after passing the flooded stretch, to dry the brake pads, rotors, linings, and drums.',
@@ -276,7 +277,8 @@ export const level9Module = {
         },
         {
           type: 'image',
-          alt: 'Diagram showing Early Warning Device placement four meters apart behind a stopped vehicle on a one-way road, and on both sides on a two-way road.',
+          // TODO(assets): this diagram shows the old placement; the FDM (Vol. 1 p. 160) puts an EWD 4 m in front and 4 m behind.
+          alt: 'Diagram showing Early Warning Device placement around a stopped vehicle.',
           src: IMG + 'early-warning-device-placement.png',
           size: 'large',
         },
@@ -286,7 +288,8 @@ export const level9Module = {
           items: [
             'Move the vehicle to the safest available position, off the main travel lane if possible.',
             'Switch on hazard lights.',
-            'Place your Early Warning Device, spaced about four meters apart, behind the vehicle on a one-way road, or on both sides on a two-way road.',
+            // FDM Vol. 1 p. 160
+            'Place your Early Warning Devices 4 meters in front of and 4 meters behind the stalled vehicle.',
             'In case of a breakdown, emergency, or accident on an expressway, the impaired vehicle must be removed from the travel way by an authorized towing operator without delay, at the owner or driver\'s expense.',
             'Do not attempt a repair that requires standing in an active traffic lane.',
           ],
@@ -330,11 +333,17 @@ export const level9Module = {
             'Turn on hazard flashers.',
             'Stay calm and check yourself, your passengers, and other road users for injuries.',
             'If anyone is injured, note your location and call 911, the national emergency hotline, or the Red Cross hotline (143) immediately.',
-            'Check for injured or unconscious passengers; if possible, move them out of the vehicle to a safe place away from oncoming traffic.',
+            // FDM Vol. 1 p. 164: never attempt to touch an unconscious or injured person.
+            'Check for injured or unconscious passengers, but do not move them unless the vehicle is on fire or they face other immediate danger; wait for trained help.',
             'If injuries such as cuts or abrasions have occurred, administer first aid if you are able to.',
             'Photograph and document the scene: the vehicles, involved parties, witnesses, and any responding police officers.',
             'Call local law enforcement to report the crash.',
           ],
+        },
+        // FDM Vol. 2 p. 44 (RA 10586)
+        {
+          type: 'paragraph',
+          text: 'When a crash results in death or physical injury, RA 10586 requires the drivers involved to undergo chemical tests for alcohol and drugs.',
         },
       ],
     },

@@ -1,40 +1,23 @@
 /** Mock Exam's persisted shapes. */
 
+/** One answer of a sitting, kept per item so the bank's responses can be counted for calibration. */
+export interface ExamResponse {
+  itemId: string;
+  level: number;
+  /** The choice picked, as the item stores it; null when left unanswered. */
+  chosen: number | null;
+  correct: boolean;
+}
+
 /** `users/{uid}/examAttempts/{id}` — one graded sitting. */
 export interface ExamAttempt {
   score: number;
   passed: boolean;
-  wrongIds: number[];
-  /**
-   * The ids actually presented, in order, so the sitting's response matrix
-   * can be reconstructed even though the bank varies between attempts.
-   */
-  questionIds: number[];
+  wrongIds: string[];
+  /** The bank item ids presented, in order. */
+  questionIds: string[];
+  responses: ExamResponse[];
+  /** Which bank the items came from: the served one, or the bundled fallback. */
+  bank: 'served' | 'bundled';
   timestamp: number;
-}
-
-/**
- * An exam item as authored in Firestore's `exam_questions` collection. The
- * local bank in `questionBank.ts` is the fallback when that collection is empty
- * or unreadable, and it matches this shape.
- */
-export interface RemoteExamQuestion {
-  id: number;
-  question: string;
-  choices: string[];
-  correctIndex: number;
-  lawCitation: string;
-  category:
-    | 'right_of_way'
-    | 'traffic_signals'
-    | 'road_signs'
-    | 'speed_limits'
-    | 'overtaking'
-    | 'parking'
-    | 'pedestrians'
-    | 'emergency'
-    | 'number_coding'
-    | 'general_rules';
-  difficulty?: 'easy' | 'medium' | 'hard';
-  isActive?: boolean;
 }

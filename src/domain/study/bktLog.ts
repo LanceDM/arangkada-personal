@@ -6,23 +6,31 @@
  * timing, the T, S and G used, P(L) before, the predicted P(correct), the
  * posterior and P(L) after, so the panel can change a value or a grading rule
  * and the log can be replayed; and AUC and RMSE come straight from it.
+ *
+ * Each competency is its own hidden Markov chain (2026-11-14): `chainSeq` is
+ * the entry's step in its competency's chain (1 on the competency's first
+ * answer, with `pInit` the chain's start), and `prevUserSeq` the `userSeq` of
+ * the entry before it in that chain, so each chain can be followed link by
+ * link: the previous entry's `pAfter` is this entry's `pBefore`.
  */
 import type { ActionLog, EvidenceSource } from '@/domain/learner/attempt';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import { COMPETENCIES } from '@/domain/learner/profile';
 import {
-  EVIDENCE_BKT_MODEL as DEFAULT_BKT_MODEL,
+  DEFAULT_BKT_MODEL,
   bktTrajectory,
-  type EvidenceParams as BKTEvidenceParams,
-  type EvidenceBKTModel as BKTModel,
-} from '@/domain/learner/mastery/evidenceBKT';
+  priorFor,
+  startingMastery,
+  type BKTEvidenceParams,
+  type BKTModel,
+} from '@/domain/learner/mastery/buildBKTProfile';
 import { MIN_DRIVE_EVIDENCE_FOR_BENCHMARKING, masteryLevel, type MasteryLevel } from '@/domain/competencyRouting/mastery';
 import type { StudyEnvelope } from './studyEvent';
 
 /** Where a graded answer was given. */
 export interface EvidenceOrigin {
   /** `attempt` for a drive; otherwise the sitting kind. */
-  kind: 'attempt' | 'quiz' | 'pre_test';
+  kind: 'attempt' | 'quiz' | 'diagnostic' | 'post_exam';
   levelId: number | null;
   /** The attempt or sitting id when the store gives one. */
   ref: string | null;
@@ -37,7 +45,7 @@ export interface BKTCompetencyProfile {
   level: MasteryLevel;
   /** Held below level 4 because it has fewer than 3 drive answers. */
   capped: boolean;
-  /** P(L) after the pre-test seeded it; null before. */
+  /** P(L) after the diagnostic; null before it. */
   startP: number | null;
   answers: CountsByClass;
   correct: CountsByClass;
@@ -54,6 +62,13 @@ export interface BKTProfileDoc {
   lastUpdateId: string | null;
   updatedAt: number;
   competencies: Record<DrivingCompetency, BKTCompetencyProfile>;
+  /**
+   * The id of the set of values this player runs on (`default`, `cal-1`, ...;
+   * see bktValueSets): marked when they start and kept for their whole course.
+   * Absent, or `pilot`, on records written before calibrations had numbers:
+   * those ran on the default values.
+   */
+  modelSet?: string;
 }
 
 export interface BKTUpdateRecord extends StudyEnvelope {
@@ -77,6 +92,10 @@ export interface BKTUpdateRecord extends StudyEnvelope {
   params: BKTEvidenceParams;
   /** pInit, written on a competency's first update only. */
   pInit: number | null;
+  /** This entry's step in its competency's chain: 1, 2, 3... (since 2026-11-14). */
+  chainSeq?: number;
+  /** The `userSeq` of the previous entry of the same competency; null on its first (since 2026-11-14). */
+  prevUserSeq?: number | null;
   pBefore: number;
   predictedCorrect: number;
   posterior: number;
@@ -89,9 +108,11 @@ export interface BKTUpdateRecord extends StudyEnvelope {
   driveAnswersAfter: number;
   /** P(L) of all 11 competencies after this update. */
   allAfter: Record<DrivingCompetency, number>;
+  /** The id of the set of values this update was made with; absent or `pilot` means the default values. */
+  modelSet?: string;
 }
 
-const zeroCounts = (): CountsByClass => ({ drive: 0, quiz: 0, pre_test: 0 });
+const zeroCounts = (): CountsByClass => ({ drive: 0, quiz: 0, diagnostic: 0, post_exam: 0 });
 
 export const emptyBKTProfile = (uid: string, configVersion: string, at: number, model: BKTModel = DEFAULT_BKT_MODEL): BKTProfileDoc => ({
   schemaVersion: 1,
@@ -104,7 +125,7 @@ export const emptyBKTProfile = (uid: string, configVersion: string, at: number, 
   competencies: Object.fromEntries(
     COMPETENCIES.map(c => [
       c,
-      { p: model.pInit, level: masteryLevel(model.pInit, 0), capped: false, startP: null, answers: zeroCounts(), correct: zeroCounts(), lastUpdatedAt: null },
+      { p: priorFor(model, c), level: masteryLevel(priorFor(model, c), 0), capped: false, startP: null, answers: zeroCounts(), correct: zeroCounts(), lastUpdatedAt: null },
     ])
   ) as Record<DrivingCompetency, BKTCompetencyProfile>,
 });
@@ -127,12 +148,18 @@ export const buildBKTLog = (input: {
   now: number;
   configVersion: string;
   model?: BKTModel;
+  /** The id of the player's set of values (`default`, `cal-1`, ...); the profile and every entry carry it. Pass that set's values as `model`. */
+  modelSet?: string;
 }): { profile: BKTProfileDoc; entries: BKTUpdateRecord[] } => {
   const model = input.model ?? DEFAULT_BKT_MODEL;
   const steps = bktTrajectory([...input.logs], model);
   const profile = emptyBKTProfile(input.uid, input.configVersion, input.now, model);
-  const all = Object.fromEntries(COMPETENCIES.map(c => [c, model.pInit])) as Record<DrivingCompetency, number>;
+  if (input.modelSet) profile.modelSet = input.modelSet;
+  const all = startingMastery(model);
   const seen = new Set<DrivingCompetency>();
+  // Each competency's chain: how many steps so far, and the userSeq of the last.
+  const chainLength = new Map<DrivingCompetency, number>();
+  const lastSeq = new Map<DrivingCompetency, number>();
   const entries: BKTUpdateRecord[] = [];
 
   steps.forEach((step, i) => {
@@ -147,11 +174,15 @@ export const buildBKTLog = (input: {
     c.p = step.pAfter;
     c.level = levelAfter;
     c.capped = masteryLevel(step.pAfter) === 4 && c.answers.drive < MIN_DRIVE_EVIDENCE_FOR_BENCHMARKING;
-    if (step.source === 'pre_test') c.startP = step.pAfter;
+    if (step.source === 'diagnostic') c.startP = step.pAfter;
     c.lastUpdatedAt = step.timestamp;
     all[step.competency] = step.pAfter;
     const first = !seen.has(step.competency);
     seen.add(step.competency);
+    const chainSeq = (chainLength.get(step.competency) ?? 0) + 1;
+    const prevUserSeq = lastSeq.get(step.competency) ?? null;
+    chainLength.set(step.competency, chainSeq);
+    lastSeq.set(step.competency, i + 1);
 
     if (i < input.alreadyLogged) return;
     const envelope = input.envelope(entries.length);
@@ -174,7 +205,9 @@ export const buildBKTLog = (input: {
       responseMs: log.reactionTime ?? null,
       timedOut: log.reactionCensored === true,
       params: step.params,
-      pInit: first ? model.pInit : null,
+      pInit: first ? priorFor(model, step.competency) : null,
+      chainSeq,
+      prevUserSeq,
       pBefore: step.pBefore,
       predictedCorrect: step.predictedCorrect,
       posterior: step.posterior,
@@ -183,6 +216,7 @@ export const buildBKTLog = (input: {
       levelAfter,
       levelChanged: levelBefore !== levelAfter,
       capApplied: c.capped,
+      ...(input.modelSet ? { modelSet: input.modelSet } : {}),
       driveAnswersAfter: c.answers.drive,
       allAfter: { ...all },
     });

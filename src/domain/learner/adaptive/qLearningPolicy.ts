@@ -1,3 +1,10 @@
+// LEGACY BUILD ONLY (2026-10-28). The study's game - the New switch - plays the
+// per-competency course (`@/domain/competencyRouting`), whose table is learned
+// online from participants. This practice policy and its table
+// (policyTable.json, trained offline in simulation) are read only by the
+// Legacy build (VITE_ROUTING_SWITCH=legacy) and by the dev tools; no study
+// result, parameter or starting table comes from them.
+//
 // The Q-learning policy that decides, once per level entry, what a learner
 // should practise next, how much of the answer the level's scenarios show, and
 // how much room the FSM gives them to react. State and action are both small

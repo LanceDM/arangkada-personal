@@ -23,6 +23,7 @@
  * Strict Mode's setup -> cleanup -> setup replay: teardown cancels the frame
  * and the timers, and the next setup puts them back.
  */
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
@@ -44,7 +45,6 @@ import {
 import {
   createDrivingSession,
   snapshotChanged,
-  type DrivingSession,
   type DrivingSnapshot,
 } from '@/features/driving-sim/application/session/DrivingSession';
 import type { useFSM } from '@/features/driving-sim/application/useFSM';
@@ -82,6 +82,8 @@ interface UseDrivingSimulationOptions {
   touch?: TouchInput;
   /** Whether the on-screen controls are shown, for the attempt's record. */
   touchControls?: boolean;
+  /** How the player's vehicle is drawn: a skin only, the car's in every other way. */
+  vehicleSkin?: VehicleSkin;
   /**
    * Held false while a pre-drive stage is running, or while a touch device is
    * held upright, so the drive stays idle.
@@ -110,17 +112,8 @@ interface UseDrivingSimulationOptions {
    * per mounted drive.
    */
   liveReroll?: boolean;
-  /**
-   * No time limit, no clock and no panel countdown: the admin's scenario check
-   * alone (Admin > Scenarios > Play). Nothing it plays is saved.
-   */
+  /** No time limit, no clock and no answer countdown (Admin > Scenarios > Play). */
   noTimeLimit?: boolean;
-  /**
-   * Handed the drive's session once it exists. Only a headless harness passes
-   * one, to steer the car as the reference
-   * drive does; the game passes none, and nothing here reads it.
-   */
-  sessionRef?: { current: DrivingSession | null };
 }
 
 export interface DrivingSimulation {
@@ -131,6 +124,8 @@ export interface DrivingSimulation {
   jolted: boolean;
   answerInspection: (action: string) => void;
   answerCutscene: (action: string) => void;
+  /** The open in-drive question's time limit ran out. */
+  timeoutQuestion: () => void;
   playParking: (action: string) => void;
   playRightOfWay: (action: string) => void;
   /** Player has read the scenario and released the drive. */
@@ -157,13 +152,13 @@ export const useDrivingSimulation = ({
   releaseHeldKeys,
   touch,
   touchControls = false,
+  vehicleSkin = 'car',
   enabled = true,
   initialDistance,
   priorLogs,
   support,
   liveReroll = true,
   noTimeLimit = false,
-  sessionRef,
 }: UseDrivingSimulationOptions): DrivingSimulation => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // One session per mounted drive. `GameScreen` is keyed per attempt, so a
@@ -178,9 +173,6 @@ export const useDrivingSimulation = ({
       ...(noTimeLimit ? { timeLimitSteps: Number.POSITIVE_INFINITY, panelSteps: Number.POSITIVE_INFINITY } : {}),
     })
   );
-  useEffect(() => {
-    if (sessionRef) sessionRef.current = session;
-  }, [sessionRef, session]);
   const [history] = useState(() => priorLogs ?? []);
   const [rerollsLive] = useState(liveReroll);
 
@@ -257,6 +249,10 @@ export const useDrivingSimulation = ({
   /** When the frame loop last stopped, so the time until it runs again is spent. Null while it runs. */
   const stoppedAtRef = useRef<number | null>(null);
   const usageRef = useRef(unusedInput());
+  const skinRef = useRef(vehicleSkin);
+  useEffect(() => {
+    skinRef.current = vehicleSkin;
+  }, [vehicleSkin]);
   const touchControlsRef = useRef(touchControls);
   useEffect(() => {
     touchControlsRef.current = touchControls;
@@ -337,7 +333,7 @@ export const useDrivingSimulation = ({
 
         const frame = session.getFrame();
         if (frame) {
-          renderFrame(ctx, frame.scene);
+          renderFrame(ctx, frame.scene, skinRef.current);
           if (frame.flash > 0) {
             ctx.fillStyle = `rgba(220,38,38,${frame.flash})`;
             ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -389,6 +385,7 @@ export const useDrivingSimulation = ({
     jolted,
     answerInspection: useCallback((action: string) => handle(session.answerInspection(action)), [handle, session]),
     answerCutscene: useCallback((action: string) => handle(session.answerCutscene(action)), [handle, session]),
+    timeoutQuestion: useCallback(() => handle(session.timeoutQuestion()), [handle, session]),
     playParking: useCallback((action: string) => session.playParking(action), [session]),
     playRightOfWay: useCallback((action: string) => session.playRightOfWay(action), [session]),
     dismissAdaptationNotice: useCallback(

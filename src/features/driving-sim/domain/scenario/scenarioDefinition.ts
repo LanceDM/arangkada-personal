@@ -643,22 +643,13 @@ export interface ScenarioEvent {
    */
   neutral?: boolean;
   /**
-   * Out of play: the road does not draw the situation this scenario describes
-   * (2026-11-16 scene audit), so it is never rolled into a slot, composed into
-   * a drive, borrowed or appended as practice, and gives BKT no evidence. It is
-   * kept in the code and listed by the dev and admin tools as not in play,
-   * until a scene can draw it.
-   */
-  offRoad?: true;
-  /**
    * Set only on an event the adaptive remediation selector injected into a
    * level, rather than one the level authored as its own curriculum.
    *
    * Never counted toward the pass mark in the game (`scoreDecision`'s
    * `neutral` rule): no points either way and the streak untouched, so a
-   * level's `requiredScore` means exactly what it was
-   * calibrated to whether or not remediation fired on this run. The game-level
-   * simulation
+   * level's `requiredScore`/`stars2`/`stars3` mean exactly what they were
+   * calibrated to whether or not remediation fired on this run. The fourth experiment
    * scored it upside-only, which let the learners who got one pass on fewer
    * authored points. It is still graded and still logged, because
    * the entire point of injecting it is to get fresh evidence back into the
@@ -777,6 +768,8 @@ export type GarageDetailArt =
 export interface GarageHotspot {
   id: string;
   /**
+   * The catalogue id of the content standing at this point, where it differs
+   * from the point's own `id` (a pooled Level 2 check is `level2.garage.<point>.<n>`).
    * What a decision log records as its scenario, so a repeat drive can draw
    * content the learner has not seen. Absent: the point's `id`.
    */
@@ -818,6 +811,12 @@ export interface GarageHotspot {
   document?: CheckpointInspection;
   /** Close-up art shown when there is no document to display. */
   detail?: GarageDetailArt;
+  /**
+   * The plate this point is about (a registration check), when it is not the
+   * stage's own. The car is drawn with it, and the paperwork names it, so the
+   * plate the question reads is the plate on screen (2026-11-16).
+   */
+  plate?: string;
 }
 
 /**
@@ -879,11 +878,13 @@ export interface LevelConfig {
   name: string;
   description: string;
   roadLength: number;
-  /** What this road is under Republic Act No. 4136, Section 35, which sets `speedLimit`. */
+  /** What this road is under RA 4136 §35, which sets `speedLimit`. */
   roadClass: RoadClass;
   speedLimit: number;
   events: ScenarioEvent[];
   requiredScore: number;
+  stars3: number;
+  stars2: number;
   moduleId: string;
   /** Present on levels that begin with a pre-drive readiness stage. */
   garage?: GarageStage;

@@ -92,8 +92,8 @@ export interface QuizModuleDoc {
 /**
  * The editor's limits. The text caps are about one and a half times the
  * longest item in the question bank (145, 117 and 85 characters) and keep an
- * item on one screen; 2–4 choices is the bank's own form, which the written exam
- * reviewer also uses. These are the team's assumptions.
+ * item on one screen; 2–4 choices is the bank's own form, which the LTO
+ * reviewer also uses. Assumptions are the team's.
  */
 export const QUIZ_ITEM_LIMITS = {
   questionMax: 300,
@@ -106,7 +106,7 @@ export const QUIZ_ITEM_LIMITS = {
 
 /**
  * A sitting draws 10 items and passes at 6: the "6 of 10" of
- * the module specification, the team's own specification, not an official
+ * The module specification, the team's own specification, not an LTO
  * rule. Both are per module and editable.
  */
 export const DEFAULT_ITEMS_PER_SITTING = 10;
@@ -239,6 +239,11 @@ export interface QuizSittingDoc {
   finishedAt: number;
   /** The language chosen when the sitting began. */
   language?: Language;
+  /**
+   * A practice sitting, taken outside the course (2026-11-16). Recorded only:
+   * nothing reads it as evidence (BKT, Q-table, course, IRT).
+   */
+  practice?: true;
 }
 
 export const quizSittingRecord = (input: {

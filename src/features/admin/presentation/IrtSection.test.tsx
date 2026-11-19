@@ -16,7 +16,7 @@ import type { IrtRepository, ParticipantTestDocuments } from '@/features/admin/a
 import type { ItemReviewKind } from '@/features/admin/domain/contentValidity';
 import { useIrtPanel } from '@/features/admin/application/useIrtPanel';
 import { IrtSection, type IrtView } from './IrtSection';
-import { flush, mount, text, unmount, view } from './routingSections.fixture';
+import { flush, mount, text, unmount, view } from './adminSections.fixture';
 
 const items: QuizItemDoc[] = COMPETENCIES.flatMap((competency, c) =>
   Array.from({ length: c < 5 ? 6 : 5 }, (_, k) => ({
@@ -29,7 +29,7 @@ const items: QuizItemDoc[] = COMPETENCIES.flatMap((competency, c) =>
     explanation: '',
     image: '',
     competency,
-    source: 'Republic Act No. 4136, Section 35',
+    source: 'RA 4136, Sec. 35',
     use: 'test' as const,
     isActive: true,
     order: k,
@@ -97,6 +97,9 @@ const repository: IrtRepository = {
   testItems: async () => items,
   participantTests: async () => tests,
   reviews: async () => ({ tagging: stored.tagging, experts: stored.experts }),
+  examResponses: async () => [
+    { uid: 'u1', timestamp: 1, responses: [{ itemId: 'L5-RW-01', level: 5, chosen: 0, correct: true }] },
+  ],
   saveReview: vi.fn(async (kind: ItemReviewKind, review: { revision: number }) => {
     const before = stored[kind] as { revision: number } | null;
     if (review.revision !== (before ? before.revision + 1 : 1)) throw new Error('Missing or insufficient permissions.');
@@ -126,7 +129,7 @@ describe('the IRT section', () => {
     await open('bank');
     expect(view().querySelector('[data-testid="irt-readiness"]')!.textContent).toContain('60 of 60 switched on · 11 of 11 competencies covered');
     expect(text()).toContain('the pre-test can open');
-    expect(text()).toContain('Republic Act No. 4136, Section 35');
+    expect(text()).toContain('RA 4136, Sec. 35');
     expect(text()).toContain('No tagging yet');
   });
 

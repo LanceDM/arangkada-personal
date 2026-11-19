@@ -100,9 +100,10 @@ export const driveSamples = (): DriveSample[] => [
     { levelId: level.id, seed: 1, frames: 1200, style: 'wander' as const },
     { levelId: level.id, seed: 2, frames: 1200, style: 'wander' as const },
     { levelId: level.id, seed: 3, frames: 1200, style: 'wander' as const },
-    // Long enough for the left-hand hold to reach Level 2's second scenario
-    // when Level 2 had a road (graded on frame 951); kept at 1,000 frames so
-    // every other level's sample is unchanged.
+    // Long enough for the left-hand hold to reach Level 2's second scenario,
+    // which it grades on frame 951: every other sample of that level runs into
+    // the pedestrian at its first, so this is the one that carries the level
+    // past its opening.
     { levelId: level.id, seed: 4, frames: 1000, style: 'hold-left' as const },
     { levelId: level.id, seed: 5, frames: 1000, style: 'hold-right' as const },
     // One drive per level that is long enough to reach the end of it. Sized

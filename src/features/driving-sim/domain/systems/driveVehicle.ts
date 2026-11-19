@@ -25,14 +25,13 @@ import {
   boundsWithBay,
   laneBounds,
   laneOf,
-  resolveLaneRole,
   roadHeadingAt,
   CAR_WIDTH,
   SPEED_REPEAT_DELAY,
   SPEED_REPEAT_EVERY,
   SPEED_STEP,
+  SCREEN_PX_PER_UNIT,
   type CurveSpan,
-  type LaneIndex,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { drivableBounds } from '@/features/driving-sim/domain/world/routeGeometry';
 import { paceOf } from '@/features/driving-sim/domain/world/DrivingPace';
@@ -58,23 +57,6 @@ const CURB_PUSH_PER_FRAME = 3.5;
  * before it becomes visible, never during its run.
  */
 export const CHASE_LOCK_RANGE = 340;
-
-/**
- * The lane a following emergency vehicle comes up: the car's own lane at the
- * lock, the lane it is asking the driver to leave. Never the lane the scenario
- * tells the driver to move into. A car that is already in that lane when the
- * lock is taken (pulled over at the curb for the scenario before, Level 12's
- * traffic stop) would otherwise have the ambulance pass down the very lane the
- * correct answer moves it into, and the driver who answered correctly would be
- * the one who drove into it (T-0001's final exam, 2026-11-17). Then it comes up
- * the lane beside it instead.
- */
-export const chaseLaneFor = (event: ScenarioEvent, carLane: LaneIndex, oncomingLanes: number): LaneIndex => {
-  const wanted = event.requiredLane ? resolveLaneRole(event.requiredLane.lane, oncomingLanes) : null;
-  if (wanted === null || carLane !== wanted) return carLane;
-  const curb = resolveLaneRole('curb', oncomingLanes);
-  return wanted === curb ? resolveLaneRole('inner', oncomingLanes) : curb;
-};
 
 /**
  * The road effect the car is standing in, if any.
@@ -324,7 +306,7 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
   // little wider than its own approach span so the lane is fixed just
   // before it becomes visible, never during its run.
   {
-    const chaserAhead = context.liveLevel.events.find(candidate => {
+    const chaserAhead = context.liveLevel.events.some(candidate => {
       if (candidate.npc?.path !== 'closing_from_behind') return false;
       const gap = candidate.triggerAtDistance - car.distance;
       return gap <= CHASE_LOCK_RANGE && gap > -CHASE_LOCK_RANGE;
@@ -336,14 +318,19 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
       world.followerState.y = null;
       world.followerState.passing = false;
     } else if (world.chaseLane === null) {
-      world.chaseLane = chaseLaneFor(chaserAhead, car.lane, context.liveLevel.paint?.oncomingLanes ?? 2);
+      world.chaseLane = car.lane;
     }
   }
   // Lean into the bend. Without this the car tracks a curving road while
   // still pointing dead ahead, which reads as sliding sideways.
   car.heading = roadHeadingAt(car.distance, curves);
   car.distance += car.speed * pace.distancePerSpeed;
-  world.roadOffset += car.speed * 0.3;
+  // The lane paint scrolls on the same scale as everything else drawn on the
+  // road: one route unit is SCREEN_PX_PER_UNIT pixels. It used to advance by
+  // speed * 0.3, which ran the paint about 12x faster than the roadside (20x
+  // on Level 7's pace). Change the shared scale or the pace to change the
+  // feel, never the paint alone.
+  world.roadOffset = car.distance * SCREEN_PX_PER_UNIT;
 
   // Standing penalties: things the driver keeps doing, rather than a
   // decision at an event. Both run the same grace/interval/cap machinery
@@ -364,8 +351,11 @@ export const driveVehicle = (input: InputState, context: DriveVehicleContext): D
   // rest: a learner doing exactly what it asked was charged for speed control.
   const standingApplies = onClearRoad && !isTutorialLevel;
 
+  // Slowing for someone on a crossing, traffic across a junction or a slow
+  // vehicle just ahead is driving, not holding up traffic: the warning used to
+  // say "move off" with a pedestrian on the crossing in front of the car.
   const crawl = stepStandingPenalty(world.crawl, CRAWL_PENALTY, {
-    violating: standingApplies && car.speed < level.speedLimit * CRAWL_SPEED_SHARE,
+    violating: standingApplies && !world.roadOccupiedAhead && car.speed < level.speedLimit * CRAWL_SPEED_SHARE,
     now,
   });
   // Quiet: scored and logged, but silent on screen. The amber

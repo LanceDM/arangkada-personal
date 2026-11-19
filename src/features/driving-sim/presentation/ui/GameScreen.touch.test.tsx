@@ -9,10 +9,11 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { provideDrivingSimDependencies } from '@/features/driving-sim/application/dependencies';
+import { courseStandIns, memoryCourseStore } from '@/features/driving-sim/application/testDependencies';
 import { recordingCanvasContext } from '@/features/driving-sim/presentation/canvas/rendering/recordingCanvas';
 import GameScreen from './GameScreen';
 
-vi.mock('@/features/auth', () => ({ useAuthSession: () => ({ isAdmin: false }) }));
+vi.mock('@/features/auth', () => ({ useAuthSession: () => ({ isAdmin: false }), useVehicleSkin: () => ({ skin: 'car', choose: async () => {} }) }));
 
 provideDrivingSimDependencies({
   learnerHistory: { load: async () => ({ source: 'local', attempts: [] }) },
@@ -32,6 +33,7 @@ provideDrivingSimDependencies({
   optimizedRouting: async () => {
     throw new Error('no drive here reads the routing table');
   },
+  ...courseStandIns(memoryCourseStore()),
 });
 
 declare global {

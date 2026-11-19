@@ -139,7 +139,7 @@ export interface SignPlate {
    * are drawn as a signal head instead.
    */
   image?: string;
-  /** Official name, worded as the level module lists it. */
+  /** Official LTO name, worded as the level module lists it. */
   name: string;
   /** Category line, e.g. 'A. Regulatory Sign'. */
   category: string;
@@ -359,7 +359,7 @@ export interface MarkingPlate {
    * fully playable without them.
    */
   image?: string;
-  /** Official name, worded as the level module lists it. */
+  /** Official LTO name, worded as the level module lists it. */
   name: string;
   /** Category line, e.g. 'A. Longitudinal Line'. */
   category: string;
@@ -519,7 +519,7 @@ export type NpcPathKind =
   | 'filtering_past'
   // Comes down the opposing lane and peels away across your path, signalling.
   // Distinct from `oncoming_through` because the rule it illustrates is about
-  // where it is going, not that it is there: Republic Act No. 4136 gives an oncoming vehicle
+  // where it is going, not that it is there: RA 4136 gives an oncoming vehicle
   // turning left across you priority only if it signalled, so a driver has to
   // be able to see it turn.
   | 'oncoming_turning_left';
@@ -686,22 +686,20 @@ export interface NpcVehicleSpec {
   inBox?: boolean;
 }
 
-/** What crosses a main-road junction a driver is waiting to join. */
-export type MainRoadVehicleKind = 'car' | 'jeepney' | 'tricycle' | 'motorcycle';
-
 /**
  * Somebody on foot, as a scene composes them rather than as the renderer
  * guesses them.
  *
- * The kinds are the sprites `drawPedestrian` draws. Declared for the
+ * The four kinds are the four sprites `drawPedestrian` draws. Declared for the
  * same reason `sign`, `marking` and `npc` are: the renderer draws what the
  * level says is there, never what its prose happens to mention, so a crossing
  * can hold a group rather than whichever single person a sentence named. See
  * `pedestrians` on `ScenarioEvent`.
- *
- * `dog`: an animal walked on a lead beside its owner, drawn and never solid
- * on its own.
  */
+/** `dog`: an animal walked on a lead beside its owner (2026-11-16), drawn and never solid on its own. */
+/** What crosses a main-road junction a driver is waiting to join. */
+export type MainRoadVehicleKind = 'car' | 'jeepney' | 'tricycle' | 'motorcycle';
+
 export type PedestrianKind = 'adult' | 'child' | 'elderly' | 'pwd' | 'dog';
 
 /**

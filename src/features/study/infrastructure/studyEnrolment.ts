@@ -24,16 +24,7 @@ export const readEnrolment = (data: unknown): EnrolmentDoc | null => {
 };
 
 /** Times a refused enrolment is tried again on a fresh read of the counter. */
-export const ENROL_ATTEMPTS = 12;
-
-/** How refused enrolments are retried: attempts, and the cap on each wait. */
-export interface EnrolRetry {
-  attempts: number;
-  capMs: number;
-}
-
-/** About 5 s in all at worst for a refusal that stands, as a closed invite's does. */
-export const ENROL_RETRY: EnrolRetry = { attempts: ENROL_ATTEMPTS, capMs: 1000 };
+export const ENROL_ATTEMPTS = 5;
 
 const refused = (error: unknown) =>
   typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'permission-denied';
@@ -41,18 +32,15 @@ const refused = (error: unknown) =>
 /** Enrols the account, or returns the enrolment it already has. */
 export const enrolInRegistry = async (
   firestore: Firestore,
-  input: { uid: string; invite: string; cohort: StudyCohort; at: number },
-  retry: EnrolRetry = ENROL_RETRY
+  input: { uid: string; invite: string; cohort: StudyCohort; at: number }
 ): Promise<EnrolmentDoc> => {
   for (let attempt = 1; ; attempt++) {
     try {
       return await enrolOnce(firestore, input);
     } catch (error) {
-      if (!refused(error) || attempt >= retry.attempts) throw error;
-      // Spread the retries, so accounts that collided do not collide again:
-      // exponential with full jitter, capped. Twenty joining in the same
-      // second lost all of five linear retries in the scripted check (run 6).
-      await new Promise(resolve => setTimeout(resolve, Math.random() * Math.min(retry.capMs, 100 * 2 ** attempt)));
+      if (!refused(error) || attempt >= ENROL_ATTEMPTS) throw error;
+      // Spread the retries, so accounts that collided do not collide again.
+      await new Promise(resolve => setTimeout(resolve, 50 * attempt + Math.random() * 100));
     }
   }
 };

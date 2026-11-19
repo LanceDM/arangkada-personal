@@ -1,3 +1,10 @@
+import type { PageAdminEntry, RoleGrantRecord } from '@/features/admin/domain/adminAccess';
+import type { ProgressResetRecord } from '@/features/admin/domain/progressReset';
+import type { QTableResetRecord, QTableStart } from '@/features/admin/domain/qTableReset';
+import type { QTableId } from '@/domain/competencyRouting/qTables';
+import type { SiteStatus } from '@/features/admin/domain/siteStatus';
+import type { BktSetsData, SavedValueSet, StartEditRecord } from '@/features/admin/domain/bktSetsAdmin';
+import type { CalibrationRecord, PilotRef } from '@/features/admin/domain/bktCalibration';
 /**
  * What Admin needs from the outside world, stated as an interface.
  *
@@ -7,8 +14,17 @@
  */
 import type {
   AttemptRow,
+  BackgroundRow,
+  ConfigVersionRow,
+  CourseLogRow,
+  LiveQTable,
+  ParticipantRow,
+  QUpdateRow,
+  RoleGrantRow,
   DailyRow,
   ExamRow,
+  SharedQTableRow,
+  SittingRow,
   UserRow,
 } from '@/features/admin/domain/adminReport';
 
@@ -17,5 +33,107 @@ export interface AdminReportRepository {
   attempts(): Promise<AttemptRow[]>;
   examResults(): Promise<ExamRow[]>;
   dailyResults(): Promise<DailyRow[]>;
+  /** The per-competency course: every participant's log, sittings and background form, and the shared table. */
+  courseLogs(): Promise<CourseLogRow[]>;
+  sittings(): Promise<SittingRow[]>;
+  backgrounds(): Promise<BackgroundRow[]>;
+  sharedQTable(): Promise<SharedQTableRow | null>;
 }
 
+/**
+ * The people, roles and settings records. Two implementations: Firestore
+ * collections (A) and SQL Connect tables (B), picked by the composition root.
+ */
+export interface StudyRecordsRepository {
+  participants(): Promise<ParticipantRow[]>;
+  roleGrants(): Promise<RoleGrantRow[]>;
+  configVersions(): Promise<ConfigVersionRow[]>;
+}
+
+/** Live reads for the dashboard: each callback runs again whenever the data changes. Returns the unsubscribe. */
+export interface LiveQTableRepository {
+  watchTable(tableId: QTableId, onChange: (table: LiveQTable | null) => void, onError: (error: Error) => void): () => void;
+  watchUpdates(tableId: QTableId, limit: number, onChange: (rows: QUpdateRow[]) => void, onError: (error: Error) => void): () => void;
+}
+
+/** The logged study records the export reads (Firestore in both implementations). */
+export interface StudyLogRepository {
+  /** Every participant's BKT update log entries. */
+  bktUpdates(): Promise<Record<string, unknown>[]>;
+  /** The shared Q-table's whole update log. */
+  /** One table's whole update log, in order: the study's unless another is named. */
+  qUpdates(tableId?: QTableId): Promise<Record<string, unknown>[]>;
+  /** Every participant's event stream. */
+  events(): Promise<Record<string, unknown>[]>;
+  /** One player's event stream, oldest first. */
+  eventsOf(uid: string): Promise<Record<string, unknown>[]>;
+}
+
+
+/** `site/status`: whether the site is open to players. Live for everyone; written by an admin. */
+export interface SiteStatusRepository {
+  watch(onChange: (status: SiteStatus) => void, onError: (error: Error) => void): () => void;
+  set(status: { suspended: boolean; message: string }, uid: string): Promise<void>;
+}
+
+/**
+ * Resets an account's course (domain/progressReset.ts): archives the course's
+ * records under `users/{uid}/archive/{resetId}` and removes the originals.
+ */
+export interface ProgressResetRepository {
+  /** Whether the account is enrolled in the study (its records are never reset). */
+  isEnrolled(uid: string): Promise<boolean>;
+  reset(uid: string, admin: { uid: string; email: string | null }, note: string): Promise<ProgressResetRecord & { resetId: string }>;
+  /** The account's past resets, newest first. */
+  history(uid: string): Promise<(ProgressResetRecord & { resetId: string })[]>;
+}
+
+/**
+ * Resets one Q-table (domain/qTableReset.ts): keeps the table as it stood
+ * under its `resets/{resetId}` and empties it, or starts it from a copy of the
+ * study's table, in one transaction. The update log is not touched.
+ */
+export interface QTableResetRepository {
+  reset(
+    tableId: QTableId,
+    admin: { uid: string; email: string | null },
+    note: string,
+    start?: QTableStart
+  ): Promise<QTableResetRecord & { resetId: string }>;
+  /** Past resets of that table, newest first. */
+  history(tableId: QTableId): Promise<(QTableResetRecord & { resetId: string })[]>;
+}
+
+/**
+ * The BKT value sets and pilot marks (2026-11-13): read together for the
+ * admin; a pilot mark changes with its log entry; a calibration is applied in
+ * one transaction that saves the set and points new players at it.
+ */
+export interface BktSetsRepository {
+  load(): Promise<BktSetsData>;
+  setPilot(player: PilotRef, on: boolean, adminUid: string): Promise<void>;
+  /**
+   * Saves `record` as Calibration N + 1 and makes it the set new players get.
+   * Refused when another calibration was applied since `expectedNumber` was read.
+   */
+  apply(record: CalibrationRecord, expectedNumber: number, admin: { uid: string; email: string | null }): Promise<SavedValueSet>;
+  /**
+   * Saves `record` as Edited start N + 1 (`set-N`) and makes it the set new
+   * players get. Refused, like `apply`, when another set was saved since.
+   */
+  editStart(record: StartEditRecord, expectedNumber: number, admin: { uid: string; email: string | null }): Promise<SavedValueSet>;
+}
+
+/**
+ * Admin access granted from the admin page (2026-11-18): `admins/{uid}` and the
+ * `roleGrants` records, followed live; a grant or revoke writes the entry and
+ * its record together.
+ */
+export interface AdminAccessRepository {
+  watch(
+    onChange: (state: { entries: PageAdminEntry[]; grants: RoleGrantRecord[] }) => void,
+    onError: (message: string) => void
+  ): () => void;
+  grant(target: { uid: string; email: string | null; name: string | null }, reason: string, by: { uid: string; email: string | null }): Promise<void>;
+  revoke(target: { uid: string; email: string | null }, reason: string, by: { uid: string; email: string | null }): Promise<void>;
+}

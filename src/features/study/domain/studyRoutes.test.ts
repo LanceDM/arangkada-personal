@@ -41,13 +41,11 @@ describe("a participant's paths", () => {
 });
 
 describe('the survey link', () => {
-  it("is the team's form with nothing about the participant in it", () => {
-    expect(surveyConfigured()).toBe(true);
-    expect(surveyConfigured('https://docs.google.com/forms/d/e/TEAM_TO_SUPPLY/viewform')).toBe(false);
-    const link = new URL(surveyLink());
-    expect(link.hostname).toBe('docs.google.com');
-    expect(link.pathname).toBe('/forms/d/e/1FAIpQLScp9jZxj269v6RtqZ_sxw-V7eWcbkBUYOdFMpMTtKYXcu6vIw/viewform');
-    expect(link.search).toBe('');
-    expect(new URL(surveyLink('https://docs.google.com/forms/d/e/abc/viewform?usp=pp_url&entry.1=P-0007')).search).toBe('');
+  it('carries the code alone, and is not ready until the team supplies the form', () => {
+    expect(surveyConfigured()).toBe(false);
+    const link = new URL(surveyLink('P-0007', 'https://docs.google.com/forms/d/e/abc/viewform', 'entry.123'));
+    expect(link.searchParams.get('entry.123')).toBe('P-0007');
+    expect(link.searchParams.get('usp')).toBe('pp_url');
+    expect([...link.searchParams.keys()].sort()).toEqual(['entry.123', 'usp']);
   });
 });

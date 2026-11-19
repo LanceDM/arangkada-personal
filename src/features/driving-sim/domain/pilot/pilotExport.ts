@@ -16,21 +16,10 @@
 //   counted and flagged, never used.
 // - Training is every other attempt saved before that post-test started:
 //   course entries, reviews and free replays alike, because BKT reads them all.
-// - A course attempt is one the per-competency course saved: it carries an evidence number (`evidenceSeq`), which only
-//   the course's commit writes. Every other attempt is the frozen design's.
 // - A graded decision is a logged decision with a verdict (not `neutral`)
 //   that is not a standing penalty, as the Optimized group's routing counts
-//   its budget. A penalty is what the decision record marks as one, or a log
-//   marked `standing`. A course attempt marks its own, so it is
-//   always told apart; a frozen attempt is told apart only by its decision
-//   record, and where it has none every verdict counts and the participant
-//   is flagged.
-// - A course attempt's records are its FSM log, its entry in the course log
-//   (`users/{uid}/courseLog`, by `attemptId`) and, where it holds BKT
-//   evidence, at least one BKT update citing it (`users/{uid}/bktUpdates`, by
-//   `origin.ref`). The tutorial (Level 0) has neither: it commits no log entry
-//   and is never evidence. A frozen attempt's are its
-//   FSM log, its decision record and its routing record.
+//   its budget. Where an attempt has no decision record to tell a penalty
+//   apart, every verdict counts and the participant is flagged.
 // - The weakest competency is the one with the lowest BKT score over the
 //   whole training history, ties to the least observed: what the Optimized
 //   group's routing reads.
@@ -50,8 +39,7 @@
 // - Drive time runs from the attempt's first FSM transition to its save. An
 //   entry left unfinished is never saved, so it is not timed; its later
 //   completion records how many times it was started.
-// - How an attempt was played is its routing record's `play`, or on a course
-//   attempt its own `play`: the controls
+// - How an attempt was played is its routing record's `play`: the controls
 //   the car was driven with, the window, the display's median frame rate,
 //   and the real time the world lost because the device could not keep up.
 //   The world runs 60 steps per second of real time, so a reaction time is
@@ -62,8 +50,6 @@ import type { ActionLog } from '@/domain/learner/attempt';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { StudyCohort } from '@/domain/study/participantCode';
 import { buildBKTLearnerProfile } from '@/domain/learner/mastery/buildBKTProfile';
-import { isEvidence } from '@/domain/learner/mastery/evidenceBKT';
-import { TUTORIAL_LEVEL } from '@/domain/study/evidence';
 import { COMPETENCIES, getLowestScoringCompetency } from '@/domain/learner/profile';
 import { stateId } from '@/domain/routing/routingTypes';
 import { readStoredCursor, type RoutingGroup } from '@/features/driving-sim/domain/adaptive/courseRouting';
@@ -78,24 +64,13 @@ import type {
   RoutingTelemetryDoc,
 } from '@/features/driving-sim/domain/telemetry/routingTelemetry';
 
-/**
- * Whether a course attempt's other records name it: an entry in the course
- * log with its `attemptId`, and a BKT update whose `origin.ref` is its id.
- */
-export interface CourseRecordsFound {
-  courseLog: boolean;
-  bktUpdate: boolean;
-}
-
-/** One saved attempt and the documents beside it, as stored. */
+/** One saved attempt and the three documents beside it, as stored. */
 export interface StoredAttempt {
   id: string;
   attempt: LevelAttempt;
   fsm: FsmTelemetryDoc | null;
   decisions: DecisionTelemetryDoc | null;
   routing: RoutingTelemetryDoc | null;
-  /** For a course attempt, which of its course records were found; absent when they were not looked for. */
-  course?: CourseRecordsFound;
 }
 
 
@@ -128,7 +103,6 @@ export interface AttemptDocuments {
   fsm: unknown;
   decisions: unknown;
   routing: unknown;
-  course?: CourseRecordsFound;
 }
 
 /** One account's documents, as a reader got them. */
@@ -160,34 +134,8 @@ export const participantSourceOf = (documents: AccountDocuments): ParticipantSou
     fsm: fsmAsRead((stored.fsm ?? null) as FsmTelemetryDoc | null),
     decisions: (stored.decisions ?? null) as DecisionTelemetryDoc | null,
     routing: (stored.routing ?? null) as RoutingTelemetryDoc | null,
-    ...(stored.course ? { course: stored.course } : {}),
   })),
 });
-
-/** Whether the per-competency course saved the attempt: only its commit writes an evidence number. */
-export const isCourseAttempt = ({ attempt }: Pick<StoredAttempt, 'attempt'>): boolean =>
-  typeof (attempt as { evidenceSeq?: unknown }).evidenceSeq === 'number';
-
-/** Whether a course attempt commits a course log entry: every drive but the tutorial's. */
-export const courseLogExpected = ({ attempt }: Pick<StoredAttempt, 'attempt'>): boolean => attempt.levelId !== TUTORIAL_LEVEL;
-
-/**
- * Whether a course attempt writes BKT updates: it is not the tutorial, which
- * is never evidence (`orderEvidence`), and holds at least one log BKT reads.
- */
-export const bktUpdateExpected = ({ attempt }: Pick<StoredAttempt, 'attempt'>): boolean =>
-  attempt.levelId !== TUTORIAL_LEVEL && attempt.logs.some(isEvidence);
-
-/**
- * Of a saved attempt's document as read, which course records it must have:
- * null for an attempt that is not the course's. The admin store reads them
- * through this, so it waits for exactly what the export would flag missing.
- */
-export const courseRecordsExpected = (document: unknown): CourseRecordsFound | null => {
-  const attempt = document as LevelAttempt | null;
-  if (!attempt || !isCourseAttempt({ attempt })) return null;
-  return { courseLog: courseLogExpected({ attempt }), bktUpdate: bktUpdateExpected({ attempt: { ...attempt, logs: attempt.logs ?? [] } }) };
-};
 
 /** An attempt's kind: the routing record's, `legacy` for a Legacy attempt, `unrecorded` without one. */
 export type AttemptKind = RoutedEntryKind | 'legacy' | 'unrecorded';
@@ -211,9 +159,8 @@ export const attemptTimedOut = ({ attempt }: StoredAttempt): boolean => attempt.
 /** Real time an attempt may lose to a device that could not keep up before it is flagged. */
 export const FELL_BEHIND_MS = 1000;
 
-/** How the attempt was played: where its routing record kept it, or a course attempt kept it itself. */
-export const attemptPlay = (stored: StoredAttempt): PlayConditions | null =>
-  stored.routing?.play ?? (isCourseAttempt(stored) ? (stored.attempt.play ?? null) : null);
+/** How the attempt was played, where its routing record kept it. */
+export const attemptPlay = ({ routing }: StoredAttempt): PlayConditions | null => routing?.play ?? null;
 
 /** The controls a set of attempts was driven with, named once each: `keyboard`, `touch`, or both. */
 const inputsUsed = (plays: readonly PlayConditions[]): string | null => {
@@ -247,21 +194,19 @@ const isCompetency = (value: unknown): value is DrivingCompetency =>
   COMPETENCIES.includes(value as DrivingCompetency);
 
 /**
- * The attempt's graded decisions, standing penalties excluded: those the
- * decision record marks and those the logs mark (`standing`). `penaltiesKnown`
- * is false where neither can be relied on: a frozen attempt without a whole
- * decision record, which may predate the logs' marker.
+ * The attempt's graded decisions, standing penalties excluded where the
+ * decision record can tell them apart. `penaltiesKnown` is false where it
+ * cannot.
  */
-export const gradedDecisions = (stored: StoredAttempt): { decisions: GradedDecision[]; penaltiesKnown: boolean } => {
-  const { attempt, decisions } = stored;
+export const gradedDecisions = ({ attempt, decisions }: StoredAttempt): { decisions: GradedDecision[]; penaltiesKnown: boolean } => {
   const penalties = new Set(
     (decisions?.decisions ?? []).filter(record => record.kind === 'penalty').map(record => record.logIndex)
   );
-  const penaltiesKnown = isCourseAttempt(stored) || (decisions !== null && !decisions.truncated);
+  const penaltiesKnown = decisions !== null && !decisions.truncated;
   return {
     penaltiesKnown,
     decisions: attempt.logs.flatMap((log, index) =>
-      log.result === 'neutral' || log.standing || penalties.has(index)
+      log.result === 'neutral' || penalties.has(index)
         ? []
         : [{ competency: isCompetency(log.competency) ? log.competency : null, correct: log.result === 'correct' }]
     ),
@@ -291,7 +236,6 @@ export const PARTICIPANT_FLAGS = [
   'unassigned', 'not-enrolled', 'manual-assignment',
   'missing-routing-record', 'override', 'legacy-attempts', 'played-before-assignment', 'group-mismatch',
   'truncated-telemetry', 'play-unrecorded', 'fell-behind', 'missing-fsm-record', 'missing-decision-record', 'timed-out',
-  'missing-course-log', 'missing-bkt-record',
   'mock-exam-during-play', 'daily-challenge-during-play', 'penalties-unknown',
 ] as const;
 
@@ -436,13 +380,10 @@ export const participantExport = (source: ParticipantSource): ParticipantExport 
   if (!assignment) flags.add('unassigned');
   if (!source.participant) flags.add('not-enrolled');
   if (assignment?.method === 'manual') flags.add('manual-assignment');
-  // A course attempt has no routing or decision record: those are the frozen
-  // design's. It has a course log entry and BKT updates instead.
-  const courseAttempts = new Set(attempts.filter(isCourseAttempt));
   for (const stored of attempts) {
     const routing = stored.routing;
     if (!routing) {
-      if (!courseAttempts.has(stored)) flags.add('missing-routing-record');
+      flags.add('missing-routing-record');
       continue;
     }
     if (routing.override) flags.add('override');
@@ -454,18 +395,13 @@ export const participantExport = (source: ParticipantSource): ParticipantExport 
     if (routing.truncated) flags.add('truncated-telemetry');
   }
   for (const stored of attempts) {
-    if ((stored.routing || courseAttempts.has(stored)) && !attemptPlay(stored)) flags.add('play-unrecorded');
+    if (stored.routing && !attemptPlay(stored)) flags.add('play-unrecorded');
     if ((attemptPlay(stored)?.lostMs ?? 0) >= FELL_BEHIND_MS) flags.add('fell-behind');
     if (attemptTimedOut(stored)) flags.add('timed-out');
   }
   for (const stored of attempts) {
     if (!stored.fsm) flags.add('missing-fsm-record');
     else if (stored.fsm.truncated) flags.add('truncated-telemetry');
-    if (courseAttempts.has(stored)) {
-      if (stored.course && !stored.course.courseLog && courseLogExpected(stored)) flags.add('missing-course-log');
-      if (stored.course && !stored.course.bktUpdate && bktUpdateExpected(stored)) flags.add('missing-bkt-record');
-      continue;
-    }
     if (!stored.decisions) flags.add('missing-decision-record');
     else if (stored.decisions.truncated) flags.add('truncated-telemetry');
   }

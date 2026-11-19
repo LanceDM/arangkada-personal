@@ -8,9 +8,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-  sendEmailVerification,
   signOut as firebaseSignOut,
-  applyActionCode,
   confirmPasswordReset,
   onAuthStateChanged,
   GoogleAuthProvider,
@@ -23,31 +21,17 @@ import {
   type User,
 } from 'firebase/auth';
 import { auth } from '@/shared/infrastructure/firebase/client';
+import { hasAdminAccess } from '@/shared/infrastructure/firebase/adminAccess';
 import { appUrl } from '@/shared/lib/appUrl';
 import type { AuthGateway } from '@/features/auth/application/ports';
 import type { AuthUser } from '@/features/auth/domain/userProfile';
 import { createUserProfile, getUserProfile } from './FirebaseUserRepository';
 
-/**
- * Admin is read from the token the session already holds, so a claim granted
- * since that token was issued arrives with the next sign-in, not this one.
- */
-const hasAdminClaim = async (user: User): Promise<boolean> => {
-  try {
-    const { claims } = await user.getIdTokenResult();
-    return claims.admin === true;
-  } catch {
-    // An expired token that cannot be refreshed, e.g. offline: the session
-    // still opens, without admin.
-    return false;
-  }
-};
-
 const toAuthUser = async (user: User): Promise<AuthUser> => ({
   uid: user.uid,
   email: user.email,
   emailVerified: user.emailVerified,
-  isAdmin: await hasAdminClaim(user),
+  isAdmin: await hasAdminAccess(user),
 });
 
 const NEW_ACCOUNT = {
@@ -74,7 +58,6 @@ const signIn = async (email: string, password: string): Promise<AuthUser> => {
 
 const signUp = async (email: string, password: string, username: string): Promise<AuthUser> => {
   const result = await createUserWithEmailAndPassword(auth, email, password);
-  await sendEmailVerification(result.user);
   await createUserProfile(result.user.uid, {
     email,
     username,
@@ -94,6 +77,18 @@ const createStudyAccount = async (identity: string, password: string): Promise<A
   await createUserProfile(result.user.uid, {
     email: '',
     username: 'Participant',
+    createdAt: Date.now(),
+    ...NEW_ACCOUNT,
+  });
+  return toAuthUser(result.user);
+};
+
+/** A regular account made with a username alone: no email on its profile, nothing sent anywhere. */
+const createUsernameAccount = async (identity: string, password: string, username: string): Promise<AuthUser> => {
+  const result = await createUserWithEmailAndPassword(auth, identity, password);
+  await createUserProfile(result.user.uid, {
+    email: '',
+    username,
     createdAt: Date.now(),
     ...NEW_ACCOUNT,
   });
@@ -135,6 +130,7 @@ export const firebaseAuthGateway: AuthGateway = {
   signIn,
   signUp,
   createStudyAccount,
+  createUsernameAccount,
   changePassword: async (currentPassword, newPassword) => {
     const user = auth.currentUser;
     if (!user?.email) throw new Error('No password account is signed in.');
@@ -150,9 +146,6 @@ export const firebaseAuthGateway: AuthGateway = {
   },
   confirmNewPassword: async (oobCode, newPassword) => {
     await confirmPasswordReset(auth, oobCode, newPassword);
-  },
-  verifyEmailCode: async oobCode => {
-    await applyActionCode(auth, oobCode);
   },
   completeRedirectSignIn,
   observeUser: onChange => {

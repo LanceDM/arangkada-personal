@@ -18,7 +18,7 @@ import {
   resolveLaneRole,
 } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { intersectionGeometry } from '@/features/driving-sim/domain/world/junctionGeometry';
-import type { EventPlacement } from '@/features/driving-sim/domain/world/eventPlacement';
+import { crossingWalk, type EventPlacement } from '@/features/driving-sim/domain/world/eventPlacement';
 import { bodyAt, bodyRect } from '@/features/driving-sim/domain/world/WorldBody';
 import {
   mergeLaneGeometry,
@@ -66,7 +66,9 @@ export const signSceneNodes = (
    * gantry over the graded lane is a marker of it, so below `full` it is not
    * put up; the junction, the sign and everything solid are.
    */
-  showsResponse: boolean
+  showsResponse: boolean,
+  /** The frame clock, for the people walking a junction's crossing. */
+  now: number = Date.now()
 ): SceneNode[] => {
   const { event, screenY, roadX, handled } = placement;
   const { correctAction, maneuver } = event;
@@ -136,7 +138,7 @@ export const signSceneNodes = (
         // People the event declares are standing on the stripes the junction
         // paints. Without them a variant whose whole question is "people are
         // still in the junction" would be driveable straight through.
-        nodes.push(pedestrianGroupNode(roadX, junction.boxBottom + 11, people));
+        nodes.push(pedestrianGroupNode(roadX, junction.boxBottom + 11, people, crossingWalk(placement, now)));
       }
       break;
     }
@@ -159,6 +161,8 @@ export const signSceneNodes = (
         roadX,
         screenY,
         cleared: handled,
+        // They walk down the footpath to the crossing as it comes up, then wait.
+        arrived: crossingWalk(placement, now).walkIn,
         // Who is waiting comes from the scenario, never from the sign: an
         // asset filename must not be able to move the world.
         ...(event.pedestrians?.[0] ? { pedestrian: event.pedestrians[0].kind } : {}),

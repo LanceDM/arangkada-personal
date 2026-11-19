@@ -1,41 +1,47 @@
 import { describe, expect, it } from 'vitest';
-import type { CourseLogRow } from './courseAdmin';
-import { directoryAttemptOf, directoryPlayers, playerHistory, searchPlayers } from './playerDirectory';
+import type { UserRow } from './adminReport';
+import { accountActivity, directoryPlayers, historyRow, playerHistory, searchPlayers } from './playerDirectory';
+
+const user = (id: string, over: Partial<UserRow> = {}): UserRow => ({ id, email: `${id}@example.com`, username: id.toUpperCase(), createdAt: 1, totalScore: 0, longestStreak: 0, bestExamScore: 0, ...over });
 
 describe('the player directory', () => {
-  const users = [
-    { id: 'u1', username: 'P-0001', createdAt: 2000 },
-    { id: 'u2', username: 'kyle', email: 'team@example.test', createdAt: 3000, language: 'fil' },
-  ];
-  const enrolments = [
-    { uid: 'u1', code: 'P-0001', cohort: 'study' },
-    { uid: 'u9', code: 'T-0001', cohort: 'test' },
-  ];
+  const players = directoryPlayers([user('ana', { createdAt: 2 }), user('ben', { username: 'Ben Cruz', createdAt: 3 })], new Map([['ana', 'P-0001']]), ['ghost'], uid => uid);
 
-  it('lists every profile and every enrolment without one, newest first, named by code where enrolled', () => {
-    const players = directoryPlayers(users, enrolments);
-    expect(players.map(p => p.uid)).toEqual(['u2', 'u1', 'u9']);
-    expect(players.find(p => p.uid === 'u9')).toMatchObject({ label: 'T-0001', code: 'T-0001', cohort: 'test', username: null, createdAt: null });
-    expect(players.find(p => p.uid === 'u2')).toMatchObject({ label: 'kyle', code: null, email: 'team@example.test', language: 'fil' });
+  it('lists every account, newest first, and accounts with records but no user document', () => {
+    expect(players.map(p => p.uid)).toEqual(['ben', 'ana', 'ghost']);
+    expect(players[2]).toMatchObject({ email: null, code: null, user: null });
   });
 
-  it('finds an account when every word typed matches its name, email, code or id', () => {
-    const players = directoryPlayers(users, enrolments);
-    expect(searchPlayers(players, 'example kyle').map(p => p.uid)).toEqual(['u2']);
-    expect(searchPlayers(players, 't-0001').map(p => p.uid)).toEqual(['u9']);
+  it('finds an account by any word of its name, email, code or id', () => {
+    expect(searchPlayers(players, 'p-0001').map(p => p.uid)).toEqual(['ana']);
+    expect(searchPlayers(players, 'ben cruz').map(p => p.uid)).toEqual(['ben']);
+    expect(searchPlayers(players, 'example.com').map(p => p.uid)).toEqual(['ben', 'ana']);
     expect(searchPlayers(players, '  ')).toHaveLength(3);
+    expect(searchPlayers(players, 'nobody')).toEqual([]);
+  });
+});
+
+describe('a player\'s history', () => {
+  const events: Record<string, unknown>[] = [
+    { seq: 1, at: 10, type: 'session_started', payload: { restored: false, language: 'en' } },
+    { seq: 2, at: 11, type: 'ui_action', payload: { action: 'signed_in' } },
+    { seq: 3, at: 12, type: 'page_viewed', payload: { path: '/play' } },
+    { seq: 4, at: 13, type: 'drive_ended', phase: 'DRIVE(1)', levelId: 1, payload: {} },
+    { seq: 5, at: 14, type: 'ui_action', payload: { action: 'signed_out', from: 'header' } },
+    { seq: 6, at: 15, type: 'app_error', payload: { message: 'boom' } },
+  ];
+
+  it('reads sign-ins and sign-outs as account events', () => {
+    expect(historyRow(events[1])).toMatchObject({ kind: 'account', title: 'Signed in' });
+    expect(historyRow(events[4])).toMatchObject({ kind: 'account', title: 'Signed out', detail: 'from header' });
+    expect(accountActivity(events).map(r => r.title)).toEqual(['Signed out', 'Signed in', 'Session started']);
   });
 
-  it('builds the history from saved drives and course steps, newest first, with no score', () => {
-    const attempt = directoryAttemptOf('a1', 1000, { levelId: 3, finalScore: 180, timestamp: 1000 });
-    expect(attempt).toEqual({ id: 'a1', savedAt: 1000, levelId: 3 });
-    const step: CourseLogRow = {
-      userId: 'u1', kind: 'drive', levelId: 3, phase: 'DRIVE(3)', verdicts: [], endReason: null, timestamp: 1500, rewards: [],
-      decisions: [{ competency: 'road_signs', action: 'practice' } as CourseLogRow['decisions'][number]],
-    };
-    const history = playerHistory([attempt], [step]);
-    expect(history.map(row => row.title)).toEqual(['Course: drive · DRIVE(3)', 'Drive saved: Level 3']);
-    expect(history[0].detail).toBe('road_signs → practice');
-    expect(JSON.stringify(history)).not.toContain('180');
+  it('lists newest first, hides page views unless asked, and names course steps and errors', () => {
+    const rows = playerHistory(events, false);
+    expect(rows.map(r => r.seq)).toEqual([6, 5, 4, 2, 1]);
+    expect(rows.find(r => r.seq === 4)).toMatchObject({ kind: 'course', title: 'Drive ended', detail: 'DRIVE(1) · Level 1' });
+    expect(rows[0]).toMatchObject({ kind: 'error', detail: 'boom' });
+    expect(playerHistory(events, true)).toHaveLength(6);
   });
 });

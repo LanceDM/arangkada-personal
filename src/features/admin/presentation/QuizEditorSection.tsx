@@ -40,6 +40,7 @@ import {
 import type { QuizBankSnapshot } from '@/features/admin/application/quizPorts';
 import type { ImportRow, ImportStatus } from '@/features/admin/domain/quizImport';
 import { EmptyState, Notice, Panel, SectionHeader, SectionTabs } from './adminUi';
+import { imageUrl } from '@/shared/lib/publicAsset';
 
 const FIELD_CLASS =
   'w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
@@ -73,7 +74,7 @@ const ItemPreview = ({ draft }: { draft: QuizItemDraft }) => (
   <div className="space-y-3 rounded-lg border border-border bg-background/60 p-4">
     <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Preview</p>
     {draft.image.startsWith(QUIZ_IMAGE_PREFIX) && (
-      <img src={draft.image} alt="The item's picture" className="mx-auto max-h-32 w-auto object-contain" />
+      <img src={imageUrl(draft.image)} alt="The item's picture" className="mx-auto max-h-32 w-auto object-contain" />
     )}
     <p className="text-base font-semibold text-foreground">{draft.question || 'The question'}</p>
     <ol className="space-y-1.5">

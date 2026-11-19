@@ -5,7 +5,7 @@ import { studyMessages as m, studyValueMessages as v } from './messages';
 
 /**
  * The end of the study: thanks, what the study was
- * for, and the code. It shows no score,
+ * for, and the code. DRAFT: the team writes the debrief; it shows no score,
  * as no study screen does.
  */
 export const StudyDebrief = ({ code }: { code: string }) => {

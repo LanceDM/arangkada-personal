@@ -60,6 +60,6 @@ describe('the overview', () => {
   });
 
   it('counts where the next Continue takes the participants in the course, and only them', () => {
-    expect(pilotOverview(pilotRows(registry()), NOW).places).toEqual([{ place: 'Level 2', participants: 1 }]);
+    expect(pilotOverview(pilotRows(registry()), NOW).places).toEqual([{ place: 'Level 2, drive', participants: 1 }]);
   });
 });

@@ -23,10 +23,13 @@ const firebaseConfig = useEmulator
       appId: import.meta.env.VITE_FIREBASE_APP_ID,
     };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+/** Whether this build talks to the local emulators. */
+export const usingEmulator = useEmulator;
 
 if (useEmulator) {
   if (!configured && import.meta.env.VITE_USE_FIREBASE_EMULATOR !== 'true') {
@@ -38,9 +41,6 @@ if (useEmulator) {
   // network it is the address the page came from.
   const page = typeof window === 'undefined' ? '' : window.location.hostname;
   const emulatorHost = page === '' || page === 'localhost' || page === '127.0.0.1' || page === '[::1]' ? '127.0.0.1' : page;
-  // The ports are firebase.json's; a second set of emulators (the scripted check's, firebase.check.json) names its own.
-  const authPort = Number(import.meta.env.VITE_EMULATOR_AUTH_PORT ?? 9099);
-  const firestorePort = Number(import.meta.env.VITE_EMULATOR_FIRESTORE_PORT ?? 8080);
-  connectAuthEmulator(auth, `http://${emulatorHost}:${authPort}`, { disableWarnings: true });
-  connectFirestoreEmulator(db, emulatorHost, firestorePort);
+  connectAuthEmulator(auth, `http://${emulatorHost}:9099`, { disableWarnings: true });
+  connectFirestoreEmulator(db, emulatorHost, 8080);
 }

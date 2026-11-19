@@ -1,7 +1,7 @@
 /**
  * Every person drawn on the road: the pedestrian sprite itself, the group
  * composer that puts a scene's declared `pedestrians` on a crossing, and the
- * roadside checkpoint officer.
+ * LTO checkpoint officer.
  *
  * `drawPedestrian` is the single sprite every category file reaches for —
  * crossingRenderer.ts composes it onto a crosswalk, junctionRenderer.ts and checkpointRenderer.ts
@@ -9,7 +9,7 @@
  * post; that composition happens in the file that owns the road furniture.
  */
 import type { CrossingPedestrian, PedestrianKind } from '@/features/driving-sim/domain/scenario/scenarioScene';
-import { crossingPedestrianPositions } from '@/features/driving-sim/domain/world/sceneGeometry';
+import { crossingPedestrianPositions, strideAt } from '@/features/driving-sim/domain/world/sceneGeometry';
 
 /**
  * Somebody on foot, at the size the collision pass gives them.
@@ -24,12 +24,16 @@ export const drawPedestrian = (
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  type: 'student' | 'lola' | 'pwd' | 'regular' | 'dog' = 'regular'
+  type: 'student' | 'lola' | 'pwd' | 'regular' | 'dog' = 'regular',
+  /** Mid-stride, -1..1 (`strideAt`), when walking; absent when standing. */
+  stride?: number
 ) => {
   if (type === 'dog') {
-    drawDog(ctx, x, y);
+    drawDog(ctx, x, y, stride);
     return;
   }
+  // Legs apart and swinging while walking, together while standing.
+  const swing = stride ?? 0;
   ctx.save();
   ctx.translate(x, y);
   // Contact shadow: what separates a figure from the road under it.
@@ -47,8 +51,8 @@ export const drawPedestrian = (
   ctx.arc(0, -10, 6.2, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillRect(-5.2, -6, 10.4, 16);
-  ctx.fillRect(-5.2, 9, 4.2, 9.5);
-  ctx.fillRect(0.2, 9, 4.2, 9.5);
+  ctx.fillRect(-5.2 + swing * 1.6, 9, 4.2, 9.5 - Math.max(0, swing) * 1.5);
+  ctx.fillRect(0.2 - swing * 1.6, 9, 4.2, 9.5 - Math.max(0, -swing) * 1.5);
   ctx.fillStyle = '#deb887';
   ctx.beginPath();
   ctx.arc(0, -10, 5, 0, Math.PI * 2);
@@ -56,8 +60,8 @@ export const drawPedestrian = (
   ctx.fillStyle = bodyColor;
   ctx.fillRect(-4, -5, 8, 14);
   ctx.fillStyle = '#334155';
-  ctx.fillRect(-4, 9, 3, 8);
-  ctx.fillRect(1, 9, 3, 8);
+  ctx.fillRect(-4 + swing * 1.6, 9, 3, 8 - Math.max(0, swing) * 1.5);
+  ctx.fillRect(1 - swing * 1.6, 9, 3, 8 - Math.max(0, -swing) * 1.5);
   if (type === 'student') {
     ctx.fillStyle = '#ff6b6b';
     ctx.fillRect(4, -3, 4, 8);
@@ -159,7 +163,8 @@ export const SPRITE_FOR_KIND: Record<PedestrianKind, PedestrianSprite> = {
 };
 
 /** A dog on a lead, at a dog's size: low and long, beside whoever walks it. */
-const drawDog = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+const drawDog = (ctx: CanvasRenderingContext2D, x: number, y: number, stride = 0) => {
+  const step = stride * 1.2;
   ctx.save();
   ctx.translate(x, y);
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
@@ -171,10 +176,10 @@ const drawDog = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
   ctx.fillStyle = '#a16207';
   ctx.fillRect(-7, 6, 13, 5); // body
   ctx.fillRect(5, 3, 5, 5); // head
-  ctx.fillRect(-7, 11, 2, 5); // legs
-  ctx.fillRect(-2, 11, 2, 5);
-  ctx.fillRect(2, 11, 2, 5);
-  ctx.fillRect(5, 11, 2, 5);
+  ctx.fillRect(-7 + step, 11, 2, 5); // legs
+  ctx.fillRect(-2 - step, 11, 2, 5);
+  ctx.fillRect(2 + step, 11, 2, 5);
+  ctx.fillRect(5 - step, 11, 2, 5);
   ctx.fillRect(-10, 4, 3, 2); // tail
   ctx.fillStyle = '#1f2937';
   ctx.fillRect(9, 4, 1.5, 1.5); // eye
@@ -199,10 +204,18 @@ export const drawCrossingPedestrians = (
   ctx: CanvasRenderingContext2D,
   roadX: number,
   screenY: number,
-  people: readonly CrossingPedestrian[]
+  people: readonly CrossingPedestrian[],
+  /** Where the world put each of them this frame, null once off the road; absent, where they stand. */
+  xs?: readonly (number | null)[],
+  walking = false,
+  /** Beside the road: each one's step along the footpath this frame. */
+  dys?: readonly number[]
 ) => {
-  crossingPedestrianPositions(roadX, people).forEach((x, index) => {
-    drawPedestrian(ctx, x, screenY - 13, SPRITE_FOR_KIND[people[index].kind]);
+  const at = xs ?? crossingPedestrianPositions(roadX, people);
+  at.forEach((x, index) => {
+    if (x === null) return;
+    const dy = dys?.[index] ?? 0;
+    const stride = dys ? strideAt(dy * 2.2) : walking ? strideAt(x + index * 5) : undefined;
+    drawPedestrian(ctx, x, screenY - 13 + dy, SPRITE_FOR_KIND[people[index].kind], stride);
   });
 };
-

@@ -2,6 +2,7 @@ import { getLevelModule } from '@/features/driving-sim/domain/scenario/content/l
 import { buildEvents, pickWeighted, type SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { SignCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
+import { withOnePlate } from '@/features/driving-sim/domain/scenario/garagePlate';
 import type { GarageHotspot, LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 
 const levelModule = getLevelModule(2);
@@ -104,7 +105,7 @@ const documentsPool: HotspotContent[] = [
       fields: [
         { label: 'CR', value: 'Present, original' },
         { label: 'OR', value: 'Present, paid' },
-        { label: 'COC (Insurance)', value: 'Expired 2026-04-15' },
+        { label: 'COC (Insurance)', value: 'Expired 2026-05-06' },
         { label: 'CEC', value: 'On file' },
         { label: 'RFID', value: 'Affixed, readable' },
       ],
@@ -149,6 +150,7 @@ const documentsPool: HotspotContent[] = [
 const plateShell: HotspotShell = { id: 'plate', label: 'Rear Plate & RFID', area: 'Registration', x: 0.5, y: 0.86, detail: 'plate' };
 const platePool: HotspotContent[] = [
   {
+    plate: 'ABC 1435',
     observation:
       'The plate reads ABC 1435. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. Today is the 20th of May.',
     question:
@@ -170,6 +172,7 @@ const platePool: HotspotContent[] = [
     severity: 'major',
   },
   {
+    plate: 'XYZ 8829',
     observation:
       'The plate reads XYZ 8829. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. Today is the 20th of May.',
     question:
@@ -184,13 +187,14 @@ const platePool: HotspotContent[] = [
     penaltyMessage:
       'The registration deadline was still months away. Refusing a properly-scheduled vehicle is also a wrong call.',
     rewardMessage:
-      'Correct. Last digit 9 means the deadline is September - this plate is still within schedule.',
+      'Correct. Last digit 9 means the deadline is September — this plate is still within schedule.',
     lawCitation:
       'The last digit of the plate sets the registration month and the second-to-last digit sets the weekly deadline; digits 1 to 3 fall on the 1st week.',
     competency: 'document_awareness',
     severity: 'major',
   },
   {
+    plate: 'DEF 4471',
     observation:
       'The plate reads DEF 4471. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. The OR in the glove box shows the last renewal was in January of last year. Today is the 20th of May.',
     question:
@@ -212,6 +216,7 @@ const platePool: HotspotContent[] = [
     severity: 'major',
   },
   {
+    plate: 'GHK 5508',
     observation:
       'The plate reads GHK 5508. It is clean, firmly attached, and fully legible, and the RFID sticker is intact. Today is the 20th of May.',
     question:
@@ -231,74 +236,6 @@ const platePool: HotspotContent[] = [
       'The last digit of the plate sets the registration month and the second-to-last digit sets the weekly deadline; digits 1 to 3 fall on the 1st week.',
     competency: 'document_awareness',
     severity: 'major',
-  },
-];
-
-// The driver's license, a third document point (2026-11-12), so a garage-only drive can give document_awareness its 3 scenarios.
-// Written only from what Level 12's source material quotes: T8 (RA
-// 4136, RO105, Duty to have License) and V4 (the fine for failure to carry
-// it), with the module's own line that the license authorizes the person and
-// registration the vehicle. Nothing here turns on a license's validity, code
-// or restrictions, which Level 1 grades.
-const licenseShell: HotspotShell = { id: 'license', label: "Wallet — Driver's License", area: 'Documents', x: 0.26, y: 0.5 };
-const licensePool: HotspotContent[] = [
-  {
-    observation:
-      "The OR and CR are in the glove box, but your driver's license is not in your wallet. You left it at home.",
-    question: "You are about to drive off. Do you have what you must carry to operate the vehicle?",
-    choices: [
-      { label: 'Go — the OR and CR in the glove box cover the driver too', action: 'accelerate' },
-      { label: "No-Go — the driver's license must be carried whenever you drive", action: 'stop' },
-      { label: 'Go — the license is needed only on long trips', action: 'brake' },
-    ],
-    correctAction: 'stop',
-    points: 20,
-    penaltyMessage:
-      "The license must be carried at all times when operating a motor vehicle. The OR and CR authorize the vehicle, not the driver.",
-    rewardMessage: 'Correct no-go. Go back for the license before the trip.',
-    lawCitation:
-      'Republic Act No. 4136 (RO105, Duty to have License): "The license must be carried at all times when operating a motor vehicle." Failure to carry a driver\'s license, CR or OR while driving: Php 1,000.00 (FDM Vol. 2).',
-    competency: 'document_awareness',
-    severity: 'minor',
-    document: {
-      officerLine: 'Check what you carry before you drive.',
-      documentType: "Driver's License",
-      holder: 'You, the driver',
-      fields: [
-        { label: 'License card', value: 'Not in your wallet, left at home' },
-        { label: 'OR / CR', value: 'In the glove box' },
-      ],
-      vehicle: 'Private passenger car — category M1',
-      tripPurpose: 'Private family trip',
-    },
-  },
-  {
-    observation: "Your driver's license is in your wallet, and the OR and CR are in the glove box.",
-    question: "You are about to drive off. Do you have what you must carry to operate the vehicle?",
-    choices: [
-      { label: "Go — the license is with you, and the vehicle's papers are on board", action: 'accelerate' },
-      { label: 'No-Go — only professional drivers need to carry a license', action: 'stop' },
-      { label: 'No-Go — the license is shown only at the licensing office, never carried', action: 'brake' },
-    ],
-    correctAction: 'accelerate',
-    points: 20,
-    penaltyMessage: 'The license was with you and the papers were on board. Refusing a trip you may lawfully make is also a wrong call.',
-    rewardMessage: 'Correct. The license authorizes the driver, the registration the vehicle, and both are in order.',
-    lawCitation:
-      'Republic Act No. 4136 (RO105, Duty to have License): "The license must be carried at all times when operating a motor vehicle and shall be shown and/or surrendered for cause and upon demand to any person with authority under this Republic Act No. 4136 to confiscate the same."',
-    competency: 'document_awareness',
-    severity: 'minor',
-    document: {
-      officerLine: 'Check what you carry before you drive.',
-      documentType: "Driver's License",
-      holder: 'You, the driver',
-      fields: [
-        { label: 'License card', value: 'In your wallet' },
-        { label: 'OR / CR', value: 'In the glove box' },
-      ],
-      vehicle: 'Private passenger car — category M1',
-      tripPurpose: 'Private family trip',
-    },
   },
 ];
 
@@ -405,7 +342,7 @@ const brakesPool: HotspotContent[] = [
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'The brakes checked out fine. Delaying a trip over healthy brakes is also a wrong call.',
-    rewardMessage: 'Correct. Firm pedal, no leak - the brakes are ready.',
+    rewardMessage: 'Correct. Firm pedal, no leak — the brakes are ready.',
     lawCitation: 'Do not drive until leaking or malfunctioning brakes are repaired.',
     competency: 'hazard_awareness',
     severity: 'critical',
@@ -439,7 +376,7 @@ const brakesPool: HotspotContent[] = [
     correctAction: 'accelerate',
     points: 25,
     penaltyMessage: 'The brakes checked out fine. Delaying a trip over healthy, serviced brakes is also a wrong call.',
-    rewardMessage: 'Correct. Firm pedal, no leak, recently serviced - the brakes are ready.',
+    rewardMessage: 'Correct. Firm pedal, no leak, recently serviced — the brakes are ready.',
     lawCitation: 'Do not drive until leaking or malfunctioning brakes are repaired.',
     competency: 'hazard_awareness',
     severity: 'critical',
@@ -480,7 +417,7 @@ const lightsPool: HotspotContent[] = [
     correctAction: 'stop',
     points: 15,
     penaltyMessage:
-      'A busted brake light and a damaged headlight reduce visibility and signal clearly to other drivers - this must be fixed first.',
+      'A busted brake light and a damaged headlight cut what you can see and stop you signalling clearly to other drivers — they must be fixed first.',
     rewardMessage: 'Correct no-go. Busted bulbs and a damaged lens are fixed before the trip starts.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
     competency: 'hazard_awareness',
@@ -497,7 +434,7 @@ const lightsPool: HotspotContent[] = [
     ],
     correctAction: 'stop',
     points: 15,
-    penaltyMessage: 'Non-working turn signals leave other drivers with no warning of your intentions - this must be fixed first.',
+    penaltyMessage: 'Non-working turn signals leave other drivers with no warning of your intentions — this must be fixed first.',
     rewardMessage: 'Correct no-go. Non-working signal lights are fixed before the trip starts.',
     lawCitation: 'Check for busted bulbs, dirty lenses, and anything blocking windshield or mirror visibility.',
     competency: 'hazard_awareness',
@@ -643,7 +580,7 @@ const trunkPool: HotspotContent[] = [
     ],
     correctAction: 'stop',
     points: 15,
-    penaltyMessage: 'A flat spare cannot help with a real breakdown - this must be sorted before the trip.',
+    penaltyMessage: 'A flat spare cannot help with a real breakdown — this must be sorted before the trip.',
     rewardMessage: 'Correct no-go. A usable spare is sorted before leaving.',
     lawCitation:
       'Vehicles must carry a reflectorized early warning device; the accessories and tools check also covers the spare tire, jack, and wrenches.',
@@ -703,8 +640,8 @@ const cockpitPool: HotspotContent[] = [
     ],
     correctAction: 'accelerate',
     points: 20,
-    penaltyMessage: 'Neutral, mirrors set, driver alert - this was ready to go. Delaying it is also a wrong call.',
-    rewardMessage: 'Correct. Neutral gear, mirrors set, and an alert driver - ready for the trip.',
+    penaltyMessage: 'Neutral, mirrors set, driver alert — this was ready to go. Delaying it is also a wrong call.',
+    rewardMessage: 'Correct. Neutral gear, mirrors set, and an alert driver — ready for the trip.',
     lawCitation:
       'For manual transmission, confirm neutral before starting. Delay the trip if the driver is sick, sleepy, distracted, or unable to focus.',
     competency: 'general_rules',
@@ -712,7 +649,7 @@ const cockpitPool: HotspotContent[] = [
   },
   {
     observation:
-      'The gear lever is in neutral and the mirrors are set, but the driver is scrolling on a phone and not paying attention to the road ahead.',
+      'The gear lever is in neutral and the mirrors are set, but you are scrolling on your phone and not paying attention to anything around you.',
     question: 'You are about to start the engine. What is the correct decision?',
     choices: [
       { label: 'No-Go — a distracted driver should not start the trip until focused', action: 'stop' },
@@ -722,7 +659,7 @@ const cockpitPool: HotspotContent[] = [
     correctAction: 'stop',
     points: 20,
     penaltyMessage: 'A distracted driver is as unfit to drive as an unroadworthy car.',
-    rewardMessage: 'Correct. Delay the trip until the driver is actually focused.',
+    rewardMessage: 'Correct. Delay the trip until you are actually focused.',
     lawCitation:
       'For manual transmission, confirm neutral before starting. Delay the trip if the driver is sick, sleepy, distracted, or unable to focus.',
     competency: 'general_rules',
@@ -739,8 +676,8 @@ const cockpitPool: HotspotContent[] = [
     ],
     correctAction: 'accelerate',
     points: 20,
-    penaltyMessage: 'Neutral, mirrors set, driver alert and belted in - this was ready to go. Delaying it is also a wrong call.',
-    rewardMessage: 'Correct. Neutral gear, mirrors set, alert, and belted in - ready for the trip.',
+    penaltyMessage: 'Neutral, mirrors set, driver alert and belted in — this was ready to go. Delaying it is also a wrong call.',
+    rewardMessage: 'Correct. Neutral gear, mirrors set, alert, and belted in — ready for the trip.',
     lawCitation:
       'For manual transmission, confirm neutral before starting. Delay the trip if the driver is sick, sleepy, distracted, or unable to focus.',
     competency: 'general_rules',
@@ -768,7 +705,7 @@ const beltsPool: HotspotContent[] = [
     points: 20,
     penaltyMessage: 'Belts are worn on every trip, however short, and the driver advises the passengers to wear theirs.',
     rewardMessage: 'Correct. Everyone belted and the doors locked, then you move off.',
-    lawCitation: 'Level 2 module, Before Starting The Engine: "Wear the seatbelt, advise passengers to wear seatbelts, and lock all doors."',
+    lawCitation: 'RA 8750 (Seat Belts Use Act), Sec. 4: the driver and front-seat passengers wear seat belts while the vehicle is running. Before starting the engine: wear the seatbelt, advise passengers to wear theirs, and lock all doors.',
     competency: 'general_rules',
     severity: 'major',
   },
@@ -784,7 +721,7 @@ const beltsPool: HotspotContent[] = [
     points: 20,
     penaltyMessage: 'Belts on and doors locked: this was ready to go. Delaying it is also a wrong call.',
     rewardMessage: 'Correct. Belted and locked, ready for the trip.',
-    lawCitation: 'Level 2 module, Before Starting The Engine: "Wear the seatbelt, advise passengers to wear seatbelts, and lock all doors."',
+    lawCitation: 'RA 8750 (Seat Belts Use Act), Sec. 4: the driver and front-seat passengers wear seat belts while the vehicle is running. Before starting the engine: wear the seatbelt, advise passengers to wear theirs, and lock all doors.',
     competency: 'general_rules',
     severity: 'major',
   },
@@ -804,7 +741,7 @@ const controlsPool: HotspotContent[] = [
     points: 20,
     penaltyMessage: 'An automatic is started in Park, and the seat is set so the pedals and wheel can be used without leaning.',
     rewardMessage: 'Correct. Park before starting, and a seat that lets you reach everything.',
-    lawCitation: 'Level 2 module, Before Starting The Engine: "Automatic transmission — make sure the shifting lever is in Park before starting." "Sit comfortably and adjust the seat so pedals and steering can be used without leaning forward or backward."',
+    lawCitation: 'Before starting the engine: with an automatic transmission, make sure the lever is in Park; sit comfortably and adjust the seat so the pedals and steering can be used without leaning forward or backward.',
     competency: 'general_rules',
     severity: 'major',
   },
@@ -820,7 +757,7 @@ const controlsPool: HotspotContent[] = [
     points: 20,
     penaltyMessage: 'Park, the seat set and a proper grip: this was ready to go. Delaying it is also a wrong call.',
     rewardMessage: 'Correct. Ready to start.',
-    lawCitation: 'Level 2 module, Before Starting The Engine: lever in Park for an automatic; seat adjusted; "Grip the steering wheel at 9-and-3 or 10-and-2."',
+    lawCitation: 'Before starting the engine: lever in Park for an automatic; seat adjusted; grip the steering wheel at 9-and-3 or 10-and-2.',
     competency: 'general_rules',
     severity: 'major',
   },
@@ -829,7 +766,6 @@ const controlsPool: HotspotContent[] = [
 export const HOTSPOTS: { shell: HotspotShell; pool: HotspotContent[] }[] = [
   { shell: documentsShell, pool: documentsPool },
   { shell: plateShell, pool: platePool },
-  { shell: licenseShell, pool: licensePool },
   { shell: tiresShell, pool: tiresPool },
   { shell: brakesShell, pool: brakesPool },
   { shell: lightsShell, pool: lightsPool },
@@ -843,15 +779,8 @@ export const HOTSPOTS: { shell: HotspotShell; pool: HotspotContent[] }[] = [
 export const buildHotspots = (pick: (pool: HotspotContent[]) => HotspotContent): GarageHotspot[] =>
   HOTSPOTS.map(({ shell, pool }) => ({ ...shell, ...pick(pool) }));
 
-// ── The road: none. Retired road slots, kept as practice ──
-// Level 2 is the garage alone (2026-11-12). Its road is a
-// short, ungraded drive out, so the level still starts and ends through the
-// driving FSM (IDLE -> DRIVING -> level_end) and the routing FSM can still
-// append `+ practice(c)` to it. Its three driveway slots measured pedestrians,
-// right of way and speed on the same scenery three times over; they are kept
-// below as practice other levels borrow, never placed on Level 2's road.
-export const SLOT_DISTANCES: number[] = [];
-export const SLOTS: SlotVariant[][] = [];
+// ── Road events (drive out of the driveway) ─────
+export const SLOT_DISTANCES = [840, 1500, 2160];
 
 const driveOutSlot: SlotVariant[] = [
   {
@@ -866,7 +795,7 @@ const driveOutSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You held back at the footpath until the pedestrian was clear.',
     duration: 200,
     lawCitation:
-      'Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
+      'RA 4136, Sec. 44(a): Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
     competency: 'pedestrians',
     severity: 'critical',
   },
@@ -883,7 +812,7 @@ const driveOutSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You held back at the footpath until the whole group was clear.',
     duration: 200,
     lawCitation:
-      'Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
+      'RA 4136, Sec. 44(a): Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
     competency: 'pedestrians',
     severity: 'critical',
   },
@@ -900,7 +829,7 @@ const driveOutSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You held back at the footpath until they were clear.',
     duration: 200,
     lawCitation:
-      'Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
+      'RA 4136, Sec. 44(a): Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
     competency: 'pedestrians',
     severity: 'critical',
   },
@@ -917,7 +846,7 @@ const driveOutSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You held back at the footpath until they and the dog were clear.',
     duration: 200,
     lawCitation:
-      'Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
+      'RA 4136, Sec. 44(a): Check surroundings before moving off. Pedestrians already crossing a driveway or footpath have the right of way.',
     competency: 'pedestrians',
     severity: 'critical',
   },
@@ -935,7 +864,7 @@ const mergeSlot: SlotVariant[] = [
       'Pushing into a moving traffic stream without signaling or yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded, and merged once a safe gap opened.',
     duration: 200,
-    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'RA 4136, Sec. 43(a): a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -950,7 +879,7 @@ const mergeSlot: SlotVariant[] = [
       'Pulling out ahead of an approaching jeepney without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded to the jeepney, and merged once it had passed.',
     duration: 200,
-    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'RA 4136, Sec. 43(a): a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -965,7 +894,7 @@ const mergeSlot: SlotVariant[] = [
       'Pulling out ahead of an approaching tricycle without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded to the tricycle, and merged once it had passed.',
     duration: 200,
-    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'RA 4136, Sec. 43(a): a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -980,7 +909,7 @@ const mergeSlot: SlotVariant[] = [
       'Pushing out into a lane a weaving motorcycle is using without yielding invites a side collision.',
     rewardMessage: 'Correct. You signaled, yielded until the motorcycle cleared, and merged into a safe gap.',
     duration: 200,
-    lawCitation: 'Republic Act No. 4136, as given in this module: a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
+    lawCitation: 'RA 4136, Sec. 43(a): a vehicle entering a highway from a private road or driveway shall yield the right-of-way to all vehicles approaching on that highway. Check your surroundings and signal before you pull out.',
     competency: 'right_of_way',
     severity: 'major',
   },
@@ -1003,7 +932,7 @@ const settleSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You settled to the posted limit and kept the drive smooth.',
     duration: 200,
     lawCitation:
-      'Move smoothly and obey road rules; observe the posted speed limit for the road you have entered.',
+      'RA 4136, Sec. 35: Move smoothly and obey road rules; observe the posted speed limit for the road you have entered.',
     competency: 'speed_control',
     severity: 'minor',
   },
@@ -1043,7 +972,7 @@ const settleSlot: SlotVariant[] = [
     id: 'level2.settle.school-zone',
     type: 'speed_limit',
     speedRule: 'maximum',
-    // Republic Act No. 4136, Section 35(b) row 4: "passing school zones", 20 km/h (speed-limits pack, L6).
+    // RA 4136 §35(b) row 4: "passing school zones", 20 km/h (speed-limits pack, L6).
     postedSpeed: 20,
     description: 'Residential street: a school zone stretch begins here.',
     correctAction: 'brake',
@@ -1053,40 +982,35 @@ const settleSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You were at 20 km/h or less through the school zone stretch.',
     duration: 200,
     lawCitation:
-      'Republic Act No. 4136, Section 35(b): the rate of speed shall not exceed 20 km per hour passing school zones.',
+      'RA 4136 Section 35(b): the rate of speed shall not exceed 20 km per hour passing school zones.',
     competency: 'speed_control',
     severity: 'minor',
   },
 ];
 
-/**
- * Level 2's former road scenarios, offered to later levels as `+ practice(c)`
- * and as a course drive's borrowed items (`remediationPool`), as before.
- * Without them Levels 3 and 4 have 2 speed_control scenarios each, short of
- * their 3.
- */
-export const LEVEL2_PRACTICE: SlotVariant[][] = [driveOutSlot, mergeSlot, settleSlot];
+export const SLOTS: SlotVariant[][] = [driveOutSlot, mergeSlot, settleSlot];
 
 const level2Base = {
   id: 2,
   name: levelModule.title,
   moduleId: levelModule.id,
   description: levelModule.desc,
-  // The garage is the level. The drive out is the run-out the level always
-  // had after its last scenario (2,560 - 2,160 units); nothing on it is graded.
-  roadLength: 400,
+  // The bulk of this level is the garage stage; the road section is only the
+  // drive out of the driveway.
+  roadLength: 2560,
   roadClass: 'city_street',
   speedLimit: 30,
-  // The garage is worth 220 and the drive nothing: 70% of 220, the share a
-  // course drive's displayed pass mark uses (composeDrive). Free play only; the
-  // course passes each topic at 2 of 3. Stars count mistakes (domain/learner/stars).
-  requiredScore: 154,
+  // Garage is worth 160 and the drive 80. The pass mark sits above 160 on
+  // purpose, so a flawless inspection still has to be driven out properly.
+  requiredScore: 170,
+  stars2: 200,
+  stars3: 230,
 } as const;
 
 /**
- * A fresh roll of the drive: one inspection finding per garage hotspot, and
- * the empty drive out. No sign/marking catalogue here (this level's content
- * is vehicle inspection, not signs), so
+ * A fresh roll of the drive: one inspection finding per garage hotspot, plus
+ * one road scenario per slot. No sign/marking catalogue here (this level's
+ * content is vehicle-inspection and driveway scenarios, not signs), so
  * `coverage` is accepted only for signature parity with the other pool-based
  * levels and is unused. A weakCompetency narrows each pool to variants tagged
  * with that competency first - a no-op for pools that are entirely one
@@ -1102,12 +1026,12 @@ export const createLevel2 = (
 
   return {
     ...level2Base,
-    garage: {
+    garage: withOnePlate({
       plate: 'ABC 1435',
       intro:
         'Your trip starts in the garage. Inspect every point on the vehicle before the engine is started, and decide Go or No-Go for each one.',
       hotspots: buildHotspots(pick),
-    },
+    }),
     events: buildEvents(SLOTS, SLOT_DISTANCES, pick),
   };
 };
@@ -1119,11 +1043,11 @@ export const createLevel2 = (
  */
 export const level2: LevelConfig = {
   ...level2Base,
-  garage: {
+  garage: withOnePlate({
     plate: 'ABC 1435',
     intro:
       'Your trip starts in the garage. Inspect every point on the vehicle before the engine is started, and decide Go or No-Go for each one.',
     hotspots: buildHotspots(pool => pool[0]),
-  },
+  }),
   events: buildEvents(SLOTS, SLOT_DISTANCES, pool => pool[0]),
 };

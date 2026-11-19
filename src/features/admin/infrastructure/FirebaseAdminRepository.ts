@@ -5,13 +5,17 @@
  * own, so `userId` is reconstructed from each document's parent path rather
  * than stored redundantly on the document.
  */
-import { collection, collectionGroup, getDocs, orderBy, query } from 'firebase/firestore';
+import { collection, collectionGroup, doc, getDoc, getDocs, orderBy, query } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
 import type { AdminReportRepository } from '@/features/admin/application/ports';
 import type {
   AttemptRow,
+  BackgroundRow,
+  CourseLogRow,
   DailyRow,
   ExamRow,
+  SharedQTableRow,
+  SittingRow,
   UserRow,
 } from '@/features/admin/domain/adminReport';
 
@@ -36,6 +40,7 @@ const getAdminAttempts = async (): Promise<AttemptRow[]> => {
       violations: data.violations,
       correctDecisions: data.correctDecisions,
       logs: data.logs,
+      ...(data.session ? { session: data.session } : {}),
     };
   });
 };
@@ -64,9 +69,55 @@ const getAdminDailyResults = async (): Promise<DailyRow[]> => {
   });
 };
 
+const getAdminCourseLogs = async (): Promise<CourseLogRow[]> => {
+  const snap = await getDocs(collectionGroup(db, 'courseLog'));
+  return snap.docs
+    .map(d => ({ ...(d.data() as Omit<CourseLogRow, 'userId'>), userId: ownerIdOf(d.ref) }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+};
+
+const getAdminSittings = async (): Promise<SittingRow[]> => {
+  const snap = await getDocs(collectionGroup(db, 'assessmentSittings'));
+  return snap.docs
+    .map(d => {
+      // `ability` (the Rasch estimate) is left behind: IRT is out of the export for now.
+      const data = d.data() as Omit<SittingRow, 'userId'>;
+      return {
+        userId: ownerIdOf(d.ref),
+        kind: data.kind,
+        levelId: data.levelId ?? null,
+        attempt: data.attempt ?? null,
+        answers: data.answers ?? [],
+        timestamp: data.timestamp,
+      };
+    })
+    .sort((a, b) => a.timestamp - b.timestamp);
+};
+
+const getAdminBackgrounds = async (): Promise<BackgroundRow[]> => {
+  const snap = await getDocs(collectionGroup(db, 'study'));
+  return snap.docs
+    .filter(d => d.id === 'background')
+    .map(d => {
+      const data = d.data() as Omit<BackgroundRow, 'userId'>;
+      return { userId: ownerIdOf(d.ref), formVersion: data.formVersion, answers: data.answers, timestamp: data.timestamp };
+    });
+};
+
+const getSharedQTable = async (): Promise<SharedQTableRow | null> => {
+  const snap = await getDoc(doc(db, 'policy', 'competencyQ'));
+  if (!snap.exists()) return null;
+  const data = snap.data() as SharedQTableRow;
+  return { table: data.table ?? {}, updates: Number(data.updates ?? 0), updatedAt: Number(data.updatedAt ?? 0) };
+};
+
 export const firebaseAdminReportRepository: AdminReportRepository = {
   users: getAdminUsers,
   attempts: getAdminAttempts,
   examResults: getAdminExamResults,
   dailyResults: getAdminDailyResults,
+  courseLogs: getAdminCourseLogs,
+  sittings: getAdminSittings,
+  backgrounds: getAdminBackgrounds,
+  sharedQTable: getSharedQTable,
 };

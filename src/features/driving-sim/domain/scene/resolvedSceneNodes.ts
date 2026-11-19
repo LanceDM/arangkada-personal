@@ -23,6 +23,7 @@ import {
 import { intersectionGeometry } from '@/features/driving-sim/domain/world/junctionGeometry';
 import {
   ownLaneX,
+  crossingWalk,
   pedestrianWalkOff,
   type EventPlacement,
 } from '@/features/driving-sim/domain/world/eventPlacement';
@@ -182,12 +183,14 @@ export const resolvedSceneNodes = (
       break;
 
     case 'driveway-crossing': {
-      const walkedOff = pedestrianWalkOff(distance, event.triggerAtDistance, handled, placement.answeredForSteps ?? null);
+      const walkedOff = pedestrianWalkOff(distance, event.triggerAtDistance, handled, placement.handledAt ?? null, now);
+      const { walkIn } = crossingWalk(placement, now);
       nodes.push({
         kind: 'driveway-mouth',
         roadX,
         screenY,
         walkedOff,
+        walkIn,
         people: scene.pedestrians,
         // Once they have walked clear they are out of the road, so a driver who
         // already stopped for them cannot then be punished for it. Only the
@@ -195,7 +198,7 @@ export const resolvedSceneNodes = (
         solids:
           walkedOff < 1
             ? scene.pedestrians.flatMap((person, index) =>
-                person.solid ? [pedestrianBody(drivewayPedestrianX(walkedOff) - index * DRIVEWAY_GROUP_GAP, screenY - 3)] : []
+                person.solid ? [pedestrianBody(drivewayPedestrianX(walkedOff, walkIn) - index * DRIVEWAY_GROUP_GAP, screenY - 3)] : []
               )
             : [],
       });
@@ -207,7 +210,7 @@ export const resolvedSceneNodes = (
       // is on it. A level swaps any one without touching the other two.
       furniture({ furniture: 'warning-sign', x: roadX - 28, y: screenY - 20, legend: 'PED' });
       nodes.push({ kind: 'crossing-approach', roadX, y: screenY - 16, height: 34 });
-      nodes.push(pedestrianGroupNode(roadX, screenY, scene.pedestrians));
+      nodes.push(pedestrianGroupNode(roadX, screenY, scene.pedestrians, crossingWalk(placement, now)));
       break;
 
     case 'tutorial-cue':

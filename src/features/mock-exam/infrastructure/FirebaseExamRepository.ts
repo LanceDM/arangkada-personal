@@ -1,18 +1,35 @@
-import { addDoc, collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
+import { readQuizItem, servedItems, type QuizItemDoc } from '@/features/driving-sim';
 import type { ExamRepository } from '@/features/mock-exam/application/ports';
-import type { ExamAttempt, RemoteExamQuestion } from '@/features/mock-exam/domain/examAttempt';
+import type { ExamAttempt } from '@/features/mock-exam/domain/examAttempt';
+import { lawPartOf, type ExamQuestion } from '@/features/mock-exam/domain/examItems';
+
+/** A served quiz item as an exam item; null when its module names no level. */
+const toExamQuestion = (item: QuizItemDoc): ExamQuestion | null => {
+  const level = Number(/(\d+)$/.exec(item.moduleId)?.[1]);
+  if (!Number.isInteger(level)) return null;
+  return {
+    id: item.id,
+    question: item.question,
+    choices: item.options,
+    correctIndex: item.correctIndex,
+    level,
+    lawCitation: lawPartOf(item.source),
+    ...(item.image ? { image: item.image } : {}),
+  };
+};
 
 /**
- * The authored question bank, when there is one. An empty result is normal and
- * means the caller should fall back to the local bank.
+ * The served question bank's quiz items: the same items the short quizzes
+ * draw from. Test items (`use == 'test'`) are never read here.
  */
-const getExamQuestions = async (): Promise<RemoteExamQuestion[]> => {
-  const snap = await getDocs(collection(db, 'exam_questions'));
-  return snap.docs
-    .map(d => d.data() as RemoteExamQuestion)
-    .filter(q => q.isActive !== false)
-    .sort((a, b) => a.id - b.id);
+const getExamQuestions = async (): Promise<ExamQuestion[]> => {
+  const snap = await getDocs(query(collection(db, 'quiz_items'), where('use', '==', 'quiz')));
+  const items = snap.docs.map(d => readQuizItem(d.id, d.data())).filter((item): item is QuizItemDoc => item !== null);
+  return servedItems(items)
+    .map(toExamQuestion)
+    .filter((item): item is ExamQuestion => item !== null);
 };
 
 const saveExamAttempt = async (uid: string, attempt: ExamAttempt) => {

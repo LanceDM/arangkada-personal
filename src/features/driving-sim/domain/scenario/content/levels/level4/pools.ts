@@ -1,7 +1,7 @@
-import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import type { ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { MarkingPlate } from '@/features/driving-sim/domain/scenario/scenarioScene';
+import type { DrivingCompetency } from '@/domain/learner/competency';
 
 /** Folder the level module already publishes its marking images from. */
 const IMG = 'arangkada_extracted_images/level4/';
@@ -33,7 +33,7 @@ interface MarkingSpec extends MarkingPlate {
   /**
    * The competency the marking is graded under, where it is not lane
    * discipline: a crossing is about pedestrians, a painted limit about speed
-   * (the groupmate's catalogue review).
+   * (catalogue review 2026-10-28).
    */
   competency?: DrivingCompetency;
 }
@@ -43,6 +43,9 @@ interface MarkingSpec extends MarkingPlate {
  * so a catalogue of thirty-odd stays readable — and so the deduction quoted in
  * the penalty text is always the one the rule engine will really take.
  */
+/** The standard every marking's rule comes from (DPWH Highway Safety Design Standards, Part 2). */
+const MARKING_STANDARD = 'Pavement marking standard (DPWH DO 41, s. 2012)';
+
 const marking = (spec: MarkingSpec): SlotVariant => {
   const points = spec.points ?? 20;
   const severity = spec.severity ?? 'major';
@@ -56,7 +59,7 @@ const marking = (spec: MarkingSpec): SlotVariant => {
     duration: 200,
     penaltyMessage: `${spec.penalty}`,
     rewardMessage: `${spec.reward}`,
-    lawCitation: spec.law,
+    lawCitation: `${MARKING_STANDARD}${spec.id === 'level4.junction-space.yellow-box' ? '; RA 4136, Sec. 54' : ''}: ${spec.law}`,
     competency: spec.competency ?? 'lane_discipline',
     severity,
     ...(spec.scene ? { scene: spec.scene } : {}),
@@ -135,7 +138,7 @@ const longitudinalSlot: SlotVariant[] = [
     type: 'overtaking_zone',
     correctAction: 'accelerate',
     description: 'Double solid yellow line: a slow vehicle is ahead and traffic is coming the other way.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Double Solid Yellow Line means no overtaking and no crossing.',
+    law: 'A Double Solid Yellow Line means no overtaking and no crossing.',
     penalty: 'You crossed a double solid yellow line into the oncoming lane. It forbids both overtaking and crossing, whatever the road ahead looks like.',
     reward: 'Correct. You read the double yellow and held your lane.',
     requiredLane: {
@@ -156,7 +159,7 @@ const longitudinalSlot: SlotVariant[] = [
     type: 'overtaking_zone',
     correctAction: 'accelerate',
     description: 'Single solid yellow line: a slow vehicle is ahead and traffic is coming the other way.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Single Solid Yellow Line allows crossing but prohibits overtaking.',
+    law: 'A Single Solid Yellow Line allows crossing but prohibits overtaking.',
     penalty: 'You overtook on a single solid yellow line. Crossing to reach a driveway is allowed; passing another vehicle on it is not.',
     reward: 'Correct. Crossing is allowed on this line, overtaking is not, and you stayed put.',
     requiredLane: {
@@ -181,7 +184,7 @@ const longitudinalSlot: SlotVariant[] = [
     type: 'overtaking_zone',
     correctAction: 'accelerate',
     description: 'Solid white center line: a slow vehicle is ahead and traffic is coming the other way.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): Crossing a solid white Center Or Separation Line requires special care and is discouraged.',
+    law: 'Crossing a solid white Center Or Separation Line requires special care and is discouraged.',
     penalty: 'You crossed the center line with oncoming traffic present. It separates opposing traffic for exactly that reason.',
     reward: 'Correct. You treated the center line as the separation it is.',
     requiredLane: {
@@ -202,7 +205,7 @@ const longitudinalSlot: SlotVariant[] = [
     type: 'overtaking_zone',
     correctAction: 'accelerate',
     description: 'Broken and solid yellow line, solid on your side: a slow vehicle is ahead.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): On a Broken And Solid Yellow Line, crossing and overtaking are allowed from the broken-line side with caution and prohibited from the solid-line side.',
+    law: 'On a Broken And Solid Yellow Line, crossing and overtaking are allowed from the broken-line side with caution and prohibited from the solid-line side.',
     penalty: 'You overtook from the solid-line side. The broken side belongs to oncoming traffic; yours was the one that forbids it.',
     reward: 'Correct. You read which of the two lines was yours and stayed on your side of it.',
     requiredLane: {
@@ -224,7 +227,7 @@ const longitudinalSlot: SlotVariant[] = [
     correctAction: 'accelerate',
     neutral: true,
     description: 'Broken yellow line: a slow vehicle is ahead and the road beyond it is clear.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Broken Yellow Line allows crossing and overtaking, with necessary precaution.',
+    law: 'A Broken Yellow Line allows crossing and overtaking, with necessary precaution.',
     penalty: 'This marking has no wrong choice — recognizing that a broken line permits the pass is the whole test.',
     reward: 'Correct. A broken yellow line permits overtaking; whether you took it was yours to decide.',
   }),
@@ -240,7 +243,7 @@ const longitudinalSlot: SlotVariant[] = [
     correctAction: 'accelerate',
     neutral: true,
     description: 'Single yellow line with a broken white line, broken side yours: a slow vehicle is ahead.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Single Yellow Line With Broken White Line prohibits overtaking and crossing from the solid-yellow side and allows both from the broken-white side.',
+    law: 'A Single Yellow Line With Broken White Line prohibits overtaking and crossing from the solid-yellow side and allows both from the broken-white side.',
     penalty: 'This marking has no wrong choice — knowing which of the two lines is yours is the whole test.',
     reward: 'Correct. The broken white line was on your side, so the pass was yours to take or leave.',
   }),
@@ -255,7 +258,7 @@ const longitudinalSlot: SlotVariant[] = [
     type: 'overtaking_zone',
     correctAction: 'accelerate',
     description: 'Single yellow line with a broken white line, solid side yours: a slow vehicle is ahead.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Single Yellow Line With Broken White Line prohibits overtaking and crossing from the solid-yellow side and allows both from the broken-white side.',
+    law: 'A Single Yellow Line With Broken White Line prohibits overtaking and crossing from the solid-yellow side and allows both from the broken-white side.',
     penalty: 'You overtook from the solid-yellow side. The broken white line belongs to the oncoming approach, not yours.',
     reward: 'Correct. The solid yellow line was on your side, and you stayed behind it.',
     requiredLane: {
@@ -277,7 +280,7 @@ const longitudinalSlot: SlotVariant[] = [
     correctAction: 'accelerate',
     neutral: true,
     description: 'Broken white lane lines: a slow vehicle is ahead in your lane and the next lane is clear.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Lane Line allows changing lanes provided it is safe and will not obstruct other traffic.',
+    law: 'A Lane Line allows changing lanes provided it is safe and will not obstruct other traffic.',
     penalty: 'This marking has no wrong choice — a lane line only ever permits a change, it never requires one.',
     reward: 'Correct. A lane line permits changing lanes; taking the gap or not was your call to make.',
   }),
@@ -319,7 +322,7 @@ const laneChangeSlot: SlotVariant[] = [
     art: 'chevron_marking',
     correctAction: 'brake',
     description: 'Chevrons: a hatched wedge is painted over the lane nearest the center line ahead, ending at a raised island.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Chevron guides traffic into the correct turning lane at a signalized intersection where an island separates movements, or marks a change in horizontal alignment.',
+    law: 'A Chevron guides traffic into the correct turning lane at a signalized intersection where an island separates movements, or marks a change in horizontal alignment.',
     penalty: 'You drove into the hatched wedge. The chevrons fold traffic out of that lane because there is a raised island at the end of it.',
     reward: 'Correct. You moved right of the wedge, clear of the island.',
     effect: { narrowsTo: 0.67, openSide: 'right', span: 90 },
@@ -341,7 +344,7 @@ const laneChangeSlot: SlotVariant[] = [
     art: 'edge_line',
     correctAction: 'accelerate',
     description: 'Edge lines: solid white lines mark where the carriageway ends and the shoulder begins.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): An Edge Line separates the outside edge of the road from the shoulder.',
+    law: 'An Edge Line separates the outside edge of the road from the shoulder.',
     penalty: 'The shoulder is not a lane. It is unmade surface, and the edge line is where the road actually stops.',
     reward: 'Correct. You held the carriageway and stayed off the shoulder.',
     requiredLane: {
@@ -359,7 +362,7 @@ const laneChangeSlot: SlotVariant[] = [
     art: 'pavement_arrow',
     correctAction: 'accelerate',
     description: 'Pavement arrows: an arrow is painted in each lane ahead, and your route turns right beyond them.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): Pavement Arrows are white arrows painted on the road surface for lane control, showing which direction a lane permits.',
+    law: 'Pavement Arrows are white arrows painted on the road surface for lane control, showing which direction a lane permits.',
     penalty: 'A painted arrow assigns the lane as firmly as an overhead sign does.',
     reward: 'Correct. You took the lane the arrow assigned.',
     requiredLane: {
@@ -396,7 +399,7 @@ const traverseSlot: SlotVariant[] = [
     correctAction: 'stop',
     points: 25,
     description: 'Stop line: a broad white bar is painted across your lane ahead.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): Vehicles are required to stop before the white stop line, at the designated point tied to a Stop sign or signal.',
+    law: 'Vehicles are required to stop before the white stop line, at the designated point tied to a Stop sign or signal.',
     penalty: 'Creeping past the stop line to see around traffic puts your bonnet in the junction before you have stopped.',
     reward: 'Correct. You stopped fully behind the line.',
   }),
@@ -411,7 +414,7 @@ const traverseSlot: SlotVariant[] = [
     correctAction: 'brake',
     points: 25,
     description: 'Give-way line: two adjacent broken white lines cross your lane at the junction ahead.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Give-Way Or Holding Line consists of two adjacent broken white lines across the carriageway, where the driver must give way to all traffic in accordance with the standard Give Way sign.',
+    law: 'A Give-Way Or Holding Line consists of two adjacent broken white lines across the carriageway, where the driver must give way to all traffic in accordance with the standard Give Way sign.',
     penalty: 'A give-way line carries the same duty as a Give Way sign, whether or not the sign is there.',
     reward: 'Correct. You slowed at the holding line and gave way.',
   }),
@@ -433,7 +436,7 @@ const traverseSlot: SlotVariant[] = [
     // reach the crossing before losing enough speed.
     warningDistance: 600,
     description: 'Pedestrian lane at a signalized junction: the signal is red, the stop line sits behind the stripes, and someone is out on the crossing.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A signalized Pedestrian Intersection marking marks the pedestrian crossing zone; the vehicle must stop clear of it, not on top of it.',
+    law: 'A signalized Pedestrian Intersection marking marks the pedestrian crossing zone; the vehicle must stop clear of it, not on top of it.',
     penalty: 'You stopped on the crossing. That forces pedestrians, including PWDs and children, into moving traffic to get around you.',
     reward: 'Correct. You held behind the line until the signal released you.',
   }),
@@ -449,7 +452,7 @@ const traverseSlot: SlotVariant[] = [
     correctAction: 'stop',
     points: 25,
     description: 'Pedestrian lane with no signal: painted stripes cross the road and someone is stepping onto them.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A non-signalized Pedestrian Intersection marking marks a crossing without a traffic light; the vehicle must still stop clear of it and yield to pedestrians.',
+    law: 'A non-signalized Pedestrian Intersection marking marks a crossing without a traffic light; the vehicle must still stop clear of it and yield to pedestrians.',
     penalty: 'No signal does not mean no crossing. The marking alone obliges you to stop clear of it and yield.',
     reward: 'Correct. You stopped clear of the crossing and yielded.',
   }),
@@ -481,7 +484,7 @@ const junctionSpaceSlot: SlotVariant[] = [
     correctAction: 'stop',
     points: 25,
     description: 'Yellow box: a hatched yellow box covers the junction and the traffic beyond it is not moving.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): Never enter a yellow box unless there is enough space on the far side to clear it completely, even on a green light.',
+    law: 'Never enter a yellow box unless there is enough space on the far side to clear it completely, even on a green light.',
     penalty: 'You stopped inside the yellow box. It blocks cross-traffic, which is the entire reason the box is painted.',
     reward: 'Correct. You held behind the box until the far side was clear.',
   }),
@@ -507,7 +510,7 @@ const reservedLaneSlot: SlotVariant[] = [
     side: 'right',
     correctAction: 'accelerate',
     description: 'Bus and PUJ lane line: a solid yellow line reserves the curb-side lane for buses and public utility jeepneys.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Bus And PUJ Lane Line is a solid yellow line separating other vehicles from buses and PUJs.',
+    law: 'A Bus And PUJ Lane Line is a solid yellow line separating other vehicles from buses and PUJs.',
     penalty: 'An empty reserved lane is still reserved. Using it is a lane violation whether or not a bus is in it.',
     reward: 'Correct. You left the bus and PUJ lane to the vehicles it is for.',
     requiredLane: {
@@ -526,7 +529,7 @@ const reservedLaneSlot: SlotVariant[] = [
     side: 'right',
     correctAction: 'accelerate',
     description: 'Bus lane: the curb-side lane is painted and lettered as a designated bus lane.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Bus Lane is a designated lane for buses; other vehicles must stay out of it.',
+    law: 'A Bus Lane is a designated lane for buses; other vehicles must stay out of it.',
     penalty: 'Slow traffic is not an exemption. The bus lane keeps moving precisely because other vehicles stay out of it.',
     reward: 'Correct. You stayed out of the bus lane even though it was moving better.',
     requiredLane: {
@@ -546,7 +549,7 @@ const reservedLaneSlot: SlotVariant[] = [
     correctAction: 'brake',
     description: 'Bicycle lane: a solid line marks the curb-side lane for bicycles, and a cyclist is riding in it.',
     npc: { path: 'travelling_ahead', vehicleKind: 'bicycle', lane: 'curb', label: 'a cyclist in the bike lane' },
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): Do not travel or park in a bicycle lane; give cyclists sufficient clearance and watch your speed when passing.',
+    law: 'Do not travel or park in a bicycle lane; give cyclists sufficient clearance and watch your speed when passing.',
     penalty: 'Passing a cyclist fast and close is dangerous even from your own lane. The rule is clearance and speed, not just staying out of the paint.',
     reward: 'Correct. You kept out of the bike lane and eased off to pass with room.',
     requiredLane: {
@@ -566,9 +569,9 @@ const reservedLaneSlot: SlotVariant[] = [
     correctAction: 'brake',
     description: 'Motorcycle lane: the curb-side lane is marked for riders, and a rider is traveling in it.',
     npc: { path: 'travelling_ahead', vehicleKind: 'motorcycle', lane: 'curb', label: 'a rider in the motorcycle lane' },
-    law: 'Be extra careful when turning at intersections where a bike or motorcycle lane crosses your path.',
+    law: 'A motorcycle lane is allotted to riders: other vehicles keep out of it, and take extra care where it crosses a junction.',
     penalty: 'Riders in a motorcycle lane are right beside you. Drifting into it, or passing fast, puts you into them.',
-    reward: 'Correct. You kept to your lane and eased off past the rider.',
+    reward: 'Correct. You stayed out of the motorcycle lane and eased off past the rider.',
     requiredLane: {
       lane: 'inner',
       hint: 'Leave the motorcycle lane to the riders and ease off past them.',
@@ -599,7 +602,7 @@ const laneObstructionSlot: SlotVariant[] = [
     type: 'obstacle_ahead',
     correctAction: 'brake',
     description: 'Traffic cones: a line of cones tapers in from the right, closing that side of the carriageway.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): Traffic cones temporarily mark a hazard, lane closure or work area; the coned-off space is closed to traffic.',
+    law: 'Traffic cones temporarily mark a hazard, lane closure or work area; the coned-off space is closed to traffic.',
     penalty: 'You drove into the coned-off space. Cones mark road that is closed, not road that is merely discouraged.',
     reward: 'Correct. You slowed and took the lane that was still open.',
     // Closes the curb-side lane only, which is exactly what 0.75 of a
@@ -644,7 +647,7 @@ const laneObstructionSlot: SlotVariant[] = [
     art: 'cats_eye',
     correctAction: 'accelerate',
     description: "Cat's eyes: reflective studs stand in for the painted lane lines along this stretch.",
-    law: "Pavement marking standard (DPWH DO 41, s. 2012): A Cat's Eye is a retroreflective road stud used to separate traffic; raised pavement markers can substitute for painted lane lines and give a tactile and audible bump when a vehicle drifts across them.",
+    law: "A Cat's Eye is a retroreflective road stud used to separate traffic; raised pavement markers can substitute for painted lane lines and give a tactile and audible bump when a vehicle drifts across them.",
     penalty: 'Studs are lane lines. Drifting across them is drifting out of your lane, and the bump is the marker telling you so.',
     reward: "Correct. You held your lane between the cat's eyes.",
     requiredLane: {
@@ -677,7 +680,7 @@ const speedMarkingSlot: SlotVariant[] = [
     correctAction: 'brake',
     points: 25,
     description: 'Rumble strips: raised transverse bars run across the carriageway ahead.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): Rumble Strips are thermoplastic markings giving a visual, audio and motion warning through a humming sound and bumpy ride when driven over, to alert drivers and prompt a speed check.',
+    law: 'Rumble Strips are thermoplastic markings giving a visual, audio and motion warning through a humming sound and bumpy ride when driven over, to alert drivers and prompt a speed check.',
     penalty: 'You took the rumble strips at speed and they threw the car off line. That jolt is the warning working.',
     reward: 'Correct. You slowed for the strips instead of being shaken by them.',
     effect: { jarringAbove: 24, span: 80 },
@@ -699,7 +702,7 @@ const speedMarkingSlot: SlotVariant[] = [
     postedSpeed: 20,
     correctAction: 'brake',
     description: 'Painted speed limit: a large 20 is painted across the carriageway ahead.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A speed limit painted on the pavement reinforces a posted or applicable speed limit and must be followed the same as a speed-limit sign.',
+    law: 'A speed limit painted on the pavement reinforces a posted or applicable speed limit and must be followed the same as a speed-limit sign.',
     penalty: 'You held your speed over a painted limit. Paint on the road carries the same force as the sign it reinforces.',
     reward: 'Correct. You came down to the painted limit.',
   }),
@@ -714,7 +717,7 @@ const speedMarkingSlot: SlotVariant[] = [
     correctAction: 'brake',
     points: 25,
     description: 'Railroad crossing marking: a large R and crossing bars are painted on the road ahead, in advance of a railroad crossing.',
-    law: 'Pavement marking standard (DPWH DO 41, s. 2012): A Railroad Crossing Ahead marking is painted on the pavement in advance of a railroad crossing to warn the driver before reaching the tracks.',
+    law: 'A Railroad Crossing Ahead marking is painted on the pavement in advance of a railroad crossing to warn the driver before reaching the tracks.',
     penalty: 'The marking is painted in advance so the slowing happens before the tracks, not on them.',
     reward: 'Correct. You slowed as soon as the advance marking appeared.',
   }),

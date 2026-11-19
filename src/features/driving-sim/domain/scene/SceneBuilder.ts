@@ -32,7 +32,7 @@ import { markingSceneNodes } from './markingScene';
 import { signSceneNodes } from './signScene';
 import { resolvedSceneNodes } from './resolvedSceneNodes';
 import { resolveScene } from '@/features/driving-sim/domain/scene/ResolvedScene';
-import { pedestrianGroupNode, roadActorNode, scriptedVehicleNode, type PoseVehicle } from './prefabs';
+import { millAbout, pedestrianGroupNode, roadActorNode, scriptedVehicleNode, type PoseVehicle } from './prefabs';
 import type { SceneNode, ScriptedVehicleRole } from './SceneNode';
 
 /**
@@ -149,12 +149,14 @@ const ownRoadVehicle = (placement: EventPlacement, poseVehicle: PoseVehicle): Sc
  * nobody is drawn twice. Asked of the composed nodes rather than of a list of
  * scene names, because the nodes are the thing that would be duplicated.
  */
-const declaredPedestrians = (placement: EventPlacement, composed: SceneNode[]): SceneNode[] => {
+const declaredPedestrians = (placement: EventPlacement, composed: SceneNode[], now: number): SceneNode[] => {
   const people = placement.event.pedestrians;
   if (!people?.length) return [];
   // A driveway crossing draws its own people, walking clear together.
   if (composed.some(node => node.kind === 'pedestrian-group' || node.kind === 'crossing' || node.kind === 'driveway-mouth')) return [];
-  return [pedestrianGroupNode(placement.roadX, placement.screenY, people)];
+  // Beside the road rather than crossing it, so they move about where they
+  // are instead of walking anywhere (2026-11-16).
+  return [pedestrianGroupNode(placement.roadX, placement.screenY, people, undefined, millAbout(people.length, now))];
 };
 
 /**
@@ -249,7 +251,8 @@ export const eventSceneNodes = (
       event.scene,
       oncomingLanes,
       auxiliaryAt(event.triggerAtDistance, level.route)?.width ?? 0,
-      showsResponse
+      showsResponse,
+      now
     );
     // A signalised junction's scripted vehicle — one still clearing the box on
     // a fresh green — is the only cross traffic, so it composes alongside the
@@ -260,7 +263,7 @@ export const eventSceneNodes = (
       return nodes;
     }
     nodes.push(...ownRoadVehicle(placement, poseVehicle));
-    nodes.push(...declaredPedestrians(placement, nodes));
+    nodes.push(...declaredPedestrians(placement, nodes, now));
     nodes.push(...declaredBay(placement, nodes));
     return nodes;
   }
@@ -285,7 +288,7 @@ export const eventSceneNodes = (
     resolveSide,
     poseVehicle,
   });
-  composed.push(...declaredPedestrians(placement, composed));
+  composed.push(...declaredPedestrians(placement, composed, now));
   composed.push(...declaredBay(placement, composed));
   return composed;
 };

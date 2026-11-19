@@ -5,7 +5,6 @@
 // painting and could only be checked by looking at the screen.
 import { describe, it, expect } from 'vitest';
 import { LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
-import { LEVEL2_PRACTICE } from '@/features/driving-sim/domain/scenario/content/levels/level2';
 import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { resolveScene, pedestriansFor } from './ResolvedScene';
 
@@ -90,10 +89,7 @@ describe('resolveScene over the real level roster', () => {
 // quietly merge them.
 describe('level 2 and level 5 crossings are different world objects', () => {
   const find = (id: string) => {
-    // Level 2's driveway mouth now stands only where it is played as practice.
-    const event =
-      LEVELS.flatMap(level => level.events).find(candidate => candidate.id === id) ??
-      (LEVEL2_PRACTICE.flat().find(candidate => candidate.id === id) as ScenarioEvent | undefined);
+    const event = LEVELS.flatMap(level => level.events).find(candidate => candidate.id === id);
     if (!event) throw new Error(`no such event: ${id}`);
     return event;
   };

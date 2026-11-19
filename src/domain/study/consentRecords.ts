@@ -1,12 +1,12 @@
 /**
- * The consent, the device check, the survey and a withdrawal, as stored.
- * `firestore.rules` holds each shape.
+ * The consent, the device check, the survey and a withdrawal, as stored
+ *. `firestore.rules` holds each shape.
  *
  *   consents/{uid}                 ConsentDoc: name, typed signature, age, username. Admin-read only,
  *                                  never in any export, apart from every game record
  *   users/{uid}/study/consent      ConsentMarker: that it was given, which text, and the age
  *                                  band. No name and no exact age
- *   users/{uid}/study/background   BackgroundDoc: gaming and device
+ *   users/{uid}/study/background   BackgroundDoc: gaming, device and preferred vehicle
  *   users/{uid}/study/device       DeviceCheckDoc
  *   users/{uid}/study/survey       SurveyDoc: when the form was opened, and confirmed
  *   participants/{code}.withdrawal Withdrawal
@@ -20,10 +20,11 @@
  * records and exports name the code alone.
  */
 
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import type { Language, Localized } from '@/shared/lib/localized';
 
 /** The consent text's version: the record says which text was agreed to. */
-export const CONSENT_VERSION = '2026-11-17a';
+export const CONSENT_VERSION = '2026-11-19';
 
 /**
  * The youngest age the consent page accepts. Under it the page
@@ -94,6 +95,8 @@ export interface BackgroundDoc {
   schemaVersion: 1;
   gaming: GamingFrequency;
   device: DeviceType;
+  /** The vehicle the participant prefers (2026-11-19); it also sets their in-game skin. Absent on older records. */
+  preferredVehicle?: VehicleSkin;
   answeredAt: number;
 }
 
@@ -138,8 +141,9 @@ export type ConsentCheck =
 
 /**
  * What the consent form's answers come to: a record to save, a minor whom
- * the page must stop for, or what to fix. The signature is the name typed
- * again, matched without regard to case or spacing.
+ * the page must stop for, or what to fix. The signature must match the name
+ * without regard to case or spacing; since 2026-11-19 the consent page passes
+ * the name itself, the ticked box with the typed name being the signature.
  */
 export const checkConsent = (input: { fullName: string; typedSignature: string; age: string; agreed: boolean }): ConsentCheck => {
   const fullName = tidy(input.fullName);

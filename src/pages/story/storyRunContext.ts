@@ -10,8 +10,9 @@ import { useOutletContext } from 'react-router-dom';
 import type { ActionLog, LevelResult } from '@/domain/learner/attempt';
 import type { SupportLevel, WeakArea } from '@/domain/learner/competency';
 import type {
-  BriefingCourse,
+  BriefingGate,
   CourseNote,
+  DriveExit,
   LevelConfig,
   LevelFsmTelemetry,
   PlayConditions,
@@ -49,15 +50,26 @@ export interface StoryCourse {
   resultNote: Localized | null;
   /** The finished attempt is still being saved; Continue waits for it. */
   saving: boolean;
-  /** The per-competency course: the topics the drive counted and, once saved, each one's verdict. */
-  topics?: readonly string[];
-  verdicts?: readonly { competency: string; correct: number; total: number; passed: boolean }[] | null;
-  /** The course's own verdict on the drive once saved (every topic 2 of 3; the final's 70%); null until then. */
-  passed?: boolean | null;
   /** Something went wrong loading or entering the course. */
   error: Localized | null;
   continueCourse: () => void;
   playFreeReplay: (levelId: number) => void;
+  /** The per-competency course's briefing gate (module, quiz, review, drive); absent in the old groups. */
+  gate?: BriefingGate | null;
+  /** Where the study's two tests stand; absent in the old groups. */
+  assessments?: StoryAssessments | null;
+}
+
+/**
+ * The study's two tests around the course (2026-11-10): the 60-item pre-test,
+ * which opens the course and seeds each competency's BKT, and the 30-item
+ * post-test, which opens once the final exam is passed. Both are sat on their
+ * own pages (/play/pre-test, /play/post-test); the map only shows where they stand.
+ */
+export interface StoryAssessments {
+  diagnosticDone: boolean;
+  postExamOpen: boolean;
+  postExamDone: boolean;
 }
 
 export interface StoryRunContext {
@@ -105,6 +117,10 @@ export interface StoryRunContext {
    * reach persistence without passing through React state or the progress store.
    */
   completeRun: (result: LevelResult, telemetry?: LevelFsmTelemetry, play?: PlayConditions) => void;
+  /** The drive was left before its end (Exit): logs what was done so far. Absent where nothing is logged. */
+  exitRun?: (partial?: DriveExit) => void;
+  /** The page is closing mid-drive: the same, best effort. */
+  abandonRun?: (partial: DriveExit) => void;
   /**
    * Discards the finished attempt so a fresh one can be rolled. Retry, Next and
    * the practice suggestion all mean "that attempt is over, plan another one".
@@ -116,8 +132,6 @@ export interface StoryRunContext {
   course: StoryCourse | null;
   /** Whether the drive re-rolls toward a weak competency: Legacy's game only. */
   liveReroll: boolean;
-  /** The per-competency course's quiz and drive readiness in the briefing; null in every other run. */
-  courseBriefing?: BriefingCourse | null;
 }
 
 export const useStoryRun = () => useOutletContext<StoryRunContext>();

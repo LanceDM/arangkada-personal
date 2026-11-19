@@ -1,29 +1,36 @@
 /**
- * Every setting the redesigned course runs with, in one record, and the version
- * tag stamped on every BKT update and Q-table update, so each logged record says
- * which settings produced it and an analysis can replay the logs under another.
+ * Every setting the study's algorithms run with, in one record, and the
+ * version tag stamped on every logged event, BKT update and Q-table update.
+ *
+ * The database keeps a copy of each version (`configVersions/{tag}`, and the
+ * active one in `policy/config`), written by `npm run db:init`. When the panel
+ * changes a value, the tag is bumped, so every logged record says which
+ * settings produced it and an analysis can replay the logs under another one.
  *
  * `runConfig.test.ts` pins a fingerprint of this record: changing any value
  * without bumping RUN_CONFIG_VERSION fails the test.
  */
-import { EVIDENCE_BKT_MODEL } from '@/domain/learner/mastery/evidenceBKT';
+import { DEFAULT_BKT_MODEL } from '@/domain/learner/mastery/buildBKTProfile';
 import { MASTERY_CUTOFFS, MIN_DRIVE_EVIDENCE_FOR_BENCHMARKING } from '@/domain/competencyRouting/mastery';
 import { DEFAULT_REWARD, DEFAULT_WARM_UP, GAMMA } from '@/domain/competencyRouting/qLearning';
 import { COMPETENCY_ATTEMPT_CAP } from '@/domain/competencyRouting/course';
 import {
+  DIAGNOSTIC_ITEMS_PER_COMPETENCY,
   DRIVE_ITEMS_PER_COMPETENCY,
   DRIVE_PASS_CORRECT,
   QUIZ_ATTEMPT_CAP,
   QUIZ_ITEMS_PER_COMPETENCY,
   QUIZ_PASS_CORRECT,
   STAGE_COMPETENCIES,
+  IN_DRIVE_QUESTION_LIMIT_SEC,
 } from '@/domain/learner/stageCompetencies';
+import { BACKGROUND_FORM_ENABLED, BACKGROUND_FORM_VERSION } from './backgroundForm';
 
 /** Bump when any value below changes: `<date><letter>`. */
-export const RUN_CONFIG_VERSION = '2026-11-17c';
+export const RUN_CONFIG_VERSION = '2026-11-10a';
 
 export const RUN_CONFIG = {
-  bktModel: EVIDENCE_BKT_MODEL,
+  bktModel: DEFAULT_BKT_MODEL,
   masteryCutoffs: MASTERY_CUTOFFS,
   minDriveEvidenceForLevel4: MIN_DRIVE_EVIDENCE_FOR_BENCHMARKING,
   reward: DEFAULT_REWARD,
@@ -37,16 +44,13 @@ export const RUN_CONFIG = {
     quizItemsPerCompetency: QUIZ_ITEMS_PER_COMPETENCY,
     quizPassCorrect: QUIZ_PASS_CORRECT,
     quizAttemptCap: QUIZ_ATTEMPT_CAP,
-    unansweredInBKT: false,
-    preTestSeedsBKT: true,
-    postTestRewardsQ: false,
-    // A drive ended early (crash, time-up) measures only the topics it asked.
-    endedDriveMeasuresAskedOnly: true,
+    diagnosticItemsPerCompetency: DIAGNOSTIC_ITEMS_PER_COMPETENCY,
+    inDriveQuestionLimitSec: IN_DRIVE_QUESTION_LIMIT_SEC,
+    timedOutQuestionsInBKT: false,
   },
   stageCompetencies: STAGE_COMPETENCIES,
-  irt: { model: 'rasch', scope: 'pre-test and post-test only, off gameplay' },
-  // What each record keeps so every result can be recomputed later from it alone.
-  recorded: { courseDriveSeedAndComposition: true, courseQuizShownOrder: true },
+  backgroundForm: { enabled: BACKGROUND_FORM_ENABLED, version: BACKGROUND_FORM_VERSION },
+  irt: { model: 'rasch', itemParameters: 'shared', status: 'undecided' },
 } as const;
 
 export type RunConfig = typeof RUN_CONFIG;

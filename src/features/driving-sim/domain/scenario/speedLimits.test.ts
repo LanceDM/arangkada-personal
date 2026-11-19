@@ -9,7 +9,7 @@ import { DEFAULT_PACE, paceOf, spacedPace } from '@/features/driving-sim/domain/
 import { speedProfileFor, SPEED_STEP } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { stoppingDistanceFrom } from '@/features/driving-sim/domain/systems/eventScheduler';
 
-describe('speed limits (Republic Act No. 4136, Section 35, speed-limits pack)', () => {
+describe('speed limits (RA 4136 §35, speed-limits pack)', () => {
   it.each(LEVELS.map(level => [level.id, level] as const))('Level %i posts its class’s limit', (_, level) => {
     expect(level.speedLimit).toBe(LEGAL_LIMIT[level.roadClass]);
   });

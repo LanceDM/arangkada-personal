@@ -233,8 +233,8 @@ export const level11Module = {
           type: 'list',
           ordered: false,
           items: [
-            'The owner must register a motorcycle within five days of acquiring ownership.',
-            'Any subsequent sale or disposal must be reported within three days, with the notarized deed of sale.',
+            'The owner must register a motorcycle within five days of acquiring ownership (RA 11235).',
+            'Any subsequent sale or disposal must be reported within three days (RA 11235), with the notarized deed of sale.',
             'The metal plate is 235mm wide by 135mm tall, made of durable reflectorized aluminum, with 60mm-tall alphanumeric characters.',
             'A decal plate is 135mm wide by 85mm tall, with 40mm-tall reflectorized alphanumeric characters.',
           ],
@@ -275,7 +275,7 @@ export const level11Module = {
           type: 'list',
           ordered: false,
           items: [
-            'All tricycles must be registered and renewed yearly, like any other motor vehicle.',
+            'All tricycles must be registered and renewed yearly (RA 4136, Sec. 5), like any other motor vehicle.',
             'A brand new motorcycle with more than 200cc engine displacement has an initial registration validity of three years.',
             'A tricycle does not need a Certificate of Public Convenience (CPC) from the LTFRB; the concerned Local Government Unit regulates tricycle operation and grants franchises within its own territory.',
             'A Motorized Tricycle Operator\'s Permit (MTOP) with official receipt, an identification card, and the fare matrix must all be visible.',
@@ -487,9 +487,87 @@ export const level11Module = {
         },
       ],
     },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-11-lanes-blind-spots-riders',
+      title: '8. Lanes, Blind Spots, And Rider Hazards',
+      text: 'Mixed traffic works only when every vehicle keeps to its own lane and every driver checks for the vehicles they cannot see.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'Mixed traffic works only when every vehicle keeps to its own lane and every driver checks for the vehicles they cannot see.',
+        },
+        {
+          type: 'heading',
+          text: 'Special Lanes',
+        },
+        // FDM Vol. 1 pp. 97, 98, 180
+        {
+          type: 'table',
+          headers: ['Lane', 'Rule'],
+          rows: [
+            ['Motorcycle lane', 'Riders stay in it unless instructed by enforcers, or when turning into an intersection after signaling within 100 meters.'],
+            ['Bus lane', 'Buses stay in it unless instructed by enforcers or turning into an intersection. Private vehicles may not use it except to turn or enter a garage within 100 meters.'],
+            ['Bicycle lane', 'For bicycles only; motor vehicles are not allowed.'],
+          ],
+        },
+        // EDSA Busway: DOTr/MMDA rule, not in the FDM; the FDM covers bus lanes generally.
+        {
+          type: 'paragraph',
+          text: 'On EDSA, the busway is reserved for buses. A clear busway is not an invitation for a private car stuck in traffic.',
+        },
+        {
+          type: 'heading',
+          text: 'Blind Spots',
+        },
+        // FDM Vol. 1 pp. 117, 119, 176
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Large vehicles such as buses and trucks have more blind spots than cars and jeepneys.',
+            'A rider alongside a car may be in its blind spot.',
+            'Before changing lanes near a motorcycle weaving between lanes, check all your mirrors and do a shoulder check of the blind spot.',
+            'Before turning right on a narrow street, check your right mirror and blind spot for tricycles and riders, then turn slowly.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'For Riders',
+        },
+        // FDM Vol. 1 pp. 119, 122, 173, 174
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Most rider crashes come from habitual and unnecessary lane changing, which can amount to reckless driving (RA 4136, Sec. 48).',
+            'Do not overtake a turning vehicle, especially in its blind spots.',
+            'Avoid overtaking on a curve: the motorcycle may skid, especially with inferior rear tires.',
+            'Stop using the front and rear brakes at the same time.',
+            'Spilled diesel or oil is especially dangerous to motorcyclists.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'PUV And School Service Duties',
+        },
+        // FDM Vol. 1 pp. 119, 121, 139, 154-156, 169
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Stopping on a pedestrian crosswalk to wait for passengers, and opening the door while the vehicle is moving, are common PUV violations.',
+            'Before a school service moves off, the driver makes sure all passengers are seated properly. Before parking it at the garage, the driver checks that no sleeping students or other passengers are left inside.',
+            'A tricycle\'s sidecar must be properly lit at night.',
+            'If a jeepney stops suddenly to pick up passengers, slow down, check your mirrors, and pass carefully only when it is safe.',
+            'At a jeepney stop, wait patiently for an elderly pedestrian to finish crossing.',
+          ],
+        },
+      ],
+    },
     {
       id: 'level-11-method-and-recap',
-      title: '8. Mixed-Traffic Method And Mission Recap',
+      title: '9. Mixed-Traffic Method And Mission Recap',
       text: 'Use one habit whenever a motorcycle, tricycle, or PUV is nearby: identify what class of vehicle it is, then apply the specific rule that governs it, on top of the ordinary traffic rules everyone follows.',
       blocks: [
         {

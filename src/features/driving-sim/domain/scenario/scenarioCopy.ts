@@ -16,7 +16,7 @@ import { englishText, type Localized, type TextOf } from '@/shared/lib/localized
 import type { ScenarioEvent } from './scenarioDefinition';
 
 /** `level3.priority-yield.merging-traffic` → `Merging Traffic`. */
-export const labelFromId = (id: string): string => {
+const fromId = (id: string): string => {
   const slug = id.split('.').pop() ?? id;
   return slug
     .split('-')
@@ -33,7 +33,7 @@ export const labelFromId = (id: string): string => {
  * syllabus does.
  */
 export const scenarioLabel = (event: ScenarioEvent): string =>
-  event.label?.trim() || event.sign?.name || event.marking?.name || labelFromId(event.id);
+  event.label?.trim() || event.sign?.name || event.marking?.name || fromId(event.id);
 
 /** What to do, for a level that has not authored an instruction of its own. */
 const DEFAULT_INSTRUCTION: Record<ScenarioEvent['correctAction'], Localized> = {
@@ -63,6 +63,9 @@ export const scenarioInstruction = (event: ScenarioEvent, say: TextOf = englishT
   const bay = event.bay?.hint?.trim();
   if (bay) return bay;
   if (event.correctAction === 'stop') return say(stopInstruction(event));
+  // Rock is down across the carriageway (2026-11-16): slowing alone runs into
+  // it, so the panel says to go round, which is what the scenario grades.
+  if (event.scene === 'rockfall') return say(ROCKFALL);
   return say(DEFAULT_INSTRUCTION[event.correctAction]);
 };
 
@@ -80,6 +83,7 @@ const STOPS_AT_A_LINE: ReadonlySet<ScenarioEvent['type']> = new Set([
   'road_marking',
 ]);
 
+const ROCKFALL: Localized = { en: 'Slow right down and steer round the fallen rock.' };
 const PULL_OVER: Localized = { en: 'Pull over to the extreme right and stop.' };
 const STOP_AT_CHECKPOINT: Localized = { en: 'Stop at the checkpoint.' };
 const STOP_PLAIN: Localized = { en: 'Come to a full stop.' };

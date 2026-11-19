@@ -17,7 +17,7 @@
  * `usePilotRecords`.
  */
 import { compareParticipantCodes, type StudyCohort } from '@/domain/study/participantCode';
-import type { AttemptRecordDocuments, CourseRecordsFound, PilotRecordsRepository, PoolAccountEntry } from './pilotPorts';
+import type { AttemptRecordDocuments, PilotRecordsRepository, PoolAccountEntry } from './pilotPorts';
 
 /** One attempt and its records, as the definitions take them. */
 export interface AttemptDocumentsRead {
@@ -26,8 +26,6 @@ export interface AttemptDocumentsRead {
   fsm: unknown;
   decisions: unknown;
   routing: unknown;
-  /** For a course attempt, which of its course records were found. */
-  course?: CourseRecordsFound;
 }
 
 /** One account's documents, as the definitions take them. */
@@ -48,8 +46,6 @@ export interface RecordDefinitions<Source, Exported> {
   exportOf: (source: Source) => Exported;
   /** Of an FSM record, what is kept between reads. */
   keepFsm: (fsm: unknown) => unknown;
-  /** Of an attempt's document, which course records it must have; null for an attempt that is not the course's. */
-  courseRecordsExpected: (attempt: unknown) => CourseRecordsFound | null;
 }
 
 export interface AccountRecords<Source, Exported> {
@@ -97,8 +93,6 @@ interface CachedAttempt {
   savedAt: number;
   attempt: unknown;
   records: AttemptRecordDocuments | null;
-  /** A course attempt's course records, once read; null for any other attempt. */
-  course: CourseRecordsFound | null;
   /** Its records are complete, or past the grace: never read again. */
   settled: boolean;
 }
@@ -120,15 +114,7 @@ const eachLimited = async <T>(items: readonly T[], limit: number, work: (item: T
 
 const codeOrder = (a: { code: string }, b: { code: string }) => compareParticipantCodes(a.code, b.code);
 
-// A course drive saves its FSM log beside it and
-// no decision or routing record: its decisions are in the course log, and its
-// answers in the BKT updates, each where the definitions expect one. Any other
-// attempt has all three beside it.
-const complete = (records: AttemptRecordDocuments, expected: CourseRecordsFound | null, found: CourseRecordsFound | null) =>
-  records.fsm != null &&
-  (expected
-    ? (!expected.courseLog || found?.courseLog === true) && (!expected.bktUpdate || found?.bktUpdate === true)
-    : records.decisions != null && records.routing != null);
+const complete = (records: AttemptRecordDocuments) => records.fsm != null && records.decisions != null && records.routing != null;
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
@@ -152,19 +138,14 @@ export const createPilotRecordsStore = <Source, Exported>(
       ]);
       for (const attempt of fresh) {
         if (cached.attempts.has(attempt.id)) continue;
-        cached.attempts.set(attempt.id, { id: attempt.id, savedAt: attempt.savedAt, attempt: attempt.data, records: null, course: null, settled: false });
+        cached.attempts.set(attempt.id, { id: attempt.id, savedAt: attempt.savedAt, attempt: attempt.data, records: null, settled: false });
         cached.latest = Math.max(cached.latest ?? attempt.savedAt, attempt.savedAt);
       }
       const unsettled = [...cached.attempts.values()].filter(attempt => !attempt.settled);
       await eachLimited(unsettled, recordsAtOnce, async attempt => {
-        const expected = definitions.courseRecordsExpected(attempt.attempt);
-        const [records, course] = await Promise.all([
-          repository.attemptRecords(entry.uid, attempt.id),
-          expected ? repository.courseRecords(entry.uid, attempt.id) : null,
-        ]);
+        const records = await repository.attemptRecords(entry.uid, attempt.id);
         attempt.records = { ...records, fsm: records.fsm == null ? null : definitions.keepFsm(records.fsm) };
-        attempt.course = course;
-        attempt.settled = complete(records, expected, course) || now() - attempt.savedAt >= graceMs;
+        attempt.settled = complete(records) || now() - attempt.savedAt >= graceMs;
       });
 
       // Oldest first, ties by id: the order the export's query returns them in.
@@ -180,7 +161,6 @@ export const createPilotRecordsStore = <Source, Exported>(
           fsm: attempt.records?.fsm ?? null,
           decisions: attempt.records?.decisions ?? null,
           routing: attempt.records?.routing ?? null,
-          ...(attempt.course ? { course: attempt.course } : {}),
         })),
         examSittings: other.examSittings,
         dailyAnswers: other.dailyAnswers,

@@ -18,8 +18,8 @@ import { assembleLevel4, SLOT_DISTANCES as level4Distances } from './content/lev
 import { SLOTS as level4Slots } from './content/levels/level4/pools';
 import { SLOTS as level5Slots, SLOT_DISTANCES as level5Distances } from './content/levels/level5';
 import { SLOTS as level6Slots, SLOT_DISTANCES as level6Distances } from './content/levels/level6';
-import { MAINLINE_STRETCH_AT, SLOTS as level7Slots, SLOT_DISTANCES as level7Distances } from './content/levels/level7';
-import { assembleLevel8, SLOTS as level8Slots, SLOT_DISTANCES as level8Distances } from './content/levels/level8';
+import { SLOTS as level7Slots, SLOT_DISTANCES as level7Distances } from './content/levels/level7';
+import { SLOTS as level8Slots, SLOT_DISTANCES as level8Distances } from './content/levels/level8';
 import { SLOTS as level9Slots, SLOT_DISTANCES as level9Distances } from './content/levels/level9';
 import { SLOTS as level10Slots, SLOT_DISTANCES as level10Distances } from './content/levels/level10';
 import { SLOTS as level11Slots, SLOT_DISTANCES as level11Distances } from './content/levels/level11';
@@ -44,14 +44,6 @@ export interface StageContent {
   base: LevelConfig;
   /** Paints the road from the events placed on it, for a level whose paint depends on them. */
   assemble?: (events: ScenarioEvent[]) => LevelConfig;
-  /**
-   * Where the stage's own extra scenarios stand, for a stage whose road after
-   * its last slot is not the road they are written for (Level 7: past the toll
-   * plaza is off the expressway). The composer inserts road here, long enough
-   * for them, and places them on it; everything beyond moves on
-   * (`stretchLevel`). Absent, extras are appended after the last slot.
-   */
-  stretchAt?: number;
   /** The pre-drive garage's points (Levels 2 and 10). */
   garage: StagePoint[];
   /** The crash scene's points (Level 9). */
@@ -81,7 +73,7 @@ const fixedPoints = (levelId: number, kind: 'garage' | 'aftermath', hotspots: Ga
     variants: [{ ...hotspot, scenarioId: `level${levelId}.${kind}.${hotspot.id}` }],
   }));
 
-/** Level 2's eleven points, each with its pool of findings, named as the catalogue names them. */
+/** Level 2's eight points, each with its pool of findings, named as the catalogue names them. */
 const level2Points = (): StagePoint[] =>
   level2Hotspots.map(({ shell, pool }) => {
     const base = { ...shell, ...pool[0] } as GarageHotspot;
@@ -104,8 +96,7 @@ export const stageContent = (levelId: number): StageContent | null => {
     slots: slots.slots,
     distances: slots.distances,
     base,
-    ...(levelId === 7 ? { stretchAt: MAINLINE_STRETCH_AT } : {}),
-    ...(levelId === 4 ? { assemble: assembleLevel4 } : levelId === 8 ? { assemble: assembleLevel8 } : levelId === 12 ? { assemble: assembleLevel12 } : {}),
+    ...(levelId === 4 ? { assemble: assembleLevel4 } : levelId === 12 ? { assemble: assembleLevel12 } : {}),
     garage: levelId === 2 ? level2Points() : fixedPoints(levelId, 'garage', base.garage?.hotspots),
     aftermath: fixedPoints(levelId, 'aftermath', base.aftermath?.hotspots),
   };

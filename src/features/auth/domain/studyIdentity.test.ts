@@ -37,8 +37,9 @@ describe('study usernames', () => {
 });
 
 describe('study passwords', () => {
-  it('are at least 15 characters and at most 128, of any kind', () => {
-    expect(passwordProblem('x'.repeat(14))?.en).toMatch(/at least 15/);
+  it('are at least 8 characters and at most 128, of any kind', () => {
+    expect(passwordProblem('x'.repeat(7))?.en).toMatch(/at least 8/);
+    expect(passwordProblem('x'.repeat(8))).toBeNull();
     expect(passwordProblem('tatlong maliit na baboy')).toBeNull();
     expect(passwordProblem('x'.repeat(128))).toBeNull();
     expect(passwordProblem('x'.repeat(129))?.en).toMatch(/at most 128/);

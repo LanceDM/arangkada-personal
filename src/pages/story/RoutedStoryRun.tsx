@@ -21,6 +21,7 @@
  * API; nothing about the routing FSM, the simulation or persistence lives here.
  */
 import { useLanguage } from '@/shared/i18n/useText';
+import { useVehicleSkin } from '@/features/auth';
 import type { Language, Localized } from '@/shared/lib/localized';
 import { storyMessages as m } from './messages';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -83,6 +84,7 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
   const { saveLevelResult, unlockLevel, totalScore, levelResults } = useProgressStore();
 
   const { language } = useLanguage();
+  const { skin: vehicleSkin } = useVehicleSkin();
   const [cursor, setCursor] = useState<RoutingCursor | null>(null);
   const [error, setError] = useState<Localized | null>(null);
   const [run, setRun] = useState<PlannedRun | null>(null);
@@ -184,7 +186,7 @@ const RoutedStoryRun = ({ routing, uid, group }: RoutedStoryRunProps) => {
     if (!run || !run.plan.level) return;
 
     setFinished({ levelId: run.levelId, level: run.plan.level });
-    const start = { attemptSeed: run.seed, plan: run.plan, level: run.plan.level, language: run.language };
+    const start = { attemptSeed: run.seed, plan: run.plan, level: run.plan.level, language: run.language, vehicleSkin };
     const resolution = routing.resolution;
     setSaving(true);
     setResultNote(null);

@@ -569,7 +569,9 @@ describe('the Level 7 score', () => {
 
   it('is calibrated against what the route is actually worth', () => {
     expect(total).toBe(165);
-    expect(level7.requiredScore).toBeLessThanOrEqual(total);
+    expect(level7.requiredScore).toBeLessThan(level7.stars2);
+    expect(level7.stars2).toBeLessThan(level7.stars3);
+    expect(level7.stars3).toBeLessThanOrEqual(total);
     expect(level7.requiredScore / total).toBeGreaterThan(0.66);
     expect(level7.requiredScore / total).toBeLessThan(0.72);
   });

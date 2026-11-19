@@ -10,10 +10,9 @@
  *   from this level or an earlier one (`remediationCandidates`). The final
  *   exam and the tutorial take none.
  *
- * - and the per-competency course's drives of this level, on every roll seed: a stage's first drive, with 3 scenarios for
- *   every competency it teaches (a repeat drive asks fewer, so it is shorter),
- *   and the final exam with one per competency. The course appends what the
- *   road cannot hold, so its drive is often the longest the level can be.
+ * - and, on a competency stage, every course drive `composeDrive` gives over
+ *   `ROLL_SEEDS` for the whole stage (3 scenarios per competency): the
+ *   per-competency course plays those, not the level's own road (2026-11-10).
  *
  * An appended item lengthens the road by the level's own last spacing,
  * whatever was rolled, so the longest roll with the longest item is the
@@ -29,8 +28,6 @@
  * can say when a change to it (spacing, speed, a scenario) needs a re-measure.
  */
 import { COMPETENCIES } from '@/domain/learner/profile';
-import { STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
-import { composeDrive } from '@/features/driving-sim/domain/scenario/composeDrive';
 import { asPracticeItem } from '@/features/driving-sim/domain/adaptive/practiceSelection';
 import { buildLevelConfig, getPooledSlots, LEVELS, withRemediation } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { remediationCandidates } from '@/features/driving-sim/domain/scenario/remediationPool';
@@ -40,6 +37,9 @@ import { FINAL_EXAM_LEVEL } from '@/domain/routing/routingTypes';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { SlotVariant } from '@/features/driving-sim/domain/scenario/pooling';
 import { rng } from './driveSamples';
+import { composeDrive } from '@/features/driving-sim/domain/scenario/composeDrive';
+import { isCompetencyStage, STAGE_COMPETENCIES } from '@/domain/learner/stageCompetencies';
+import { createRng } from '@/shared/lib/rng';
 import { driveReference, isCorrectDrive, referenceCruise, type ReferenceDriveResult } from './referenceDrive';
 
 /** The rolls a pooled level is measured over. Fixed, so a re-measure on the same content gives the same limit. */
@@ -48,20 +48,6 @@ export const ROLL_SEEDS: readonly number[] = Array.from({ length: 20 }, (_, i) =
 /** The level as rolled for `seed`, or its one road where it does not roll. */
 export const rollFor = (levelId: number, seed: number): LevelConfig =>
   buildLevelConfig(levelId, undefined, null, rng(seed * 31 + 7))!;
-
-/** The course's drive of this level for `seed`, or null where the course plays none (the tutorial). */
-export const courseDriveFor = (levelId: number, seed: number): LevelConfig | null => {
-  if (isCompetencyStage(levelId)) {
-    return composeDrive({ levelId, competencies: STAGE_COMPETENCIES[levelId], rng: rng(seed * 31 + 7) }).level;
-  }
-  if (levelId === FINAL_EXAM_LEVEL) {
-    return composeDrive({ levelId, competencies: COMPETENCIES, rng: rng(seed * 31 + 7), perCompetency: 1 }).level;
-  }
-  return null;
-};
-
-/** What a course drive is named on a level's row. */
-const COURSE_DRIVE = 'course drive';
 
 /** Whether the routing FSM can append practice to this level. */
 const takesPractice = (level: LevelConfig): boolean => !isTutorial(level) && level.id !== FINAL_EXAM_LEVEL;
@@ -96,8 +82,8 @@ export const timeLimitFingerprint = (levelId: number): string => {
       level,
       pooled: getPooledSlots(levelId),
       practice: takesPractice(level) ? practiceItemsFor(levelId) : [],
+      composed: isCompetencyStage(levelId) ? ROLL_SEEDS.map(seed => composedFor(levelId, seed)) : [],
       cruise: referenceCruise(level),
-      course: courseDriveFor(levelId, ROLL_SEEDS[0]),
     })
   );
 };
@@ -125,6 +111,10 @@ export const whyNotCorrect = (result: ReferenceDriveResult): string =>
     .filter(Boolean)
     .join('; ');
 
+/** The course's whole-stage drive for `seed`: every competency the stage teaches, 3 scenarios each. */
+export const composedFor = (levelId: number, seed: number): LevelConfig =>
+  composeDrive({ levelId, competencies: isCompetencyStage(levelId) ? STAGE_COMPETENCIES[levelId] : [], rng: createRng(seed) }).level;
+
 /** Measures one level's limit. */
 export const measureLevelTimeLimit = (levelId: number): LevelMeasurement => {
   const base = LEVELS.find(entry => entry.id === levelId)!;
@@ -151,9 +141,10 @@ export const measureLevelTimeLimit = (levelId: number): LevelMeasurement => {
     }
   }
 
-  for (const seed of ROLL_SEEDS) {
-    const course = courseDriveFor(levelId, seed);
-    if (course) drives.push({ roll: seed, item: COURSE_DRIVE, result: driveReference(course, { seed }) });
+  if (isCompetencyStage(levelId)) {
+    for (const seed of ROLL_SEEDS) {
+      drives.push({ roll: seed, item: 'composed', result: driveReference(composedFor(levelId, seed), { seed }) });
+    }
   }
 
   const correct = drives.filter(drive => isCorrectDrive(drive.result));

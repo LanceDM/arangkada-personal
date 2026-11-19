@@ -1,5 +1,5 @@
 /** The test's wiring, for the composition root alone. Kept out of `index.ts`. */
-import { provideAssessmentDependencies } from './application/dependencies';
+import { provideAssessmentDependencies, type AssessmentDependencies } from './application/dependencies';
 import {
   firebaseTestDesignRepository,
   firebaseTestDraftRepository,
@@ -7,10 +7,11 @@ import {
   firebaseTestSittingRepository,
 } from './infrastructure/FirebaseTestRepositories';
 
-export const composeAssessment = () =>
+export const composeAssessment = ({ onFinished }: Pick<AssessmentDependencies, 'onFinished'> = {}) =>
   provideAssessmentDependencies({
     items: firebaseTestItemRepository,
     designs: firebaseTestDesignRepository,
     sittings: firebaseTestSittingRepository,
     drafts: firebaseTestDraftRepository,
+    onFinished,
   });

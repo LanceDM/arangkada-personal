@@ -18,7 +18,7 @@ const levelModule = getLevelModule(12);
  * | 1 | Roadside check     | this level's, 4 variants  | a full stop, then what the check comes to |
  * | 2 | Signs              | Level 3's, 44             | as graded there |
  * | 3 | Flagged down       | this level's, 3           | a full stop, then conduct and rights |
- * | 4 | Right-of-way       | Levels 2 and 5, 24        | as graded there |
+ * | 4 | Right-of-way       | Levels 2 and 5, 20        | as graded there |
  * | 5 | Ticket issued      | this level's, 3           | a full stop, then the TOP and the record |
  * | 6 | Hazard response    | Levels 7-11, 12           | as graded there |
  * | 7 | Violation risk     | Levels 4 and 6, 6         | as graded there: a line not crossed |
@@ -42,8 +42,8 @@ const levelModule = getLevelModule(12);
  * borrowed scenario; its question, grading and citation are its own. With eight
  * equal slots, 140 of 200 passes one miss always, three never, and two only
  * when both come before the running score has anything to lose (it cannot go
- * below zero). That is the 70% every level from 2 to 11 already asks; no official
- * source sets a pass mark.
+ * below zero). That is the 70% every level from 2 to 11 already asks; no LTO
+ * source sets a pass mark .
  *
  * ## The enforcement half is asked at a stop
  *
@@ -60,7 +60,7 @@ const levelModule = getLevelModule(12);
  *
  * ## Where every claim comes from
  *
- * The collected LTO material quotes each claim this file makes, by
+ * The team's source notes quotes each claim this file makes, by
  * file and heading, and lists what the sources leave open. The
  * borrowed half carries its own levels' claims. The emergencies rest on the
  * final-readiness row (E1*-E4*).
@@ -101,7 +101,7 @@ const borrowed = (
     .map(variant => ({ ...variant, points: POINTS, severity: SEVERITY }));
 
 // 1. Roadside check - curriculum ingredient "checkpoint", and the module's
-// documents and registration (F). The card says what was
+// documents and registration . The card says what was
 // presented; the question is what the check comes to, which is the law's
 // consequence and never a move the sources do not give. Amounts stay in the
 // citations: the choices turn on which violation it is, and on the one-month
@@ -127,7 +127,7 @@ const roadsideCheckSlot: SlotVariant[] = [
       'Right. Without the CR in the car, the stop ends in an apprehension for failure to carry it. The registration itself is not in question.',
     duration: 220,
     lawCitation:
-      'RO105: "A photocopy or the original CR are required to be preserved and carried in the car by the owner or driver of a motor vehicle." JAO 2014-01, as printed in FDM Vol. 2: failure to carry the driver\'s license, Certificate of Registration or Official Receipt while driving a motor vehicle, Php 1,000. Driving an unregistered motor vehicle is a separate violation, Php 10,000.',
+      'RA 4136, Sec. 15: the Certificate of Registration, or a copy, is kept in the vehicle. JAO 2014-01: failure to carry the driver\'s license, Certificate of Registration or Official Receipt while driving a motor vehicle, Php 1,000. Driving an unregistered motor vehicle is a separate violation, Php 10,000.',
     competency: 'document_awareness',
     severity: SEVERITY,
     inspection: {
@@ -163,7 +163,7 @@ const roadsideCheckSlot: SlotVariant[] = [
       'Right. An expired registration makes it an unregistered vehicle, and past a month the car stays impounded until it is registered and the fines are paid.',
     duration: 220,
     lawCitation:
-      'JAO 2014-01, as printed in FDM Vol. 2: driving an unregistered motor vehicle "includes driving with an improperly registered motor vehicle or a motor vehicle with expired, revoked, suspended or invalid registration", Php 10,000, and "in case of non-registration and the violation has exceeded one (1) month, the motor vehicle shall be impounded and shall be released only upon its valid registration and payment of appropriate fines and penalties." The last digit of the plate sets the month the registration is due.',
+      'JAO 2014-01: driving an unregistered motor vehicle "includes driving with an improperly registered motor vehicle or a motor vehicle with expired, revoked, suspended or invalid registration", Php 10,000, and "in case of non-registration and the violation has exceeded one (1) month, the motor vehicle shall be impounded and shall be released only upon its valid registration and payment of appropriate fines and penalties." The last digit of the plate sets the month the registration is due.',
     competency: 'document_awareness',
     severity: SEVERITY,
     inspection: {
@@ -199,7 +199,7 @@ const roadsideCheckSlot: SlotVariant[] = [
       'Right. Lapsed is unregistered, but the impound applies only once the lapse has passed a month.',
     duration: 220,
     lawCitation:
-      'JAO 2014-01, as printed in FDM Vol. 2: driving an unregistered motor vehicle "includes driving with an improperly registered motor vehicle or a motor vehicle with expired, revoked, suspended or invalid registration", Php 10,000, and "in case of non-registration and the violation has exceeded one (1) month, the motor vehicle shall be impounded and shall be released only upon its valid registration and payment of appropriate fines and penalties."',
+      'JAO 2014-01: driving an unregistered motor vehicle "includes driving with an improperly registered motor vehicle or a motor vehicle with expired, revoked, suspended or invalid registration", Php 10,000, and "in case of non-registration and the violation has exceeded one (1) month, the motor vehicle shall be impounded and shall be released only upon its valid registration and payment of appropriate fines and penalties."',
     competency: 'document_awareness',
     severity: SEVERITY,
     inspection: {
@@ -234,7 +234,7 @@ const roadsideCheckSlot: SlotVariant[] = [
     rewardMessage: 'Right. The cover comes off and is confiscated, and there is a fine for it.',
     duration: 220,
     lawCitation:
-      'RO105: "The number plates must be kept clean and cared for, and firmly affixed to the motor vehicle in such a manner as will make it entirely visible and always legible." JAO 2014-01, as printed in FDM Vol. 2: improper attachment of license plates includes "any accessory or device to and/or around the authorized motor vehicle license plate, or any manner of attachment that impedes in any way the visibility or reflectivity" of it, Php 5,000, with "the unauthorized plate, accessory and/or device removed and confiscated in favor of the government."',
+      'RA 4136, Sec. 18: number plates are firmly affixed, kept clean and always entirely visible and legible. JAO 2014-01: improper attachment of license plates includes "any accessory or device to and/or around the authorized motor vehicle license plate, or any manner of attachment that impedes in any way the visibility or reflectivity" of it, Php 5,000, with "the unauthorized plate, accessory and/or device removed and confiscated in favor of the government."',
     competency: 'document_awareness',
     severity: SEVERITY,
     inspection: {
@@ -275,7 +275,7 @@ const flaggedDownSlot: SlotVariant[] = [
     rewardMessage: "Right. Seated, hands visible, papers ready, and following the officer's instructions.",
     duration: 220,
     lawCitation:
-      'FDM Vol. 1, law enforcement officer: "If stopped by an enforcer, safely pull over to the extreme right. Stay in the driver\'s seat. Do not get out of the vehicle unless asked or directed. Keep your hands visible. Sit calmly and follow the officer\'s instructions. Be ready to present your driver\'s license and motor vehicle registration." FDM Vol. 1 reviewer: "it is improper for any driver or any traffic enforcer to negotiate a violation. Any complaint/contest may be done at the proper adjudication office." RO101 lists the right not to step down from the vehicle.',
+      'RA 4136, Sec. 19: the license is shown on demand. When stopped by an enforcer, pull over safely to the extreme right, stay in the driver\'s seat unless asked to step out, keep your hands visible, follow the officer\'s instructions, and have your license and registration ready. Neither driver nor enforcer may negotiate a violation; a contest goes to the proper adjudication office (JAO 2014-01).',
     competency: 'general_rules',
     severity: SEVERITY,
     inspection: {
@@ -309,7 +309,7 @@ const flaggedDownSlot: SlotVariant[] = [
     rewardMessage: 'Right. Stopped, and asking the reason: the exact violation, and who is apprehending you, are yours to know.',
     duration: 220,
     lawCitation:
-      'FDM Vol. 1 reviewer, stopped by an enforcer when you believe you did not violate any rule: "Stop at the roadside and politely ask the reason why you were being stopped." FDM Vol. 1: during an apprehension a driver has the right to know the complete name and agency of the apprehending officer and the exact alleged traffic violation, and to contest within a prescribed period. RO105: the license "shall be shown and/or surrendered for cause and upon demand to any person with authority under this Republic Act No. 4136 to confiscate the same."',
+      'RA 4136, Secs. 19 and 29: the license is shown, or surrendered for cause, on demand of a person with authority to confiscate it. Stopped when you believe you did not violate any rule: stop at the roadside and politely ask the reason. During an apprehension you have the right to know the officer\'s complete name and agency and the exact alleged violation, and to contest it within the period set by JAO 2014-01.',
     competency: 'general_rules',
     severity: SEVERITY,
     inspection: {
@@ -345,7 +345,7 @@ const flaggedDownSlot: SlotVariant[] = [
     rewardMessage: 'Right. A written contest within five days; it is resolved within five days of receipt.',
     duration: 220,
     lawCitation:
-      'JAO 2014-01, as printed in FDM Vol. 2: "All apprehensions are deemed admitted unless contested by filling a written contest within five (5) days from date of apprehension. … The [licensing office] shall resolve a contested case within five (5) days from receipt of said written contest." FDM Vol. 1 reviewer: "it is improper for any driver or any traffic enforcer to negotiate a violation. Any complaint/contest may be done at the proper adjudication office."',
+      'JAO 2014-01: all apprehensions are deemed admitted unless contested in writing within five (5) days from the date of apprehension, and a contested case is resolved within five (5) days of receiving the written contest. Neither driver nor enforcer may negotiate a violation; a contest goes to the proper adjudication office.',
     competency: 'general_rules',
     severity: SEVERITY,
     inspection: {
@@ -353,7 +353,7 @@ const flaggedDownSlot: SlotVariant[] = [
       documentType: "Temporary Operator's Permit",
       holder: 'DIAZ, ROMEO C.',
       fields: [
-        { label: 'Issued by', value: 'Deputized enforcer' },
+        { label: 'Issued by', value: 'Deputized traffic enforcer' },
         { label: 'Violation', value: 'Disregarding traffic signs' },
         { label: "Driver's statement", value: 'Denies the violation' },
       ],
@@ -364,7 +364,7 @@ const flaggedDownSlot: SlotVariant[] = [
   },
 ];
 
-// 5. Ticket issued - the TOP and the license record (
+// 5. Ticket issued - the TOP and the license record (source notes rows A and
 // D). What the TOP lets you do and what an unpaid one costs are FDM Vol. 2's
 // and RO105's; the renewal is FDM Vol. 1's demerit table, asked by total and
 // never by what a violation's category is (G4).
@@ -388,7 +388,7 @@ const ticketIssuedSlot: SlotVariant[] = [
     rewardMessage: 'Right. You drive on the TOP, for 72 hours.',
     duration: 220,
     lawCitation:
-      'JAO 2014-01, as printed in FDM Vol. 2: the TOP "Serves as a permit to operate a motor vehicle for a period of seventy-two (72) hours only." RO105: issued by deputized enforcers, it serves as "Receipt for driver\'s license confiscated; Notice and Summon; Temporary driver\'s license (for 72 hrs. only)". Only deputized traffic enforcers may confiscate a license.',
+      'RA 4136, Sec. 29; JAO 2014-01: the Temporary Operator\'s Permit (TOP) serves as a permit to operate a motor vehicle for seventy-two (72) hours only. It is the receipt for the confiscated license, the notice and summons, and a temporary license for 72 hours. Only deputized traffic enforcers may confiscate a license.',
     competency: 'driver_legality',
     severity: SEVERITY,
     inspection: {
@@ -396,7 +396,7 @@ const ticketIssuedSlot: SlotVariant[] = [
       documentType: "Temporary Operator's Permit",
       holder: 'LIM, TERESA G.',
       fields: [
-        { label: 'Issued by', value: 'Deputized enforcer' },
+        { label: 'Issued by', value: 'Deputized traffic enforcer' },
         { label: "Driver's license", value: 'Confiscated' },
         { label: 'Issued', value: '20 July 2026, 08:40' },
       ],
@@ -424,7 +424,7 @@ const ticketIssuedSlot: SlotVariant[] = [
     rewardMessage: 'Right. Pay within fifteen days, or lose the license for thirty days and still owe the fine.',
     duration: 220,
     lawCitation:
-      'JAO 2014-01, as printed in FDM Vol. 2: "Failure of the driver to pay the corresponding penalty within fifteen (15) days from the date of apprehension shall cause automatic suspension of his driver\'s license for a period of thirty (30) days from the date of apprehension, in addition to the fines and penalties prescribed hereunder." RO105: "5 days to contest, 15 days to settle; otherwise, 30 days suspension of driver\'s license will be meted".',
+      'JAO 2014-01: "Failure of the driver to pay the corresponding penalty within fifteen (15) days from the date of apprehension shall cause automatic suspension of his driver\'s license for a period of thirty (30) days from the date of apprehension, in addition to the fines and penalties prescribed hereunder." In short: 5 days to contest, 15 days to settle, or a 30-day suspension.',
     competency: 'driver_legality',
     severity: SEVERITY,
     inspection: {
@@ -432,7 +432,7 @@ const ticketIssuedSlot: SlotVariant[] = [
       documentType: "Temporary Operator's Permit",
       holder: 'REYES, MARCO D.',
       fields: [
-        { label: 'Issued by', value: 'Deputized enforcer' },
+        { label: 'Issued by', value: 'Deputized traffic enforcer' },
         { label: 'Violation', value: 'Admitted' },
         { label: 'Issued', value: '20 July 2026, 08:40' },
       ],
@@ -461,7 +461,7 @@ const ticketIssuedSlot: SlotVariant[] = [
       'Right. With five to nine points, the renewal waits on the Driving Enhancement Program. The points go back to zero once the license is renewed.',
     duration: 220,
     lawCitation:
-      'FDM Vol. 1, accumulated violation points: "5 -- 9 demerit points -- applicants for renewal of DL — Driving Enhancement Program (DEP) or accredited service provider"; "10 or more demerit points — DEP plus Theoretical Exam"; "at least forty (40) demerit points — Revoked for at least two (2) years". Demerit points accumulate during the validity of the license "and will revert to zero (0) after renewal."',
+      'IRR of RA 10930, demerit points: "5 -- 9 demerit points -- applicants for renewal of DL — Driving Enhancement Program (DEP) or accredited service provider"; "10 or more demerit points — DEP plus Theoretical Exam"; "at least forty (40) demerit points — Revoked for at least two (2) years". Demerit points accumulate during the validity of the license "and will revert to zero (0) after renewal."',
     competency: 'driver_legality',
     severity: SEVERITY,
     inspection: {
@@ -507,7 +507,7 @@ const emergencySlot: SlotVariant[] = [
     rewardMessage: 'Right. Off the pedals, eyes and wheel on where you wanted to go, then straight again as it gripped.',
     duration: 220,
     lawCitation:
-      'FDM Vol. 1, skidding: "1. Do not use your brake, if possible. 2. Take off your foot on the gas pedal. 3. Identify your escape route and slightly turn the wheel in the direction you want to go. 4. Then, straighten the wheels to bring the vehicle under control." RO101, skid and traction loss: look and steer where you want to go, release the brake or accelerator to maintain rolling traction, and never take your hands off the steering wheel.',
+      'Skidding: do not use the brake if possible, take your foot off the gas pedal, identify your escape route and turn the wheel slightly in the direction you want to go, then straighten the wheels to bring the vehicle under control. Skid and traction loss: look and steer where you want to go, release the brake or accelerator to maintain rolling traction, and never take your hands off the steering wheel.',
     competency: 'hazard_awareness',
     severity: SEVERITY,
   },
@@ -534,7 +534,7 @@ const emergencySlot: SlotVariant[] = [
     rewardMessage: 'Right. Off the accelerator, a lower gear, and the parking brake doing the stopping.',
     duration: 220,
     lawCitation:
-      'RO101, loss of brake: "Aim to the target or escape area. Release the accelerator. Control steering. Downshift. Do not switch off the engine. If possible, use parking brake, keep the release lever open and use it as a brake. Use soft crash area if necessary." FDM Vol. 1, emergency braking: pump the brake pedal to build pressure (but not on a car with anti-lock brakes), shift to a lower gear, sound the horn and flash the lights if you cannot slow down, and use the parking brake sporadically.',
+      'Loss of brake: aim for the target or escape area, release the accelerator, control the steering, downshift, and do not switch off the engine. If possible, use the parking brake with the release lever held open, as a brake, and use a soft crash area if necessary. Emergency braking: pump the brake pedal to build pressure (but not on a car with anti-lock brakes), shift to a lower gear, sound the horn and flash the lights if you cannot slow down, and use the parking brake sporadically.',
     competency: 'hazard_awareness',
     severity: SEVERITY,
   },
@@ -573,9 +573,10 @@ const level12Base = {
   speedLimit: 30,
   // Spaced and measured at 60 on the dial; driven at 30 as it was at 60.
   pace: spacedPace(30, 60),
-  // 70% of 200: the mark Levels 2-11 set on their own totals. Stars count
-  // mistakes, one rule for every level (domain/learner/stars).
+  // 70%, 83% and 95% of 200: the marks Levels 2-11 set on their own totals.
   requiredScore: 140,
+  stars2: 166,
+  stars3: 190,
   /**
    * An ordinary two-way street, and this is load-bearing for the borrowed half
    * of the route rather than decoration.
@@ -605,7 +606,8 @@ const level12Base = {
  * double yellow. Each brings its line as a declaration (`declaredLine`), as
  * Level 4's markings do on their own level, and the road carries it over every
  * frame the scenario is graded. A road left broken yellow there showed a
- * driver a line that permits the pass and then failed them for making it.
+ * driver a line that permits the pass and then failed them for making it
+ *.
  *
  * Exported for the dev tools that stage events by hand, so a staged exam is
  * painted the way a roll of it would be.

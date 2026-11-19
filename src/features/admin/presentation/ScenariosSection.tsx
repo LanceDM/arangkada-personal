@@ -11,15 +11,14 @@ import type { LevelConfigRow, ScenarioConfigRow } from '@/features/driving-sim';
 import { Badge } from '@/shared/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import { COMPETENCIES, getCompetencyLabel } from '@/domain/learner/profile';
-import { Panel, SearchField, SectionHeader } from './adminUi';
-import { Legend } from './courseUi';
+import { Legend, Panel, SearchField, SectionHeader } from './adminUi';
 
 const dash = (value: number | null | undefined, unit = '') => (value === null || value === undefined ? '–' : `${value}${unit}`);
 
 const LevelsPanel = ({ levels }: { levels: readonly LevelConfigRow[] }) => (
   <Panel
     title="Levels"
-    description="Each level's road. Metres are on the speed scale (how far the car travels at its speed); seconds at the limit leave out stops and questions. The time limit is twice the longest correct reference drive (time-limits:update)."
+    description="Each level's road. Play a drive plays a whole course drive of the level, nothing saved, to check how its scenarios follow one another. Metres are on the speed scale (how far the car travels at its speed); seconds at the limit leave out stops and questions. The time limit is twice the longest correct reference drive (time-limits:update)."
     bodyClassName="p-0"
   >
     <div className="overflow-x-auto">
@@ -34,6 +33,7 @@ const LevelsPanel = ({ levels }: { levels: readonly LevelConfigRow[] }) => (
             <TableHead>Time limit</TableHead>
             <TableHead>Pass mark</TableHead>
             <TableHead>On its road</TableHead>
+            <TableHead>Check</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -54,6 +54,11 @@ const LevelsPanel = ({ levels }: { levels: readonly LevelConfigRow[] }) => (
                 {level.roadEvents} road events
                 {level.garageChecks ? ` · ${level.garageChecks} garage` : ''}
                 {level.aftermathChecks ? ` · ${level.aftermathChecks} crash scene` : ''}
+              </TableCell>
+              <TableCell className="text-xs">
+                <Link to={`/admin/scenarios/play-level/${level.id}`} className="font-semibold text-primary underline">
+                  Play a drive
+                </Link>
               </TableCell>
             </TableRow>
           ))}
@@ -94,14 +99,14 @@ export const ScenariosSection = ({ levels, scenarios }: { levels: readonly Level
           { term: 'at N m', meaning: 'Where it stands on the road, in metres on the speed scale (how far the car travels at its speed).' },
           { term: 'Warning', meaning: 'How far ahead it is announced, in metres and in seconds at the speed limit.' },
           { term: 'limit / posted', meaning: "The road's speed limit, and a different speed its sign posts." },
-          { term: 'Targets', meaning: 'Every number it is graded on, read from the fields the grader reads. At full support the instruction the player reads names the speed target alone.' },
+          { term: 'Targets', meaning: 'Every number it is graded on, word for word as the player reads it.' },
           { term: 'u', meaning: "The game's route units (about 10.8 per metre at the default pace)." },
         ]}
       />
       <LevelsPanel levels={levels} />
       <Panel
         title="Scenarios"
-        description="Click a scenario for its situation, the instruction the player reads at full support and the rule it cites. Road position and warning are in metres on the speed scale, and seconds at the limit."
+        description="Click a scenario for its situation, the instruction the player reads (targets included) and the rule it cites. Road position and warning are in metres on the speed scale, and seconds at the limit."
         actions={
           <div className="flex flex-wrap gap-2">
             <select aria-label="Level" value={level} onChange={e => setLevel(e.target.value)} className="h-9 rounded-md border border-input bg-background px-2 text-xs">

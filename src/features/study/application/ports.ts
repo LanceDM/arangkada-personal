@@ -37,8 +37,6 @@ export interface StudyRecordsState {
   deviceChecked: boolean;
   survey: { openedAt: number | null; confirmedAt: number | null };
   withdrawn: boolean;
-  /** The admin's study deadline (ms), or null while none is set. */
-  deadlineAt: number | null;
 }
 
 /** The participant's own study records. The consent record is written here and never read back. */
@@ -61,7 +59,5 @@ export interface StudyRecordsRepository {
  */
 export interface StudySources {
   course(uid: string): Promise<CourseProgress>;
-  /** The end path: ends the account's course without the certificate, as its own course writes it. */
-  finishCourse(account: { uid: string; participantCode: string; cohort: string }, reason: 'final_attempts' | 'deadline'): Promise<void>;
   tests(uid: string): Promise<{ pre: TestProgress; post: TestProgress }>;
 }

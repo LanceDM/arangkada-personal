@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Shield, Brain, Trophy, ChevronRight, Gauge } from 'lucide-react';
+import { SURVEY_URL } from '@/shared/lib/survey';
+import { Car, Shield, Brain, Trophy, ChevronRight, Gauge, ClipboardList } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 
 const features = [
   { icon: Car, title: 'Realistic Filipino Roads', desc: 'Jeepneys, tricycles, EDSA traffic — survive real Philippine driving scenarios.' },
-  { icon: Brain, title: 'License Exam Ready', desc: 'Every scenario maps to license exam topics and Philippine traffic laws.' },
+  { icon: Brain, title: 'License Exam Ready', desc: 'Every scenario rests on Philippine traffic laws and the topics of the license exam.' },
   { icon: Shield, title: 'Learn From Mistakes', desc: 'Wrong decisions show the exact law citation — learn rules in context.' },
   { icon: Trophy, title: '3 Game Modes', desc: 'Story Mode, Mock Exam, and Daily Challenges keep you engaged and learning.' },
 ];
+
+/** The team's survey (2026-11-18): a Google Form, opened in a new tab. */
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -41,7 +44,7 @@ const Landing = () => {
 
             <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto leading-relaxed">
               Master Philippine traffic rules and sharpen your driving instincts — 
-              built for Filipino drivers preparing for the license exam.
+              built for Filipino drivers preparing for the driver's license exam.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -54,6 +57,12 @@ const Landing = () => {
               >
                 TARA NA!
                 <ChevronRight className={`ml-1 transition-transform duration-300 ${hovering ? 'translate-x-1' : ''}`} />
+              </Button>
+              <Button asChild size="lg" variant="outline" className="text-lg px-8 py-6 font-display font-bold">
+                <a href={SURVEY_URL} target="_blank" rel="noopener noreferrer">
+                  <ClipboardList className="mr-1" />
+                  TAKE THE SURVEY
+                </a>
               </Button>
             </div>
 
@@ -108,7 +117,7 @@ const Landing = () => {
               READY NA BA <span className="text-primary">IKAW</span>?
             </h2>
             <p className="text-muted-foreground">
-              3 game modes. Exam-style questions. Filipino road chaos included.
+              3 game modes. Questions grounded in Philippine traffic law. Filipino road chaos included.
             </p>
             <Button
               size="lg"

@@ -8,11 +8,9 @@ import { buildEvents } from '@/features/driving-sim/domain/scenario/pooling';
 import { buildLevelConfig, getPooledSlots, levelWithEvents, LEVELS } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { type GarageHotspot, type LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { createRng } from '@/shared/lib/rng';
-import { composeDrive } from '@/features/driving-sim/domain/scenario/composeDrive';
-import { isCompetencyStage, STAGE_COMPETENCIES } from '@/domain/learner/stageCompetencies';
 import { garageHotspotSlots } from './scenarioCatalog';
 
-export type StagedMode = 'seeded' | 'course' | 'exact' | 'single';
+export type StagedMode = 'seeded' | 'exact' | 'single';
 export interface SinglePick { slotIndex: number; variantIndex: number }
 
 export interface StagedLevel {
@@ -62,22 +60,10 @@ export const useStagedLevel = (initialLevelId = 1): StagedLevel => {
   }
 
   const stagedLevel: LevelConfig = useMemo(() => {
-    // The drive the competency course composes for this seed: three scenarios
-    // per competency, unseen first, borrowed ones included (composeDrive). What a
-    // first attempt at this stage plays.
-    if (mode === 'course' && isCompetencyStage(levelId)) {
-      return composeDrive({ levelId, competencies: STAGE_COMPETENCIES[levelId], rng: createRng(seed) }).level;
-    }
-
     if (!isPooled || !pooled) return staticLevel;
 
     if (mode === 'seeded') {
-      const roll = buildLevelConfig(levelId, undefined, null, createRng(seed)) ?? staticLevel;
-      if (roll !== staticLevel) return roll;
-      // A level with no roll of its own (6, 8-11): one variant per slot, by seed.
-      const rng = createRng(seed);
-      const events = buildEvents(pooled.slots, pooled.distances, pool => pool[Math.floor(rng() * pool.length)]);
-      return levelWithEvents(levelId, events) ?? staticLevel;
+      return buildLevelConfig(levelId, undefined, null, createRng(seed)) ?? staticLevel;
     }
 
     if (mode === 'single') {

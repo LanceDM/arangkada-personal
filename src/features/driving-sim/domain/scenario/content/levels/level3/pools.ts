@@ -143,7 +143,7 @@ const priorityStopSlot: SlotVariant[] = [
     penaltyMessage: 'A crossing with no barrier or light is not a clear crossing. Stop and check the track both ways first.',
     rewardMessage: 'Correct. You stopped and checked both directions before crossing the tracks.',
     duration: 200,
-    lawCitation: 'Where a railway crossing has no barrier or warning light, slow down, check both directions, then proceed only if it is clearly safe.',
+    lawCitation: 'RA 4136, Sec. 42(d): a driver about to traverse a railroad crossing shall bring the vehicle to a full stop, unless no hazard is apparent, in which case it may be slowed instead to about 8 kph. A crossing with no barrier or warning light gives no sign the way is clear, so stop, check both directions, and proceed only when it is clearly safe.',
     competency: 'road_signs',
     severity: 'major',
     sign: {
@@ -515,8 +515,8 @@ const routeRestrictionSlot: SlotVariant[] = [
   // Road Closed To All Vehicles is taught in the module's sign table and not
   // driven. The sign means the road ahead is closed to all vehicle traffic
   // (FDM Vol. 1), and a corridor with no detour can stage that only as a
-  // closed lane the car drives past, which grades the opposite of the sign.
-  // The work-zone variants below stage that closed
+  // closed lane the car drives past, which grades the opposite of the sign
+  //. The work-zone variants below stage that closed
   // lane under signs that warn of it.
   {
     id: 'level3.route-restriction.roadwork-ahead',
@@ -622,7 +622,7 @@ const speedSlot: SlotVariant[] = [
     type: 'speed_limit',
     scene: 'open_road',
     speedRule: 'maximum',
-    // Republic Act No. 4136, Section 35(b) row 4, "through crowded streets": below the road's 40, so
+    // RA 4136 §35(b) row 4, "through crowded streets": below the road's 40, so
     // obeying it takes a deliberate act rather than simply carrying on.
     postedSpeed: 20,
     description: '20 km/h speed zone: a MAXIMUM SPEED RESTRICTION sign marks the crowded street ahead.',
@@ -632,8 +632,8 @@ const speedSlot: SlotVariant[] = [
     rewardMessage: 'Correct. You kept within the posted 20 km/h limit.',
     duration: 200,
     lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): Vehicles must not exceed the speed posted by a Maximum Speed Restriction sign.',
-    // A posted maximum is graded on the speed driven: speed control (the
-    // groupmate's catalogue review).
+    // Tagged speed_control with the other two posted restrictions in this slot
+    // (catalogue review 2026-10-28); the advisory signs stay road_signs.
     competency: 'speed_control',
     severity: 'major',
     sign: {
@@ -676,18 +676,12 @@ const speedSlot: SlotVariant[] = [
     id: 'level3.speed.end-of-restriction',
     type: 'speed_limit',
     scene: 'open_road',
-    // Graded at the road's own limit, as a maximum: past the sign the posted
-    // restriction no longer applies and the road's limit does. The speed-limits
-    // pack names the sign (S1) and §35(a)'s careful and prudent speed (L1);
-    // nothing in it makes speeding up the only right move, so a safe slow-down
-    // past the sign is not graded wrong (2026-11-17; it was a minimum until
-    // then, and failed every driver who braked).
-    speedRule: 'maximum',
+    speedRule: 'minimum',
     description: 'Restriction lifted: an END OF SPEED RESTRICTION sign marks the point where the posted limit stops applying.',
-    correctAction: 'brake',
+    correctAction: 'accelerate',
     points: 20,
-    penaltyMessage: "The posted restriction has ended, but the road's own limit still applies, and you were over it.",
-    rewardMessage: "Correct. The posted restriction ended, and you kept within the road's own limit.",
+    penaltyMessage: 'The restriction has ended, so there is no reason to keep crawling. Resume normal speed for the road.',
+    rewardMessage: 'Correct. You resumed normal speed once the restriction ended.',
     duration: 200,
     lawCitation: 'Road sign standard (DPWH DO 41, s. 2012): An End Of Speed Restriction sign means the posted speed limit no longer applies past that point.',
     competency: 'speed_control',
@@ -1128,12 +1122,14 @@ const signalSlot: SlotVariant[] = [
     type: 'red_light',
     scene: 'signal',
     description: 'Signalized intersection: a solid red signal, stop line, crosswalk, and cross street control the approach.',
+    // A full stop, not merely slowing: 'brake' was satisfied by slowing
+    // (ruleEngine), which a solid red does not allow (catalogue review 2026-10-28).
     correctAction: 'stop',
     points: 25,
     penaltyMessage: 'A solid red signal requires a full stop before the stop line and crosswalk.',
     rewardMessage: 'Correct. You stopped before the line at the red signal.',
     duration: 220,
-    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals): A solid red traffic signal means stop before the marked stop line or crosswalk.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A solid red traffic signal means stop before the marked stop line or crosswalk.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {
@@ -1154,7 +1150,7 @@ const signalSlot: SlotVariant[] = [
     penaltyMessage: 'A flashing red is a stop sign in light form. Rolling through it is not a stop.',
     rewardMessage: 'Correct. You came to a full stop, then judged the junction before moving.',
     duration: 220,
-    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals): A flashing red signal means stop completely, then proceed only when it is safe, similar to a stop sign.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A flashing red signal means stop completely, then proceed only when it is safe, similar to a stop sign.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {
@@ -1175,7 +1171,7 @@ const signalSlot: SlotVariant[] = [
     penaltyMessage: 'Yellow means the red is about to appear, not that there is time left to beat it.',
     rewardMessage: 'Correct. You prepared to stop instead of racing the signal.',
     duration: 220,
-    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals): A solid yellow signal means the red signal is about to appear; prepare to stop if it is safe to do so.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A solid yellow signal means the red signal is about to appear; prepare to stop if it is safe to do so.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {
@@ -1196,7 +1192,7 @@ const signalSlot: SlotVariant[] = [
     penaltyMessage: 'A flashing yellow hands the judgment back to you, and that judgment starts with slowing down.',
     rewardMessage: 'Correct. You slowed and read the junction before crossing it.',
     duration: 220,
-    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals): A flashing yellow signal means slow down and proceed with caution.',
+    lawCitation: 'PD 207 (Vienna Convention on Road Signs and Signals), Art. 23: A flashing yellow signal means slow down and proceed with caution.',
     competency: 'traffic_signals',
     severity: 'critical',
     sign: {

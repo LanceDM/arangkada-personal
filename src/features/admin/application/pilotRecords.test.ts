@@ -3,7 +3,7 @@
  * reads, what it keeps, and what it reads again.
  */
 import { describe, expect, it } from 'vitest';
-import type { AttemptDocument, AttemptRecordDocuments, CourseRecordsFound, PilotRecordsRepository, PoolAccountEntry } from './pilotPorts';
+import type { AttemptDocument, AttemptRecordDocuments, PilotRecordsRepository, PoolAccountEntry } from './pilotPorts';
 import { createPilotRecordsStore, type AccountDocumentsRead } from './pilotRecords';
 
 const MINUTE = 60_000;
@@ -13,7 +13,6 @@ interface Account {
   routing: { assignment: unknown; cursor: unknown };
   attempts: AttemptDocument[];
   records: Record<string, AttemptRecordDocuments>;
-  course?: Record<string, CourseRecordsFound>;
   failing?: boolean;
 }
 
@@ -55,7 +54,6 @@ const world = () => {
       reads.records.push(id);
       return accounts[uid].records[id] ?? { fsm: null, decisions: null, routing: null };
     },
-    courseRecords: async (uid, id) => accounts[uid].course?.[id] ?? { courseLog: false, bktUpdate: false },
     otherModes: async () => ({ examSittings: [{ timestamp: T0 }], dailyAnswers: [] }),
     fsmLog: async (uid, id) => {
       reads.fsmLogs += 1;
@@ -70,11 +68,6 @@ const echo = {
   sourceOf: (documents: AccountDocumentsRead) => documents,
   exportOf: (source: AccountDocumentsRead) => ({ code: source.participant.code, ids: source.attempts.map(attempt => attempt.id) }),
   keepFsm: (fsm: unknown) => ({ kept: (fsm as { transitions: unknown[] }).transitions.slice(0, 1) }),
-  // A course drive, as the export's rule reads one: the tutorial (Level 0) commits no course log entry.
-  courseRecordsExpected: (attempt: unknown) => {
-    const { levelId, evidenceSeq } = attempt as { levelId: number; evidenceSeq?: number };
-    return typeof evidenceSeq === 'number' ? { courseLog: levelId !== 0, bktUpdate: levelId !== 0 } : null;
-  },
 };
 
 describe('the records store', () => {
@@ -142,38 +135,6 @@ describe('the records store', () => {
     expect(reads.records).toEqual([]);
     // A whole FSM log is the Replay's to ask for, one attempt at a time; the store never does.
     expect(reads.fsmLogs).toBe(0);
-  });
-
-  it('holds a course drive complete on its FSM log, course log entry and BKT update, never a routing or decision record', async () => {
-    const { repository, accounts } = world();
-    let now = T0 + 30_000;
-    const COURSE_ONLY: AttemptRecordDocuments = { ...RECORDS, decisions: null, routing: null };
-    accounts.u10.attempts.push(
-      { id: 'drive_a', savedAt: T0, data: { levelId: 1, evidenceSeq: 1 } },
-      { id: 'drive_b', savedAt: T0, data: { levelId: 1, evidenceSeq: 2 } },
-      { id: 'drive_t', savedAt: T0, data: { levelId: 0, evidenceSeq: 3 } }
-    );
-    accounts.u10.records = { drive_a: COURSE_ONLY, drive_b: COURSE_ONLY, drive_t: COURSE_ONLY };
-    accounts.u10.course = {
-      drive_a: { courseLog: true, bktUpdate: true },
-      drive_b: { courseLog: true, bktUpdate: false },
-      // The tutorial has no course log entry, and is complete without one.
-      drive_t: { courseLog: false, bktUpdate: true },
-    };
-    const store = createPilotRecordsStore(repository, echo, { now: () => now, graceMs: 2 * MINUTE });
-
-    const first = await store.refresh();
-    const p10 = first.accounts.find(account => account.code === 'P10')!;
-    expect(p10.pending).toBe(1);
-    const read = (p10.source as AccountDocumentsRead).attempts;
-    expect(read.find(a => a.id === 'drive_a')!.course).toEqual({ courseLog: true, bktUpdate: true });
-    expect(read.find(a => a.id === 'drive_b')!.course).toEqual({ courseLog: true, bktUpdate: false });
-
-    now = T0 + 3 * MINUTE;
-    const later = await store.refresh();
-    expect(later.accounts.find(account => account.code === 'P10')!.pending).toBe(0);
-    // Any other attempt is never asked for course records.
-    expect((later.accounts.find(account => account.code === 'P02')!.source as AccountDocumentsRead).attempts.every(a => a.course === undefined)).toBe(true);
   });
 
   it('joins a read already under way', async () => {

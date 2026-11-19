@@ -1,19 +1,32 @@
 /** The bound implementations of Admin's ports. Provided by `app/dependencies`. */
-import type { CourseLogsRepository } from './courseLogsPorts';
 import type { IrtRepository } from './irtPorts';
-import type { PilotPoolRepository, PilotRecordsRepository, StudyDeadlineRepository, StudyInvitesRepository } from './pilotPorts';
-import type { AdminReportRepository } from './ports';
+import type { PilotPoolRepository, PilotRecordsRepository, StudyInvitesRepository } from './pilotPorts';
+import type { AdminAccessRepository, AdminReportRepository, BktSetsRepository, ProgressResetRepository, QTableResetRepository, LiveQTableRepository, StudyLogRepository, StudyRecordsRepository, SiteStatusRepository } from './ports';
 import type { QuizEditorRepository } from './quizPorts';
 
 export interface AdminDependencies {
   report: AdminReportRepository;
   pilotPool: PilotPoolRepository;
   invites: StudyInvitesRepository;
-  deadline: StudyDeadlineRepository;
   pilotRecords: PilotRecordsRepository;
   quizEditor: QuizEditorRepository;
   irt: IrtRepository;
-  courseLogs: CourseLogsRepository;
+  /** The per-competency course's records: participants, roles, settings versions. */
+  records: StudyRecordsRepository;
+  /** The shared Q-table, live. */
+  live: LiveQTableRepository;
+  /** The event stream, BKT log and Q-table log, for the study export. */
+  logs: StudyLogRepository;
+  /** Whether the site is open to players; absent in tests (always open). */
+  site?: SiteStatusRepository;
+  /** The BKT value sets and pilot marks; absent in tests (no calibration, nobody marked). */
+  bktSets?: BktSetsRepository;
+  /** Resetting an account's course; absent in tests (the panel says it is not wired). */
+  progressReset?: ProgressResetRepository;
+  /** Resetting the shared Q-table; absent in tests (the panel says it is not wired). */
+  qTableReset?: QTableResetRepository;
+  /** Granting admin access from the admin page; absent in tests (the panel says it is not wired). */
+  adminAccess?: AdminAccessRepository;
 }
 
 let bound: AdminDependencies | null = null;

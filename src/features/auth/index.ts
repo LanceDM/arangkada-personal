@@ -6,6 +6,7 @@ export { default as AuthForm } from './presentation/AuthForm';
 export { useAuthSession } from './application/useAuthSession';
 export { useAuthModal } from './application/useAuthModal';
 export { useLanguagePreference } from './application/useLanguagePreference';
+export { useVehicleSkin, chooseVehicleSkin } from './application/vehicleSkin';
 export {
   signOut,
   signInStudyAccount,
@@ -13,7 +14,6 @@ export {
   StudyAuthError,
   requestPasswordReset,
   confirmNewPassword,
-  verifyEmailCode,
 } from './application/authActions';
 export type { AuthSession } from './application/authSession';
 export type { AuthUser, UserProfile } from './domain/userProfile';
@@ -27,3 +27,4 @@ export {
   studyUsernameOf,
   usernameProblem,
 } from './domain/studyIdentity';
+export { usernameOfIdentity } from './domain/accountIdentity';

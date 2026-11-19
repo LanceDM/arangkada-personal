@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildLevelResult } from './buildLevelResult';
+import { buildLevelResult, starsFor } from './buildLevelResult';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import type { ActionLog, SignOutcome } from '@/domain/learner/attempt';
 
@@ -12,42 +12,27 @@ const level: LevelConfig = {
   speedLimit: 40,
   events: [],
   requiredScore: 45,
+  stars2: 55,
+  stars3: 65,
   moduleId: 'm3',
 };
 
 const noLogs: ActionLog[] = [];
 
-const log = (result: ActionLog['result'], extra: Partial<ActionLog> = {}): ActionLog =>
-  ({ timestamp: 0, action: 'brake', result, points: 0, ...extra });
-const wrong = (n: number, extra: Partial<ActionLog> = {}) => Array.from({ length: n }, () => log('violation', extra));
-
-describe('stars, one rule for every level: passed, then counted in mistakes', () => {
-  const stars = (logs: ActionLog[], score = 60) => buildLevelResult(level, { score, violations: 0, correctActions: 0, logs }).stars;
-
-  it('gives 3 for none, 2 for 1 or 2, 1 for more, whatever the points', () => {
-    expect(stars([log('correct')])).toBe(3);
-    expect(stars(wrong(1))).toBe(2);
-    expect(stars(wrong(2))).toBe(2);
-    expect(stars(wrong(3))).toBe(1);
-    expect(stars(wrong(9), 999)).toBe(1);
-  });
-
-  it('gives nothing below the pass mark, however few the mistakes', () => {
-    expect(stars([], 44)).toBe(0);
-    expect(stars([], 45)).toBe(3);
-  });
-
-  it('counts an unanswered question, but not a standing penalty or a practice item', () => {
-    expect(stars(wrong(3, { unanswered: true }))).toBe(1);
-    expect(stars(wrong(4, { standing: true }))).toBe(3);
-    expect(stars(wrong(4, { remediation: true }))).toBe(3);
-    expect(stars([log('neutral'), log('correct')])).toBe(3);
+describe('starsFor', () => {
+  it('bands a score by the level thresholds', () => {
+    expect(starsFor(level, 44)).toBe(0);
+    expect(starsFor(level, 45)).toBe(1);
+    expect(starsFor(level, 54)).toBe(1);
+    expect(starsFor(level, 55)).toBe(2);
+    expect(starsFor(level, 65)).toBe(3);
+    expect(starsFor(level, 999)).toBe(3);
   });
 });
 
 describe('buildLevelResult', () => {
-  it('grades a completed run', () => {
-    const r = buildLevelResult(level, { score: 60, violations: 2, correctActions: 5, logs: wrong(2) });
+  it('grades a completed run by the level thresholds', () => {
+    const r = buildLevelResult(level, { score: 60, violations: 2, correctActions: 5, logs: noLogs });
     expect(r.levelId).toBe(3);
     expect(r.score).toBe(60);
     expect(r.stars).toBe(2);

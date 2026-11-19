@@ -11,15 +11,22 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { signOut, useAuthSession } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 import { LanguageChooser, StudyCard, StudyJoinForm } from '@/features/study';
 import { Say } from '@/shared/i18n/language';
 import { Button } from '@/shared/ui/button';
 import { studyPageMessages as m } from './messages';
 
+/** Logged first: once signed out, nothing more can be written for this account. */
+const signOutLogged = async (uid: string | null, from: string) => {
+  if (uid) await logUiAction(uid, 'signed_out', { from }).catch(() => {});
+  await signOut();
+};
+
 const StudyJoinPage = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { isLoggedIn, studyAccount, loading } = useAuthSession();
+  const { user, isLoggedIn, studyAccount, loading } = useAuthSession();
   const [joining, setJoining] = useState(false);
   const [languageSet, setLanguageSet] = useState(false);
 
@@ -37,7 +44,7 @@ const StudyJoinPage = () => {
           <p className="text-sm text-muted-foreground">
             <Say {...m.youAreSignedIn} />
           </p>
-          <Button variant="outline" onClick={() => void signOut()}>
+          <Button variant="outline" onClick={() => void signOutLogged(user?.uid ?? null, 'study_join')}>
             <Say {...m.signOut} />
           </Button>
         </div>

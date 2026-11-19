@@ -8,6 +8,7 @@
  * the boundary.
  */
 import type { Language } from '@/shared/lib/localized';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 import type { AuthUser, UserProfile } from '@/features/auth/domain/userProfile';
 
 export interface AuthGateway {
@@ -20,12 +21,16 @@ export interface AuthGateway {
    * profile, with no email and nothing sent to the address.
    */
   createStudyAccount(identity: string, password: string): Promise<AuthUser>;
+  /**
+   * Creates a regular account on a username's synthetic identity, with that
+   * username on its profile and no email (2026-11-18).
+   */
+  createUsernameAccount(identity: string, password: string, username: string): Promise<AuthUser>;
   /** Changes the signed-in account's password, after confirming its current one. */
   changePassword(currentPassword: string, newPassword: string): Promise<void>;
   signOut(): Promise<void>;
   requestPasswordReset(email: string): Promise<void>;
   confirmNewPassword(oobCode: string, newPassword: string): Promise<void>;
-  verifyEmailCode(oobCode: string): Promise<void>;
   /**
    * Finishes a sign-in that left the page for a full-screen redirect, on the
    * load that follows it. Resolves to null when no redirect was pending.
@@ -40,6 +45,16 @@ export interface UserProfileRepository {
   get(uid: string): Promise<UserProfile | null>;
   /** Merges the account's chosen language into its profile. */
   saveLanguage(uid: string, language: Language): Promise<void>;
+  /** Merges the Terms and Data Use the account agreed to into its profile. */
+  saveTermsAcceptance(uid: string, version: string, at: number): Promise<void>;
+  /** Merges the account's vehicle skin into its profile. */
+  saveVehicleSkin(uid: string, skin: VehicleSkin): Promise<void>;
+}
+
+/** The vehicle skin chosen on this device, for a guest and before the profile is read. */
+export interface DeviceVehicleSkinRepository {
+  load(): VehicleSkin | null;
+  save(skin: VehicleSkin): void;
 }
 
 /** The language chosen on this device, before any sign-in and for a guest. */

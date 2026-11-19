@@ -1152,6 +1152,1014 @@
   "bodies": []
  },
  {
+  "levelId": 2,
+  "distance": 240,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": -48.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": -135.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 230,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 240,
+  "handled": [
+   840
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": -48.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": -135.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 230,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 490,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 76.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": -10.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 355,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 490,
+  "handled": [
+   840
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 76.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": -10.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 355,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 660,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 161.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 74.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 440,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 660,
+  "handled": [
+   840
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 161.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 74.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 440,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 780,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 221.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 134.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 500,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 780,
+  "handled": [
+   840
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 221.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 134.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 287,
+    "y": 500,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 840,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 251.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 164.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 530,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 840,
+  "handled": [
+   840
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 251.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 164.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 332,
+    "y": 530,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 880,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 271.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 184.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 550,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 880,
+  "handled": [
+   840
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 271.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 184.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 362,
+    "y": 550,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 250,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": -43.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": -130.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 235,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 250,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 227,
+    "y": 235,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 600,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 131.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 44.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 410,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 600,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 227,
+    "y": 410,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 900,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 281.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 194.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 560,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 900,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 227,
+    "y": 560,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1150,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 406.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 319.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 685,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1150,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 227,
+    "y": 685,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1320,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 491.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 404.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1320,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 1440,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 551.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 464.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1440,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 1500,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 581.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 494.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1500,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 1540,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 601.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 514.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1540,
+  "handled": [
+   1500
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 910,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 286.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 199.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 565,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 910,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 286.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 199.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 227,
+    "y": 565,
+    "width": 18,
+    "height": 34,
+    "kind": "pedestrian",
+    "label": "a pedestrian on the crossing"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1260,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 461.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 374.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1260,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 461.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 374.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1560,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 611.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 524.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1560,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 611.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 524.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1810,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 736.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 649.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1810,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": [
+   {
+    "x": 308.333,
+    "y": 736.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 649.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
+   }
+  ]
+ },
+ {
+  "levelId": 2,
+  "distance": 1980,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 1980,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 2100,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 2100,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 2160,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 2160,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 2200,
+  "handled": [],
+  "playerLane": 2,
+  "bodies": []
+ },
+ {
+  "levelId": 2,
+  "distance": 2200,
+  "handled": [
+   2160
+  ],
+  "playerLane": 1,
+  "bodies": []
+ },
+ {
   "levelId": 3,
   "distance": 240,
   "handled": [],
@@ -4447,7 +5455,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -4465,7 +5473,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -4481,7 +5489,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -11,
     "width": 18,
     "height": 34,
@@ -4507,7 +5515,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -11,
     "width": 18,
     "height": 34,
@@ -4531,7 +5539,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 371.533,
     "y": 49,
     "width": 18,
     "height": 34,
@@ -4557,7 +5565,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 371.533,
     "y": 49,
     "width": 18,
     "height": 34,
@@ -4581,7 +5589,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -4607,7 +5615,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -4631,7 +5639,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 357.867,
     "y": 99,
     "width": 18,
     "height": 34,
@@ -4657,7 +5665,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 357.867,
     "y": 99,
     "width": 18,
     "height": 34,
@@ -4681,7 +5689,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -4699,7 +5707,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -4715,7 +5723,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -4741,7 +5749,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 336,
+    "x": 363.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -4899,16 +5907,7 @@
    1830
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 336,
-    "y": 499,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -4933,16 +5932,7 @@
    1830
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 336,
-    "y": 529,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -4967,16 +5957,7 @@
    1830
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 336,
-    "y": 549,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -5087,7 +6068,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -5105,7 +6086,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -5121,7 +6102,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -18,
     "width": 18,
     "height": 34,
@@ -5147,7 +6128,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -18,
     "width": 18,
     "height": 34,
@@ -5171,7 +6152,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 354.467,
     "y": 42,
     "width": 18,
     "height": 34,
@@ -5197,7 +6178,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 354.467,
     "y": 42,
     "width": 18,
     "height": 34,
@@ -5221,7 +6202,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -5247,7 +6228,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -5271,7 +6252,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 298.133,
     "y": 92,
     "width": 18,
     "height": 34,
@@ -5297,7 +6278,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 298.133,
     "y": 92,
     "width": 18,
     "height": 34,
@@ -5321,7 +6302,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -5339,7 +6320,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 377,
     "y": -103,
     "width": 18,
     "height": 34,
@@ -5355,7 +6336,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -5381,7 +6362,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 208,
+    "x": 320.667,
     "y": 72,
     "width": 18,
     "height": 34,
@@ -5539,16 +6520,7 @@
    3630
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 208,
-    "y": 492,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -5573,16 +6545,7 @@
    3630
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 208,
-    "y": 522,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -5607,16 +6570,7 @@
    3630
   ],
   "playerLane": 1,
-  "bodies": [
-   {
-    "x": 208,
-    "y": 542,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
-   }
-  ]
+  "bodies": []
  },
  {
   "levelId": 5,
@@ -19439,7 +20393,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -121,
     "width": 18,
     "height": 34,
@@ -19521,7 +20475,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -121,
     "width": 18,
     "height": 34,
@@ -19545,7 +20499,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": 4,
     "width": 18,
     "height": 34,
@@ -19627,7 +20581,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": 4,
     "width": 18,
     "height": 34,
@@ -19651,7 +20605,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 304.2,
     "y": 89,
     "width": 18,
     "height": 34,
@@ -19725,7 +20679,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 304.2,
     "y": 89,
     "width": 18,
     "height": 34,
@@ -19741,7 +20695,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 231.4,
     "y": 149,
     "width": 18,
     "height": 34,
@@ -19815,7 +20769,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 231.4,
     "y": 149,
     "width": 18,
     "height": 34,
@@ -20011,7 +20965,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -20093,7 +21047,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 377,
     "y": -96,
     "width": 18,
     "height": 34,
@@ -20173,7 +21127,7 @@
   "playerLane": 2,
   "bodies": [
    {
-    "x": 195,
+    "x": 316.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -20247,7 +21201,7 @@
   "playerLane": 1,
   "bodies": [
    {
-    "x": 195,
+    "x": 316.333,
     "y": 79,
     "width": 18,
     "height": 34,
@@ -20725,14 +21679,6 @@
     "height": 54,
     "kind": "vehicle",
     "label": "an overloaded jeepney"
-   },
-   {
-    "x": 195,
-    "y": 499,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
    }
   ]
  },
@@ -20775,14 +21721,6 @@
     "height": 54,
     "kind": "vehicle",
     "label": "an overloaded jeepney"
-   },
-   {
-    "x": 195,
-    "y": 529,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
    }
   ]
  },
@@ -20825,14 +21763,6 @@
     "height": 54,
     "kind": "vehicle",
     "label": "an overloaded jeepney"
-   },
-   {
-    "x": 195,
-    "y": 549,
-    "width": 18,
-    "height": 34,
-    "kind": "pedestrian",
-    "label": "a pedestrian on the crossing"
    }
   ]
  },
@@ -21996,7 +22926,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": -155.333,
+    "y": -68.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22004,7 +22934,7 @@
    },
    {
     "x": 101.667,
-    "y": -68.667,
+    "y": -155.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22022,19 +22952,19 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": -155.333,
-    "width": 50,
-    "height": 24,
-    "kind": "vehicle",
-    "label": "a vehicle crossing on the main road"
-   },
-   {
-    "x": 101.667,
     "y": -68.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
     "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": -155.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
    }
   ]
  },
@@ -22046,7 +22976,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": -30.333,
+    "y": 56.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22054,7 +22984,7 @@
    },
    {
     "x": 101.667,
-    "y": 56.333,
+    "y": -30.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22072,7 +23002,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": -30.333,
+    "y": 56.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22080,7 +23010,7 @@
    },
    {
     "x": 101.667,
-    "y": 56.333,
+    "y": -30.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22096,7 +23026,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 54.667,
+    "y": 141.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22104,7 +23034,7 @@
    },
    {
     "x": 101.667,
-    "y": 141.333,
+    "y": 54.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22122,19 +23052,19 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 54.667,
-    "width": 50,
-    "height": 24,
-    "kind": "vehicle",
-    "label": "a vehicle crossing on the main road"
-   },
-   {
-    "x": 101.667,
     "y": 141.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
     "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 54.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
    }
   ]
  },
@@ -22146,7 +23076,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 114.667,
+    "y": 201.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22154,7 +23084,7 @@
    },
    {
     "x": 101.667,
-    "y": 201.333,
+    "y": 114.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22172,7 +23102,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 114.667,
+    "y": 201.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22180,7 +23110,7 @@
    },
    {
     "x": 101.667,
-    "y": 201.333,
+    "y": 114.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22196,7 +23126,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 144.667,
+    "y": 231.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22204,7 +23134,7 @@
    },
    {
     "x": 101.667,
-    "y": 231.333,
+    "y": 144.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22222,7 +23152,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 144.667,
+    "y": 231.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22230,7 +23160,7 @@
    },
    {
     "x": 101.667,
-    "y": 231.333,
+    "y": 144.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22246,7 +23176,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 164.667,
+    "y": 251.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22254,7 +23184,7 @@
    },
    {
     "x": 101.667,
-    "y": 251.333,
+    "y": 164.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22272,7 +23202,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 164.667,
+    "y": 251.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22280,7 +23210,7 @@
    },
    {
     "x": 101.667,
-    "y": 251.333,
+    "y": 164.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22296,19 +23226,19 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": -130.333,
-    "width": 50,
-    "height": 24,
-    "kind": "vehicle",
-    "label": "a vehicle crossing on the main road"
-   },
-   {
-    "x": 101.667,
     "y": -43.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
     "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": -130.333,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
    }
   ]
  },
@@ -22329,7 +23259,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 44.667,
+    "y": 131.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22337,7 +23267,7 @@
    },
    {
     "x": 101.667,
-    "y": 131.333,
+    "y": 44.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22362,7 +23292,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 194.667,
+    "y": 281.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22370,7 +23300,7 @@
    },
    {
     "x": 101.667,
-    "y": 281.333,
+    "y": 194.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22395,7 +23325,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 319.667,
+    "y": 406.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22403,7 +23333,7 @@
    },
    {
     "x": 101.667,
-    "y": 406.333,
+    "y": 319.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22428,7 +23358,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 404.667,
+    "y": 491.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22436,7 +23366,7 @@
    },
    {
     "x": 101.667,
-    "y": 491.333,
+    "y": 404.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22461,7 +23391,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 464.667,
+    "y": 551.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22469,7 +23399,7 @@
    },
    {
     "x": 101.667,
-    "y": 551.333,
+    "y": 464.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22494,7 +23424,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 494.667,
+    "y": 581.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22502,7 +23432,7 @@
    },
    {
     "x": 101.667,
-    "y": 581.333,
+    "y": 494.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22527,7 +23457,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 514.667,
+    "y": 601.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22535,7 +23465,7 @@
    },
    {
     "x": 101.667,
-    "y": 601.333,
+    "y": 514.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22560,7 +23490,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 219.667,
+    "y": 306.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22568,7 +23498,7 @@
    },
    {
     "x": 101.667,
-    "y": 306.333,
+    "y": 219.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22586,19 +23516,19 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 219.667,
-    "width": 50,
-    "height": 24,
-    "kind": "vehicle",
-    "label": "a vehicle crossing on the main road"
-   },
-   {
-    "x": 101.667,
     "y": 306.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
     "label": "a vehicle crossing on the main road"
+   },
+   {
+    "x": 101.667,
+    "y": 219.667,
+    "width": 50,
+    "height": 24,
+    "kind": "vehicle",
+    "label": "a vehicle crossing on the main road"
    }
   ]
  },
@@ -22610,7 +23540,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 394.667,
+    "y": 481.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22618,7 +23548,7 @@
    },
    {
     "x": 101.667,
-    "y": 481.333,
+    "y": 394.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22636,7 +23566,7 @@
   "bodies": [
    {
     "x": 308.333,
-    "y": 394.667,
+    "y": 481.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22644,7 +23574,7 @@
    },
    {
     "x": 101.667,
-    "y": 481.333,
+    "y": 394.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22668,7 +23598,7 @@
    },
    {
     "x": 308.333,
-    "y": 544.667,
+    "y": 631.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22676,7 +23606,7 @@
    },
    {
     "x": 101.667,
-    "y": 631.333,
+    "y": 544.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22702,7 +23632,7 @@
    },
    {
     "x": 308.333,
-    "y": 544.667,
+    "y": 631.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22710,7 +23640,7 @@
    },
    {
     "x": 101.667,
-    "y": 631.333,
+    "y": 544.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22734,7 +23664,7 @@
    },
    {
     "x": 308.333,
-    "y": 669.667,
+    "y": 756.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22742,7 +23672,7 @@
    },
    {
     "x": 101.667,
-    "y": 756.333,
+    "y": 669.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22768,7 +23698,7 @@
    },
    {
     "x": 308.333,
-    "y": 669.667,
+    "y": 756.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22776,7 +23706,7 @@
    },
    {
     "x": 101.667,
-    "y": 756.333,
+    "y": 669.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22936,7 +23866,7 @@
    },
    {
     "x": 308.333,
-    "y": 569.667,
+    "y": 656.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22944,7 +23874,7 @@
    },
    {
     "x": 101.667,
-    "y": 656.333,
+    "y": 569.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22970,7 +23900,7 @@
    },
    {
     "x": 308.333,
-    "y": 569.667,
+    "y": 656.333,
     "width": 50,
     "height": 24,
     "kind": "vehicle",
@@ -22978,7 +23908,7 @@
    },
    {
     "x": 101.667,
-    "y": 656.333,
+    "y": 569.667,
     "width": 50,
     "height": 24,
     "kind": "vehicle",

@@ -12,7 +12,13 @@ import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenari
 import type { ActionLog, LevelResult, SignOutcome } from '@/domain/learner/attempt';
 import { buildBKTLearnerProfile } from '@/domain/learner/mastery/buildBKTProfile';
 import { getCompetencyScores, getWeakestCompetency } from '@/domain/learner/profile';
-import { mistakesIn, starsForMistakes } from '@/domain/learner/stars';
+
+/** The star band a score falls in for this level. One definition, every caller. */
+export const starsFor = (level: LevelConfig, score: number): number =>
+  score >= level.stars3 ? 3
+  : score >= level.stars2 ? 2
+  : score >= level.requiredScore ? 1
+  : 0;
 
 /** The running totals a drive holds while it plays, snapshotted the moment it ends. */
 export interface RunTotals {
@@ -28,14 +34,6 @@ export interface RunTotals {
  * running out of driving time. A run driven to its end has none.
  */
 export type RunEnding = { kind: 'crash'; reason: string } | { kind: 'time_up' };
-
-/**
- * Whether a finished run ended early, in a collision or out of time. Not the
- * same as `!completed`, which is also false for a run driven to its end under
- * the level's points pass mark.
- */
-export const endedEarly = (result: Pick<LevelResult, 'crashReason' | 'timedOut'>): boolean =>
-  result.crashReason !== undefined || result.timedOut === true;
 
 /**
  * Build the finished result for a drive.
@@ -59,8 +57,7 @@ export const buildLevelResult = (
   return {
     levelId: level.id,
     score: totals.score,
-    // One rule for every level: passed, then counted in mistakes (`domain/learner/stars`).
-    stars: endedEarly ? 0 : starsForMistakes(totals.score >= level.requiredScore, mistakesIn(totals.logs)),
+    stars: endedEarly ? 0 : starsFor(level, totals.score),
     completed: endedEarly ? false : totals.score >= level.requiredScore,
     violations: totals.violations,
     correctActions: totals.correctActions,

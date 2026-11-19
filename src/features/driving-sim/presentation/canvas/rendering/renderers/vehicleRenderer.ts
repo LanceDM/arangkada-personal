@@ -106,7 +106,9 @@ export const drawMotorcycle = (
   x: number,
   y: number,
   scale = 1,
-  rider: MotorcycleRider = {}
+  rider: MotorcycleRider = {},
+  /** The tank's three gradient stops; traffic's red unless given. */
+  paint: readonly [string, string, string] = ['#f87171', '#dc2626', '#991b1b']
 ) => {
   drawVehicleShadow(ctx, x, 16 * scale, y + 19 * scale);
   ctx.save();
@@ -145,7 +147,7 @@ export const drawMotorcycle = (
   ctx.fill();
 
   // Tank and fairing in the bike's own colour, between the bars and the rider.
-  ctx.fillStyle = bodyGradient(ctx, -5, -12, 5, 2, '#f87171', '#dc2626', '#991b1b');
+  ctx.fillStyle = bodyGradient(ctx, -5, -12, 5, 2, paint[0], paint[1], paint[2]);
   ctx.beginPath();
   ctx.roundRect(-5, -12, 10, 14, 4);
   ctx.fill();

@@ -27,12 +27,7 @@ export const HelpButton = ({ code }: { code: string | null }) => {
       </Button>
       {open && (
         <div className="mt-2 space-y-1 rounded-lg border border-border bg-muted/40 p-3 text-left text-sm">
-          <p>{text(HELP_CONTACT.intro)}</p>
-          <ul className="list-none space-y-0.5 select-all">
-            {HELP_CONTACT.emails.map(email => (
-              <li key={email}>{email}</li>
-            ))}
-          </ul>
+          <p>{text(HELP_CONTACT)}</p>
           {code && (
             <p className="text-xs text-muted-foreground">
               {text(v.sayYourCode(code))}

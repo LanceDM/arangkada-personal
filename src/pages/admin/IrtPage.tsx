@@ -1,6 +1,6 @@
 /**
  * `/admin/irt`: the Rasch model. The address holds the
- * view, so it can be reloaded or linked to: `?view=bank|calibration|design|results`.
+ * view, so it can be reloaded or linked to: `?view=bank|calibration|design|results|item-bank`.
  * Review sheets saved here carry this admin's id.
  */
 import { useSearchParams } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useSearchParams } from 'react-router-dom';
 import { IrtSection, useIrtPanel, type IrtView } from '@/features/admin';
 import { useAuthSession } from '@/features/auth';
 
-const VIEWS: readonly IrtView[] = ['bank', 'calibration', 'design', 'results'];
+const VIEWS: readonly IrtView[] = ['bank', 'calibration', 'design', 'results', 'item-bank'];
 
 const IrtPage = () => {
   const { isAdmin, user } = useAuthSession();

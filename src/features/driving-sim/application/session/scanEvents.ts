@@ -111,11 +111,8 @@ const RAMP_COMMIT_TOLERANCE = CAR_LENGTH;
 const MAX_SHOWN_GAP = 9.9;
 
 
-/**
- * How long a car must stand still short of a stop scenario's zone for that to
- * be its stop: 1.2 s of driving steps, the world's clock.
- */
-export const EARLY_STOP_HOLD_STEPS = 72;
+/** How long a car must stand still short of a stop scenario's zone for that to be its stop. */
+export const EARLY_STOP_HOLD_MS = 1200;
 
 /** What a checkpoint driven through without stopping is told. */
 export const CHECKPOINT_MISSED_MESSAGE =
@@ -544,12 +541,11 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
       }
     }
 
-    // A full stop before the line is the stop (ported from the groupmate's
-    // repository, timed in driving steps here). A stop scenario was
+    // A full stop before the line is the stop (2026-11-16). A stop scenario was
     // graded only when the car left its zone, so a driver who stopped as told
     // and waited saw nothing happen: the pedestrian waiting on the answer never
     // walked, and the drive waited on the car moving off first. Standing still
-    // for EARLY_STOP_HOLD_STEPS with the approach open and the line still ahead,
+    // for EARLY_STOP_HOLD_MS with the approach open and the line still ahead,
     // after moving in it, is graded as the stop there and then.
     if (
       event.correctAction === 'stop' &&
@@ -563,8 +559,9 @@ export const scanEvents = (input: InputState, context: ScanEventsContext): GameE
     ) {
       if (car.speed > 0) world.earlyStop = { since: null, moved: true };
       else if (world.earlyStop.moved) {
-        world.earlyStop.since ??= world.drivenSteps;
-        if (world.drivenSteps - world.earlyStop.since >= EARLY_STOP_HOLD_STEPS) gradeNow(event, 'response');
+        const now = performance.now();
+        world.earlyStop.since ??= now;
+        if (now - world.earlyStop.since >= EARLY_STOP_HOLD_MS) gradeNow(event, 'response');
       }
     }
 

@@ -25,7 +25,7 @@ export const FULL_STOP_SPEED = 1.5;
 
 /**
  * What "slow down" means on the expressway, as a share of the speed that
- * applies there. Labelled: Republic Act No. 4136, Section 35 does not govern the expressway, and no
+ * applies there. Labelled: RA 4136 §35 does not govern the expressway, and no
  * source sets a figure for slowing on one (speed-limits pack).
  */
 export const SLOWED_SHARE = 0.6;
@@ -34,7 +34,7 @@ export const SLOWED_SHARE = 0.6;
  * The speed a hazard's "slow down" is met at or under.
  *
  * A hazard asks for a genuine reduction, not merely for the posted limit to be
- * respected. On every Republic Act No. 4136 road that is §35(b) row 4's 20 km/h, the figure
+ * respected. On every RA 4136 road that is §35(b) row 4's 20 km/h, the figure
  * the law sets for "similar dangerous circumstances", or the posting where one
  * is lower. On the expressway it is `SLOWED_SHARE` of the speed that applies.
  */
@@ -464,7 +464,7 @@ export interface NoStandingStretch {
  * The car stands within `noStandingWithin` meters of the place when any part
  * of it does: from its nose that far short of the place to its tail that far
  * past it. The place is the event's point, where the hydrant or the sign is
- * drawn. Until the first play-test this was the whole 340-unit approach, which
+ * drawn. Until a play-test this was the whole 340-unit approach, which
  * failed a stop eleven meters short of a hydrant for "within four meters" and
  * passed a car standing level with it.
  */

@@ -6,8 +6,6 @@
 import type { Localized } from '@/shared/lib/localized';
 
 export const quizMessages = {
-  courseQuizRule: { en: 'Get at least 2 of the 3 questions right for each topic. A topic you pass is not asked again.' },
-  courseNextAttempt: { en: 'Next attempt' },
   timesUp: { en: "Time's up: unanswered questions count as wrong" },
   cleared: { en: 'Checkpoint Cleared!' },
   failed: { en: 'Checkpoint Failed' },
@@ -40,7 +38,7 @@ export const lessonMessages = {
   toCheckpoint: { en: 'Proceed to Checkpoint' },
   finishReading: { en: 'Finish Reading' },
   academy: { en: 'Mission Academy' },
-  manualModule: { en: 'Manual Module' },
+  manualModule: { en: 'Lesson Module' },
   close: { en: 'Close learning module' },
   readFromBriefing: { en: "Read the module. The level's checkpoint and drive open from its briefing." },
   readThenCheckpoint: { en: 'Read the module, then pass the checkpoint to unlock the driving simulation.' },
@@ -86,13 +84,11 @@ export const driveMessages = {
 } as const;
 
 export const briefingMessages = {
-  coursePassed: { en: 'Passed' },
-  courseCounted: (n: number): Localized => ({ en: `${n} graded scenarios, 3 for each topic` }),
   tutorialSubtitleQuiz: { en: 'Learn how the lessons, the checkpoint, the drive and its scoring work before the road lessons begin.' },
   tutorialSubtitle: { en: 'Learn how the lessons, the drive and its scoring work before the road lessons begin.' },
   finalSubtitle: { en: 'Study the module, then drive the Final Mission: scenarios drawn from across the course, driven with no hints.' },
-  levelSubtitleQuiz: { en: "Study the key concepts, pass the checkpoint, then drive the level's scenarios." },
-  levelSubtitle: { en: "Study the key concepts, then drive the level's scenarios." },
+  levelSubtitleQuiz: { en: "Study the traffic laws for this level, pass the checkpoint, then drive the level's scenarios." },
+  levelSubtitle: { en: "Study the traffic laws for this level, then drive the level's scenarios." },
   weakRoll: (label: string): Localized => ({ en: `This level's roll leans toward ${label} scenarios where it has them.` }),
   weakPractice: { en: 'This level stays the same, but a practice scenario may be added to this drive to help you improve.' },
   objectiveTutorial: (checkpoint: string): Localized => ({ en: `Learn how Arangkada works, ${checkpoint}try the first guided simulation.` }),
@@ -100,8 +96,15 @@ export const briefingMessages = {
   checkpointSized: (size: number, tutorial: boolean): Localized => ({ en: `pass the ${size}-item ${tutorial ? 'tutorial ' : ''}checkpoint, then ` }),
   checkpointPlain: (tutorial: boolean): Localized => ({ en: `pass the ${tutorial ? 'tutorial ' : ''}checkpoint, then ` }),
   thenOnly: { en: 'then ' },
+  // The per-competency course (its quiz is drawn per competency from the bank).
+  courseCheckpoint: { en: 'pass the short quiz (3 items per competency, 2 of 3 to pass), then ', fil: 'ipasa ang maikling pagsusulit (3 tanong bawat kakayahan, 2 sa 3 para pumasa), saka ' },
+  courseObjectiveTutorial: { en: 'Learn how Arangkada works, then try the first guided drive.', fil: 'Alamin kung paano gumagana ang Arangkada, saka subukan ang unang ginabayang pagmamaneho.' },
+  courseObjective: (title: string): Localized => ({
+    en: `Study ${title}, pass the short quiz (3 items per competency, 2 of 3 to pass), then apply it in the drive: 3 scenarios per competency, 2 of 3 to pass each.`,
+    fil: `Pag-aralan ang ${title}, ipasa ang maikling pagsusulit (3 tanong bawat kakayahan, 2 sa 3 para pumasa), saka gamitin ito sa pagmamaneho: 3 sitwasyon bawat kakayahan, 2 sa 3 para pumasa.`,
+  }),
   tutorialModule: { en: 'Tutorial Module' },
-  manualModuleNumber: (level: number | undefined): Localized => ({ en: `Module ${level}` }),
+  ltoModule: (level: number | undefined): Localized => ({ en: `Module ${level}` }),
   loadingCheckpoint: { en: 'Loading the checkpoint…' },
   loading: { en: 'Loading' },
   quizLoadFailed: { en: "Couldn't load the quiz, try again" },
@@ -121,7 +124,6 @@ export const briefingMessages = {
   level: (id: number): Localized => ({ en: `Level ${id}` }),
   title: { en: 'Mission Briefing' },
   roadEvents: { en: 'Road events' },
-  garageChecks: { en: 'Garage checks' },
   courseLimit: { en: 'Course limit, km/h' },
   roadLimit: { en: 'Road limit, km/h' },
   drivingTime: (time: string): Localized => ({ en: `Driving time: ${time}. Reading a scenario or answering a question never counts.` }),
@@ -151,7 +153,6 @@ export const panelMessages = {
   route: { en: 'Route' },
   lastCalls: { en: 'Your last calls' },
   nothingScored: { en: 'Nothing scored yet. React to each road event as it comes up.' },
-  nothingOnRoad: { en: 'Nothing on this road is graded. Drive to the end.' },
   correctCall: { en: 'correct call' },
   wrongCall: { en: 'wrong call' },
   you: (action: string): Localized => ({ en: `You ${action}` }),
@@ -195,7 +196,7 @@ export const promptMessages = {
   inPosition: { en: 'In position' },
   moveOver: { en: 'Move over' },
   trafficStop: { en: 'Traffic stop' },
-  roadsideCheckpoint: { en: 'Roadside checkpoint' },
+  ltoCheckpoint: { en: 'Roadside checkpoint' },
   brakeAtLine: { en: 'Brake to a full stop at the line.' },
   startSlowing: { en: 'Start slowing for the checkpoint.' },
   practice: { en: 'Practice' },
@@ -247,6 +248,8 @@ export const decisionMessages = {
   dismiss: { en: 'Dismiss' },
   you: { en: 'You' },
   wanted: { en: '— this one wanted' },
+  youAnswered: { en: 'You answered:', fil: 'Sagot mo:' },
+  rightAnswer: { en: 'Right answer:', fil: 'Tamang sagot:' },
 } as const;
 
 export const stageMessages = {

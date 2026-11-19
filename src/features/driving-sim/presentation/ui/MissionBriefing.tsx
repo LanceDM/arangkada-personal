@@ -1,3 +1,4 @@
+import { STAGE_COMPETENCIES, isCompetencyStage } from '@/domain/learner/stageCompetencies';
 import { useLanguage, useText } from '@/shared/i18n/useText';
 import { playableModule } from '@/features/driving-sim/application/use-cases/playableLevel';
 import {
@@ -11,7 +12,7 @@ import {
   Route,
   Target,
 } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { LevelConfig } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { rollLeansToWeakArea, signNamesForLevel } from '@/features/driving-sim/domain/scenario/levelCatalog';
 import { getLevelModule, LEVEL_MODULES } from '@/features/driving-sim/domain/scenario/content/lessons/lessonCatalog';
@@ -23,7 +24,7 @@ import {
   postedLimitsLine,
 } from '@/features/driving-sim/domain/scenario/missionComposition';
 import { isTutorial } from '@/features/driving-sim/domain/systems/tutorial';
-import { timeLimitSecondsFor } from '@/features/driving-sim/domain/scenario/levelTimeLimits';
+import { PANEL_SECONDS, timeLimitSecondsFor } from '@/features/driving-sim/domain/scenario/levelTimeLimits';
 import { FINAL_EXAM_LEVEL } from '@/domain/routing/routingTypes';
 import { summariseCoverage } from '@/features/driving-sim/domain/adaptive/signCoverage';
 import { loadSignCoverage } from '@/features/driving-sim/application/signCoverage';
@@ -33,30 +34,60 @@ import type { CourseNote } from '@/features/driving-sim/domain/adaptive/routingB
 import { useProgressStore } from '@/features/progression';
 import { useAuthSession } from '@/features/auth';
 import { useBriefing, type QuizGate } from '@/features/driving-sim/application/useBriefing';
-import { recordQuizSitting, useLevelQuiz, type LevelQuizLoad } from '@/features/driving-sim/application/levelQuiz';
-import type { QuizItemDoc, QuizSittingDoc } from '@/features/driving-sim/domain/scenario/quizBank';
+import { recordQuizSitting, useLevelQuiz } from '@/features/driving-sim/application/levelQuiz';
+import type { QuizSittingDoc } from '@/features/driving-sim/domain/scenario/quizBank';
 import LessonReader from './LessonReader';
 import MissionQuiz from './MissionQuiz';
 import type { TextOf } from '@/shared/i18n/useText';
 import { briefingMessages as m } from './messages';
+import BankQuiz, { type BankQuizResult } from './BankQuiz';
+import DriveOverview from './DriveOverview';
+import type { DrivePreview } from '@/features/driving-sim/domain/scenario/drivePreview';
+import type { BankItem } from '@/domain/assessment/questionBank';
+import type { Lesson } from '@/features/driving-sim/domain/scenario/lessonModule';
 
 /**
- * The per-competency course's part of a briefing:
- * its own quiz draw and verdict in place of the level's sitting, and a drive
- * that opens only once the course has planned it.
+ * The per-competency course's briefing (2026-10-28): the module, then the
+ * bank-drawn short quiz as a gate, then the drive. Replaces the local
+ * quiz-passed flag and restores the gate (it was bypassed for testing).
  */
-export interface BriefingCourse {
-  /** The course's draw for this attempt; `no-quiz` once the quiz is behind the participant. */
-  quiz: LevelQuizLoad;
-  passes: (answers: Readonly<Record<string, number>>, items: readonly QuizItemDoc[]) => boolean;
-  onQuizFinish: (sitting: QuizSittingDoc) => void;
-  onQuizRetry: () => void;
-  retryLoad: () => void;
-  driveReady: boolean;
-  /** This stage's quiz is behind the participant: its step stays, shown passed. */
-  quizDone: boolean;
-  /** The graded scenarios the planned drive counts; null until it is planned. */
-  countedScenarios: number | null;
+export interface BriefingGate {
+  lessonsRead: boolean;
+  onLessonsRead: () => Promise<void>;
+  /** The quiz attempt to sit now; null when there is none (passed, tutorial, or a drive phase). */
+  quiz: {
+    items: readonly BankItem[];
+    attempt: number;
+    cap: number;
+    onSubmit: (choices: (number | null)[], responseMs: (number | null)[]) => Promise<BankQuizResult[]>;
+    /** Each answer as it is given, for the log. */
+    onAnswer?: (position: number, item: BankItem, choice: number, responseMs: number) => void;
+    onDone: () => void;
+  } | null;
+  /**
+   * The stage's short quiz as practice, outside the course: open whenever the
+   * course has no quiz to sit here (passed, or a free replay), as often as the
+   * player likes. Recorded, but never evidence for BKT, the Q-table or IRT.
+   */
+  practice?: {
+    open: () => Promise<{
+      items: readonly BankItem[];
+      onSubmit: (choices: (number | null)[], responseMs: (number | null)[]) => Promise<BankQuizResult[]>;
+    }>;
+  } | null;
+  /** Whether the stage has a quiz at all (the tutorial has none). */
+  hasQuiz: boolean;
+  quizPassed: boolean;
+  /** Module sections to read before the drive: after the quiz cap, or after a review decision. */
+  review: { title: string; lessons: Lesson[]; onDone: () => Promise<void> } | null;
+  canDrive: boolean;
+  driveDetail: string;
+  /** The planned drive's setting and scenarios, shown before it starts. */
+  preview: DrivePreview | null;
+  /** Short lines for the course panel. */
+  notes: string[];
+  /** Every action on the briefing, for the study log (module, quiz, review, overview, drive). */
+  log?: (action: string, detail?: Record<string, unknown>) => void;
 }
 
 interface MissionBriefingProps {
@@ -66,7 +97,8 @@ interface MissionBriefingProps {
   courseNote?: CourseNote | null;
   onBack: () => void;
   onStartGame: () => void;
-  course?: BriefingCourse | null;
+  /** The per-competency course's gate; absent in Legacy, which keeps its own quiz. */
+  gate?: BriefingGate | null;
 }
 
 const moduleSubtitle = (level: LevelConfig, hasQuiz: boolean, t: TextOf) => {
@@ -97,7 +129,7 @@ const weakAreaLine = (levelId: number, label: string, t: TextOf) =>
     ? t(m.weakRoll(label))
     : t(m.weakPractice);
 
-const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, course = null }: MissionBriefingProps) => {
+const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, gate = null }: MissionBriefingProps) => {
   const t = useText();
   const { language } = useLanguage();
   const authoredModule = LEVEL_MODULES[level.moduleId] ?? getLevelModule(level.id);
@@ -110,39 +142,44 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
     return names.length ? summariseCoverage(names, loadSignCoverage()) : null;
   }, [level.id]);
   const simulationDone = Boolean(levelResult?.completed);
-  const own = useLevelQuiz(level.moduleId);
-  const quizLoad = course ? course.quiz : own.quiz;
-  const retryQuiz = course ? course.retryLoad : own.retry;
-  const levelQuiz = quizLoad.kind === 'quiz' && !isTutorial(level) ? quizLoad.quiz : null;
-  // The tutorial teaches the controls and has no quiz, whatever the bank holds for its module.
-  const gate: QuizGate = isTutorial(level) ? 'open' : quizLoad.kind === 'quiz' ? 'required' : quizLoad.kind === 'no-quiz' ? 'open' : 'blocked';
+  // Legacy's module quiz, read from the bank. The per-competency course (`gate`)
+  // draws its own quiz from the same bank, by competency, and ignores this one.
+  const { quiz: quizLoad, retry: retryQuiz } = useLevelQuiz(level.moduleId);
+  const levelQuiz = quizLoad.kind === 'quiz' ? quizLoad.quiz : null;
+  const quizGate: QuizGate = gate ? 'open' : quizLoad.kind === 'quiz' ? 'required' : quizLoad.kind === 'no-quiz' ? 'open' : 'blocked';
   // A blocked quiz still shows its step: that is where the retry is.
-  const hasQuiz = gate !== 'open' || (course?.quizDone ?? false);
+  const hasQuiz = gate ? gate.hasQuiz : quizGate !== 'open';
   const quizSize = levelQuiz?.itemsPerSitting ?? 0;
+  // The course's quiz: 3 items for each competency the stage teaches (the open
+  // attempt's own count when there is one; a retake asks only the ones left).
+  const courseQuizSize = gate?.quiz?.items.length ?? (isCompetencyStage(level.id) ? STAGE_COMPETENCIES[level.id].length * 3 : 0);
   const readMinutes = moduleReadMinutes(levelModule);
   const subtitle = moduleSubtitle(level, hasQuiz, t);
-  const checkpoint = levelQuiz
-    ? t(m.checkpointSized(quizSize, isTutorial(level)))
-    : hasQuiz
-      ? t(m.checkpointPlain(isTutorial(level)))
-      : t(m.thenOnly);
-  const primaryObjective = isTutorial(level)
-    ? t(m.objectiveTutorial(checkpoint))
-    : t(m.objective(levelModule.title, checkpoint));
+  const checkpoint = gate
+    ? t(m.courseCheckpoint)
+    : levelQuiz
+      ? t(m.checkpointSized(quizSize, isTutorial(level)))
+      : hasQuiz
+        ? t(m.checkpointPlain(isTutorial(level)))
+        : t(m.thenOnly);
+  const primaryObjective = gate
+    ? isTutorial(level)
+      ? t(m.courseObjectiveTutorial)
+      : t(m.courseObjective(levelModule.title))
+    : isTutorial(level)
+      ? t(m.objectiveTutorial(checkpoint))
+      : t(m.objective(levelModule.title, checkpoint));
   const composition = missionComposition(level);
   const parts = compositionParts(composition, t);
-  // The road tile's count is the road events; whatever else is scored is named
-  // under it. A garage alone (Level 2) has no road to count, so the tile counts
-  // its checks instead.
-  const garageTile = composition.road === 0 && composition.garage > 0;
+  // The road tile's count is the road events; whatever else is scored is named under it.
   const otherParts = parts
-    .filter(part => !(garageTile ? / garage checks?$/ : / road events?$/).test(part))
+    .filter(part => !/ road events?$/.test(part))
     .map(part => (part.startsWith('+') ? part : `+${part}`));
   const limitsLine = isTutorial(level) ? null : postedLimitsLine(postedLimits(level), t);
   const timeLimit = timeLimitSecondsFor(level.id);
   const { isAdmin, user } = useAuthSession();
   const uid = user?.uid ?? null;
-  const moduleBadge = t(levelModule.sourceLevel === 0 ? m.tutorialModule : m.manualModuleNumber(levelModule.sourceLevel));
+  const moduleBadge = t(levelModule.sourceLevel === 0 ? m.tutorialModule : m.ltoModule(levelModule.sourceLevel));
   const {
     lessonsRead,
     quizPassed,
@@ -156,22 +193,20 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
     openQuiz,
     markLessonsRead,
     markQuizPassed,
-  } = useBriefing(level.moduleId, gate, isAdmin);
+  } = useBriefing(level.moduleId, quizGate, isAdmin);
 
   // Signed-in players only: a guest's sittings are never stored.
   const handleQuizFinish = useCallback(
     (sitting: QuizSittingDoc) => {
-      if (course) course.onQuizFinish(sitting);
-      else if (uid) recordQuizSitting(uid, sitting);
+      if (uid) recordQuizSitting(uid, sitting);
     },
-    [uid, course]
+    [uid]
   );
 
-  const quizStep = course?.quizDone
-    ? { detail: t(m.coursePassed), actionText: t(m.coursePassed), disabled: true, active: false, onClick: openQuiz }
-    : quizLoad.kind === 'loading'
+  const quizStep =
+    quizLoad.kind === 'loading'
       ? { detail: t(m.loadingCheckpoint), actionText: t(m.loading), disabled: true, active: false, onClick: openQuiz }
-      : gate === 'blocked'
+      : quizGate === 'blocked'
         ? { detail: t(m.quizLoadFailed), actionText: t(m.retry), disabled: false, active: true, onClick: retryQuiz }
         : {
             detail: t(m.checkpointItems(quizSize)),
@@ -181,7 +216,111 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
             onClick: openQuiz,
           };
 
-  const allSteps = [
+  const [showReview, setShowReview] = useState(false);
+  // The drive's overview, opened by the Drive step before the drive starts.
+  const [showOverview, setShowOverview] = useState(false);
+  // The attempt being sat, held while it is open: submitting it moves the
+  // cursor (and the gate's quiz) on before its results are shown.
+  const [activeQuiz, setActiveQuiz] = useState<NonNullable<BriefingGate['quiz']> | null>(null);
+  // Practice sittings, numbered from 1 in this visit; a practice sitting is shown with cap 0.
+  const practiceCount = useRef(0);
+  const [practiceOpening, setPracticeOpening] = useState(false);
+  const [practiceError, setPracticeError] = useState<string | null>(null);
+  const openPractice = async (practice: NonNullable<BriefingGate['practice']>) => {
+    setPracticeOpening(true);
+    setPracticeError(null);
+    try {
+      const paper = await practice.open();
+      practiceCount.current += 1;
+      gate?.log?.('practice_quiz_opened', { practice: practiceCount.current, items: paper.items.map(item => item.id) });
+      setActiveQuiz({ items: paper.items, attempt: practiceCount.current, cap: 0, onSubmit: paper.onSubmit, onDone: () => {} });
+    } catch (failure) {
+      console.error('Failed to open the practice quiz:', failure);
+      setPracticeError('The practice quiz could not be opened. Check your connection and try again.');
+    } finally {
+      setPracticeOpening(false);
+    }
+  };
+
+  const gatedSteps = gate && [
+    {
+      title: 'Learning Module',
+      detail: `${levelModule.lessons.length} study notes`,
+      done: gate.lessonsRead,
+      active: !gate.lessonsRead,
+      disabled: false,
+      actionText: gate.lessonsRead ? 'Review' : 'Open',
+      onClick: () => {
+        gate.log?.('module_opened', { review: gate.lessonsRead });
+        openReader();
+      },
+      icon: BookOpen,
+    },
+    ...(gate.hasQuiz
+      ? [
+          {
+            title: 'Short Quiz',
+            detail: gate.quiz
+              ? `Attempt ${gate.quiz.attempt} of ${gate.quiz.cap} · ${gate.quiz.items.length} items, 3 per competency`
+              : practiceError
+                ? practiceError
+                : gate.practice
+                  ? gate.quizPassed
+                    ? 'Passed. Practise again: new items, not counted in your course'
+                    : 'Practice: new items each time, not counted in your course'
+                  : gate.quizPassed
+                    ? 'Passed: 2 of 3 per competency'
+                    : '3 items per competency, 2 of 3 to pass',
+            done: gate.quizPassed,
+            active: gate.lessonsRead && (gate.quiz !== null || !!gate.practice),
+            disabled: !gate.lessonsRead || (gate.quiz === null && !gate.practice) || practiceOpening,
+            actionText: gate.quiz ? 'Start' : gate.practice ? (practiceOpening ? 'Drawing…' : 'Practice') : gate.quizPassed ? 'Passed' : 'Start',
+            onClick: () => {
+              if (gate.quiz) {
+                gate.log?.('quiz_opened', { attempt: gate.quiz.attempt, items: gate.quiz.items.map(item => item.id) });
+                setActiveQuiz(gate.quiz);
+                return;
+              }
+              if (gate.practice) void openPractice(gate.practice);
+            },
+            icon: BrainCircuit,
+          },
+        ]
+      : []),
+    ...(gate.review
+      ? [
+          {
+            title: gate.review.title,
+            detail: `${gate.review.lessons.length} module sections`,
+            done: false,
+            active: true,
+            disabled: false,
+            actionText: 'Read',
+            onClick: () => {
+              gate.log?.('review_opened', { title: gate.review?.title ?? null, lessons: gate.review?.lessons.map(lesson => lesson.id) ?? [] });
+              setShowReview(true);
+            },
+            icon: BookOpen,
+          },
+        ]
+      : []),
+    {
+      title: 'Driving Simulation',
+      detail: gate.driveDetail,
+      done: false,
+      active: gate.canDrive,
+      disabled: !gate.canDrive,
+      actionText: 'Drive',
+      onClick: () => {
+        gate.log?.(gate.preview ? 'drive_overview_opened' : 'drive_start_clicked');
+        if (gate.preview) setShowOverview(true);
+        else onStartGame();
+      },
+      icon: Route,
+    },
+  ];
+
+  const legacySteps = [
     {
       title: t(m.learningModule),
       detail: t(m.studyNotes(levelModule.lessons.length)),
@@ -195,30 +334,61 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
     {
       title: t(m.shortQuiz),
       ...quizStep,
-      done: (quizPassed && gate === 'required') || (course?.quizDone ?? false),
+      done: quizPassed && quizGate === 'required',
       icon: BrainCircuit,
     },
     {
       title: t(m.drivingSimulation),
-      detail: course && course.countedScenarios !== null ? t(m.courseCounted(course.countedScenarios)) : parts.join(' · '),
-      done: course ? false : simulationDone,
-      active: canStartMission && (course ? course.driveReady : !simulationDone),
-      disabled: !canStartMission || (course !== null && !course.driveReady),
-      actionText: t(simulationDone && !course ? m.replay : m.drive),
+      detail: parts.join(' · '),
+      done: simulationDone,
+      active: canStartMission && !simulationDone,
+      disabled: !canStartMission,
+      actionText: t(simulationDone ? m.replay : m.drive),
       onClick: onStartGame,
       icon: Route,
     },
   ];
-  // A level with no quiz has no quiz step to show.
-  const steps = hasQuiz ? allSteps : allSteps.filter(step => step.title !== t(m.shortQuiz));
+  // The course's own steps; otherwise Legacy's, where a level with no quiz has no quiz step to show.
+  const steps = gatedSteps ?? (hasQuiz ? legacySteps : legacySteps.filter(step => step.title !== t(m.shortQuiz)));
 
   if (showReader) {
     return (
       <LessonReader
         module={levelModule}
-        quizSize={levelQuiz ? quizSize : gate === 'open' ? 0 : undefined}
-        onClose={closeReader}
-        onFinish={markLessonsRead}
+        quizSize={gate ? (gate.hasQuiz ? courseQuizSize : 0) : levelQuiz ? quizSize : quizGate === 'open' ? 0 : undefined}
+        onReadEvent={gate?.log ? event => gate.log?.(`lesson_${event.action}`, { ...event, module: levelModule.id }) : undefined}
+        onClose={() => {
+          gate?.log?.('module_closed', { module: levelModule.id });
+          closeReader();
+        }}
+        onFinish={() => {
+          if (gate) {
+            gate.log?.('module_finished', { module: levelModule.id });
+            closeReader();
+            void gate.onLessonsRead();
+          } else {
+            markLessonsRead();
+          }
+        }}
+      />
+    );
+  }
+
+  if (showReview && gate?.review) {
+    const review = gate.review;
+    return (
+      <LessonReader
+        module={{ ...levelModule, title: `${levelModule.title}: ${review.title}`, lessons: review.lessons }}
+        onReadEvent={gate?.log ? event => gate.log?.(`review_${event.action}`, { ...event, module: levelModule.id }) : undefined}
+        onClose={() => {
+          gate?.log?.('review_closed', { module: levelModule.id });
+          setShowReview(false);
+        }}
+        onFinish={() => {
+          gate?.log?.('review_finished', { module: levelModule.id });
+          setShowReview(false);
+          void review.onDone();
+        }}
       />
     );
   }
@@ -228,7 +398,10 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <button
-            onClick={onBack}
+            onClick={() => {
+              gate?.log?.('briefing_back');
+              onBack();
+            }}
             className="inline-flex w-fit items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -264,8 +437,8 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-lg border border-border bg-background/60 p-4">
                 <Route className="mb-3 h-5 w-5 text-primary" />
-                <p className="font-display text-2xl font-black text-foreground">{garageTile ? composition.garage : composition.road}</p>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t(garageTile ? m.garageChecks : m.roadEvents)}</p>
+                <p className="font-display text-2xl font-black text-foreground">{composition.road}</p>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">{t(m.roadEvents)}</p>
                 {otherParts.length > 0 && (
                   <p className="mt-2 text-xs leading-5 text-muted-foreground">{otherParts.join(' · ')}</p>
                 )}
@@ -334,8 +507,24 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
               </div>
             )}
 
-            {/* The routing FSM's move into this entry, and why. The same panel in both groups; it never
-                names the group or the policy. */}
+            {/* The routing FSM's move into this entry, and why. The same panel in
+                both groups; it never names the group or the policy. */}
+            {gate && gate.notes.length > 0 && (
+              <div className="mt-4 rounded-lg border-l-4 border-accent bg-accent/10 p-5">
+                <div className="mb-2 flex items-center gap-2">
+                  <Route className="h-4 w-4 text-accent" />
+                  <p className="font-display text-[10px] font-black uppercase tracking-[0.2em] text-accent">
+                    Your Course
+                  </p>
+                </div>
+                {gate.notes.map(line => (
+                  <p key={line} className="mt-1 max-w-3xl text-sm leading-6 text-foreground">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            )}
+
             {courseNote && (
               <div className="mt-4 rounded-lg border-l-4 border-accent bg-accent/10 p-5">
                 <div className="mb-2 flex items-center gap-2">
@@ -409,7 +598,7 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
                 </div>
                 {hasQuiz && (
                   <div className="rounded-lg bg-secondary/50 p-3">
-                    <p className="font-display text-lg font-black">{levelQuiz ? quizSize : '–'}</p>
+                    <p className="font-display text-lg font-black">{gate ? (gate.hasQuiz ? courseQuizSize : '–') : levelQuiz ? quizSize : '–'}</p>
                     <p className="text-[10px] uppercase text-muted-foreground">{t(m.quiz)}</p>
                   </div>
                 )}
@@ -460,14 +649,52 @@ const MissionBriefing = ({ level, weakArea, courseNote, onBack, onStartGame, cou
         </div>
       </div>
 
-      {showQuiz && levelQuiz && (
+      {showOverview && gate?.preview && (
+        <DriveOverview
+          preview={gate.preview}
+          questionLimitSec={PANEL_SECONDS}
+          onClose={() => {
+            gate.log?.('drive_overview_closed');
+            setShowOverview(false);
+          }}
+          onStart={() => {
+            gate.log?.('drive_start_clicked');
+            setShowOverview(false);
+            onStartGame();
+          }}
+        />
+      )}
+
+      {activeQuiz && (
+        <BankQuiz
+          // A new attempt is a new paper.
+          key={`${activeQuiz.cap === 0 ? 'practice' : 'attempt'}-${activeQuiz.attempt}`}
+          items={activeQuiz.items}
+          kind="quiz"
+          title={activeQuiz.cap === 0 ? 'Short Quiz · Practice' : 'Short Quiz'}
+          subtitle={activeQuiz.cap === 0 ? 'Not counted in your course' : `Attempt ${activeQuiz.attempt} of ${activeQuiz.cap}`}
+          onSubmit={activeQuiz.onSubmit}
+          onAnswer={activeQuiz.onAnswer}
+          // Practice is outside the course: it may show what was missed.
+          reviewMissed={activeQuiz.cap === 0}
+          onDone={() => {
+            setActiveQuiz(null);
+            activeQuiz.onDone();
+          }}
+          onClose={() => {
+            gate?.log?.(activeQuiz.cap === 0 ? 'practice_quiz_closed' : 'quiz_closed', { attempt: activeQuiz.attempt });
+            setActiveQuiz(null);
+          }}
+        />
+      )}
+
+      {!gate && showQuiz && levelQuiz && (
         <MissionQuiz
           quiz={levelQuiz}
           levelId={level.id}
           onPass={markQuizPassed}
           onClose={closeQuiz}
           onFinish={handleQuizFinish}
-          course={course ? { passes: course.passes, onRetry: () => { closeQuiz(); course.onQuizRetry(); } } : undefined}
         />
       )}
     </div>

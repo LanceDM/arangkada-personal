@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Firestore security rules for Arangkada.
+// Firestore security rules for Arangkada .
 //
 // Schema - the TypeScript types named are the authoritative shapes:
 //   users/{uid}                                    UserProfile (features/auth)
@@ -9,8 +9,37 @@ rules_version = '2';
 //   users/{uid}/attempts/{id}/telemetry/fsm        FsmTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/decisions  DecisionTelemetryDoc
 //   users/{uid}/attempts/{id}/telemetry/routing    RoutingTelemetryDoc
+//   users/{uid}/attempts/{id}/telemetry/inputs     InputTelemetryDoc: every key pressed and released on the road
 //   users/{uid}/routing/assignment                 the pilot group an admin assigned
 //   users/{uid}/routing/cursor                     StoredRoutingCursor
+//   users/{uid}/routing/competencyCourse           CourseCursor (per-competency routing FSM)
+//   users/{uid}/courseLog/{id}                     CourseLogEntry: decisions, rewards, table snapshot
+//   users/{uid}/assessmentSittings/{id}            AssessmentSitting: quiz, diagnostic, post-exam answers
+//   users/{uid}/study/background                   BackgroundResponse: the background form (muted by default)
+//   users/{uid}/events/{eventId}                   StudyEvent: the participant's event stream, append-only
+//   users/{uid}/state/events                       { nextSeq }: the event stream's counter
+//   users/{uid}/state/evidence                     { nextSeq }: numbers each drive and sitting (BKT's order)
+//   users/{uid}/state/active                       the quiz or drive open now, with its seed
+//   users/{uid}/bkt/profile                        BKTProfileDoc: the participant's own BKT now
+//   users/{uid}/bktUpdates/{updateId}              BKTUpdateRecord: one per graded answer, append-only
+//   bktCalibration/state                           which BKT value set new players get (admin)
+//   bktSets/{setId}                                each applied calibration (cal-N) or edited start (set-N): its values, never edited (admin writes)
+//   bktSetLogs/{setId}                             its log: pilot players, fit or the start changed, who applied it (admin only)
+//   bktPilots/{uid}, bktPilotLog/{id}              pilot players and every mark/unmark (admin)
+//   policy/{table}                                 the four Q-tables (2026-11-19): competencyQ (study),
+//                                                  competencyQ_dryrun, competencyQ_test, competencyQ_public
+//   policy/{table}/updates/{updateId}              QLogEntry: every table change, append-only
+//   policy/{table}/resets/{resetId}                the table as it stood before an admin reset it
+//   policy/config                                  the settings version in force (written by db:init)
+//   configVersions/{tag}                           every settings version (written by db:init)
+//   participants/{code}                            study enrolment (written by db:participant)
+//   roleGrants/{id}                                admin grants and revokes (db:role, or the admin page)
+//   admins/{uid}                                   admin access granted from the admin page
+//   meta/schema                                    which schema version the database was set up with
+//
+// Implementation B (VITE_DATABASE_MODE=firestore+sql) keeps participants,
+// role grants, settings versions and the background form in SQL Connect instead
+// (dataconnect/); the paths above for them are then unused. See DATABASE.md.
 //   users/{uid}/examAttempts/{id}                  ExamAttempt, append-only
 //   users/{uid}/dailyStreak/summary                DailyStreakSummary
 //   users/{uid}/dailyAttempts/{id}                 DailyAttempt, append-only
@@ -30,18 +59,7 @@ rules_version = '2';
 //   item_reviews/{tagging|experts}                 the test items' content-validity ratings
 //   study_invites/{invite}                         StudyInviteDoc, an invite and its cohort
 //   study_counters/{cohort}                        StudyCounterDoc, the cohort's next enrolment
-//   study_settings/deadline                        the study's deadline for the end path (admin-set; off unless set)
 //   participants/{code}                            ParticipantDoc, the study's registry
-//   users/{uid}/course/cursor                      CourseCursor, the per-competency course
-//   users/{uid}/course/active                      ActiveActivity, the quiz or drive open, with its seed
-//   users/{uid}/course/evidence                    { nextSeq }: numbers each drive and course quiz (BKT's order)
-//   users/{uid}/course/preTestSeed                 PreTestSeed: per-competency counts, written with the pre-test
-//   users/{uid}/courseQuizSittings/{id}            CourseQuizSitting, append-only
-//   users/{uid}/courseLog/{id}                     CourseLogEntry: decisions, rewards, table snapshot, append-only
-//   users/{uid}/bkt/profile                        BKTProfileDoc, the participant's BKT now
-//   users/{uid}/bktUpdates/{id}                    BKTUpdateRecord, one per graded answer, append-only
-//   q_tables/{cohort}                              the shared Q-table of a cohort: study, dryrun or test
-//   q_tables/{cohort}/updates/{id}                 QLogEntry: every change to that table, append-only
 //
 // Who:
 //   - A player reads and writes only their own users/{uid} tree, and can delete
@@ -50,7 +68,7 @@ rules_version = '2';
 //     with the service account. Their pre/post test record (testSittings)
 //     they write once and never read back.
 //   - An admin is the custom claim `admin: true` on the sign-in token, set by
-//     the developers with the service account. It is never a document field:
+//     the developers with a developers' script It is never a document field:
 //     a `role` on a profile is a legacy label that no rule and no screen
 //     trusts, and no player write can change it.
 //   - An admin reads every player's data (the report's collection-group
@@ -72,8 +90,7 @@ rules_version = '2';
 // key, so an additive payload change - how these shapes have always evolved -
 // never makes a save fail and lose the record.
 //
-// The developers test these rules on the Firestore emulator before a change
-// to a path or a payload ships.
+// Tests: a developers' script, run by `npm run test:rules`.
 //
 // Legacy collections (fsm_sessions, exam_results, daily_results, and the
 // `progress`/`daily` fields still embedded in old users/{uid} docs) are
@@ -92,8 +109,13 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // An admin: the `admin` claim (set by `npm run db:role`), or an entry in
+    // `admins/{uid}`, which an admin grants from the admin page (2026-11-18).
+    // The claim is checked first, so a claim admin costs no extra read.
     function isAdmin() {
-      return isSignedIn() && request.auth.token.get('admin', false) == true;
+      return isSignedIn()
+        && (request.auth.token.get('admin', false) == true
+          || exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
     }
 
     function isCount(value) {
@@ -103,7 +125,7 @@ service cloud.firestore {
     // ── Shapes ─────────────────────────────────────────────
 
     function profileKeys() {
-      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore', 'language'];
+      return ['email', 'username', 'role', 'createdAt', 'totalScore', 'longestStreak', 'bestExamScore', 'language', 'termsVersion', 'termsAcceptedAt', 'vehicleSkin'];
     }
 
     // Checks only the keys a write sets, so a field an old profile already
@@ -116,7 +138,12 @@ service cloud.firestore {
         && (!keys.hasAny(['longestStreak']) || isCount(data.longestStreak))
         && (!keys.hasAny(['bestExamScore']) || isCount(data.bestExamScore))
         // The language the account chose.
-        && (!keys.hasAny(['language']) || data.language in ['en', 'fil']);
+        && (!keys.hasAny(['language']) || data.language in ['en', 'fil'])
+        // The Terms and Data Use the account agreed to at sign-up, and when.
+        && (!keys.hasAny(['termsVersion']) || data.termsVersion is string)
+        && (!keys.hasAny(['termsAcceptedAt']) || data.termsAcceptedAt is number)
+        // How the player's vehicle is drawn: a skin, nothing else.
+        && (!keys.hasAny(['vehicleSkin']) || data.vehicleSkin in ['car', 'motorcycle']);
     }
 
     function isProgressSummary(data) {
@@ -124,199 +151,6 @@ service cloud.firestore {
         && data.unlockedLevels is list
         && data.levelBest is map
         && data.updatedAt is number;
-    }
-
-    // ── The per-competency course ──
-
-    function isCourseCursor(data) {
-      return data.keys().hasAll(['schemaVersion', 'phase', 'stage', 'pending', 'seen', 'flagged', 'seq', 'updatedAt'])
-        && data.schemaVersion == 1
-        && data.phase is map
-        && data.phase.kind in ['MODULE', 'QUIZ', 'QUIZ_REVIEW', 'DRIVE', 'REPEAT', 'FINAL', 'CERTIFIED', 'FINISHED']
-        && data.stage is map
-        && data.pending is list
-        && data.seen is map
-        && data.flagged is list
-        && isCount(data.seq)
-        && data.updatedAt is number;
-    }
-
-    // The end path: the admin's study deadline, set and passed.
-    // Each function reads a document with one exists and one get: the rules allow 10
-    // document reads per write, and the post-test's opening is near that.
-    function studyDeadlinePassed() {
-      let deadline = /databases/$(database)/documents/study_settings/deadline;
-      return exists(deadline) && isPastDeadline(get(deadline).data);
-    }
-
-    function isPastDeadline(setting) {
-      return setting.at is number && setting.at <= request.time.toMillis();
-    }
-
-    // A course may end without the certificate (phase FINISHED) only from the final
-    // exam after 3 failed attempts, or from any uncertified phase once the deadline
-    // has passed. A cursor already ended stays as it is.
-    function isCourseCursorChange(now, next) {
-      return next.phase.kind != 'FINISHED'
-        || now.phase.kind == 'FINISHED'
-        || (now.phase.kind != 'CERTIFIED'
-          && ((now.phase.kind == 'FINAL' && now.get('finalFailures', 0) >= 3) || studyDeadlinePassed()));
-    }
-
-    // The post-test opens once the course has ended: certified, finished by the
-    // end path, after 3 failed finals, or past the study's deadline.
-    function courseEndedFor(uid) {
-      let cursor = /databases/$(database)/documents/users/$(uid)/course/cursor;
-      // The cursor first: the deadline is read only when the cursor has not ended.
-      return (exists(cursor) && isEndedCourse(get(cursor).data)) || studyDeadlinePassed();
-    }
-
-    function isEndedCourse(cursor) {
-      return cursor.phase.kind in ['CERTIFIED', 'FINISHED']
-        || (cursor.phase.kind == 'FINAL' && cursor.get('finalFailures', 0) >= 3);
-    }
-
-    function isActiveActivity(data) {
-      return data.keys().hasAll(['kind', 'position', 'seed', 'openedAt', 'opens'])
-        && data.kind in ['quiz', 'drive']
-        && data.position is string
-        && data.seed is int
-        && data.openedAt is number
-        && data.opens is int && data.opens >= 1;
-    }
-
-    // The pre-test seeds BKT once (no learning step), as counts per
-    // competency: the device never holds which items were missed.
-    function isPreTestSeed(data) {
-      return data.keys().hasOnly(['schemaVersion', 'counts', 'timestamp'])
-        && data.schemaVersion == 1
-        && data.counts is map
-        && data.counts.size() <= 11
-        && data.timestamp is number;
-    }
-
-    function isCourseQuizSitting(data) {
-      return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'attempt', 'answers', 'timestamp'])
-        && data.schemaVersion == 1
-        && data.kind == 'quiz'
-        && data.levelId is int
-        && data.attempt is int && data.attempt >= 1 && data.attempt <= 3
-        && data.answers is list
-        && data.timestamp is number
-        // How the sitting was shown: the draw's seed and order, the screen's seed and choice orders.
-        && (!data.keys().hasAny(['shown']) || (data.shown is map
-          && data.shown.drawSeed is int && data.shown.seed is int
-          && data.shown.drawOrder is list && data.shown.items is list));
-    }
-
-    // The post-test is never a course-log kind: it rewards no decision.
-    function isCourseLogEntry(data) {
-      return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'decisions', 'rewards', 'timestamp'])
-        && data.schemaVersion == 1
-        && data.kind in ['drive', 'quiz', 'final', 'finish']
-        && data.decisions is list
-        && data.rewards is list
-        && data.timestamp is number;
-    }
-
-    // A drive or course quiz is numbered by the participant's evidence counter,
-    // moved on in the same write. Records from before the counter carry none.
-    function isNumberedEvidence(uid, data) {
-      let counter = /databases/$(database)/documents/users/$(uid)/course/evidence;
-      return !data.keys().hasAny(['evidenceSeq'])
-        || (data.evidenceSeq is int
-          && existsAfter(counter)
-          && getAfter(counter).data.nextSeq == data.evidenceSeq + 1);
-    }
-
-    // A logged record's id is its eventId, made on the device; a retried
-    // write may touch only the server time.
-    function isEnvelope(data, uid, id) {
-      return data.keys().hasAll(['schemaVersion', 'eventId', 'uid', 'at', 'sessionId', 'appBuild', 'configVersion'])
-        && data.schemaVersion == 1
-        && data.eventId == id
-        && data.uid == uid
-        && data.at is number
-        && data.sessionId is string
-        && data.appBuild is string
-        && data.configVersion is string;
-    }
-
-    function onlyServerTimeChanged() {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['serverAt']);
-    }
-
-    function isBKTUpdate(data, uid, id) {
-      return isEnvelope(data, uid, id)
-        && data.keys().hasAll(['userSeq', 'competency', 'source', 'correct', 'params', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter'])
-        && data.userSeq is int
-        && data.source in ['drive', 'quiz', 'pre_test']
-        && data.correct is bool
-        && data.params is map
-        && data.pBefore is number && data.pAfter is number;
-    }
-
-    function isBKTProfile(data, uid) {
-      return data.keys().hasAll(['schemaVersion', 'uid', 'configVersion', 'updates', 'competencies', 'updatedAt'])
-        && data.schemaVersion == 1
-        && data.uid == uid
-        && data.updates is int
-        && data.competencies is map
-        && data.competencies.size() == 11;
-    }
-
-    // Which shared table an account trains: an active participant only their
-    // own cohort's, and an account outside the study (the team) only `test`,
-    // so no tester's play reaches the table the study's participants learn.
-    // The study's order for the course (2026-11-17): a study account writes its
-    // course records only once its pre-test is finished. Team, admin and other
-    // accounts are not held to it. One document read, shared by every write of
-    // the request; getAfter, so a record written with the finishing write passes.
-    function courseOpenFor(uid) {
-      let status = /databases/$(database)/documents/users/$(uid)/testStatus/pre;
-      return !isStudyAccount() || (existsAfter(status) && getAfter(status).data.status == 'finished');
-    }
-
-    // An admin's course is a check of the game, not a learner: it never changes
-    // a shared table or its log (the groupmate's rule, 2026-11-16).
-    function mayTrainTable(table) {
-      let enrolment = enrolmentPath(request.auth.uid);
-      return isSignedIn() && !isAdmin()
-        && ((exists(enrolment) && get(enrolment).data.cohort == table && isActiveParticipant(request.auth.uid)
-            && courseOpenFor(request.auth.uid))
-          || (!isStudyAccount() && !exists(enrolment) && table == 'test'));
-    }
-
-    function isQTableDoc(data) {
-      return data.keys().hasAll(['schemaVersion', 'table', 'updates', 'updatedAt'])
-        && data.schemaVersion == 1
-        && data.table is map
-        && data.table.size() <= 8
-        && isCount(data.updates)
-        && data.updatedAt is number;
-    }
-
-    // The table's values cannot be checked here, so every change must come
-    // with its log: the counter only moves forward, the last change names
-    // this account, and the entry it names exists in the same write.
-    function isLoggedTableChange(table, previousUpdates) {
-      let next = request.resource.data;
-      let entryPath = /databases/$(database)/documents/q_tables/$(table)/updates/$(next.lastUpdate.updateId);
-      return next.updates > previousUpdates
-        && next.lastUpdate is map
-        && next.lastUpdate.uid == request.auth.uid
-        && next.lastUpdate.globalSeq == next.updates
-        && existsAfter(entryPath)
-        && getAfter(entryPath).data.globalSeq == next.updates
-        && getAfter(entryPath).data.uid == request.auth.uid;
-    }
-
-    function isQLogEntry(data, id) {
-      return isEnvelope(data, request.auth.uid, id)
-        && data.keys().hasAll(['globalSeq', 'kind', 'stateKey', 'action', 'tableAfter', 'statesAfter'])
-        && data.globalSeq is int
-        && data.kind in ['visit', 'learn']
-        && data.tableAfter is map;
     }
 
     function isLevelAttempt(data) {
@@ -333,10 +167,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['timedOut']) || data.timedOut == true)
         // The language the player had chosen when the attempt began.
         && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil'])
-        // A course drive's seed, its counted scenarios in road order, and a crash's text.
-        && (!data.keys().hasAny(['attemptSeed']) || data.attemptSeed is int)
-        && (!data.keys().hasAny(['composition']) || data.composition is list)
-        && (!data.keys().hasAny(['crashReason']) || data.crashReason is string);
+        // The vehicle skin the attempt was drawn with (looks only).
+        && (!data.keys().hasAny(['vehicleSkin']) || data.vehicleSkin in ['car', 'motorcycle']);
     }
 
     function isFsmTelemetry(data) {
@@ -359,6 +191,14 @@ service cloud.firestore {
         && data.policy is map
         && data.rerolls is list
         && data.decisions is list
+        && data.truncated is bool
+        && isCount(data.totalCount);
+    }
+
+    function isInputTelemetry(data) {
+      return data.keys().hasAll(['schemaVersion', 'inputs', 'truncated', 'totalCount'])
+        && data.schemaVersion == 1
+        && data.inputs is list
         && data.truncated is bool
         && isCount(data.totalCount);
     }
@@ -395,13 +235,196 @@ service cloud.firestore {
         && data.updatedAt is number;
     }
 
+    function isCourseCursor(data) {
+      return data.keys().hasAll(['schemaVersion', 'phase', 'stage', 'pending', 'seen', 'flagged', 'seq', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.phase is map
+        && data.phase.kind in ['MODULE', 'QUIZ', 'QUIZ_REVIEW', 'DRIVE', 'REPEAT', 'FINAL', 'CERTIFIED']
+        && data.stage is map
+        && data.pending is list
+        && data.seen is map
+        && data.flagged is list
+        && isCount(data.seq)
+        && data.updatedAt is number;
+    }
+
+    function isCourseLogEntry(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'levelId', 'decisions', 'rewards', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind in ['drive', 'quiz', 'post_exam', 'final']
+        && data.decisions is list
+        && data.rewards is list
+        && data.timestamp is number;
+    }
+
+    function isBackgroundResponse(data) {
+      return data.keys().hasOnly(['schemaVersion', 'formVersion', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.formVersion is int
+        && data.answers is map
+        && data.answers.size() <= 20
+        && data.timestamp is number;
+    }
+
+    function isActiveActivity(data) {
+      return data.keys().hasAll(['kind', 'position', 'seed', 'openedAt', 'opens'])
+        && data.kind in ['quiz', 'drive']
+        && data.position is string
+        && data.seed is int
+        && data.openedAt is number
+        && data.opens is int && data.opens >= 1;
+    }
+
+    function isAssessmentSitting(data) {
+      return data.keys().hasAll(['schemaVersion', 'kind', 'answers', 'timestamp'])
+        && data.schemaVersion == 1
+        && data.kind in ['quiz', 'diagnostic', 'post_exam']
+        && data.answers is list
+        && data.timestamp is number;
+    }
+
+    // The shared table holds 8 states; every update is the whole table,
+    // written in a transaction on the newest version.
+    // A logged record's own id is its eventId, made on the device; it never
+    // changes once written. A retried write may only touch the server time.
+    function isEnvelope(data, uid, id) {
+      return data.keys().hasAll(['schemaVersion', 'eventId', 'uid', 'at', 'sessionId', 'appBuild', 'configVersion'])
+        && data.schemaVersion == 1
+        && data.eventId == id
+        && data.uid == uid
+        && data.at is number
+        && data.sessionId is string
+        && data.appBuild is string
+        && data.configVersion is string;
+    }
+
+    function onlyServerTimeChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['serverAt']);
+    }
+
+    function isStudyEvent(data, uid, id) {
+      return isEnvelope(data, uid, id)
+        && data.keys().hasAll(['type', 'seq', 'payload'])
+        && data.type in [
+          'session_started', 'page_viewed', 'course_transition', 'sitting_submitted', 'item_answered',
+          'background_submitted', 'drive_planned', 'activity_opened', 'answer_given', 'drive_started',
+          'drive_exited', 'decision_made', 'drive_ended', 'verdict_computed', 'policy_decision',
+          'reward_computed', 'ui_action', 'app_error'
+        ]
+        && (data.seq == null || data.seq is int)
+        && data.payload is map;
+    }
+
+    function isBKTUpdate(data, uid, id) {
+      return isEnvelope(data, uid, id)
+        && data.keys().hasAll(['userSeq', 'competency', 'source', 'correct', 'params', 'pBefore', 'predictedCorrect', 'posterior', 'pAfter'])
+        && data.userSeq is int
+        && data.source in ['drive', 'quiz', 'diagnostic', 'post_exam']
+        && data.correct is bool
+        && data.params is map
+        && data.pBefore is number && data.pAfter is number;
+    }
+
+    function isBKTProfile(data, uid) {
+      return data.keys().hasAll(['schemaVersion', 'uid', 'configVersion', 'updates', 'competencies', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.uid == uid
+        && data.updates is int
+        && data.competencies is map
+        && data.competencies.size() == 11;
+    }
+
+    function isQLogEntry(data, id) {
+      return isEnvelope(data, request.auth.uid, id)
+        && data.keys().hasAll(['globalSeq', 'kind', 'stateKey', 'action', 'tableAfter', 'statesAfter'])
+        && data.globalSeq is int
+        && data.kind in ['visit', 'learn']
+        && data.configVersion == settingsInForce()
+        && data.tableAfter is map;
+    }
+
+    // The settings version in force: written by `npm run db:init` only.
+    function settingsInForce() {
+      return get(/databases/$(database)/documents/policy/config).data.tag;
+    }
+
+    // A record of graded answers (a drive or a sitting) is numbered by the
+    // participant's evidence counter, moved on in the same transaction.
+    // Records from before the counter carry no number.
+    function isNumberedEvidence(uid, data) {
+      let counter = /databases/$(database)/documents/users/$(uid)/state/evidence;
+      return !data.keys().hasAny(['evidenceSeq'])
+        || (data.evidenceSeq is int
+          && existsAfter(counter)
+          && getAfter(counter).data.nextSeq == data.evidenceSeq + 1);
+    }
+
+    // The four Q-tables (2026-11-19, src/domain/competencyRouting/qTables.ts).
+    function isQTableId(tableId) {
+      return tableId in ['competencyQ', 'competencyQ_dryrun', 'competencyQ_test', 'competencyQ_public'];
+    }
+
+    // Whose play may teach a table: the study's, the dry run's and the test's
+    // table only their own cohort's; the public table every signed-in account
+    // that is in none of those, and the study's participants too (one way:
+    // the study's table never hears of the public's players).
+    function mayTeach(tableId) {
+      let enrolment = enrolmentPath(request.auth.uid);
+      let cohort = exists(enrolment) ? get(enrolment).data.cohort : null;
+      return tableId == 'competencyQ' ? cohort == 'study'
+        : tableId == 'competencyQ_dryrun' ? cohort == 'dryrun'
+        : tableId == 'competencyQ_test' ? cohort == 'test'
+        : (cohort == null || cohort == 'study');
+    }
+
+    function isLoggedTableChange(tableId, previousUpdates) {
+      let next = request.resource.data;
+      let entryPath = /databases/$(database)/documents/policy/$(tableId)/updates/$(next.lastUpdate.updateId);
+      return next.updates > previousUpdates
+        && next.lastUpdate is map
+        && next.lastUpdate.uid == request.auth.uid
+        && next.lastUpdate.globalSeq == next.updates
+        // Only the settings in force may change the shared table: a tab left
+        // open across a settings change cannot write with the old ones.
+        && next.lastUpdate.configVersion == settingsInForce()
+        && existsAfter(entryPath)
+        && getAfter(entryPath).data.globalSeq == next.updates
+        && getAfter(entryPath).data.uid == request.auth.uid;
+    }
+
+    // A reset keeps the table's update counter: `previousUpdates` is 0 for a
+    // table never written, which an admin may also create by a reset (the
+    // public table started from the study's, 2026-11-19).
+    function isQTableReset(tableId, next, previousUpdates) {
+      let resetPath = /databases/$(database)/documents/policy/$(tableId)/resets/$(next.lastReset.resetId);
+      return isQTableDoc(next)
+        && next.updates == previousUpdates
+        && next.lastReset is map
+        && next.lastReset.resetId is string
+        && next.lastReset.fromGlobalSeq == previousUpdates + 1
+        && existsAfter(resetPath)
+        && getAfter(resetPath).data.updatesBefore == previousUpdates;
+    }
+
+    function isQTableDoc(data) {
+      return data.keys().hasAll(['schemaVersion', 'table', 'updates', 'updatedAt'])
+        && data.schemaVersion == 1
+        && data.table is map
+        && data.table.size() <= 8
+        && isCount(data.updates)
+        && data.updatedAt is number;
+    }
+
     function isExamAttempt(data) {
       return data.keys().hasAll(['score', 'passed', 'wrongIds', 'questionIds', 'timestamp'])
         && isCount(data.score)
         && data.passed is bool
         && data.wrongIds is list
         && data.questionIds is list
-        && data.timestamp is number;
+        && data.timestamp is number
+        // Since 2026-11-13: each answer per bank item, for the bank's calibration.
+        && (!data.keys().hasAny(['responses']) || (data.responses is list && data.responses.size() <= 60))
+        && (!data.keys().hasAny(['bank']) || data.bank in ['served', 'bundled']);
     }
 
     function isDailyStreak(data) {
@@ -552,7 +575,9 @@ service cloud.firestore {
         && data.startedAt is number
         && data.finishedAt is number
         // The language chosen when the sitting began.
-        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil']);
+        && (!data.keys().hasAny(['language']) || data.language in ['en', 'fil'])
+        // A practice sitting, outside the course: recorded, never evidence.
+        && (!data.keys().hasAny(['practice']) || data.practice == true);
     }
 
     // The pre-test and post-test. Only a participant sits
@@ -563,11 +588,9 @@ service cloud.firestore {
     // of events, never whether an answer was right.
     function isOwnParticipantCode(code) {
       let entry = /databases/$(database)/documents/participants/$(code);
-      return code is string && exists(entry) && isOwnActiveEntry(get(entry).data);
-    }
-
-    function isOwnActiveEntry(entry) {
-      return entry.uid == request.auth.uid && entry.withdrawal == null;
+      return code is string && exists(entry)
+        && get(entry).data.uid == request.auth.uid
+        && get(entry).data.withdrawal == null;
     }
 
     // The study's order before the pre-test: consent
@@ -588,7 +611,7 @@ service cloud.firestore {
         && data.startedAt == request.time
         && data.status == 'open'
         && data.finishedAt == null
-        && (kind == 'pre' || (isOpenPostTest(data) && courseEndedFor(request.auth.uid)));
+        && (kind == 'pre' || isOpenPostTest(data));
     }
 
     // The post-test (amendment 3) opens only once its participant's pre-test
@@ -815,11 +838,13 @@ service cloud.firestore {
     }
 
     function isBackground(data) {
-      return data.keys().hasOnly(['schemaVersion', 'gaming', 'device', 'answeredAt'])
+      return data.keys().hasOnly(['schemaVersion', 'gaming', 'device', 'preferredVehicle', 'answeredAt'])
         && data.keys().hasAll(['schemaVersion', 'gaming', 'device', 'answeredAt'])
         && data.schemaVersion == 1
         && data.gaming in ['never', 'less-than-monthly', 'monthly', 'weekly', 'daily']
         && data.device in ['phone', 'tablet', 'laptop', 'desktop']
+        // The vehicle they prefer (2026-11-19); older records have none.
+        && (!data.keys().hasAny(['preferredVehicle']) || data.preferredVehicle in ['car', 'motorcycle'])
         && data.answeredAt is number;
     }
 
@@ -907,14 +932,14 @@ service cloud.firestore {
       match /progress/summary {
         allow read: if isOwner(uid) || isAdmin();
         allow create, update: if isOwner(uid) && isProgressSummary(request.resource.data);
-        allow delete: if false;
+        allow delete: if isAdmin(); // a course reset, after archiving it (see archive below)
       }
 
       match /attempts/{attemptId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data) && isNumberedEvidence(uid, request.resource.data)
-          && courseOpenFor(uid);
-        allow update, delete: if false; // append-only, never rewrite history
+        allow create: if isOwner(uid) && isLevelAttempt(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
+        allow update: if false; // append-only, never rewrite history
+        allow delete: if isAdmin(); // a course reset, after archiving it
 
         // The raw FSM transition log, the per-decision record and the routing
         // record, apart from the attempt because they are large or read only
@@ -926,21 +951,92 @@ service cloud.firestore {
             && exists(/databases/$(database)/documents/users/$(uid)/attempts/$(attemptId))
             && ((docId == 'fsm' && isFsmTelemetry(request.resource.data))
               || (docId == 'decisions' && isDecisionTelemetry(request.resource.data))
-              || (docId == 'routing' && isRoutingTelemetry(request.resource.data)));
-          allow update, delete: if false;
+              || (docId == 'routing' && isRoutingTelemetry(request.resource.data))
+              || (docId == 'inputs' && isInputTelemetry(request.resource.data)));
+          allow update: if false;
+          allow delete: if isAdmin(); // a course reset, after archiving it
         }
       }
 
       // The routing FSM in the game. The assignment is written by
-      // the developers alone, with the service account, which these rules do
-      // not govern: no
+      // the developers alone, with the service account
+      // (a developers' script), which these rules do not govern: no
       // client writes it, so no player can choose their own group, and an
       // admin writes no player data. The cursor is the player's place in the
       // course, rewritten as they play.
       match /routing/{docId} {
         allow read: if isOwner(uid) || isAdmin();
-        allow create, update: if isOwner(uid) && docId == 'cursor' && isRoutingCursor(request.resource.data);
+        allow create: if isOwner(uid)
+          && ((docId == 'cursor' && isRoutingCursor(request.resource.data))
+            || (docId == 'competencyCourse' && isCourseCursor(request.resource.data)));
+        // The course cursor's decision counter never goes back: an old cursor
+        // (a stale tab, a replayed request) cannot be written over a newer one.
+        allow update: if isOwner(uid)
+          && ((docId == 'cursor' && isRoutingCursor(request.resource.data))
+            || (docId == 'competencyCourse' && isCourseCursor(request.resource.data)
+              && request.resource.data.seq >= resource.data.seq));
+        // A course reset clears the player's place (archived first); never the assignment.
+        allow delete: if isAdmin() && docId in ['cursor', 'competencyCourse'];
+      }
+
+      // Every policy decision and reward of the per-competency routing FSM, append-only.
+      match /courseLog/{entryId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isCourseLogEntry(request.resource.data);
+        allow update: if false;
+        allow delete: if isAdmin(); // a course reset, after archiving it
+      }
+
+      // The background form, written once and never changed.
+      match /study/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && docId == 'background' && isBackgroundResponse(request.resource.data);
+        allow update, delete: if false;
+      }
+
+      // The event stream: append-only; its counter only moves forward.
+      match /events/{eventId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isStudyEvent(request.resource.data, uid, eventId);
+        allow update: if isOwner(uid) && onlyServerTimeChanged();
         allow delete: if false;
+      }
+
+      match /state/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        // The event and evidence counters only move forward; `active` is the
+        // quiz or drive open now (its seed, so a reload gets the same one).
+        allow create: if isOwner(uid)
+          && ((docId in ['events', 'evidence'] && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1)
+            || (docId == 'active' && isActiveActivity(request.resource.data)));
+        allow update: if isOwner(uid)
+          && ((docId in ['events', 'evidence'] && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq)
+            || (docId == 'active' && isActiveActivity(request.resource.data)));
+        // A course reset clears the open quiz or drive; the counters stay.
+        allow delete: if isAdmin() && docId == 'active';
+      }
+
+      // The participant's own BKT: the profile now, and one log entry per answer.
+      match /bkt/{docId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create, update: if isOwner(uid) && docId == 'profile' && isBKTProfile(request.resource.data, uid);
+        allow delete: if isAdmin() && docId == 'profile'; // a course reset, after archiving it
+      }
+
+      match /bktUpdates/{updateId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId);
+        allow update: if isOwner(uid) && onlyServerTimeChanged();
+        allow delete: if isAdmin(); // a course reset, after archiving it
+      }
+
+      // Quiz, diagnostic and post-exam answers, append-only; BKT reads all of them.
+      match /assessmentSittings/{sittingId} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid) && isAssessmentSitting(request.resource.data) && isNumberedEvidence(uid, request.resource.data);
+        allow update: if false;
+        // A course reset clears the short-quiz sittings (archived first); the pre-test and post-test stay.
+        allow delete: if isAdmin() && resource.data.kind == 'quiz';
       }
 
       match /examAttempts/{attemptId} {
@@ -968,7 +1064,33 @@ service cloud.firestore {
       match /quizSittings/{sittingId} {
         allow read: if isOwner(uid) || isAdmin();
         allow create: if isOwner(uid) && isQuizSitting(request.resource.data);
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if isAdmin(); // a course reset, after archiving it
+      }
+
+      // A course reset (src/features/admin/domain/progressReset.ts): its record,
+      // and under it a copy of every record it cleared, at the same path. Admins
+      // only. A study participant (enrolled) is never reset. Never deleted.
+      match /archive/{resetId} {
+        allow read: if isAdmin();
+        allow create: if isAdmin()
+          && !exists(/databases/$(database)/documents/users/$(uid)/study/enrolment)
+          && request.resource.data.kind == 'progress_reset'
+          && request.resource.data.uid == uid
+          && request.resource.data.status == 'copying'
+          && request.resource.data.by.uid == request.auth.uid;
+        allow update: if isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'finishedAt'])
+          && request.resource.data.status == 'done';
+        allow delete: if false;
+
+        // A copy may be written again (a reset run twice after a failure); never removed.
+        match /{path=**} {
+          allow read: if isAdmin();
+          // isAdmin() alone: a reset writes hundreds of copies a batch, past the rules' document-read limit.
+          allow create, update: if isAdmin();
+          allow delete: if false;
+        }
       }
 
       // Holds no answer, so its participant reads it: the seed their sitting
@@ -977,9 +1099,10 @@ service cloud.firestore {
         allow read: if isOwner(uid) || isAdmin();
         allow create: if isOwner(uid)
           && isOpenTestStatus(request.resource.data, kind)
-          && isOwnParticipantCode(request.resource.data.playerCode)
-          // A post-test opens on a finished pre-test, which these steps came before.
-          && (kind == 'post' || hasStudyStepsBeforePreTest());
+          && ((isOwnParticipantCode(request.resource.data.playerCode) && hasStudyStepsBeforePreTest())
+            // Every other account sits the tests too (2026-11-10), under its
+            // own open-access code, with no study steps before them.
+            || (!isStudyAccount() && request.resource.data.playerCode == 'U-' + request.auth.uid));
         allow update: if isOwner(uid)
           && resource.data.status == 'open'
           && ((request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'finishedAt'])
@@ -1031,53 +1154,6 @@ service cloud.firestore {
       // written once and only after the one before it: consent (whose
       // record, with the name, is the admin-only `consents/{uid}`), the
       // device check, and the survey once the post-test is finished.
-      // ── The per-competency course ──
-      // The cursor and the open activity are rewritten as the course moves;
-      // the evidence counter only counts forward; the pre-test's seed is
-      // written once, only in the write that finishes the pre-test.
-      match /course/{docId} {
-        allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid)
-          && ((docId == 'cursor' && isCourseCursor(request.resource.data) && courseOpenFor(uid))
-            || (docId == 'active' && isActiveActivity(request.resource.data) && courseOpenFor(uid))
-            || (docId == 'evidence' && request.resource.data.nextSeq is int && request.resource.data.nextSeq >= 1 && courseOpenFor(uid))
-            || (docId == 'preTestSeed' && isPreTestSeed(request.resource.data)
-              && get(/databases/$(database)/documents/users/$(uid)/testStatus/pre).data.status == 'open'
-              && getAfter(/databases/$(database)/documents/users/$(uid)/testStatus/pre).data.status == 'finished'
-              && existsAfter(/databases/$(database)/documents/users/$(uid)/testSittings/pre)));
-        allow update: if isOwner(uid) && courseOpenFor(uid)
-          && ((docId == 'cursor' && isCourseCursor(request.resource.data) && isCourseCursorChange(resource.data, request.resource.data))
-            || (docId == 'active' && isActiveActivity(request.resource.data))
-            || (docId == 'evidence' && request.resource.data.nextSeq is int && request.resource.data.nextSeq > resource.data.nextSeq));
-        allow delete: if false;
-      }
-
-      match /courseQuizSittings/{sittingId} {
-        allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isCourseQuizSitting(request.resource.data) && isNumberedEvidence(uid, request.resource.data)
-          && courseOpenFor(uid);
-        allow update, delete: if false;
-      }
-
-      match /courseLog/{entryId} {
-        allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isCourseLogEntry(request.resource.data) && courseOpenFor(uid);
-        allow update, delete: if false;
-      }
-
-      match /bkt/{docId} {
-        allow read: if isOwner(uid) || isAdmin();
-        allow create, update: if isOwner(uid) && docId == 'profile' && isBKTProfile(request.resource.data, uid) && courseOpenFor(uid);
-        allow delete: if false;
-      }
-
-      match /bktUpdates/{updateId} {
-        allow read: if isOwner(uid) || isAdmin();
-        allow create: if isOwner(uid) && isBKTUpdate(request.resource.data, uid, updateId) && courseOpenFor(uid);
-        allow update: if isOwner(uid) && onlyServerTimeChanged();
-        allow delete: if false;
-      }
-
       match /study/{docId} {
         allow read: if isOwner(uid) || isAdmin();
         allow create: if isOwner(uid)
@@ -1116,26 +1192,6 @@ service cloud.firestore {
       }
     }
 
-    // ── The shared Q-tables ───
-    // One per cohort. Read by any signed-in account, which chooses from it;
-    // trained only as mayTrainTable allows, and every change with its log.
-    match /q_tables/{table} {
-      allow read: if isSignedIn();
-      allow create: if table in ['study', 'dryrun', 'test'] && mayTrainTable(table)
-        && isQTableDoc(request.resource.data) && isLoggedTableChange(table, 0);
-      allow update: if mayTrainTable(table)
-        && isQTableDoc(request.resource.data) && isLoggedTableChange(table, resource.data.updates);
-      allow delete: if false;
-
-      match /updates/{updateId} {
-        allow read: if isAdmin();
-        allow create: if mayTrainTable(table) && isQLogEntry(request.resource.data, updateId)
-          && getAfter(/databases/$(database)/documents/q_tables/$(table)).data.updates >= request.resource.data.globalSeq;
-        allow update: if isSignedIn() && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
-        allow delete: if false;
-      }
-    }
-
     // ── The admin report's collection-group queries ────────
     // A collection-group query is judged against a recursive match only, never
     // against the per-user rules above.
@@ -1153,6 +1209,220 @@ service cloud.firestore {
 
     match /{path=**}/courseLog/{entryId} {
       allow read: if isAdmin();
+    }
+
+    match /{path=**}/assessmentSittings/{sittingId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/study/{docId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/events/{eventId} {
+      allow read: if isAdmin();
+    }
+
+    match /{path=**}/bktUpdates/{updateId} {
+      allow read: if isAdmin();
+    }
+
+    // Every player's BKT profile, for the admin: which value set each runs on.
+    match /{path=**}/bkt/{docId} {
+      allow read: if isAdmin();
+    }
+
+    // ── The Q-tables ───────────────────────────────────────
+    // Four since 2026-11-19 (src/domain/competencyRouting/qTables.ts): the
+    // study's, the dry run's, the test's and the public one. Each is learned
+    // online from its own players, in a transaction; `mayTeach` says whose.
+    // The rules check the shape only; a value cannot be checked here, as with
+    // every score.
+    match /policy/{tableId} {
+      allow read: if isSignedIn() && isQTableId(tableId);
+      // A player's change must come with its log: the counter only moves
+      // forward, the last change names this player, and the log entry it
+      // names exists in the same transaction under the new counter. Every
+      // change to a table is therefore attributed and on the record. (The
+      // values themselves cannot be checked here; see DATABASE.md.)
+      // An admin's course teaches no table (2026-11-16): their play is a check
+      // of the game, not a learner's decisions.
+      allow create: if isSignedIn() && !isAdmin() && isQTableId(tableId) && mayTeach(tableId)
+        && isQTableDoc(request.resource.data) && isLoggedTableChange(tableId, 0);
+      allow update: if isSignedIn() && !isAdmin() && isQTableId(tableId) && mayTeach(tableId)
+        && isQTableDoc(request.resource.data) && isLoggedTableChange(tableId, resource.data.updates);
+      // An admin's reset (Admin > Q-learning): the table emptied or started
+      // from another, its update counter unchanged, and the table as it stood
+      // kept under resets/ in the same transaction.
+      allow update: if isAdmin() && isQTableId(tableId) && isQTableReset(tableId, request.resource.data, resource.data.updates);
+      allow create: if isAdmin() && isQTableId(tableId) && isQTableReset(tableId, request.resource.data, 0);
+      allow delete: if false;
+
+      // The table as it stood before each reset, with who reset it and why.
+      match /resets/{resetId} {
+        allow read: if isAdmin() && isQTableId(tableId);
+        allow create: if isAdmin() && isQTableId(tableId)
+          && request.resource.data.keys().hasAll(['at', 'by', 'note', 'updatesBefore', 'fromGlobalSeq', 'tableBefore'])
+          && request.resource.data.by.uid == request.auth.uid
+          && request.resource.data.tableBefore is map
+          && request.resource.data.note is string && request.resource.data.note.size() <= 500;
+        allow update, delete: if false;
+      }
+
+      // Every change to the table, written in the same transaction by the
+      // player whose decision or reward caused it.
+      match /updates/{updateId} {
+        allow read: if isAdmin() && isQTableId(tableId);
+        // Written only together with the table: the table after the
+        // transaction must already count this entry.
+        allow create: if isSignedIn() && isQTableId(tableId) && isQLogEntry(request.resource.data, updateId)
+          && getAfter(/databases/$(database)/documents/policy/$(tableId)).data.updates >= request.resource.data.globalSeq;
+        allow update: if isSignedIn() && isQTableId(tableId) && resource.data.uid == request.auth.uid && onlyServerTimeChanged();
+        allow delete: if false;
+      }
+    }
+
+    // ── Settings, enrolment and roles ───────────────────────
+    // Written only by the scripts in scripts/db with the service account,
+    // which these rules do not govern. The app reads the settings in force.
+    match /policy/config {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /configVersions/{tag} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    match /participants/{code} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Who has admin access by the admin page (2026-11-18). An admin adds one
+    // and takes one away, never their own (so nobody locks themselves out);
+    // each change is written with its roleGrants record in the same batch.
+    match /admins/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['email', 'name', 'grantedBy', 'grantedByEmail', 'grantedAt', 'reason'])
+        && request.resource.data.grantedBy == request.auth.uid
+        && request.resource.data.grantedAt is number
+        && request.resource.data.email is string
+        && request.resource.data.reason is string;
+      allow delete: if isAdmin() && uid != request.auth.uid;
+      allow update: if false;
+    }
+
+    // Every admin grant and revoke. `npm run db:role` writes them for the
+    // claim; the admin page writes them for `admins/{uid}`, and only with the
+    // matching change to that list in the same batch.
+    match /roleGrants/{grantId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'role', 'action', 'by', 'byUid', 'at', 'reason', 'via'])
+        && request.resource.data.role == 'admin'
+        && request.resource.data.via == 'admin-page'
+        && request.resource.data.byUid == request.auth.uid
+        && request.resource.data.uid is string
+        && request.resource.data.at is number
+        && ((request.resource.data.action == 'grant'
+              && existsAfter(/databases/$(database)/documents/admins/$(request.resource.data.uid)))
+            || (request.resource.data.action == 'revoke'
+              && !existsAfter(/databases/$(database)/documents/admins/$(request.resource.data.uid))));
+      allow update, delete: if false;
+    }
+
+    match /meta/{docId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Whether the site is open to players (2026-11-10). Everyone reads it, a
+    // guest included, so the paused screen shows before sign-in; only an admin
+    // writes it, naming themselves.
+    // ── BKT value sets (2026-11-13) ────────────────────────
+    // `bktCalibration/state` names the set new players get; `bktSets/cal-N` is
+    // each calibration an admin applied (its values), and `bktSetLogs/cal-N`
+    // everything it was fitted from. `set-N` (2026-11-14) is an edited start:
+    // the set in force with only P(L0) changed by an admin; the two kinds share
+    // one count. A saved set is never edited or removed: players who started
+    // on it keep it to the end of their course. Every signed-in player reads
+    // the state and the sets; only an admin writes them, in one transaction.
+    match /bktCalibration/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() && docId == 'state'
+        && request.resource.data.keys().hasOnly(['activeSetId', 'number', 'appliedAt', 'appliedBy'])
+        && request.resource.data.number is int && request.resource.data.number >= 1
+        && request.resource.data.number == (resource == null ? 1 : resource.data.number + 1)
+        && request.resource.data.activeSetId in ['cal-' + string(request.resource.data.number), 'set-' + string(request.resource.data.number)]
+        && request.resource.data.appliedAt is number
+        && request.resource.data.appliedBy == request.auth.uid
+        && existsAfter(/databases/$(database)/documents/bktSets/$(request.resource.data.activeSetId));
+    }
+
+    // What players read: the values only. No names, no emails.
+    match /bktSets/{setId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['setId', 'number', 'model', 'appliedAt'])
+        && request.resource.data.setId == setId
+        && request.resource.data.number is int
+        && setId in ['cal-' + string(request.resource.data.number), 'set-' + string(request.resource.data.number)]
+        && request.resource.data.model is map
+        && request.resource.data.model.pInit is number
+        && request.resource.data.model.pInit > 0 && request.resource.data.model.pInit < 1
+        && request.resource.data.appliedAt is number
+        && existsAfter(/databases/$(database)/documents/bktSetLogs/$(setId));
+      allow update, delete: if false;
+    }
+
+    // The calibration's log (the pilot players used, the fit, who applied
+    // it): admins only, written once with its set.
+    match /bktSetLogs/{setId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.setId == setId
+        && request.resource.data.model is map
+        && request.resource.data.pilots is list
+        && request.resource.data.appliedAt is number
+        && request.resource.data.appliedBy == request.auth.uid
+        && existsAfter(/databases/$(database)/documents/bktSets/$(setId));
+      allow update, delete: if false;
+    }
+
+    // Which players are pilot (their answers feed the next calibration), set
+    // and removed by an admin; every mark and unmark is also logged.
+    match /bktPilots/{uid} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'label', 'markedAt', 'markedBy'])
+        && request.resource.data.uid == uid
+        && request.resource.data.markedAt is number
+        && request.resource.data.markedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    match /bktPilotLog/{entryId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['uid', 'label', 'action', 'at', 'by'])
+        && request.resource.data.action in ['marked', 'unmarked']
+        && request.resource.data.at is number
+        && request.resource.data.by == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /site/{docId} {
+      allow read: if true;
+      allow write: if isAdmin() && docId == 'status'
+        && request.resource.data.keys().hasOnly(['suspended', 'message', 'updatedAt', 'updatedBy'])
+        && request.resource.data.suspended is bool
+        && request.resource.data.message is string && request.resource.data.message.size() <= 300
+        && request.resource.data.updatedAt is number
+        && request.resource.data.updatedBy == request.auth.uid;
     }
 
     // ── Shared content ─────────────────────────────────────
@@ -1181,7 +1451,7 @@ service cloud.firestore {
 
     // The post-test's frozen design: item ids and cut
     // points, no item's content. Written once by the developers with the
-    // service account, which these rules do
+    // service account (a developers' script), which these rules do
     // not govern, so no client, an admin included, can change how anyone is
     // routed. Any signed-in account reads it.
     match /test_designs/{kind} {
@@ -1191,7 +1461,7 @@ service cloud.firestore {
 
     // The Rasch analysis as the admin area's IRT section shows it: item difficulties, fit, and each participant's θ by code.
     // Written by the developers with the service account
-    // so no client, an admin included, can
+    // (a developers' script), so no client, an admin included, can
     // change a result. Only an admin reads it.
     match /irt_reports/{report} {
       allow read: if isAdmin();
@@ -1231,18 +1501,6 @@ service cloud.firestore {
         && resource.data.open == true
         && request.resource.data.open == false
         && request.resource.data.closedAt is number;
-      allow delete: if false;
-    }
-
-    // The study's settings: the deadline after which anyone not yet certified may
-    // finish the study (the end path). Off unless an admin sets it.
-    match /study_settings/{setting} {
-      allow read: if isSignedIn();
-      allow create, update: if isAdmin() && setting == 'deadline'
-        && request.resource.data.keys().hasAll(['schemaVersion', 'at', 'updatedAt'])
-        && request.resource.data.schemaVersion == 1
-        && (request.resource.data.at == null || request.resource.data.at is number)
-        && request.resource.data.updatedAt is number;
       allow delete: if false;
     }
 

@@ -15,6 +15,7 @@ import {
   resolveLaneRole,
   roadXAt,
   screenYToDistance,
+  SCREEN_PX_PER_UNIT,
   type CurveSpan,
 } from './vehiclePhysics';
 
@@ -53,8 +54,8 @@ export interface EventPlacement {
   roadAt: RoadAt;
   /** True once this event has been answered. */
   handled: boolean;
-  /** Driving steps since it was answered; null before, or where the frame does not know. */
-  answeredForSteps?: number | null;
+  /** When it was answered, on the frame clock; null before, or where the frame does not know. */
+  handledAt?: number | null;
   /**
    * The scene is only still here because its traffic has not finished leaving.
    *
@@ -94,15 +95,13 @@ export interface FrameView {
   /** The player's road distance, which everything on screen is placed against. */
   distance: number;
   handled: ReadonlySet<number>;
-  /** The world's `drivenSteps` when each answered event was answered; absent in frames composed without one. */
+  /** When each answered event was answered (`Date.now`); absent in frames composed without a clock. */
   handledAt?: ReadonlyMap<number, number>;
-  /** The world's `drivenSteps` now: the clock `handledAt` is read against. */
-  drivenSteps?: number;
   curves: CurveSpan[];
   /**
    * The support level the level is played at, for the one thing a frame shows
-   * that depends on it: whether the road marks the response being graded.
-   * It reaches no solid, no grade and no part of the machine.
+   * that depends on it: whether the road marks the response being graded
+   *. It reaches no solid, no grade and no part of the machine.
    * Absent means `full`, the baseline machine, as a missing h does everywhere.
    */
   support?: SupportLevel;
@@ -191,37 +190,62 @@ export const placeVisibleEvents = (view: FrameView): EventPlacement[] => {
     const runOn = handled && past < -50;
     if (runOn && !(runsOn(event) && past >= -VEHICLE_RUN_ON)) continue;
 
-    const answeredAt = handled ? view.handledAt?.get(event.triggerAtDistance) : undefined;
-    const answeredForSteps = answeredAt !== undefined && view.drivenSteps !== undefined ? view.drivenSteps - answeredAt : null;
-    placements.push({ event, index, screenY, roadAt, roadX: roadAt(screenY), handled, answeredForSteps, runOn });
+    const handledAt = handled ? view.handledAt?.get(event.triggerAtDistance) ?? null : null;
+    placements.push({ event, index, screenY, roadAt, roadX: roadAt(screenY), handled, handledAt, runOn });
   }
 
   return placements;
 };
 
-/** How long a pedestrian takes to walk clear of the lane once the event is answered: 2.4 s of driving steps. */
-export const PEDESTRIAN_WALK_OFF_STEPS = 144;
+/** How long a pedestrian takes to walk clear of the lane once the event is answered. */
+export const PEDESTRIAN_WALK_OFF_MS = 2400;
 
 /**
  * How far the pedestrian has walked clear, 0..1, once the event is answered.
  *
- * Walked in driving steps from the answer (ported from the groupmate's
- * repository, on the world's step clock), so a driver who stopped and waits
- * sees them cross; it was read off the car's distance alone before, which froze
+ * Walked in time from the answer (2026-11-16), so a driver who stopped and
+ * waits sees them cross; it was read off the car's distance before, which froze
  * them in the road while the car stood still and only moved them as it crept
- * forward. Where the frame has no answer time, the distance rule alone holds.
+ * forward. Where the frame has no answer time, the old distance rule is the
+ * fallback.
  */
 export const pedestrianWalkOff = (
   distance: number,
   trigger: number,
   handled: boolean,
-  answeredForSteps: number | null = null
+  handledAt: number | null = null,
+  now: number = Date.now()
 ): number => {
   if (!handled) return 0;
   const byDistance = Math.min(1, Math.max(0, (distance - trigger + 140) / 200));
-  if (answeredForSteps === null) return byDistance;
+  if (handledAt === null) return byDistance;
   // Whichever is further: waiting lets them walk, driving on never holds them back.
-  return Math.max(byDistance, Math.min(1, Math.max(0, answeredForSteps / PEDESTRIAN_WALK_OFF_STEPS)));
+  return Math.max(byDistance, Math.min(1, Math.max(0, (now - handledAt) / PEDESTRIAN_WALK_OFF_MS)));
+};
+
+/**
+ * How far along their walk the people on a crossing are this frame
+ * (2026-11-16). They used to stand on the stripes from the moment the crossing
+ * came into view until it scrolled away, which read as cardboard figures.
+ *
+ * - `walkIn`, 0..1: stepping off the right-hand curb and out to where they
+ *   stand. Done by the time the crossing is CROSSING_WALK_IN_DONE units ahead,
+ *   which is further out than any warning zone, so where they stand when the
+ *   driver is warned, and what the driver has to do about it, is unchanged.
+ * - `walkedOff`, 0..1: once the event is answered, walking on across and off
+ *   the far side (the same clock as `pedestrianWalkOff`).
+ */
+export const CROSSING_WALK_IN_FROM = 1000;
+export const CROSSING_WALK_IN_DONE = 700;
+
+export const crossingWalk = (
+  placement: Pick<EventPlacement, 'screenY' | 'handled' | 'handledAt'>,
+  now: number
+): { walkIn: number; walkedOff: number } => {
+  const ahead = (distanceToScreenY(0, 0) - placement.screenY) / SCREEN_PX_PER_UNIT;
+  const walkIn = Math.min(1, Math.max(0, (CROSSING_WALK_IN_FROM - ahead) / (CROSSING_WALK_IN_FROM - CROSSING_WALK_IN_DONE)));
+  const walkedOff = pedestrianWalkOff(-ahead, 0, placement.handled, placement.handledAt ?? null, now);
+  return { walkIn, walkedOff };
 };
 
 /** The lane an oncoming vehicle uses on a two-way stretch. */

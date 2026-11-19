@@ -5,7 +5,7 @@ import { publicAsset } from '@/shared/lib/publicAsset';
 /**
  * The sign on the road is drawn at the scale a sign really is on a narrow
  * carriageway, which is not a size anyone can read a symbol off. This card
- * shows the same sign enlarged beside the road, using the official artwork
+ * shows the same sign enlarged beside the road, using the official LTO artwork
  * the level module teaches from, so the question is about recognising the sign
  * rather than squinting at it.
  *

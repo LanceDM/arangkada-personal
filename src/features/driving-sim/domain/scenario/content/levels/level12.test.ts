@@ -2,7 +2,7 @@
  * Level 12, the final exam, as the same test for every learner.
  *
  * The level this replaced drew a Stop junction where its checkpoint was meant
- * to be, graded paperwork with the brake, rested two verdicts on rules no official
+ * to be, graded paperwork with the brake, rested two verdicts on rules no LTO
  * file states, picked its signs slot by the learner's own coverage record, and
  * passed a driver who missed three of its seven scenarios. So the assertions
  * below are about the exam as an instrument: what it is made of, that nothing
@@ -67,7 +67,7 @@ describe('the final exam, as it is made', () => {
     expect(ids(SLOTS[3])).toEqual(ids(portable('right_of_way')));
     expect(ids(SLOTS[5])).toEqual(ids(portable('hazard_awareness')));
     expect(ids(SLOTS[6])).toEqual(ids(portable('lane_discipline').filter(v => v.requiredLane?.strict === true)));
-    expect(BORROWED.map(slot => SLOTS[slot].length)).toEqual([37, 20, 15, 6]);
+    expect(BORROWED.map(slot => SLOTS[slot].length)).toEqual([37, 20, 12, 6]);
   });
 
   it("never rolls Level 3's prohibitions on a turn it does not offer, which nothing can fail", () => {
@@ -96,8 +96,10 @@ describe('the final exam, as it is made', () => {
     }
   });
 
-  it('passes at 70% of that, the mark Levels 2-11 set', () => {
+  it('passes at 70% of that, with stars at 83% and 95%, the marks Levels 2-11 set', () => {
     expect(level12.requiredScore).toBe(Math.ceil(0.7 * 200));
+    expect(level12.stars2).toBe(Math.ceil(0.83 * 200));
+    expect(level12.stars3).toBe(Math.ceil(0.95 * 200));
     expect(level12.roadLength).toBe(6200);
   });
 
@@ -206,7 +208,7 @@ describe('the enforcement half, and the emergency', () => {
     // it corrects, so it is held only to the rules no scenario may state at all.
     const OPEN: Array<[RegExp, string, 'anywhere' | 'as true']> = [
       [/overrid|precedence/i, 'no file says an officer overrides a signal (G3)', 'anywhere'],
-      [/rolling stop/i, 'Republic Act No. 4136’s through-highway proviso conflicts (K1)', 'anywhere'],
+      [/rolling stop/i, 'RA 4136’s through-highway proviso conflicts (K1)', 'anywhere'],
       [/\b(?:light|less grave|grave) violation/i, 'no file lists which violation is which category (G4)', 'anywhere'],
       [/\b911\b|\b117\b/, 'no hotline is sourced for this level', 'anywhere'],
       [/until the case is settled/i, 'the TOP is 72 hours only (T1, T2)', 'as true'],

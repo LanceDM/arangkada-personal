@@ -13,6 +13,7 @@ import { provideStudyDependencies, type StudyDependencies } from '@/features/stu
 import { StudyProgressContext, type StudyProgressState } from '@/features/study/application/studyProgress';
 import { LanguageProvider } from '@/shared/i18n/language';
 import type { Language } from '@/shared/lib/localized';
+import { BackgroundForm } from './BackgroundForm';
 import { ConsentStep } from './ConsentStep';
 import { StudyHome } from './StudyHome';
 
@@ -25,6 +26,9 @@ let root: Root | null = null;
 let host: HTMLDivElement | null = null;
 const saveConsent = vi.fn(async () => {});
 const withdraw = vi.fn(async () => {});
+const saveBackground = vi.fn(async () => {});
+const chooseVehicleSkin = vi.hoisted(() => vi.fn(async () => {}));
+vi.mock('@/features/auth', async importOriginal => ({ ...(await importOriginal<object>()), chooseVehicleSkin }));
 
 beforeEach(() => {
   saveConsent.mockClear();
@@ -33,8 +37,10 @@ beforeEach(() => {
     registry: {} as StudyDependencies['registry'],
     accounts: {} as StudyDependencies['accounts'],
     sources: {} as StudyDependencies['sources'],
-    records: { saveConsent, withdraw } as unknown as StudyDependencies['records'],
+    records: { saveConsent, withdraw, saveBackground } as unknown as StudyDependencies['records'],
   });
+  saveBackground.mockClear();
+  chooseVehicleSkin.mockClear();
 });
 
 afterEach(() => {
@@ -131,7 +137,6 @@ describe('the consent step', () => {
   const fill = (age: string) => {
     type('#consent-name', 'Juan dela Cruz');
     type('#consent-age', age);
-    type('#consent-signature', 'Juan dela Cruz');
     act(() => (host!.querySelector('input[type="checkbox"]') as HTMLInputElement).click());
   };
   const submit = async () => act(async () => host!.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
@@ -153,8 +158,8 @@ describe('the consent step', () => {
 
   it('records the language its text was read in, on the record and its marker', async () => {
     render(<ConsentStep uid="u1" code="P-0004" username="juan_2026" onDone={() => {}} />, ready('consent'), 'fil');
-    expect(host!.textContent).toContain('Ano ang pag-aaral na ito');
-    expect(host!.textContent).not.toContain('What this study is');
+    expect(host!.textContent).toContain('Tungkol sa pag-aaral');
+    expect(host!.textContent).not.toContain('About the study');
     fill('24');
     await submit();
     expect(saveConsent).toHaveBeenCalledWith('u1', {
@@ -172,5 +177,39 @@ describe('the consent step', () => {
     expect(onDone).not.toHaveBeenCalled();
     expect(host!.textContent).toContain('this study is for people 18 and older');
     expect(host!.textContent).toContain('Nothing you typed was saved');
+  });
+});
+
+describe('the background form (2026-11-19)', () => {
+  const pick = (name: string, index: number) =>
+    act(() => (host!.querySelectorAll(`input[name="${name}"]`)[index] as HTMLInputElement).click());
+  const submit = async () => act(async () => host!.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+
+  it('asks which vehicle they prefer, saves it, and makes it their in-game vehicle', async () => {
+    const onDone = vi.fn();
+    render(<BackgroundForm uid="u1" onDone={onDone} />, ready('background'));
+    expect(host!.textContent).toContain('Which vehicle do you prefer to drive?');
+    pick('gaming', 3);
+    pick('device', 0);
+    await submit();
+    expect(saveBackground).not.toHaveBeenCalled();
+    expect(host!.textContent).toContain('Answer every question.');
+    pick('vehicle', 1);
+    await submit();
+    expect(saveBackground).toHaveBeenCalledWith('u1', expect.objectContaining({ gaming: 'weekly', device: 'phone', preferredVehicle: 'motorcycle' }));
+    expect(chooseVehicleSkin).toHaveBeenCalledWith('u1', 'motorcycle');
+    expect(onDone).toHaveBeenCalled();
+  });
+});
+
+describe('the survey link on the study home (2026-11-19)', () => {
+  it('is open from the first stage, and hidden once withdrawn', () => {
+    render(<StudyHome uid="u1" onNext={() => {}} onSignOut={() => {}} />, ready('consent'));
+    const link = host!.querySelector('a[href*="docs.google.com/forms"]') as HTMLAnchorElement | null;
+    expect(link?.target).toBe('_blank');
+    act(() => root!.unmount());
+    host!.remove();
+    render(<StudyHome uid="u1" onNext={() => {}} onSignOut={() => {}} />, ready('withdrawn'));
+    expect(host!.querySelector('a[href*="docs.google.com/forms"]')).toBeNull();
   });
 });

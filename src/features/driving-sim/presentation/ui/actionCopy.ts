@@ -48,7 +48,7 @@ const HAPPENED: Record<string, Localized> = {
   drifted: { en: 'wandered across the lane' },
   braked_hard: { en: 'stood on the brake' },
   too_fast: { en: 'carried too much speed' },
-  wrong_lane: { en: 'was in the wrong lane' },
+  wrong_lane: { en: 'were in the wrong lane' },
   // A checkpoint driven through: the stop that opens its question never came.
   no_stop: { en: 'drove through without stopping' },
 };
@@ -75,8 +75,23 @@ export const actionLabel = (action: string, say: TextOf): string => {
   return happened ? say(happened) : action.replace(/_/g, ' ');
 };
 
+/**
+ * The lane a wrong-lane verdict wanted (2026-11-16). A lane direction sign is
+ * graded as carrying on, so "You were in the wrong lane — this one wanted you
+ * to carry on" said nothing about the lane; the verdict names the lane instead.
+ */
+const WANTED_LANE: Record<string, Localized> = {
+  // Keys from `wantedLaneKey` (application/useScenarioEvaluation.ts).
+  'lane:curb': { en: 'the right lane' },
+  'lane:inner': { en: 'the lane nearest the center line' },
+  'lane:middle': { en: 'the middle lane' },
+  'lane:stay': { en: 'you to stay in your lane' },
+};
+
 /** What the scenario asked for, for "this one wanted …". */
 export const expectedLabel = (action: string, say: TextOf): string => {
+  const lane = WANTED_LANE[action];
+  if (lane) return say(lane);
   const wanted = WANTED[action as ScenarioEvent['correctAction']];
   return wanted ? say(wanted) : actionLabel(action, say);
 };

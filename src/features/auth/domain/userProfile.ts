@@ -1,4 +1,5 @@
 import type { Language } from '@/shared/lib/localized';
+import type { VehicleSkin } from '@/shared/lib/vehicleSkin';
 
 /**
  * Who is signed in, and the account record behind them.
@@ -41,4 +42,9 @@ export interface UserProfile {
   bestExamScore: number;
   /** The language the account chose; absent until it chooses one. */
   language?: Language;
+  /** The Terms and Data Use the account agreed to at sign-up, and when; absent on older accounts. */
+  termsVersion?: string;
+  termsAcceptedAt?: number;
+  /** How the player's vehicle is drawn (looks only); absent means the car. */
+  vehicleSkin?: VehicleSkin;
 }

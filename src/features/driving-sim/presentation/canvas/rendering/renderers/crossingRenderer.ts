@@ -29,7 +29,7 @@
 import { ROAD_WIDTH, CANVAS_WIDTH } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { drawCrossingApproach, drawIntersection, drawSignalHead, } from '@/features/driving-sim/presentation/canvas/rendering/renderPrimitives';
 import { DRIVEWAY_CROSSING_HEIGHT } from '@/features/driving-sim/domain/world/junctionGeometry';
-import { DRIVEWAY_GROUP_GAP, drivewayPedestrianX, type Point } from '@/features/driving-sim/domain/world/sceneGeometry';
+import { DRIVEWAY_GROUP_GAP, drivewayPedestrianX, strideAt, type Point } from '@/features/driving-sim/domain/world/sceneGeometry';
 import type { CrossingPedestrian, PedestrianKind } from '@/features/driving-sim/domain/scenario/scenarioScene';
 import { drawPedestrian, SPRITE_FOR_KIND } from './pedestrianRenderer';
 
@@ -38,7 +38,10 @@ const drawZebraCrossing = (
   ctx: CanvasRenderingContext2D,
   roadX: number,
   screenY: number,
-  waiting: PedestrianKind
+  /** Who waits on the curb; null when the crossing's people are drawn as a walking group. */
+  waiting: PedestrianKind | null,
+  /** How far they have walked down the footpath to the crossing, 0..1. */
+  arrived = 1
 ) => {
   const top = screenY - 34;
   const height = 40;
@@ -48,7 +51,10 @@ const drawZebraCrossing = (
   // Waiting on the curb, not in the lane: the lesson is reading the sign and
   // slowing early, not swerving around a body in the road. They stand on the
   // opposite curb to the sign so the two never sit on top of each other.
-  drawPedestrian(ctx, roadX - 13, screenY - 14, SPRITE_FOR_KIND[waiting]);
+  if (waiting) {
+    const along = (1 - arrived) * -70;
+    drawPedestrian(ctx, roadX - 13, screenY - 14 + along, SPRITE_FOR_KIND[waiting], arrived < 1 ? strideAt(along) : undefined);
+  }
 };
 
 // Sprite positions live in these helpers rather than inline in the drawing, so
@@ -66,7 +72,8 @@ const drawDrivewayMouth = (
   roadX: number,
   screenY: number,
   walkedOff = 0,
-  people: readonly CrossingPedestrian[] = [{ kind: 'adult' }]
+  people: readonly CrossingPedestrian[] = [{ kind: 'adult' }],
+  walkIn = 1
 ) => {
   const half = DRIVEWAY_CROSSING_HEIGHT / 2;
   const top = screenY - half;
@@ -96,7 +103,14 @@ const drawDrivewayMouth = (
 
   if (walkedOff < 1) {
     people.forEach((person, index) =>
-      drawPedestrian(ctx, drivewayPedestrianX(walkedOff) - index * DRIVEWAY_GROUP_GAP, screenY - 2, SPRITE_FOR_KIND[person.kind])
+      drawPedestrian(
+        ctx,
+        drivewayPedestrianX(walkedOff, walkIn) - index * DRIVEWAY_GROUP_GAP,
+        screenY - 2,
+        SPRITE_FOR_KIND[person.kind],
+        // Legs move while they walk, and stand still while they wait.
+        walkedOff > 0 || walkIn < 1 ? strideAt(drivewayPedestrianX(walkedOff, walkIn) + index * 5) : undefined
+      )
     );
   }
 };
@@ -127,7 +141,7 @@ const drawSignalizedCrossing = (
 
   // Drawn where the world put them this frame. Reading the clock again here
   // would put the sprite a few milliseconds ahead of the body you can hit.
-  if (walker) drawPedestrian(ctx, walker.x, walker.y, 'regular');
+  if (walker) drawPedestrian(ctx, walker.x, walker.y, 'regular', strideAt(walker.x));
 };
 
 export {

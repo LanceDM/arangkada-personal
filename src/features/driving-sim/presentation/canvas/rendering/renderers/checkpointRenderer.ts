@@ -1,6 +1,6 @@
 /**
  * The "pull over and deal with an official" scenes: an `event.inspection`
- * roadside checkpoint (boom barrier, officer, cones, sign), an enforcer flagging a
+ * LTO checkpoint (boom barrier, officer, cones, sign), an enforcer flagging a
  * car down at the curb (`inspection.pullOver`), and the marked
  * `parking_bay`/`loading_bay`/`red_curb`/`yellow_curb`/`lay_by` pull-over bay
  * a `PullOverBay` describes.
@@ -60,7 +60,7 @@ const drawCheckpointScene = (
   drawCheckpointOfficer(ctx, roadX - 34, screenY + 4, 0.95);
   drawTrafficCone(ctx, roadX + 16, screenY + 40, 0.5);
   drawTrafficCone(ctx, roadX + ROAD_WIDTH - 16, screenY + 40, 0.5);
-  drawRoadsideSign(ctx, roadX + ROAD_WIDTH + 44, screenY - 26, 'ROADSIDE', 'CHECKPOINT', '#1d4ed8');
+  drawRoadsideSign(ctx, roadX + ROAD_WIDTH + 44, screenY - 26, 'TRAFFIC', 'CHECKPOINT', '#1d4ed8');
 };
 
 /**

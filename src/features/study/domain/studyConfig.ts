@@ -2,35 +2,33 @@
  * What the team supplies before the study opens. Kept
  * in the source, so the study-freeze tag pins exactly what participants saw.
  *
- * The survey says it is not ready while its address is still the placeholder.
+ * TEAM TO SUPPLY: replace each placeholder, then rebuild. Until then the
+ * survey says it is not ready, and help shows the placeholder.
  */
 
 const PLACEHOLDER = 'TEAM_TO_SUPPLY';
 
 /**
- * The team's ISO/IEC 25010 + TAM Google Form. The link carries nothing about
- * the participant: no code, no name, no age (the developers' decision,
- * 2026-11-17), so a response cannot be matched to a code from the link.
+ * The team's ISO/IEC 25010 + TAM Google Form: its "Get pre-filled link" URL
+ * up to `viewform`, and the entry id of the question that holds the
+ * participant code. Only the code is ever put in the link: never a name or an
+ * age.
  */
-export const SURVEY_FORM_URL =
-  'https://docs.google.com/forms/d/e/1FAIpQLScp9jZxj269v6RtqZ_sxw-V7eWcbkBUYOdFMpMTtKYXcu6vIw/viewform';
+export const SURVEY_FORM_URL = `https://docs.google.com/forms/d/e/${PLACEHOLDER}/viewform`;
+export const SURVEY_CODE_ENTRY = `entry.${PLACEHOLDER}`;
 
-/**
- * How a participant reaches the team, shown on every study screen: the team's
- * addresses as plain text. They are only shown: never sent anywhere, never put
- * in a link or a URL (no mailto).
- */
+/** How a participant reaches the team, shown on every study screen. */
 export const HELP_CONTACT = {
-  intro: { en: 'Message the team:', fil: 'Mag-message sa team:' },
-  emails: ['kdelacuesta@fit.edu.ph', 'ldmendoza@fit.edu.ph', 'bsportugal@fit.edu.ph', 'edsantos1@fit.edu.ph'],
-} as const;
+  en: `Message the team: ${PLACEHOLDER}`,
+  fil: `Mag-message sa team: ${PLACEHOLDER}`,
+};
 
-export const surveyConfigured = (formUrl = SURVEY_FORM_URL): boolean => !formUrl.includes(PLACEHOLDER);
+export const surveyConfigured = (): boolean => !SURVEY_FORM_URL.includes(PLACEHOLDER) && !SURVEY_CODE_ENTRY.includes(PLACEHOLDER);
 
-/** The survey's link, exactly the form's address: no query, so nothing about the participant. */
-export const surveyLink = (formUrl = SURVEY_FORM_URL): string => {
+/** The survey's link with the code filled in, and nothing else. */
+export const surveyLink = (code: string, formUrl = SURVEY_FORM_URL, entry = SURVEY_CODE_ENTRY): string => {
   const url = new URL(formUrl);
-  url.search = '';
-  url.hash = '';
+  url.searchParams.set('usp', 'pp_url');
+  url.searchParams.set(entry, code);
   return url.toString();
 };

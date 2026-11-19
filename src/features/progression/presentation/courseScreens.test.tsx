@@ -1,3 +1,4 @@
+import type { DrivingCompetency } from '@/domain/learner/competency';
 // @vitest-environment jsdom
 /**
  * The ladder and the results screen under the Legacy / New switch.
@@ -145,29 +146,11 @@ describe('the results screen', () => {
     act(() => [...container.querySelectorAll('button')].find(b => b.textContent?.includes('CONTINUE'))!.click());
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
-
-  it('gives the course the one star rule: passed by its verdict, then counted in mistakes', () => {
-    const wrong = { timestamp: 0, action: 'brake', result: 'violation' as const, points: -10, competency: 'speed_control' };
-    const standing = { ...wrong, standing: true as const };
-    const run = { ...passed, logs: [wrong, standing, { ...wrong, result: 'correct' as const, points: 20 }] };
-    const container = render(
-      <LevelComplete
-        result={run} level={level} onNext={vi.fn()} onRetry={vi.fn()} onMenu={vi.fn()} hasNextLevel
-        course={{
-          note: null, onContinue: vi.fn(), topics: ['speed_control'], passed: true,
-          verdicts: [{ competency: 'speed_control', correct: 2, total: 3, passed: true }],
-        }}
-      />
-    );
-    // One mistake: the standing penalty is not one.
-    expect(container.textContent).toContain('1 mistake');
-    expect(container.querySelectorAll('svg.fill-primary').length).toBe(2);
-  });
 });
 
 describe('the results screen after the tutorial', () => {
   const tutorial = LEVELS.find(entry => entry.id === 0)!;
-  const step = (timestamp: number, competency: string, result: 'correct' | 'violation' = 'correct') => ({
+  const step = (timestamp: number, competency: DrivingCompetency, result: 'correct' | 'violation' = 'correct') => ({
     timestamp, action: 'brake', result, points: 10, competency, expectedAction: 'brake',
   });
   const run: LevelResult = {
@@ -186,7 +169,7 @@ describe('the results screen after the tutorial', () => {
     );
     const text = container.textContent ?? '';
     const skills = Object.keys(run.competencyScores!).map(getCompetencyLabel);
-    for (const label of ['Topics This Drive', 'Topic to work on', 'No mistakes this drive', ...skills]) {
+    for (const label of ['Skill Breakdown', 'Focus Area', 'Strongest Skill', ...skills]) {
       expect(text, label).not.toContain(label);
     }
     expect(buttonText(container).join('|')).not.toContain('PRACTICE');
@@ -198,7 +181,7 @@ describe('the results screen after the tutorial', () => {
     const container = render(
       <LevelComplete result={{ ...run, levelId: 3 }} level={level} onNext={vi.fn()} onRetry={vi.fn()} onMenu={vi.fn()} hasNextLevel />
     );
-    expect(container.textContent).toContain('Topics This Drive');
+    expect(container.textContent).toContain('Skill Breakdown');
     expect(container.textContent).toContain(getCompetencyLabel('right_of_way'));
   });
 });

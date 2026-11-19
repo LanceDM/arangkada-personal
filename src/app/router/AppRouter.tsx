@@ -20,9 +20,9 @@ import LevelMapPage from '@/pages/story/LevelMapPage';
 import BriefingPage from '@/pages/story/BriefingPage';
 import DrivePage from '@/pages/story/DrivePage';
 import CompletePage from '@/pages/story/CompletePage';
+import { RequireInitialExam } from '@/app/initialExam/RequireInitialExam';
 import NotFound from '@/pages/NotFoundPage';
 import ResetPassword from '@/pages/auth/ResetPasswordPage';
-import VerifyEmail from '@/pages/auth/VerifyEmailPage';
 
 // The modes that share nothing with each other: their own content, their own
 // screens, no state carried in from anywhere else. Split so that opening the
@@ -37,6 +37,7 @@ const Learn = lazy(() => import('@/pages/learn/LearnPage'));
 const EksamenMode = lazy(() => import('@/pages/mock-exam/MockExamPage'));
 const DailyChallenge = lazy(() => import('@/pages/daily-challenge/DailyChallengePage'));
 const Settings = lazy(() => import('@/pages/settings/SettingsPage'));
+const Profile = lazy(() => import('@/pages/profile/ProfilePage'));
 const PreTest = lazy(() => import('@/pages/pre-test/PreTestPage'));
 // The study's post-test, not the frozen pilot's at /play/story/post-test.
 const StudyPostTest = lazy(() => import('@/pages/post-test/PostTestPage'));
@@ -51,12 +52,12 @@ const AdminRouting = lazy(() => import('@/pages/admin/RoutingPage'));
 const AdminQLearning = lazy(() => import('@/pages/admin/QLearningPage'));
 const AdminQuiz = lazy(() => import('@/pages/admin/QuizPage'));
 const AdminIrt = lazy(() => import('@/pages/admin/IrtPage'));
-const AdminCourseFlow = lazy(() => import('@/pages/admin/CourseFlowPage'));
-const AdminCourseQLearning = lazy(() => import('@/pages/admin/CourseQLearningPage'));
-const AdminCourseBkt = lazy(() => import('@/pages/admin/CourseBktPage'));
+const AdminEvaluation = lazy(() => import('@/pages/admin/EvaluationPage'));
 const AdminPlayers = lazy(() => import('@/pages/admin/PlayersPage'));
+const AdminCourse = lazy(() => import('@/pages/admin/CoursePage'));
 const AdminScenarios = lazy(() => import('@/pages/admin/ScenariosPage'));
 const AdminScenarioPlay = lazy(() => import('@/pages/admin/ScenarioPlayPage'));
+const AdminLevelPlay = lazy(() => import('@/pages/admin/LevelPlayPage'));
 // The study's own pages: a participant joins and signs in by username.
 const StudyHome = lazy(() => import('@/pages/study/StudyHomePage'));
 const StudyJoin = lazy(() => import('@/pages/study/StudyJoinPage'));
@@ -89,16 +90,23 @@ export const AppRouter = () => (
       entry point; `drive` and `complete` hold in-memory run state and redirect
       when loaded cold. See src/pages/story/StoryModeLayout.tsx.
     */}
-    <Route path="/play/story" element={<StoryModeLayout />}>
+    {/* The initial exam (the study's pre-test) is opened from the main menu; the modes stay closed until it is taken. */}
+    <Route path="/play/initial-exam" element={<Navigate to="/play/pre-test" replace />} />
+    <Route path="/play/story" element={<RequireInitialExam><StoryModeLayout /></RequireInitialExam>}>
       <Route index element={<LevelMapPage />} />
       <Route path=":levelId/briefing" element={<BriefingPage />} />
       <Route path=":levelId/drive" element={<DrivePage />} />
       <Route path=":levelId/complete" element={<CompletePage />} />
+      {/* The course's old exam paths: the study's pre-test and post-test replace them. */}
+      <Route path="background" element={<Navigate to="/play/pre-test" replace />} />
+      <Route path="diagnostic" element={<Navigate to="/play/pre-test" replace />} />
+      <Route path="post-exam" element={<Navigate to="/play/post-test" replace />} />
     </Route>
     {lazyRoute('/learn/:levelId', <Learn />)}
-    {lazyRoute('/play/eksamen', <EksamenMode />)}
-    {lazyRoute('/play/daily', <DailyChallenge />)}
+    {lazyRoute('/play/eksamen', <RequireInitialExam><EksamenMode /></RequireInitialExam>)}
+    {lazyRoute('/play/daily', <RequireInitialExam><DailyChallenge /></RequireInitialExam>)}
     {lazyRoute('/settings', <Settings />)}
+    {lazyRoute('/profile', <Profile />)}
     {/* The study's pre-test: a participant sits it, an admin previews it. */}
     {lazyRoute('/play/pre-test', <PreTest />)}
     {/* The study's two-stage post-test, the same who as the pre-test. */}
@@ -114,19 +122,19 @@ export const AppRouter = () => (
     >
       <Route index element={<AdminOverview />} />
       <Route path="pilot" element={<Pilot />} />
-      <Route path="players" element={<AdminPlayers />} />
       <Route path="test-mode" element={<TestMode />} />
       <Route path="replay" element={<AdminReplay />} />
       <Route path="routing" element={<AdminRouting />} />
       <Route path="q-learning" element={<AdminQLearning />} />
       <Route path="irt" element={<AdminIrt />} />
-      <Route path="course-flow" element={<AdminCourseFlow />} />
-      <Route path="course-q-learning" element={<AdminCourseQLearning />} />
-      <Route path="course-bkt" element={<AdminCourseBkt />} />
-      <Route path="report" element={<AdminReport />} />
-      <Route path="quiz" element={<AdminQuiz />} />
+      <Route path="course" element={<AdminCourse />} />
+      <Route path="evaluation" element={<AdminEvaluation />} />
+      <Route path="players" element={<AdminPlayers />} />
       <Route path="scenarios" element={<AdminScenarios />} />
       <Route path="scenarios/play/:levelId/:scenarioId" element={<AdminScenarioPlay />} />
+      <Route path="scenarios/play-level/:levelId" element={<AdminLevelPlay />} />
+      <Route path="report" element={<AdminReport />} />
+      <Route path="quiz" element={<AdminQuiz />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />
     </Route>
     {lazyRoute('/study', <StudyHome />)}
@@ -140,7 +148,6 @@ export const AppRouter = () => (
 
     {/* Firebase email link landing pages */}
     <Route path="/auth/reset-password" element={<ResetPassword />} />
-    <Route path="/auth/verify-email" element={<VerifyEmail />} />
 
     {import.meta.env.DEV && [
       lazyRoute('/dev/gallery', <ComponentGallery />),

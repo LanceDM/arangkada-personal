@@ -9,6 +9,7 @@ import { ArrowLeft, Shield } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { signOut, useAuthModal, useAuthSession } from '@/features/auth';
+import { logUiAction } from '@/features/driving-sim';
 
 export const AdminGate = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export const AdminGate = ({ children }: { children: ReactNode }) => {
   const { open: openAuthModal } = useAuthModal();
 
   const handleSignOut = async () => {
+    if (user) await logUiAction(user.uid, 'signed_out', { from: 'admin' }).catch(() => {});
     await signOut();
     navigate('/');
   };

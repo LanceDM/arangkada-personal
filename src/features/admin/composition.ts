@@ -1,31 +1,36 @@
 /** Admin's wiring, for the composition root alone. Kept out of `index.ts`. */
 import { provideAdminDependencies } from './application/dependencies';
-import { designatedRoutingPolicyOf, type DesignatedRoutingPolicy } from './domain/designatedRoutingPolicy';
-import { firebaseCourseLogsRepository } from './infrastructure/FirebaseCourseLogsRepository';
 import { firebaseIrtRepository } from './infrastructure/FirebaseIrtRepository';
 import { firebaseAdminReportRepository } from './infrastructure/FirebaseAdminRepository';
 import { firebasePilotPoolRepository } from './infrastructure/FirebasePilotPoolRepository';
 import { firebaseStudyInvitesRepository } from './infrastructure/FirebaseStudyInvitesRepository';
-import { firebaseStudyDeadlineRepository } from './infrastructure/FirebaseStudyDeadlineRepository';
 import { firebasePilotRecordsRepository } from './infrastructure/FirebasePilotRecordsRepository';
 import { firebaseQuizEditorRepository } from './infrastructure/FirebaseQuizEditorRepository';
+import { firebaseLiveQTable, firebaseStudyLogs, firebaseStudyRecords } from './infrastructure/FirebaseStudyRecords';
+import { sqlBackgrounds, sqlStudyRecords } from './infrastructure/SqlConnectStudyRecords';
+import { firebaseSiteStatus } from './infrastructure/FirebaseSiteStatus';
+import { firebaseBktSets } from './infrastructure/FirebaseBktSets';
+import { firebaseProgressReset } from './infrastructure/FirebaseProgressReset';
+import { firebaseQTableReset } from './infrastructure/FirebaseQTableReset';
+import { firebaseAdminAccess } from './infrastructure/FirebaseAdminAccess';
 
-export const composeAdmin = () =>
+/** `firestore` (Implementation A) or `firestore+sql` (Implementation B): where the people, roles and settings records live. */
+export const composeAdmin = ({ databaseMode = 'firestore' }: { databaseMode?: 'firestore' | 'firestore+sql' } = {}) =>
   provideAdminDependencies({
-    report: firebaseAdminReportRepository,
+    // In B the background form's answers are SQL rows; everything else the report reads is Firestore.
+    report: databaseMode === 'firestore+sql' ? { ...firebaseAdminReportRepository, backgrounds: sqlBackgrounds } : firebaseAdminReportRepository,
     pilotPool: firebasePilotPoolRepository,
     invites: firebaseStudyInvitesRepository,
-    deadline: firebaseStudyDeadlineRepository,
     pilotRecords: firebasePilotRecordsRepository,
     quizEditor: firebaseQuizEditorRepository,
     irt: firebaseIrtRepository,
-    courseLogs: firebaseCourseLogsRepository,
+    records: databaseMode === 'firestore+sql' ? sqlStudyRecords : firebaseStudyRecords,
+    live: firebaseLiveQTable,
+    logs: firebaseStudyLogs,
+    site: firebaseSiteStatus,
+    bktSets: firebaseBktSets,
+    progressReset: firebaseProgressReset,
+    qTableReset: firebaseQTableReset,
+    adminAccess: firebaseAdminAccess,
   });
 
-/**
- * The designated routing table, read from its table file. The file
- * is loaded on first use, in a chunk of its own, so only an Optimized entry
- * downloads it; the composition root hands this loader to Driving Sim.
- */
-export const loadDesignatedRoutingPolicy = async (): Promise<DesignatedRoutingPolicy> =>
-  designatedRoutingPolicyOf((await import('./domain/designatedRoutingTable.json')).default);

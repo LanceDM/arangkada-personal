@@ -23,13 +23,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { QuizItemDoc } from '@/features/driving-sim';
 import type { PresentedItem, SittingClosure, TestKind, TestSitting } from '@/domain/assessment/testResponse';
 import type { TestDraft } from '@/features/assessment/domain/testDraft';
-import { isParticipantCode } from '@/features/assessment/domain/testStatus';
+import { isOpenAccessCode, isParticipantCode } from '@/features/assessment/domain/testStatus';
 import { assessmentDeps } from './dependencies';
 
 export type TestAccess = 'participant' | 'preview' | 'none';
 
 export const testAccess = (who: { uid: string | null; participantCode: string | null; isAdmin: boolean }): TestAccess =>
-  who.uid && isParticipantCode(who.participantCode) ? 'participant' : who.uid && who.isAdmin && who.participantCode === null ? 'preview' : 'none';
+  who.uid && (isParticipantCode(who.participantCode) || isOpenAccessCode(who.participantCode))
+    ? 'participant'
+    : who.uid && who.isAdmin && who.participantCode === null
+      ? 'preview'
+      : 'none';
 
 /**
  * Why a sitting cannot open: the bank does not hold its items, the
@@ -143,6 +147,24 @@ type StatusRead =
   | { kind: 'found'; status: FormStatus };
 
 const stageOf = (draft: TestDraft | null): 0 | 1 => (draft?.stage2StartedAt !== undefined ? 1 : 0);
+
+/**
+ * Hands the saved sitting to the course (its BKT and rewards), three tries.
+ * The test itself is already saved; a failure here is logged, not shown.
+ */
+const handOver = async (uid: string, sitting: TestSitting) => {
+  const { onFinished } = assessmentDeps();
+  if (!onFinished) return;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await onFinished(uid, sitting);
+      return;
+    } catch (error) {
+      console.warn(`Could not hand the ${sitting.kind}-test to the course (try ${attempt} of 3).`, error);
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+};
 
 export const useTestSitting = (form: SittingForm, { uid, participantCode, isAdmin, newSeed, clock }: TestSittingInput) => {
   const access = testAccess({ uid, participantCode, isAdmin });
@@ -272,6 +294,7 @@ export const useTestSitting = (form: SittingForm, { uid, participantCode, isAdmi
       const problems = form.problems(sitting);
       if (problems.length > 0) console.warn(`The ${kind}-test record has problems; saving it as it is.`, problems);
       await orTimeout(assessmentDeps().sittings.finish(uid!, sitting));
+      void handOver(uid!, sitting);
       setPhase({ kind: 'done' });
     } catch (error) {
       // Another device may have closed it first; otherwise Try again saves it,

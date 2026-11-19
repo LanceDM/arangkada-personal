@@ -75,7 +75,7 @@ export const level2Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'Before operating a vehicle, the driver should know where the important documents are and why they matter. The source material states that a photocopy or the original CR must be preserved and carried in the car by the owner or driver.',
+          text: 'Before operating a vehicle, the driver should know where the important documents are and why they matter. Under RA 4136 (Sec. 15), the Certificate of Registration, or a copy, is kept in the vehicle, and the driver carries the license at all times (Sec. 19).',
         },
         {
           type: 'image',
@@ -170,15 +170,15 @@ export const level2Module = {
     {
       id: 'level-2-registration-awareness',
       title: '4. Motor Vehicle Registration Awareness',
-      text: 'A beginner does not need to memorize every licensing-office workflow, but should recognize the pattern behind a legally ready vehicle.',
+      text: 'A beginner does not need to memorize every registration workflow, but should recognize the pattern behind a legally ready vehicle.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'A beginner does not need to memorize every licensing-office workflow, but should recognize the pattern behind a legally ready vehicle: proof of ownership, proof of identity, insurance, inspection, emissions compliance, clearances, plates, and special authority documents may be required depending on the transaction.',
+          text: 'A beginner does not need to memorize every registration workflow, but should recognize the pattern behind a legally ready vehicle: proof of ownership, proof of identity, insurance, inspection, emissions compliance, clearances, plates, and special authority documents may be required depending on the transaction.',
         },
         {
           type: 'paragraph',
-          text: "When the extracted source conflicts with the official Citizen's Charter, the Citizen's Charter prevails.",
+          text: 'Every motor vehicle must be registered before it is used on a public highway (RA 4136, Sec. 5).',
         },
         {
           type: 'table',
@@ -197,7 +197,7 @@ export const level2Module = {
         },
         {
           type: 'paragraph',
-          text: 'For Level 2 gameplay, the question is not whether you can process registration at a licensing office. The question is whether the vehicle has the required legal proof before it is driven.',
+          text: 'For Level 2 gameplay, the question is not whether you can process a registration yourself. The question is whether the vehicle has the required legal proof before it is driven.',
         },
       ],
     },
@@ -208,7 +208,7 @@ export const level2Module = {
       blocks: [
         {
           type: 'paragraph',
-          text: 'BLOWBAGETS is a simple do-it-yourself motor vehicle inspection used to avoid road crashes and breakdowns. Regular preventive maintenance is also cheaper than corrective maintenance.',
+          text: 'BLOWBAGETS is a simple do-it-yourself motor vehicle inspection used to avoid road crashes and breakdowns. The Driver\'s Manual also reminds drivers that regular preventive maintenance is cheaper than corrective maintenance.',
         },
         {
           type: 'table',
@@ -239,11 +239,11 @@ export const level2Module = {
     {
       id: 'level-2-unsafe-conditions',
       title: '6. Unsafe Conditions And No-Go Decisions',
-      text: 'Under Republic Act No. 4136, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
+      text: 'Under RA 4136, Sec. 16, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
       blocks: [
         {
           type: 'paragraph',
-          text: 'Under Republic Act No. 4136, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
+          text: 'Under RA 4136, Sec. 16, motor vehicle registration may be suspended when a vehicle is unsafe, overloaded, improperly marked or equipped, unfit to be operated, capable of causing excessive highway damage, or not conforming to minimum standards.',
         },
         {
           type: 'table',
@@ -307,9 +307,176 @@ export const level2Module = {
         },
       ],
     },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-2-maintenance-habits',
+      title: '8. Maintenance Habits And Registration Penalties',
+      text: 'Most breakdowns are decided long before the trip, by how the vehicle is looked after between drives.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'Most breakdowns are decided long before the trip, by how the vehicle is looked after between drives.',
+        },
+        // FDM Vol. 1 p. 129
+        {
+          type: 'table',
+          headers: ['Type Of Maintenance', 'What It Means'],
+          rows: [
+            ['Proactive', 'The driver checks and services the vehicle in advance, following its service manual. Parts are serviced or replaced when the manual says they are due. This is the approach to follow.'],
+            ['Preventive', 'Parts found worn during an inspection are replaced before they cause a breakdown.'],
+            ['Corrective', 'A mechanic repairs what an inspection or a breakdown has already found.'],
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Checks To Highlight',
+        },
+        // FDM Vol. 1 pp. 100, 101, 106, 132, 133, 171, 180
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Check tire pressure only when the tires are cold, never when they are hot.',
+            'Brand-new tires should generally be used within 5 years of their manufacture date. Do not buy expired tires.',
+            'Abnormal wear on the outer or inner sides of the front tires points to the wheel alignment; have it checked.',
+            'With the engine cold, the coolant level should sit between the lower and upper markers on the reservoir.',
+            'Switch the headlights on before sunset.',
+            'While driving, do not rest one arm on the window. Keep both hands ready on the wheel.',
+            'Do not leave the engine running while the vehicle is stopped on the road; it can confuse other motorists and cause a crash.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Registration Penalties',
+        },
+        // FDM Vol. 2 pp. 64, 80
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Driving an unregistered motor vehicle is fined Php 10,000 (JAO 2014-01).',
+            'A newly bought motorcycle must be registered within 5 days (RA 11235, Motorcycle Crime Prevention Act).',
+          ],
+        },
+      ],
+    },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-2-leaving-the-driveway',
+      title: '9. Leaving The Driveway: Right Of Way',
+      text: 'The first decision on the road happens at the mouth of the driveway, and the law already says who goes first.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'The first decision on the road happens at the mouth of the driveway, and the law already says who goes first.',
+        },
+        {
+          type: 'paragraph',
+          text: 'The right-of-way rule describes when a driver must yield or give way to other road users. It is not a privilege to be claimed; it is a duty to give way in set situations.',
+        },
+        // FDM Vol. 1 pp. 114-115 (RA 4136), 137, 167, 179
+        {
+          type: 'table',
+          headers: ['Situation', 'Who Goes First'],
+          rows: [
+            ['Entering a highway from a private road or driveway', 'Yield to all vehicles approaching on the highway.'],
+            ['Entering a "through highway" or "stop intersection" from a side street', 'Yield to all vehicles approaching from either direction on the through highway.'],
+            ['Driving on the through highway while a car enters', 'Your right of way does not let you ignore it. You must still drive with due regard for the safety of vehicles entering.'],
+            ['Two vehicles reach an intersection at about the same time', 'The vehicle on the left yields to the vehicle on the right. A driver going above the legal speed forfeits any right of way.'],
+            ['Through highway or railroad crossing', 'Come to a full stop before crossing. Where no hazard is apparent, you may instead slow to about 5 miles per hour.'],
+            ['Narrow road on a slope with room for one vehicle', 'Give way to the vehicle going uphill.'],
+            ['A school service on the road', 'Give way to it.'],
+            ['You are unsure who should go first', 'Yield the right of way to avoid a crash.'],
+          ],
+        },
+      ],
+    },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-2-pedestrians-near-home',
+      title: '10. Pedestrians At The Gate And On The Street',
+      text: 'Residential streets are full of people on foot, and many of them move slowly or unpredictably.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'Residential streets are full of people on foot, and many of them move slowly or unpredictably.',
+        },
+        // FDM Vol. 1 pp. 120, 137, 139, 148, 169, 170
+        {
+          type: 'list',
+          ordered: false,
+          items: [
+            'Before moving off from the curb, if a pedestrian may be affected, give a clearly audible signal with the horn.',
+            'Under defensive driving, give the right of way to PWDs, senior citizens, children, pregnant women and road workers.',
+            'Slow down where there are many pedestrians.',
+            'Be patient with an elderly person crossing slowly in the pedestrian lane; let them finish crossing.',
+            'Persons with disabilities may need extra time to cross. Allow it.',
+            'A school service parked across the road with its hazard lights on means students may cross. Slow down and prepare to stop.',
+          ],
+        },
+        {
+          type: 'heading',
+          text: 'Fixed And Dynamic Hazards',
+        },
+        // FDM Vol. 1 p. 148
+        {
+          type: 'table',
+          headers: ['Type', 'Examples'],
+          rows: [
+            ['Fixed hazards', 'Structures along the road that may block your view: curves, hills, hidden driveways, intersections and merging roads.'],
+            ['Dynamic hazards', 'Hazards that change through the day: school zones, market areas, other commercial districts, and emergency vehicles.'],
+          ],
+        },
+      ],
+    },
+    // Added in the FDM module revision (see the Arangkada question bank, Module Review sheet).
+    {
+      id: 'level-2-street-speed',
+      title: '11. Speed On City, Barangay, And School-Zone Streets',
+      text: 'Most trips start on slow streets. The legal limits there are low because of what can step out in front of you.',
+      blocks: [
+        {
+          type: 'paragraph',
+          text: 'Most trips start on slow streets. The legal limits there are low because of what can step out in front of you.',
+        },
+        // FDM Vol. 1 p. 112 (RA 4136 Sec. 35)
+        {
+          type: 'table',
+          headers: ['Where', 'Cars And Motorcycles'],
+          rows: [
+            ['City and municipal streets with light traffic, not designated through streets', '30 kph'],
+            ['Through streets or boulevards clear of traffic, with no blind corners, when so designated', '40 kph'],
+            ['Crowded streets, intersections at blind corners, passing school zones, passing stationary vehicles', '20 kph'],
+          ],
+        },
+        // FDM Vol. 1 p. 113 (DPWH Memorandum, 14 April 2014)
+        {
+          type: 'paragraph',
+          text: 'On barangay roads, the prescribed speed for cars is 20 kph. A speed limit posted on the road prevails over the table.',
+        },
+        {
+          type: 'heading',
+          text: 'Who May Exceed The Limit',
+        },
+        // FDM Vol. 1 p. 113
+        {
+          type: 'paragraph',
+          text: 'RA 4136 exempts a few drivers, such as a driver bringing a wounded or sick person for emergency treatment, an ambulance on an emergency run, and fire department vehicles. The exemption never allows useless or unnecessary fast driving.',
+        },
+        {
+          type: 'heading',
+          text: 'In A School Zone',
+        },
+        // FDM Vol. 1 p. 112
+        {
+          type: 'paragraph',
+          text: 'Slow to 20 kph and watch for children.',
+        },
+      ],
+    },
     {
       id: 'level-2-routine-and-scenario',
-      title: '8. Pre-Drive Routine And Scenario',
+      title: '12. Pre-Drive Routine And Scenario',
       text: 'Use the same readiness routine before every trip so the decision becomes automatic.',
       blocks: [
         {

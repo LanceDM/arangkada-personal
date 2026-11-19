@@ -29,7 +29,7 @@ describe('a level counted the way the drive scores it', () => {
     expect(counted).toEqual({
       0: [5, 0, 0, 85],
       1: [5, 0, 0, 110],
-      2: [0, 11, 0, 220],
+      2: [3, 10, 0, 280],
       3: [8, 0, 0, 165],
       4: [5, 0, 0, 110],
       5: [8, 0, 0, 180],
@@ -46,8 +46,8 @@ describe('a level counted the way the drive scores it', () => {
   it('puts every pass mark within reach, and Level 2 only with its garage', () => {
     for (const entry of LEVELS) expect(missionComposition(entry).maxScore).toBeGreaterThanOrEqual(entry.requiredScore);
     const level2 = level(2);
-    expect(level2.events).toEqual([]);
-    expect(missionComposition(level2).garage).toBe(11);
+    const roadOnly = level2.events.reduce((sum, event) => sum + event.points, 0);
+    expect(roadOnly).toBeLessThan(level2.requiredScore);
   });
 
   it('names a practice item apart and scores it as nothing, as the game does', () => {
@@ -61,15 +61,8 @@ describe('a level counted the way the drive scores it', () => {
     expect(compositionParts(composition)).toEqual(['6 road events', '+1 practice (not scored)']);
   });
 
-  it('says nothing of a road that grades nothing, beside a garage', () => {
-    const level2 = level(2);
-    const practice = { ...pooledVariant(3, 'level3.speed.min-40'), remediation: true } as ScenarioEvent;
-    expect(compositionParts(missionComposition({ ...level2, events: [practice] }))).toEqual(['11 garage checks', '+1 practice (not scored)']);
-    expect(compositionParts(missionComposition({ ...level2, garage: undefined }))).toEqual(['0 road events']);
-  });
-
   it('lists the parts in the order they are played', () => {
-    expect(compositionParts(missionComposition(level(2)))).toEqual(['11 garage checks']);
+    expect(compositionParts(missionComposition(level(2)))).toEqual(['10 garage checks', '3 road events']);
     expect(compositionParts(missionComposition(level(9)))).toEqual(['6 road events', '4 crash-scene steps']);
     expect(compositionParts(missionComposition(level(10)))).toEqual(['4 garage checks', '7 road events']);
   });

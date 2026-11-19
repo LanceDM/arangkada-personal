@@ -8,7 +8,6 @@
 import { getCompetencyLabel } from '@/domain/learner/profile';
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import { scenarioLabel } from './scenarioCopy';
-import { hotspotScenarioId } from './hotspotScenarioId';
 import type { GarageStage, LevelConfig, ScenarioEvent } from './scenarioDefinition';
 import { SCENARIO_FORMAT_LABEL, TIMED_FORMATS, scenarioFormat, type ScenarioFormat } from './scenarioFormat';
 
@@ -72,7 +71,7 @@ export const drivePreview = (level: LevelConfig, counted?: ReadonlySet<string>):
   const isCounted = (id: string, competency?: DrivingCompetency) => (counted ? counted.has(id) : Boolean(competency));
   const scenarios: Omit<PreviewScenario, 'order'>[] = [
     ...(level.garage?.hotspots ?? []).map(point => {
-      const id = hotspotScenarioId(point);
+      const id = point.scenarioId ?? point.id;
       const format = scenarioFormat({}, 'garage');
       return {
         id, stage: 'garage' as const, title: point.label, description: point.objective ?? point.observation,
@@ -91,7 +90,7 @@ export const drivePreview = (level: LevelConfig, counted?: ReadonlySet<string>):
         };
       }),
     ...(level.aftermath?.hotspots ?? []).map(point => {
-      const id = hotspotScenarioId(point);
+      const id = point.scenarioId ?? point.id;
       const format = scenarioFormat({}, 'aftermath');
       return {
         id, stage: 'aftermath' as const, title: point.label, description: point.objective ?? point.observation,

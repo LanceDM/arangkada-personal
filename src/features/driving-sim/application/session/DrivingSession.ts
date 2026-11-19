@@ -19,7 +19,7 @@
  * It has no lifecycle of its own. It subscribes to nothing and schedules
  * nothing, so a drive stops simply by not being updated again — the host owns
  * the animation frame and is the only thing that can end one. There is
- * deliberately no `dispose()`.
+ * deliberately no `dispose()`: 
  */
 import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/scenario/scenarioDefinition';
 import { getRerollableSlots } from '@/features/driving-sim/domain/scenario/levelCatalog';
@@ -45,7 +45,7 @@ import { advanceToVerdict } from '@/features/driving-sim/domain/systems/fsmBridg
 import { isTutorial } from '@/features/driving-sim/domain/systems/tutorial';
 import { scanEvents } from './scanEvents';
 import { CANVAS_HEIGHT, ROAD_EFFECT_SPAN, ROAD_WIDTH, ROUNDABOUT_PATH_RADIUS, distanceToScreenY, laneCentreX, resolveLaneRole, roadXAt, 
-  speedProfileFor, laneOf, BAY_WIDTH, type CurveSpan, } from '@/features/driving-sim/domain/world/vehiclePhysics';
+  speedProfileFor, laneOf, BAY_WIDTH, SCREEN_PX_PER_UNIT, type CurveSpan, } from '@/features/driving-sim/domain/world/vehiclePhysics';
 import { roadAtFor } from '@/features/driving-sim/domain/world/eventPlacement';
 import { curvesForLevel } from '@/features/driving-sim/domain/world/roadCurves';
 import { generateEnvObjects } from '@/features/driving-sim/domain/world/roadsideScenery';
@@ -59,6 +59,10 @@ import type { DecisionSettlement } from '@/features/driving-sim/domain/evaluatio
 import { limitInForce } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import { snapshotChanged, type DrivingSnapshot } from './DrivingSnapshot';
 import { textIn, type Language, type Localized, type TextOf } from '@/shared/lib/localized';
+
+
+/** How far ahead of the car, in pixels, something on the road makes slowing for it not a crawl. */
+const OCCUPIED_AHEAD_PX = 300;
 
 export { snapshotChanged };
 export type { DrivingSnapshot };
@@ -109,8 +113,8 @@ export interface DrivingSessionOptions {
   timeLimitSteps?: number;
   /**
    * How many world steps a panel may hold the drive before it closes
-   * unanswered. Omitted means `PANEL_STEPS`; only the admin's
-   * scenario check passes infinity, so a panel waits for its answer.
+   * unanswered. Omitted means `PANEL_STEPS`; the admin's scenario check passes
+   * infinity (2026-11-16), so a panel waits for its answer.
    */
   panelSteps?: number;
 }
@@ -119,7 +123,7 @@ export interface DrivingSessionOptions {
  * Never re-roll an event closer than this. Derived from the renderer's own
  * visibility filter (the cutoff is 1300 distance-units ahead) plus a buffer, so
  * a re-roll can never swap a sign's appearance while it is already on screen.
- * Exported for the offline simulation, which re-rolls as a drive does.
+ * Exported for the fourth experiment's environment, which re-rolls as a drive does.
  */
 export const REROLL_SAFETY_MARGIN = 1400;
 
@@ -188,7 +192,7 @@ export const WRONG_SIDE_PENALTY_EVENT: ScenarioEvent = {
 /**
  * Charged while the car is over the road's limit on clear road.
  *
- * Republic Act No. 4136, Section 35 is the rule, and it binds on the whole road, not only beside a
+ * RA 4136 §35 is the rule, and it binds on the whole road, not only beside a
  * sign. Scored like the crawl penalty — points only, a standing offence, never
  * BKT evidence (`bktEvidence`) — and at the crawl's weight, which is
  * an assumption until step 7 gives the weights a basis.
@@ -201,7 +205,7 @@ export const OVER_LIMIT_PENALTY_EVENT: ScenarioEvent = {
   correctAction: 'brake',
   points: 10,
   penaltyMessage:
-    "You are over this road's limit. Republic Act No. 4136, Section 35 sets a road's limit everywhere on it, not only beside a sign.",
+    "You are over this road's limit. RA 4136 Section 35 sets a road's limit everywhere on it, not only beside a sign.",
   rewardMessage: '',
   duration: 0,
   competency: 'speed_control',
@@ -512,6 +516,27 @@ export class DrivingSession {
     return events;
   }
 
+  /**
+   * The open in-drive question ran out of time (TENTATIVE 30 s): settled as
+   * not passed, with no answer. Idempotent; does nothing once answered.
+   */
+  timeoutQuestion(): GameEvent[] {
+    const { world } = this;
+    const event = world.inspectionEvent ?? world.cutsceneEvent;
+    if (!event) return [];
+    if (world.inspectionEvent) world.inspectionEvent = null;
+    else {
+      world.cutsceneEvent = null;
+      world.parkingPlayed = false;
+      world.rightOfWayPlayed = false;
+      world.rightOfWay = null;
+    }
+    this.syncPaused();
+    const events: GameEvent[] = [];
+    this.decide(events, event, 'timeout', 'question_timeout');
+    return events;
+  }
+
   /** Player answered a right-of-way, parking or emergency call. */
   answerCutscene(action: string): GameEvent[] {
     return this.settleCutscene(action, 'question');
@@ -619,7 +644,7 @@ export class DrivingSession {
   ): void {
     const { world } = this;
     world.handled.add(event.triggerAtDistance);
-    world.handledAt.set(event.triggerAtDistance, world.drivenSteps);
+    world.handledAt.set(event.triggerAtDistance, Date.now());
     world.activeEvent = null;
     world.playerActed = false;
     world.laneCue = null;
@@ -681,12 +706,13 @@ export class DrivingSession {
       overlay: { flash?: number; veil?: number } = {}
     ) => {
       const composed = composeWorldFrame(
-        { level: liveLevel, distance: car.distance, handled: world.handled, handledAt: world.handledAt, drivenSteps: world.drivenSteps, curves, support: this.support },
+        { level: liveLevel, distance: car.distance, handled: world.handled, handledAt: world.handledAt, curves, support: this.support },
         {
           chaseLane: world.chaseLane ?? undefined,
           playerLane: car.lane,
           playerSpeed: car.speed,
           traffic: world.traffic,
+          clocks: world.npcClocks,
           ...npc,
         }
       );
@@ -839,7 +865,8 @@ export class DrivingSession {
         impact = pose.impact;
         const travelled = car.distance;
         car.distance = yielding.fromDistance + pose.playerAdvance;
-        world.roadOffset += Math.max(0, car.distance - travelled) * 6;
+        // Same scale as driveVehicle: the paint moves with the distance.
+        if (car.distance > travelled) world.roadOffset = car.distance * SCREEN_PX_PER_UNIT;
         if (pose.done) {
           world.rightOfWay = null;
           world.rightOfWayPlayed = true;
@@ -953,8 +980,18 @@ export class DrivingSession {
     // not a change to the road but a limit on how much of it reaches the driver.
     // What the weather hides is still solid, which is the reason to slow for it.
     const collidables = composeFrame(
-      { followerState: world.followerState },
+      // The one frame per step that moves the junction vehicles' own clocks.
+      { followerState: world.followerState, tick: true },
       { veil: driven.surface?.visibility !== undefined ? 1 - driven.surface.visibility : 0 }
+    );
+
+    // What stands on the carriageway just ahead, for the crawl rule next frame.
+    world.roadOccupiedAhead = collidables.some(
+      body =>
+        body.x < roadX + ROAD_WIDTH &&
+        body.x + body.width > roadX &&
+        body.y + body.height <= car.y &&
+        car.y - (body.y + body.height) <= OCCUPIED_AHEAD_PX
     );
 
     // Traffic, pedestrians and barriers are solid, and hitting one ends the
@@ -967,10 +1004,16 @@ export class DrivingSession {
       car.speed = 0;
       fsm.transition('crash');
 
+      // Said for what was hit (2026-11-16): a fallen rock was explained as
+      // traffic you should have waited for a gap in.
       const crashReason = textIn(level.language)(
         impact.kind === 'pedestrian'
           ? { en: `You drove into ${impact.label}. A pedestrian already crossing has the right of way, and striking one ends the run whatever your score.` }
-          : { en: `You drove into ${impact.label}. Traffic already on the road has priority; you must wait for the gap before entering.` }
+          : impact.kind === 'obstruction'
+            ? { en: `You drove into ${impact.label}. Slow down early, and stop or steer round anything blocking the road.` }
+            : // A vehicle may be moving or stopped across the road (a wreck, a
+              // breakdown), so the advice covers both (2026-11-16).
+              { en: `You drove into ${impact.label}. Keep a safe gap, stop or steer round a vehicle stopped in the road, and give way to traffic that has the right of way.` }
       );
 
       events.push({ kind: 'crashed', reason: crashReason });
@@ -1004,7 +1047,7 @@ const project = (
   level: LevelConfig,
   curves: CurveSpan[],
   timeLimitSteps: number,
-  panelSteps: number
+  panelSteps: number = PANEL_STEPS
 ): DrivingSnapshot => ({
   panelSecondsLeft:
     world.paused && Number.isFinite(panelSteps)

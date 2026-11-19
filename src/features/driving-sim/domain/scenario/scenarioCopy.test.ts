@@ -26,3 +26,10 @@ describe('what to do, where a level has not said', () => {
     expect(scenarioInstruction(stop({ recommendedMove: 'Stop before the crossing.' }))).toBe('Stop before the crossing.');
   });
 });
+
+describe('a rockfall says to go round the rock (2026-11-16)', () => {
+  it('rather than only to slow down, which runs into it', () => {
+    const event = { id: 'level3.bend-warning.falling-rocks', correctAction: 'brake', scene: 'rockfall' } as never;
+    expect(scenarioInstruction(event)).toBe('Slow right down and steer round the fallen rock.');
+  });
+});

@@ -20,19 +20,11 @@ export interface CourseProgress {
   /** The level the next Continue enters; null once the course is finished. */
   frontierLevel: number | null;
   /**
-   * Why the course is over, or null while it runs: certified, or finished
-   * without the certificate by the end path (after the failed finals, or at
-   * the study's deadline). Either opens the post-test.
+   * Why the course is over, or null while it runs. `certified` is the only
+   * reason today; the stopping rule and the retry cap add theirs later.
    */
-  endReason: CourseEndReason | null;
-  /** Final exams failed so far (absent where the course does not count them). */
-  finalFailures?: number;
+  endReason: 'certified' | null;
 }
-
-export type CourseEndReason = 'certified' | 'finished_after_finals' | 'finished_at_deadline';
-
-/** Failed final exams after which the home offers to finish the study (course.ts FINAL_ATTEMPTS_BEFORE_FINISH). */
-export const FINISH_AFTER_FAILED_FINALS = 3;
 
 export interface StudyFacts {
   withdrawn: boolean;
@@ -43,8 +35,6 @@ export interface StudyFacts {
   course: CourseProgress;
   postTest: TestProgress;
   survey: { openedAt: number | null; confirmedAt: number | null };
-  /** The admin's study deadline (ms), or null while none is set. */
-  deadlineAt?: number | null;
 }
 
 export const STUDY_STAGES = [
@@ -78,19 +68,6 @@ export const studyStage = (facts: StudyFacts): StudyStage => {
   if (facts.postTest !== 'finished') return 'post-test';
   if (facts.survey.confirmedAt === null) return 'survey';
   return 'done';
-};
-
-/**
- * Whether the home offers "Finish the study" now, and why: after
- * FINISH_AFTER_FAILED_FINALS failed finals, or to anyone in the course not yet
- * certified once the deadline has passed. Null when it does not.
- */
-export const finishOffer = (facts: StudyFacts, now: number): 'final_attempts' | 'deadline' | null => {
-  const stage = studyStage(facts);
-  if (!COURSE_STAGES.includes(stage)) return null;
-  if (stage === 'final' && (facts.course.finalFailures ?? 0) >= FINISH_AFTER_FAILED_FINALS) return 'final_attempts';
-  if (typeof facts.deadlineAt === 'number' && now >= facts.deadlineAt) return 'deadline';
-  return null;
 };
 
 /** The course's stages: where a participant plays Story Mode, and nowhere else. */

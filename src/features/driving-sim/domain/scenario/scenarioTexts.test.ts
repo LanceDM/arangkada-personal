@@ -158,7 +158,7 @@ describe('every scenario in the game', () => {
   const NOT_TEXT = new Set([
     'id', 'type', 'correctAction', 'action', 'competency', 'severity', 'art', 'image', 'glyph', 'aspect', 'scene',
     'scenePrefab', 'lane', 'side', 'emergency', 'kind', 'parkingCutscene', 'passingLane', 'toward', 'intoLane',
-    'marker', 'area', 'detail', 'src', 'size',
+    'marker', 'area', 'detail', 'src', 'size', 'plate',
   ]);
 
   const stringsOf = (value: unknown, at: string, out: Array<[string, string]>): void => {

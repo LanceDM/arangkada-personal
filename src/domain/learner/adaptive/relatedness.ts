@@ -6,7 +6,7 @@
 //
 // Every edge below is derived from the curriculum's Traceability Matrix,
 // which is the project's canonical educational design document. A row there
-// assigning one official curriculum topic to two different levels is a statement that
+// assigning one official LTO topic to two different levels is a statement that
 // the same knowledge is deliberately reinforced in both places - which is
 // exactly the transfer relationship this map needs. Nothing here is inferred
 // from vibes, from the level's prose, or from which competencies happen to

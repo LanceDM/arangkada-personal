@@ -79,8 +79,6 @@ export interface QLogEntry extends StudyEnvelope, QLogContext {
     weights: RewardWeights;
     reward: number;
     measuredBy: RewardRecord['measuredBy'];
-    /** Option 2: step or terminal. Absent on entries logged before it. */
-    rewardKind?: RewardRecord['kind'];
     nextStateKey: string | null;
     maxNextQ: number;
     gamma: number;
@@ -115,19 +113,6 @@ export const pairQOperations = (
     return { op, reward };
   });
 };
-
-/**
- * What a step teaches the shared table: its operations paired with their
- * records, or nothing when the account may not teach it. An admin's course is
- * a check of the game, not a learner (the groupmate's rule, 2026-11-16): its
- * decisions are still drawn from the table, and change nothing in it.
- */
-export const learningItems = (
-  teachesTable: boolean,
-  operations: readonly QOperation[],
-  decisions: readonly DecisionRecord[],
-  rewards: readonly RewardRecord[]
-): QLogItem[] => (teachesTable ? pairQOperations(operations, decisions, rewards) : []);
 
 export const statesOf = (table: QTable, warmUp: WarmUp = DEFAULT_WARM_UP): Record<string, StateStatus> =>
   Object.fromEntries(Q_STATES.map(state => [stateKey(state), statePhase(table, state, warmUp)]));
@@ -176,7 +161,7 @@ export const applyQLog = (input: {
       decisionId = r.decisionId;
       learning = {
         accuracy: r.accuracy, passed: r.passed, addedDecisions: r.addedDecisions, weights, reward: r.reward,
-        measuredBy: r.measuredBy, rewardKind: r.kind, nextStateKey: next ? stateKey(next) : null, maxNextQ, gamma: updateOp.gamma,
+        measuredBy: r.measuredBy, nextStateKey: next ? stateKey(next) : null, maxNextQ, gamma: updateOp.gamma,
         alpha: 1 / (before.n + 1), target: applied.target, qBefore: applied.before, qAfter: applied.after,
         nBefore: before.n, nAfter: before.n + 1,
       };
@@ -216,15 +201,21 @@ const near = (a: number, b: number) => Math.abs(a - b) <= 1e-9;
  */
 export const replayQLog = (
   entries: readonly QLogEntry[],
-  options: { start?: QTable; tableEquals?: (a: QTable, b: QTable) => boolean } = {}
+  options: {
+    start?: QTable;
+    tableEquals?: (a: QTable, b: QTable) => boolean;
+    /** The first entry's number: 1 for the whole log, a reset's `fromGlobalSeq` for the stretch after it. */
+    firstSeq?: number;
+  } = {}
 ): { table: QTable; problems: string[] } => {
   const equals = options.tableEquals ?? sameTable;
+  const firstSeq = options.firstSeq ?? 1;
   const ordered = [...entries].sort((a, b) => a.globalSeq - b.globalSeq);
   const problems: string[] = [];
   let table: QTable = options.start ?? {};
   ordered.forEach((entry, i) => {
     const at = `globalSeq ${entry.globalSeq}`;
-    if (entry.globalSeq !== i + 1) problems.push(`${at}: expected globalSeq ${i + 1}`);
+    if (entry.globalSeq !== firstSeq + i) problems.push(`${at}: expected globalSeq ${firstSeq + i}`);
     if (stateKey(entry.state) !== entry.stateKey) problems.push(`${at}: stateKey ${entry.stateKey} does not match the state`);
     const before = cellOf(table, entry.state, entry.action);
     if (entry.kind === 'visit') {
@@ -236,11 +227,7 @@ export const replayQLog = (
       if (!l) {
         problems.push(`${at}: a learn entry with no learning`);
       } else {
-        // Entries logged before Option 2 carry their pass weight and no kind: replay them as they were computed.
-        const legacyPass = (l.weights as { pass?: number }).pass;
-        const reward = l.rewardKind
-          ? rewardOf({ accuracy: l.accuracy, passed: l.passed }, l.addedDecisions, l.weights, l.rewardKind)
-          : l.accuracy + (legacyPass ?? 0) * (l.passed ? 1 : 0) - l.weights.perAddedDecision * l.addedDecisions;
+        const reward = rewardOf({ accuracy: l.accuracy, passed: l.passed }, l.addedDecisions, l.weights);
         if (!near(reward, l.reward)) problems.push(`${at}: reward ${l.reward}, its parts give ${reward}`);
         const next = l.nextStateKey === null ? null : Q_STATES.find(s => stateKey(s) === l.nextStateKey) ?? null;
         if (l.nextStateKey !== null && !next) problems.push(`${at}: unknown next state ${l.nextStateKey}`);

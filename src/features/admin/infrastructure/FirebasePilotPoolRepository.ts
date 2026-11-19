@@ -16,6 +16,7 @@
  * and logs are downloaded with it - Firestore sends whole documents - and
  * dropped at this boundary, so nothing above can show them.
  */
+import { VEHICLE_SKINS } from '@/shared/lib/vehicleSkin';
 import { collection, doc, getDoc, onSnapshot, type FirestoreError, type Unsubscribe } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
 import { isStudyCohort } from '@/domain/study/participantCode';
@@ -27,6 +28,7 @@ import {
   NO_STEPS,
   type PilotAccountProgress,
   type PilotAttemptSummary,
+  type PilotCursor,
   type PilotDeviceCheck,
   type PilotGroup,
   type PilotSteps,
@@ -119,6 +121,7 @@ const watch: PilotPoolRepository['watch'] = (onChange, onError) => {
               ...tracked.progress.profile,
               gaming: oneOf(GAMING_FREQUENCIES, data('background')?.gaming),
               device: oneOf(DEVICE_TYPES, data('background')?.device),
+              preferredVehicle: oneOf(VEHICLE_SKINS, data('background')?.preferredVehicle),
               deviceCheck: deviceCheckOf(data('device')),
             },
           });
@@ -133,21 +136,12 @@ const watch: PilotPoolRepository['watch'] = (onChange, onError) => {
         },
         fail
       ),
-      // The per-competency course's cursor, read as
-      // the place it stands: a stage's module, quiz, drive or repeat is that
-      // level, then the final exam, then certified. Before its first step, none.
       onSnapshot(
-        doc(db, 'users', uid, 'course', 'cursor'),
+        // The per-competency course's cursor (2026-11-10): the study's Story Mode.
+        doc(db, 'users', uid, 'routing', 'competencyCourse'),
         snap => {
-          const data = snap.data() as { phase?: { kind?: string; level?: number }; seq?: number; updatedAt?: number } | undefined;
-          const phase = data?.phase;
-          const kind = phase?.kind === 'FINAL' || phase?.kind === 'CERTIFIED' ? phase.kind : 'DRIVE';
-          const started = Boolean(phase) && !(phase?.kind === 'MODULE' && phase.level === 0 && !data?.seq);
-          update({
-            cursor: started
-              ? { state: { kind, ...(kind === 'DRIVE' ? { level: phase?.level ?? 0 } : {}) }, outcome: null, updatedAt: Number(data?.updatedAt ?? 0) }
-              : null,
-          });
+          const data = snap.data() as { phase?: PilotCursor['state']; seq?: number; updatedAt?: number } | undefined;
+          update({ cursor: data?.phase ? { state: data.phase, outcome: null, seq: Number(data.seq ?? 0), updatedAt: Number(data.updatedAt ?? 0) } : null });
         },
         fail
       ),

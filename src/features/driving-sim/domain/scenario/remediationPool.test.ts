@@ -116,7 +116,6 @@ describe('a prohibition on a turn the variant does not offer', () => {
       const offered = COMPETENCIES.flatMap(competency => remediationCandidates(competency, level)).map(c => c.variant.id);
       expect(offered.filter(id => UNFAILABLE.includes(id)), `Level ${level}`).toEqual([]);
     }
-    // 37 since level3.speed.max-20, a posted maximum, is graded under speed_control.
     expect(remediationCandidates('road_signs', 11)).toHaveLength(37);
   });
 
@@ -140,7 +139,7 @@ describe('remediationCandidates', () => {
     // Step 3h. Graded from whether the car came to rest, with no bay,
     // no cutscene, no manoeuvre and nothing route-bound, so both can be played
     // on any road; `parkingPracticeDrive.test.ts` drives them there.
-    const PARKING = ['level6.red-curb-no-parking.inside-the-intersection', 'level6.hydrant-at-the-curb', 'level6.tow-away-zone'];
+    const PARKING = ['level6.hydrant-at-the-curb', 'level6.tow-away-zone'];
     for (let level = 6; level <= 11; level++) {
       const offered = remediationCandidates('parking', level);
       expect(offered.map(({ variant }) => variant.id), `Level ${level}`).toEqual(PARKING);

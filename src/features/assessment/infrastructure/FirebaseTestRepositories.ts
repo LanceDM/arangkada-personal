@@ -1,5 +1,4 @@
 import { collection, doc, FieldPath, getDoc, getDocs, query, serverTimestamp, updateDoc, where, writeBatch } from 'firebase/firestore';
-import { preTestSeedOf } from '@/domain/study/evidence';
 import { db } from '@/shared/infrastructure/firebase/client';
 import { readQuizItem, type QuizItemDoc } from '@/features/driving-sim';
 import { millisOf, readDraftAnswers } from '@/domain/assessment/sittingClock';
@@ -83,9 +82,6 @@ export const firebaseTestSittingRepository: TestSittingRepository = {
   async finish(uid, sitting) {
     const batch = writeBatch(db);
     batch.set(doc(db, 'users', uid, 'testSittings', sitting.kind), sitting);
-    // The pre-test seeds the course's BKT: counts
-    // only, and only in this write, as the rules require.
-    if (sitting.kind === 'pre') batch.set(doc(db, 'users', uid, 'course', 'preTestSeed'), preTestSeedOf(sitting.responses, sitting.finishedAt));
     batch.update(statusRef(uid, sitting.kind), {
       status: 'finished',
       finishedAt: sitting.finishedAt,

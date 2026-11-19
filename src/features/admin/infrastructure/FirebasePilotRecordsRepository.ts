@@ -7,10 +7,8 @@
  * An attempt's three records are one query on its `telemetry` collection. An
  * admin cannot query `routing` or `telemetry` across every account, so the
  * dashboard reads the enrolled participants one by one, which is all it shows.
- * A course attempt's course log entry and BKT update are each one query of at
- * most one document, where the export reads both collections whole.
  */
-import { collection, doc, getDoc, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query, where } from 'firebase/firestore';
 import { db } from '@/shared/infrastructure/firebase/client';
 import { isStudyCohort } from '@/domain/study/participantCode';
 import type { PilotRecordsRepository, PoolAccountEntry } from '@/features/admin/application/pilotPorts';
@@ -42,16 +40,6 @@ export const firebasePilotRecordsRepository: PilotRecordsRepository = {
     const docs = await docsOf('users', uid, 'attempts', attemptId, 'telemetry');
     const dataOf = (id: string) => docs.find(d => d.id === id)?.data() ?? null;
     return { fsm: dataOf('fsm'), decisions: dataOf('decisions'), routing: dataOf('routing') };
-  },
-
-  courseRecords: async (uid, attemptId) => {
-    const [log, bkt] = await Promise.all([
-      getDocs(query(collection(db, 'users', uid, 'courseLog'), where('attemptId', '==', attemptId), limit(1))),
-      getDocs(
-        query(collection(db, 'users', uid, 'bktUpdates'), where('origin.kind', '==', 'attempt'), where('origin.ref', '==', attemptId), limit(1))
-      ),
-    ]);
-    return { courseLog: !log.empty, bktUpdate: !bkt.empty };
   },
 
   fsmLog: async (uid, attemptId) => {

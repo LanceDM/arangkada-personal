@@ -53,8 +53,7 @@ export const compositionParts = (composition: MissionComposition, say: TextOf = 
   const { garage, road, aftermath, practice } = composition;
   return [
     ...(garage ? [say(garage === 1 ? { en: '1 garage check' } : { en: `${garage} garage checks` })] : []),
-    // A level that is a garage alone (Level 2) names no road: it grades none.
-    ...(road || !(garage || aftermath) ? [say(road === 1 ? { en: '1 road event' } : { en: `${road} road events` })] : []),
+    say(road === 1 ? { en: '1 road event' } : { en: `${road} road events` }),
     ...(aftermath ? [say(aftermath === 1 ? { en: '1 crash-scene step' } : { en: `${aftermath} crash-scene steps` })] : []),
     ...(practice ? [say({ en: `+${practice} practice (not scored)` })] : []),
   ];

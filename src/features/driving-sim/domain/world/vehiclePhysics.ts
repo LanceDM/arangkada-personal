@@ -129,7 +129,7 @@ export type LaneIndex = 0 | 1 | 2 | 3;
  * Where a lane sits **on your own side of the road**, which is the only way a
  * traffic rule ever names one.
  *
- * Republic Act No. 4136 does not say "lane 2". It says the lane nearest the centre line, and
+ * RA 4136 does not say "lane 2". It says the lane nearest the centre line, and
  * the wheel nearest the curb — positions relative to the driver's carriageway,
  * not to the paint's left edge. Content written in absolute indices would be
  * silently wrong the moment a level changed its `oncomingLanes`: the lane a left

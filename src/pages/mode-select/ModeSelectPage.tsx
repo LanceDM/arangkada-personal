@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Car, FileText, CalendarDays, Lock, Flame, Star, ChevronRight, Trophy, ShieldAlert } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Car, FileText, CalendarDays, Lock, Flame, Star, ChevronRight, Trophy, ShieldAlert, ClipboardCheck, CheckCircle2, ClipboardList, ExternalLink } from 'lucide-react';
 import { useProgressStore } from '@/features/progression';
 import { getDailyKey } from '@/features/daily-challenge';
 import { getDailyStreak, loadGuestStreak, type StreakData } from '@/features/daily-challenge';
-import { LEVELS } from '@/features/driving-sim';
+import { LEVELS, logUiAction } from '@/features/driving-sim';
+import { useInitialExam } from '@/app/initialExam/useInitialExam';
 import AppLayout from '@/app/layout/AppLayout';
 import { useAuthSession } from '@/features/auth';
+import { SURVEY_URL } from '@/shared/lib/survey';
 
 const EMPTY_STREAK: StreakData = {
   currentStreak: 0,
@@ -36,6 +38,11 @@ const ModeSelect = () => {
   const totalStars = Object.values(levelResults).reduce((sum, r) => sum + r.stars, 0);
 
   const { user, isLoggedIn, profile } = useAuthSession();
+  const exam = useInitialExam();
+  const lockedFrom = (useLocation().state as { lockedFrom?: string } | null)?.lockedFrom ?? null;
+  // The initial exam gates every mode while the study course is on.
+  const examLock = exam.required && (exam.locked || exam.loading);
+  const examDone = exam.status !== null && exam.status.done && (!exam.status.backgroundRequired || exam.status.backgroundDone);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +101,7 @@ const ModeSelect = () => {
       borderColor: 'border-yellow-400/40 hover:border-yellow-400/70',
       iconColor: 'text-yellow-400',
       route: '/play/daily',
-      locked: false,
+      locked: examLock,
       badge: dailyLoading ? 'Loading...' : (todayDone ? '✅ Done Today' : '🔥 New Today'),
       stars: 0,
     },
@@ -108,25 +115,111 @@ const ModeSelect = () => {
       borderColor: 'border-sky-400/40 hover:border-sky-400/70',
       iconColor: 'text-sky-400',
       route: '/play/story',
-      locked: false,
+      locked: examLock,
       badge: completedLevels > 0 ? `${completedLevels}/${totalLevels} Levels` : null,
       stars: totalStars,
     },
     {
       id: 'eksamen',
       title: 'Eksamen Mode',
-      subtitle: 'License Mock Exam',
-      description: '40-item exam modelled on the written license exam. See your weak areas and get recommendations.',
+      subtitle: 'Mock Exam',
+      description: '40-item practice exam in the license exam format, grounded in traffic law. See your weak areas and get recommendations.',
       icon: FileText,
       color: 'from-red-500/20 to-rose-600/5',
       borderColor: eksamenUnlocked ? 'border-red-400/40 hover:border-red-400/70' : 'border-muted/30',
       iconColor: eksamenUnlocked ? 'text-accent' : 'text-muted-foreground',
       route: '/play/eksamen',
-      locked: !eksamenUnlocked,
+      locked: examLock || !eksamenUnlocked,
       badge: null,
       stars: 0,
     },
   ];
+
+  const renderMode = (mode: (typeof modes)[number]) => {
+    const Icon = mode.icon;
+    const isLocked = mode.locked;
+    
+    return (
+      <button
+        key={mode.id}
+        onClick={() => {
+          if (user) void logUiAction(user.uid, 'menu_selected', { mode: mode.id, locked: isLocked });
+          if (!isLocked) navigate(mode.route);
+        }}
+        disabled={isLocked}
+        className={`relative text-left p-12 rounded-[3rem] border transition-all duration-500 group overflow-hidden shadow-2xl
+          ${mode.id === 'story'
+              ? `w-full min-h-64 flex items-center bg-gradient-to-r ${mode.color} ${mode.borderColor} hover:scale-[1.01] hover:border-primary/50`
+              : isLocked
+              ? 'bg-black border-destructive/10 opacity-60 cursor-not-allowed'
+              : `h-[22rem] bg-gradient-to-br ${mode.color} border-white/10 hover:scale-[1.02] ${mode.borderColor} cursor-pointer glow-yellow`
+          }`}
+      >
+        {/* CARD LAYOUT */}
+        {/* Icon */}
+        <div className="absolute bottom-[-30px] right-[-30px] opacity-10 group-hover:opacity-20 transition-all duration-1000 pointer-events-none -rotate-[15deg] group-hover:rotate-0">
+          <Icon className="w-80 h-80 text-white" />
+        </div> 
+        {/* Chevron */}
+        <div className="absolute top-12 right-12 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all">
+        {isLocked ? (
+          <Lock className="w-10 h-10 text-destructive" />
+        ) : (
+            <ChevronRight className="w-10 h-10 text-primary" />
+        )}
+        </div>
+
+        <div className="relative z-10 flex flex-col h-full">
+          <h2 className="text-5xl font-black italic uppercase text-white leading-none">
+            {mode.title}
+          </h2>
+          <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground mt-2">
+            {mode.subtitle}
+          </p>
+          <p className="text-sm italic text-muted-foreground mt-6 max-w-[280px]">
+            {mode.description}
+          </p>
+          {(examLock || (mode.id === 'eksamen' && isLocked)) && (
+            <div className="mt-4 flex items-center gap-2 text-red-400 text-xs font-black uppercase">
+              <ShieldAlert className="w-4 h-4" />
+              {examLock ? 'Take the pre-test first' : 'Story Mode: Level 3 required'}
+            </div>
+          )}
+          <div className="mt-auto pt-4 flex items-center gap-4">
+            {mode.badge && (
+              <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase">
+                {mode.badge}
+              </span>
+            )}
+            {/* Stars or completion badge */}
+            {mode.id === 'story' ? (
+              completedLevels === totalLevels ? (
+                <div className="flex items-center gap-1 text-yellow-400 text-glow-yellow font-black italic">
+                  <Trophy className="w-4 h-4" />
+                  Completed
+                </div>
+              ) : mode.stars > 0 && (
+                <div className="flex items-center gap-1 text-primary font-black italic">
+                  <Star className="w-4 h-4" />
+                  {mode.stars}
+                </div>
+              )
+            ) : (
+              mode.stars > 0 && (
+                <div className="flex items-center gap-1 text-primary font-black italic">
+                  <Star className="w-4 h-4" />
+                  {mode.stars}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </button>
+    );
+  };
+
+  const story = modes.find(mode => mode.id === 'story');
+  const others = modes.filter(mode => mode.id !== 'story');
 
   return (
     <AppLayout>
@@ -153,6 +246,7 @@ const ModeSelect = () => {
           ) : (
           <div />
           )}
+          <div className="flex flex-wrap items-center justify-center gap-3">
           {/* Streak */}
           {streak.currentStreak > 0 && (
             <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 border border-primary/30 text-primary shadow-[0_0_20px_rgba(var(--primary),0.15)]">
@@ -162,6 +256,7 @@ const ModeSelect = () => {
               </span>
             </div>
           )}
+          </div>
         </div>
 
         {/* Title */}
@@ -177,89 +272,78 @@ const ModeSelect = () => {
           </p>
         </div>
 
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 md:grid-rows-[auto_1fr] gap-8">
-
-          {modes.map((mode) => {
-            const Icon = mode.icon;
-            const isLocked = mode.locked;
-            
-            return (
-              <button
-                key={mode.id}
-                onClick={() => !isLocked && navigate(mode.route)}
-                disabled={isLocked}
-                className={`relative text-left p-12 rounded-[3rem] border transition-all duration-500 group overflow-hidden shadow-2xl
-                  ${mode.id === 'daily'
-                      ? `md:col-span-2 h-56 flex items-center bg-gradient-to-r ${mode.color} ${mode.borderColor} hover:scale-[1.01] hover:border-primary/50`
-                      : isLocked
-                      ? 'bg-black border-destructive/10 opacity-60 cursor-not-allowed'
-                      : `h-[22rem] bg-gradient-to-br ${mode.color} border-white/10 hover:scale-[1.02] ${mode.borderColor} cursor-pointer glow-yellow`
-                  }`}
-              >
-                {/* CARD LAYOUT */}
-                {/* Icon */}
-                <div className="absolute bottom-[-30px] right-[-30px] opacity-10 group-hover:opacity-20 transition-all duration-1000 pointer-events-none -rotate-[15deg] group-hover:rotate-0">
-                  <Icon className="w-80 h-80 text-white" />
-                </div> 
-                {/* Chevron */}
-                <div className="absolute top-12 right-12 opacity-20 group-hover:opacity-100 group-hover:translate-x-2 transition-all">
-                {isLocked ? (
-                  <Lock className="w-10 h-10 text-destructive" />
-                ) : (
-                    <ChevronRight className="w-10 h-10 text-primary" />
-                )}
-                </div>
-
-                {mode.id === 'eksamen' && isLocked && (
-                  <div className="absolute bottom-12 left-12 flex items-center gap-2 text-red-400 text-xs font-black uppercase">
-                    <ShieldAlert className="w-4 h-4" />
-                    Story Mode: Level 3 required
-                  </div>
-                )}
-                
-                <div className="relative z-10 flex flex-col h-full">
-                  <h2 className="text-5xl font-black italic uppercase text-white leading-none">
-                    {mode.title}
-                  </h2>
-                  <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground mt-2">
-                    {mode.subtitle}
+        {/* The initial exam: taken first, from here; it opens the other modes. */}
+        {exam.required && (
+          <section className="mb-8">
+            <button
+              onClick={() => {
+                if (user) void logUiAction(user.uid, 'menu_selected', { mode: 'initial_exam', done: examDone });
+                navigate(exam.participant ? '/study' : '/play/pre-test');
+              }}
+              className={`relative flex w-full items-center gap-8 overflow-hidden rounded-[3rem] border p-10 text-left shadow-2xl transition-all duration-500 hover:scale-[1.01] ${
+                examDone ? 'border-emerald-400/30 bg-gradient-to-r from-emerald-500/10 to-transparent' : 'border-primary/60 bg-gradient-to-r from-primary/20 to-transparent glow-yellow'
+              }`}
+            >
+              {examDone ? <CheckCircle2 className="h-14 w-14 shrink-0 text-emerald-400" /> : <ClipboardCheck className="h-14 w-14 shrink-0 text-primary" />}
+              <div className="flex-1">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Step 1 · Required</p>
+                <h2 className="mt-1 text-4xl font-black uppercase italic leading-none text-white">Pre-Test</h2>
+                <p className="mt-3 max-w-xl text-sm italic text-muted-foreground">
+                  {!exam.signedIn
+                    ? 'Sign in, then take the 60-item pre-test. It sets your starting point and opens every mode.'
+                    : exam.loading
+                      ? 'Checking your initial exam…'
+                      : exam.error
+                        ? exam.error
+                        : examDone
+                          ? 'Done. Every mode is open.'
+                          : '60 items, no pass mark. It sets your starting point in every competency and opens every mode.'}
+                </p>
+                {exam.bypass && !examDone && !exam.loading && (
+                  <p className="mt-2 text-[10px] font-black uppercase text-muted-foreground">
+                    Admin or developer build: the modes stay open for testing
                   </p>
-                  <p className="text-sm italic text-muted-foreground mt-6 max-w-[280px]">
-                    {mode.description}
-                  </p>
-                  <div className="mt-auto flex items-center gap-4">
-                    {mode.badge && (
-                      <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase">
-                        {mode.badge}
-                      </span>
-                    )}
-                    {/* Stars or completion badge */}
-                    {mode.id === 'story' ? (
-                      completedLevels === totalLevels ? (
-                        <div className="flex items-center gap-1 text-yellow-400 text-glow-yellow font-black italic">
-                          <Trophy className="w-4 h-4" />
-                          Completed
-                        </div>
-                      ) : mode.stars > 0 && (
-                        <div className="flex items-center gap-1 text-primary font-black italic">
-                          <Star className="w-4 h-4" />
-                          {mode.stars}
-                        </div>
-                      )
-                    ) : (
-                      mode.stars > 0 && (
-                        <div className="flex items-center gap-1 text-primary font-black italic">
-                          <Star className="w-4 h-4" />
-                          {mode.stars}
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+                )}
+                {lockedFrom && examLock && (
+                  <p className="mt-2 text-xs font-bold text-red-400">That mode opens after the pre-test.</p>
+                )}
+              </div>
+              <ChevronRight className="h-10 w-10 shrink-0 text-primary" />
+            </button>
+          </section>
+        )}
+
+        {/* Bagong Driver, full width */}
+        {story && renderMode(story)}
+
+        {/* Survey: a full-width call to action, between the story and the other modes. */}
+        <section className="my-8">
+          <a
+            href={SURVEY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative flex w-full flex-col items-center gap-5 overflow-hidden rounded-[3rem] border-2 border-primary bg-gradient-to-r from-primary via-yellow-300 to-primary p-8 text-center text-primary-foreground shadow-[0_0_45px_rgba(250,204,21,0.45)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_70px_rgba(250,204,21,0.7)] md:flex-row md:p-10 md:text-left"
+          >
+            <span className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/25 blur-2xl" />
+            <span className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-black/85 shadow-xl">
+              <span className="absolute inset-0 animate-ping rounded-3xl bg-black/30" />
+              <ClipboardList className="relative h-10 w-10 text-primary" />
+            </span>
+            <span className="relative flex-1">
+              <span className="block text-[11px] font-black uppercase tracking-[0.3em] opacity-70">Tulungan kami · Help our study</span>
+              <span className="mt-1 block text-4xl font-black uppercase italic leading-none tracking-tight md:text-6xl">Take the survey!</span>
+              <span className="mt-3 block text-sm font-bold italic opacity-80">A few minutes of your feedback helps us improve Arangkada.</span>
+            </span>
+            <span className="relative flex shrink-0 items-center gap-2 rounded-2xl bg-black px-7 py-4 text-lg font-black uppercase italic text-primary shadow-xl transition-transform group-hover:translate-x-1">
+              Answer now
+              <ExternalLink className="h-5 w-5" />
+            </span>
+          </a>
+        </section>
+
+        {/* Araw-Araw and Eksamen, side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {others.map(renderMode)}
         </div>
       </main>
     </AppLayout>

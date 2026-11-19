@@ -1,6 +1,6 @@
 /**
  * The speed a scenario is graded on: the 20 km/h "slow down" of
- * Republic Act No. 4136, Section 35(b) row 4 on a §35 road, 60% on the expressway, a posted minimum
+ * RA 4136 §35(b) row 4 on a §35 road, 60% on the expressway, a posted minimum
  * at its figure, the number the prompt names, and the correction that quotes it.
  */
 import { describe, expect, it } from 'vitest';
@@ -68,18 +68,6 @@ describe('a posted minimum', () => {
   });
 });
 
-describe('the End Of Speed Restriction sign', () => {
-  // The pack names the sign (S1) and §35(a)'s careful and prudent speed (L1);
-  // nothing makes speeding up the only right move. A safe slow-down past it is
-  // never graded wrong; only being over the road's own limit is.
-  it("passes any speed within the road's own limit, a brake included, and fails one over it", async () => {
-    const { SLOTS } = await import('@/features/driving-sim/domain/scenario/content/levels/level3/pools');
-    const end = SLOTS.flat().find(variant => variant.id === 'level3.speed.end-of-restriction')! as ScenarioEvent;
-    for (const speed of [10, 20, 30]) expect(deriveAction(passedAt(speed), end, street), `${speed}`).toBe(end.correctAction);
-    expect(deriveAction(passedAt(40), end, street)).not.toBe(end.correctAction);
-  });
-});
-
 describe('speedTarget and the prompt', () => {
   it('names what each kind is graded on', () => {
     expect(speedTarget(hazard, street)).toEqual({ at: 'most', speed: 20 });
@@ -90,7 +78,7 @@ describe('speedTarget and the prompt', () => {
   });
 
   it('is named on the instruction at full support only', () => {
-    expect(scenarioSupport(hazard, 'full', street).instruction).toMatch(/Target: 20 km\/h or less\.$/);
+    expect(scenarioSupport(hazard, 'full', street).instruction).toMatch(/Target: 20 km\/h or less by the time you reach it\.$/);
     expect(scenarioSupport(hazard, 'cue', street).instruction).toBeNull();
     expect(scenarioSupport(hazard, 'full').instruction).not.toMatch(/Target/);
   });

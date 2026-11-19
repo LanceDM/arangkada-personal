@@ -19,10 +19,12 @@ export const USERNAME_MIN = 4;
 export const USERNAME_MAX = 20;
 
 /**
- * 15 at least: NIST SP 800-63B-4 (2025) for a password used alone. Up to
+ * 8 at least (2026-11-18, the team's choice, matching regular accounts). NIST
+ * SP 800-63B-4 (2025) asks 15 for a password used alone and accepts 8 only
+ * with a second factor, so this trades strength for ease of joining. Up to
  * 128, past the 64 it asks verifiers to accept. No rule on which characters.
  */
-export const STUDY_PASSWORD_MIN = 15;
+export const STUDY_PASSWORD_MIN = 8;
 export const STUDY_PASSWORD_MAX = 128;
 
 const USERNAME = new RegExp(`^[a-z][a-z0-9_]{${USERNAME_MIN - 1},${USERNAME_MAX - 1}}$`);

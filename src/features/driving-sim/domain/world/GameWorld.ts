@@ -15,6 +15,7 @@ import type { LevelConfig, ScenarioEvent } from '@/features/driving-sim/domain/s
 import type { DrivingCompetency } from '@/domain/learner/competency';
 import type { EventTelemetry } from '@/features/driving-sim/domain/evaluation/eventTelemetry';
 import type { RoadTraffic } from '@/features/driving-sim/domain/systems/roadTraffic';
+import type { NpcClock } from '@/features/driving-sim/domain/systems/updateNpcVehicles';
 import type { EnvObject } from './roadsideScenery';
 import {
   CANVAS_HEIGHT,
@@ -149,16 +150,15 @@ export interface DrivingWorld {
   /** Trigger distances already answered. */
   handled: Set<number>;
   /**
-   * When each was answered, in `drivenSteps`: what a pedestrian who walks
-   * clear after the answer walks by, so they keep walking while the car waits
-   * rather than only as it moves. The world's step clock, never the device's
-   *: a walker is solid, so a scripted drive must replay the same.
+   * When each was answered, on the frame clock (`Date.now`, as the frame is
+   * composed): what a pedestrian who walks clear after the answer walks by, so
+   * they keep walking while the car waits rather than only as it moves.
    */
   handledAt: Map<number, number>;
   /**
    * A full stop made short of a stop scenario's graded zone: when the car came
-   * to rest there (in `drivenSteps`), and whether it had moved since the
-   * approach opened. See EARLY_STOP_HOLD_STEPS in scanEvents.
+   * to rest there (performance.now), and whether it had moved since the
+   * approach opened. See EARLY_STOP_HOLD_MS in scanEvents.
    */
   earlyStop: { since: number | null; moved: boolean };
   roadOffset: number;
@@ -285,6 +285,12 @@ export interface DrivingWorld {
   wrongSide: StandingPenaltyState;
   overLimit: StandingPenaltyState;
   crawlWarning: boolean;
+  /**
+   * Whether something solid stands on the carriageway a short way ahead (a
+   * pedestrian on a crossing, traffic crossing a junction, a slow vehicle),
+   * as of the last frame. Slowing for it is not crawling (2026-11-16).
+   */
+  roadOccupiedAhead: boolean;
   wrongSideWarning: boolean;
   overLimitWarning: boolean;
 
@@ -317,6 +323,8 @@ export interface DrivingWorld {
    */
   chaseLane: LaneIndex | null;
   followerState: FollowerState;
+  /** Each junction vehicle's own clock, so it keeps moving while the player waits (`NpcClock`). */
+  npcClocks: Map<string, NpcClock>;
   /**
    * Where each self-driving scenario vehicle has got to, keyed by its event.
    *
@@ -453,6 +461,7 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
     wrongSide: createStandingPenaltyState(),
     overLimit: createStandingPenaltyState(),
     crawlWarning: false,
+    roadOccupiedAhead: false,
     wrongSideWarning: false,
     overLimitWarning: false,
 
@@ -464,6 +473,7 @@ export const createDrivingWorld = (level: LevelConfig, initialDistance = 0): Dri
 
     chaseLane: null,
     followerState: { y: null, passing: false },
+    npcClocks: new Map(),
     traffic: new Map(),
 
     crashed: false,
