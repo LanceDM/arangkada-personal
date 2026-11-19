@@ -82,5 +82,9 @@ export default defineConfig({
     // explicitly, so no ambient test-global types need to be added to
     // tsconfig.app.json, keeping `tsc -b`'s production build unaffected.
     environment: 'node',
+    // 20 s, not the 5 s default (2026-11-20): the DOM tests that render a
+    // whole admin page (every scenario, every level) take 3-4 s alone, and
+    // more on a slower PC running the suite in parallel.
+    testTimeout: 20_000,
   },
 })
