@@ -40,7 +40,7 @@ const SettingsPanel = () => (
       <div>
         <dt className="font-semibold text-foreground">Warm-up (Tentative)</dt>
         <dd className="text-muted-foreground">
-          Double Explore-then-Commit: {warmUp.exploreFirst} random visits per legal action, then commit until the leader has {warmUp.commitLeader}, then {warmUp.exploreSecond} more per other action, then the final commit. Every non-leader keeps probability {warmUp.floor}. Ties go to fewer visits, then the fallback rule.
+          {warmUp.exploreFirst} random tries per legal action, then the leader, with every other legal action kept at probability {warmUp.floor}. Ties go to fewer visits, then the fallback rule.
         </dd>
       </div>
       <div>
@@ -48,13 +48,16 @@ const SettingsPanel = () => (
         <dd className="font-mono text-muted-foreground">
           Q(s,a) ← Q(s,a) + α[r + γ·max Q(s′,a′) − Q(s,a)], α = {RUN_CONFIG.learningRate}, γ = {gamma}
         </dd>
+        <dd className="text-muted-foreground">One episode per competency per stage: it ends when the competency moves on (none) or reaches the attempt cap.</dd>
       </div>
       <div>
         <dt className="font-semibold text-foreground">Reward (Tentative)</dt>
         <dd className="font-mono text-muted-foreground">
-          r = A_next + {reward.pass}·Pass − {reward.perAddedDecision}·H
+          practice / review: r = −{reward.perAddedDecision}·H · moving on: r = A_next{reward.pass ? ` + ${reward.pass}·Pass` : ''}
         </dd>
-        <dd className="text-muted-foreground">At the competency's next measurement (a repeat drive, a later quiz or drive, the final, or the post-test). Observed data only.</dd>
+        <dd className="text-muted-foreground">
+          Paid once, when the episode ends: A_next is the competency&apos;s accuracy at its next measurement (a later quiz or drive, the final, or the post-test). Practice and review cost {reward.perAddedDecision} per scenario they add, so they win only if they raise that later accuracy by more than their cost. Observed data only.
+        </dd>
       </div>
       <div className="sm:col-span-2">
         <dt className="font-semibold text-foreground">Fallback rule (tie-break only)</dt>
@@ -68,7 +71,7 @@ const EARNED_LEGEND = [
   { term: 'Chosen', meaning: 'Decisions that picked this action in this state.' },
   { term: 'explore / exploit / forced', meaning: 'A random warm-up draw, the leader by the policy, or the only legal action (or the attempt cap).' },
   { term: 'Rewarded', meaning: 'How many of those have been measured again and rewarded; the rest are waiting.' },
-  { term: 'Mean r', meaning: 'Average reward r = A_next + 0.5·Pass − 0.02·H.' },
+  { term: 'Mean r', meaning: 'Average reward: −0.02·H for a practice or review mid-episode; A_next − 0.02·H when the episode ends.' },
   { term: 'Mean A_next', meaning: "Average share of the competency's graded answers right at its next measurement (0–1)." },
   { term: 'Pass share', meaning: 'How often it passed at that next measurement (0–1).' },
   { term: 'Mean H', meaning: 'Graded decisions the action added (practice and review add 3, none 0).' },

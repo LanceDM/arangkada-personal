@@ -31,13 +31,13 @@ describe('exploration and exploitation tags', () => {
     expect(statePhase(emptyQTable(), failed).tag).toBe('exploring');
   });
 
-  it('exploits when the commit phase takes the leader, explores when the floor picks another', () => {
+  it('exploits when it takes the leader, explores when the floor picks another (2 / 0 / 0)', () => {
     let table = emptyQTable();
     for (let i = 0; i < 2; i++) {
       table = recordVisit(table, failed, 'practice');
       table = recordVisit(table, failed, 'review');
     }
-    expect(statePhase(table, failed)).toMatchObject({ phase: 'commit_1', tag: 'exploiting' });
+    expect(statePhase(table, failed)).toMatchObject({ phase: 'final_commit', tag: 'exploiting' });
     const ctx = { state: failed, masteryP: 0.6, failedBefore: false };
     const leaderPick = chooseAction(table, failed, ctx, () => 0.05);
     expect(leaderPick.selection).toBe('exploit');
@@ -56,11 +56,11 @@ describe('the Q-table update log', () => {
     selection: 'explore', draw: 0.6, snapshot: {}, timestamp: 1,
   });
   const reward: RewardRecord = {
-    decisionId: '2:parking:0', competency: 'parking', state, action: 'practice', reward: 1.2, accuracy: 0.76, passed: true,
+    decisionId: '2:parking:0', competency: 'parking', state, action: 'practice', reward: -0.06, accuracy: 0.76, passed: true,
     addedDecisions: 3, next: { mastery: 4, result: 'passed' }, measuredBy: 'quiz', timestamp: 2,
   };
   const operations: QOperation[] = [
-    { kind: 'update', state, action: 'practice', reward: 1.2, next: { mastery: 4, result: 'passed' }, gamma: 0.9 },
+    { kind: 'update', state, action: 'practice', reward: -0.06, next: { mastery: 4, result: 'passed' }, gamma: 1 },
     { kind: 'visit', state, action: 'practice' },
   ];
 
@@ -69,7 +69,7 @@ describe('the Q-table update log', () => {
     const { table, entries } = applyQLog({ table: emptyQTable(), items, firstGlobalSeq: 7, context: { participantCode: 'P01', levelId: 2, phase: 'DRIVE(2)', attemptId: 'a' }, envelope });
     expect(table).toEqual(applyQOperations(emptyQTable(), operations));
     expect(entries.map(e => [e.globalSeq, e.kind])).toEqual([[7, 'learn'], [8, 'visit']]);
-    expect(entries[0].learning).toMatchObject({ qBefore: 0, qAfter: 1.2, alpha: 1, target: 1.2, nBefore: 0, nAfter: 1, measuredBy: 'quiz', nextStateKey: 'M4-passed' });
+    expect(entries[0].learning).toMatchObject({ qBefore: 0, qAfter: -0.06, alpha: 1, target: -0.06, nBefore: 0, nAfter: 1, measuredBy: 'quiz', nextStateKey: 'M4-passed' });
     expect(entries[1].decision).toMatchObject({ selection: 'explore', draw: 0.6, visitsBefore: 0, visitsAfter: 1 });
     expect(entries[1].decisionId).toBe('2:parking:1');
     expect(entries[1].tableAfter).toEqual(table);

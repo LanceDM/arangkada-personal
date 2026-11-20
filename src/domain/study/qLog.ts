@@ -16,6 +16,7 @@ import {
   Q_STATES,
   legalActions,
   recordVisit,
+  endedEpisode,
   rewardOf,
   stateKey,
   statePhase,
@@ -227,7 +228,7 @@ export const replayQLog = (
       if (!l) {
         problems.push(`${at}: a learn entry with no learning`);
       } else {
-        const reward = rewardOf({ accuracy: l.accuracy, passed: l.passed }, l.addedDecisions, l.weights);
+        const reward = rewardOf({ accuracy: l.accuracy, passed: l.passed }, l.addedDecisions, l.weights, endedEpisode(l.gamma, l.nextStateKey));
         if (!near(reward, l.reward)) problems.push(`${at}: reward ${l.reward}, its parts give ${reward}`);
         const next = l.nextStateKey === null ? null : Q_STATES.find(s => stateKey(s) === l.nextStateKey) ?? null;
         if (l.nextStateKey !== null && !next) problems.push(`${at}: unknown next state ${l.nextStateKey}`);

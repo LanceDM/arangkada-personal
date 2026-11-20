@@ -27,8 +27,8 @@ const LEVEL_STYLE: Record<MasteryRow['level'], string> = {
 const DESCRIPTOR_FIL: Record<MasteryRow['level'], string> = {
   1: 'Nagsisimula',
   2: 'Umuunlad',
-  3: 'Kumokonekta',
-  4: 'Mahusay',
+  3: 'Halos bihasa na',
+  4: 'Bihasa na',
 };
 
 type CourseProgress = Awaited<ReturnType<typeof loadCompetencyCourseProgress>>;
@@ -178,8 +178,8 @@ const ProfilePage = () => {
           </div>
           <p className="px-1 text-xs text-muted-foreground">
             <Say
-              en="Your chance of knowing each competency, from every pre-test, quiz and drive answer so far. It starts from the pre-test and moves with each answer. Benchmarking needs at least 3 drive answers."
-              fil="Ang tsansang alam mo ang bawat kakayahan, mula sa lahat ng sagot sa pre-test, quiz at pagmamaneho. Nagsisimula ito sa pre-test at gumagalaw sa bawat sagot. Kailangan ng hindi bababa sa 3 sagot sa pagmamaneho para sa Mahusay."
+              en="Your chance of knowing each competency, from every pre-test, quiz and drive answer so far. It starts from the pre-test and moves with each answer. Mastered needs at least 3 drive answers."
+              fil="Ang tsansang alam mo ang bawat kakayahan, mula sa lahat ng sagot sa pre-test, quiz at pagmamaneho. Nagsisimula ito sa pre-test at gumagalaw sa bawat sagot. Kailangan ng hindi bababa sa 3 sagot sa pagmamaneho para sa Bihasa na."
             />
           </p>
           {error && <p className="px-1 text-sm text-destructive">{error}</p>}

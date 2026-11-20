@@ -40,13 +40,13 @@ describe('the 8-state table', () => {
     expect([0.49, 0.5, 0.8, 0.95].map(p => masteryLevel(p))).toEqual([1, 2, 3, 4]);
   });
 
-  it('caps a competency at Connecting until it has 3 graded drive answers', () => {
+  it('caps a competency at Nearly mastered until it has 3 graded drive answers', () => {
     expect(masteryLevel(0.97, 2)).toBe(3);
     expect(masteryLevel(0.97, 3)).toBe(4);
   });
 });
 
-describe('the warm-up (Double Explore-then-Commit, 2 / 6 / 2, floor 0.1)', () => {
+describe('the warm-up (2 / 0 / 0, floor 0.1, 2026-11-20)', () => {
   const fallback = { state: passedHigh, masteryP: 0.85, failedBefore: false };
 
   it('skips the policy when only one action is legal', () => {
@@ -60,17 +60,17 @@ describe('the warm-up (Double Explore-then-Commit, 2 / 6 / 2, floor 0.1)', () =>
     expect(decision.probability).toBe(0.5);
   });
 
-  it('then commits to the leader with probability 1 - (k - 1)p and keeps every other action at p', () => {
+  it('after two tries each, takes the leader at 1 - (k - 1)p and keeps every other action at p', () => {
     let table: QTable = emptyQTable();
     for (const action of ['none', 'none', 'practice', 'practice'] as const) table = recordVisit(table, passedHigh, action);
     table = updateQ(table, passedHigh, 'practice', 1.2, null).table;
     const decision = chooseAction(table, passedHigh, fallback, () => 0.05);
-    expect(decision.phase).toBe('commit_1');
+    expect(decision.phase).toBe('final_commit');
     expect(decision.leader).toBe('practice');
     expect(decision.probabilities).toEqual({ none: 0.1, practice: 0.9 });
   });
 
-  it('finishes a 2-action state after 10 visits', () => {
+  it('finishes a 2-action state after its 4 tries, with no forced second round', () => {
     let table: QTable = emptyQTable();
     const rng = sequence([0.05, 0.55, 0.95, 0.35]);
     let visits = 0;
@@ -79,7 +79,7 @@ describe('the warm-up (Double Explore-then-Commit, 2 / 6 / 2, floor 0.1)', () =>
       table = recordVisit(table, passedHigh, decision.action);
       visits += 1;
     }
-    expect(visits).toBeGreaterThanOrEqual(10);
+    expect(visits).toBe(4);
     expect(warmUpFinished(table, passedHigh, DEFAULT_WARM_UP)).toBe(true);
   });
 
@@ -99,15 +99,26 @@ describe('learning', () => {
     expect(table['M1-failed'].practice).toMatchObject({ q: 0.5, n: 2 });
   });
 
-  it('bootstraps from the best legal action of the next state at gamma 0.9', () => {
+  it('bootstraps from the best legal action of the next state, undiscounted (gamma 1)', () => {
     let table = emptyQTable();
     table = updateQ(table, passedHigh, 'none', 2, null).table;
-    const { target } = updateQ(table, failedLow, 'practice', 1, passedHigh);
-    expect(target).toBeCloseTo(1 + 0.9 * 2, 10);
+    const { target } = updateQ(table, failedLow, 'practice', -0.06, passedHigh);
+    expect(target).toBeCloseTo(-0.06 + 2, 10);
   });
 
-  it('rewards r = A_next + 0.5 Pass - 0.02 H', () => {
-    expect(rewardOf({ accuracy: 2 / 3, passed: true }, 3)).toBeCloseTo(2 / 3 + 0.5 - 0.06, 10);
-    expect(rewardOf({ accuracy: 1 / 3, passed: false }, 0)).toBeCloseTo(1 / 3, 10);
+  it('pays accuracy once, at the end of the episode, with no pass bonus; a mid-episode step pays only its cost', () => {
+    expect(rewardOf({ accuracy: 2 / 3, passed: true }, 0)).toBeCloseTo(2 / 3, 10);
+    expect(rewardOf({ accuracy: 2 / 3, passed: true }, 3)).toBeCloseTo(2 / 3 - 0.06, 10);
+    expect(rewardOf({ accuracy: 1, passed: true }, 3, undefined, false)).toBeCloseTo(-0.06, 10);
+  });
+
+  it("moves on the perfect player: practice loses by exactly its cost (Ana, 3 of 3 at M3)", () => {
+    // Move on: the episode ends, r = A_next = 1.
+    let table = updateQ(emptyQTable(), passedHigh, 'none', rewardOf({ accuracy: 1, passed: true }, 0), null).table;
+    // Practise once, then move on: r = -0.06, plus Q(M3-passed, none) = 1.
+    const practice = updateQ(table, passedHigh, 'practice', rewardOf({ accuracy: 1, passed: true }, 3, undefined, false), passedHigh);
+    table = practice.table;
+    expect(table['M3-passed']?.none?.q).toBeCloseTo(1, 10);
+    expect(table['M3-passed']?.practice?.q).toBeCloseTo(0.94, 10);
   });
 });
