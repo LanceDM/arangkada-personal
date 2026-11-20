@@ -87,8 +87,9 @@ describe('the course admin sections', () => {
 
   it('show the policy, the live table and the decisions', async () => {
     await mount(<QLearningSection course={course()} />);
-    expect(text()).toContain('Double Explore-then-Commit');
-    expect(text()).toContain('γ = 0.9');
+    expect(text()).toContain('2 random tries per legal action');
+    expect(text()).toContain('γ = 1');
+    expect(text()).toContain('One episode per competency per stage');
     expect(text()).toContain('No table yet');
     // Four tables (2026-11-19), each with its own reset; the public one can start from the study's.
     for (const label of ['Study', 'Dry run', 'Test', 'Public']) expect(text()).toContain(label);

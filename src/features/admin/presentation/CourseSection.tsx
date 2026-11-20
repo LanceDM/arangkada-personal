@@ -55,10 +55,10 @@ const BktTable = ({ course }: { course: ReturnType<typeof useCourseAdmin> }) => 
     <Legend
       title="Legend: BKT"
       items={[
-        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[1]}`}>0.42</span>, meaning: 'M1 Emerging: P(L) below 0.50.' },
+        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[1]}`}>0.42</span>, meaning: 'M1 Beginning: P(L) below 0.50.' },
         { term: <span className={`rounded px-1.5 ${LEVEL_CELL[2]}`}>0.66</span>, meaning: 'M2 Developing: 0.50–0.79.' },
-        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[3]}`}>0.88</span>, meaning: 'M3 Connecting: 0.80–0.94.' },
-        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[4]}`}>0.97</span>, meaning: 'M4 Benchmarking: 0.95+ with at least 3 drive answers.' },
+        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[3]}`}>0.88</span>, meaning: 'M3 Nearly mastered: 0.80–0.94.' },
+        { term: <span className={`rounded px-1.5 ${LEVEL_CELL[4]}`}>0.97</span>, meaning: 'M4 Mastered: 0.95+ with at least 3 drive answers.' },
         { term: 'P(L)', meaning: 'The chance the player knows the competency, after every answer so far.' },
         { term: 'Columns', meaning: COMPETENCIES.map(c => `${short(c)} ${getCompetencyLabel(c)}`).join(' · ') },
         { term: 'Answers', meaning: 'Graded answers BKT has read (pre-test, quiz, drive, post-test).' },

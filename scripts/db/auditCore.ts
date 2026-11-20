@@ -26,7 +26,7 @@
  *    logged, and the profile with the rebuilt profile.
  */
 import type { ActionLog } from '@/domain/learner/attempt';
-import { rewardOf, type QTable } from '@/domain/competencyRouting/qLearning';
+import { GAMMA, endedEpisode, rewardOf, type QTable } from '@/domain/competencyRouting/qLearning';
 import type { DecisionRecord, RewardRecord } from '@/domain/competencyRouting/course';
 import { replayQLog, sameTable, type QLogEntry } from '@/domain/study/qLog';
 import { buildBKTLog, type BKTProfileDoc, type BKTUpdateRecord, type EvidenceOrigin } from '@/domain/study/bktLog';
@@ -187,7 +187,12 @@ const auditCourseIn = (user: AuditUser, source: AuditTable, problems: string[]) 
         lastSeq = Math.max(lastSeq, learn.globalSeq);
       }
       // The reward follows from its parts, and its parts from the verdict this same entry recorded.
-      const fromParts = rewardOf({ accuracy: reward.accuracy, passed: reward.passed }, reward.addedDecisions, learn?.learning?.weights);
+      const fromParts = rewardOf(
+        { accuracy: reward.accuracy, passed: reward.passed },
+        reward.addedDecisions,
+        learn?.learning?.weights,
+        endedEpisode(learn?.learning?.gamma ?? GAMMA, reward.next)
+      );
       if (!near(fromParts, reward.reward)) problems.push(`${at}: reward for ${reward.decisionId} is ${reward.reward}; its parts give ${fromParts}`);
       if (log.kind !== 'post_exam') {
         const verdict = log.verdicts.find(v => v.competency === reward.competency);

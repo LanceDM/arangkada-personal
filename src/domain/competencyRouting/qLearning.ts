@@ -9,12 +9,16 @@
  * - State: the competency's mastery level (4) x its scenario result in this
  *   attempt (passed / failed) = 8 states.
  * - Actions (TENTATIVE): none, practice, review.
- * - Choosing (TENTATIVE): Double Explore-then-Commit, 2 / 6 / 2, with randomized
- *   exploration visits and a probability floor p = 0.1 (Jin, Xu, Xiao & Gu,
- *   2021; randomized, logged probabilities after Qian et al., 2022, and Trella
- *   et al., 2022).
- * - Learning: Q-learning, alpha = 1/n, gamma = 0.9.
- * - Reward (TENTATIVE): r = A_next + 0.5 * Pass - 0.02 * H, from observed data only.
+ * - Choosing (TENTATIVE, 2026-11-20): 2 randomized tries per legal action, then
+ *   the leader with a probability floor p = 0.1 for every other action
+ *   (2 / 0 / 0: the earlier 2 / 6 / 2 Double Explore-then-Commit without its
+ *   commit and second-explore phases). Randomized, logged probabilities after
+ *   Qian et al., 2022, and Trella et al., 2022.
+ * - Learning: Q-learning, alpha = 1/n, gamma = 1, one episode per competency
+ *   per stage (2026-11-20).
+ * - Reward (TENTATIVE, 2026-11-20): the episode's outcome once, at its end.
+ *   Practice and review cost 0.02 per scenario they add; moving on (or the
+ *   attempt cap) ends the episode and earns the competency's next accuracy.
  *
  * Rules decide what is legal and when the learner advances; the table chooses
  * among the legal actions.
@@ -91,7 +95,13 @@ export interface WarmUp {
   floor: number;
 }
 
-export const DEFAULT_WARM_UP: WarmUp = { exploreFirst: 2, commitLeader: 6, exploreSecond: 2, floor: 0.1 };
+/**
+ * 2 / 0 / 0 (2026-11-20): two randomized tries per legal action, then the
+ * leader at 1 - (k - 1) p and every other legal action at p. The earlier
+ * 2 / 6 / 2 also forced the leader to 6 visits and the others to 2 more; the
+ * floor now does that exploring.
+ */
+export const DEFAULT_WARM_UP: WarmUp = { exploreFirst: 2, commitLeader: 0, exploreSecond: 0, floor: 0.1 };
 
 export type DecisionPhase = 'only_legal' | 'explore_1' | 'commit_1' | 'explore_2' | 'final_commit';
 
@@ -285,8 +295,13 @@ export const warmUpFinished = (table: QTable, state: QState, warmUp: WarmUp = DE
 
 // --- learning --------------------------------------------------------------------
 
-/** gamma = 0.9; the analysis rechecks the leaders at gamma = 0 from the logs. */
-export const GAMMA = 0.9;
+/**
+ * gamma = 1 (2026-11-20): a competency's decisions in one stage are one
+ * episode, rewarded once at its end, so nothing is discounted. With 0.9 and a
+ * reward after every step, practice-then-move-on collected two rewards and
+ * outscored moving on even for a learner who already knew the competency.
+ */
+export const GAMMA = 1;
 
 /**
  * One Q-learning update with alpha = 1/n:
@@ -328,7 +343,11 @@ export interface RewardWeights {
   perAddedDecision: number;
 }
 
-export const DEFAULT_REWARD: RewardWeights = { pass: 0.5, perAddedDecision: 0.02 };
+/**
+ * No pass bonus (2026-11-20): accuracy alone; the earlier 0.5 * Pass had no
+ * source. The field stays, at 0, so every logged settings record keeps one shape.
+ */
+export const DEFAULT_REWARD: RewardWeights = { pass: 0, perAddedDecision: 0.02 };
 
 /** The competency's next measurement, from observed data. */
 export interface Measurement {
@@ -338,13 +357,31 @@ export interface Measurement {
 }
 
 /**
- * r = A_next + beta * Pass - psi * H (TENTATIVE).
+ * One step's reward (TENTATIVE, 2026-11-20): one episode per competency per
+ * stage, rewarded once at its end.
  *
- * H = graded decisions the action added: practice, its scenarios in the repeat
- * drive; review, its scenarios after the module section; none, 0. Uses only
- * observed data. Replaces NG_c + 0.5 Pass - 0.02 H, which favoured practice by
- * construction. Basis: outcome minus a small per-activity penalty (Ruan et al.,
- * 2024); accuracy as a reward signal (Girard et al., 2024).
+ *   mid-episode (practice or review, a decision follows):  r = -psi * H
+ *   end of the episode (moved on, or the attempt cap):      r = A_next + beta * Pass - psi * H
+ *
+ * with beta = 0 and psi = 0.02. H = graded decisions the action added:
+ * practice, its scenarios in the repeat drive; review, its scenarios after the
+ * module section; none, 0. With gamma = 1, practice then beats moving on only
+ * if it raises the later accuracy by more than its own cost. Uses only
+ * observed data. Basis: outcome minus a small per-activity penalty (Ruan et
+ * al., 2024); accuracy as a reward signal (Girard et al., 2024).
  */
-export const rewardOf = (measurement: Measurement, addedDecisions: number, weights: RewardWeights = DEFAULT_REWARD): number =>
-  measurement.accuracy + weights.pass * (measurement.passed ? 1 : 0) - weights.perAddedDecision * addedDecisions;
+/**
+ * Whether a logged reward ended its episode: under gamma = 1 (2026-11-20) a
+ * reward ends the episode exactly when it has no next state; under the
+ * earlier gamma = 0.9 every reward carried the full outcome. For checking a
+ * logged reward against its parts.
+ */
+export const endedEpisode = (gamma: number, next: unknown | null): boolean => gamma !== 1 || next === null;
+
+export const rewardOf = (
+  measurement: Measurement,
+  addedDecisions: number,
+  weights: RewardWeights = DEFAULT_REWARD,
+  endsEpisode = true
+): number =>
+  (endsEpisode ? measurement.accuracy + weights.pass * (measurement.passed ? 1 : 0) : 0) - weights.perAddedDecision * addedDecisions;

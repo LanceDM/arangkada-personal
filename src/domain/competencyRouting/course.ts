@@ -348,9 +348,14 @@ const measuredState = (m: CompetencyMeasurement): QState => ({
 });
 
 /**
- * Rewards every pending decision whose competency `measurements` measured,
- * r = A_next + 0.5 Pass - 0.02 H, with s' the measured state, or null (Q = 0)
- * when no decision for that competency follows.
+ * Rewards every pending decision whose competency `measurements` measured
+ * (2026-11-20: one episode per competency per stage, gamma = 1).
+ *
+ * - Moving on (`none`) ends the episode: r = A_next - 0.02 H, s' = null.
+ * - Practice or review with a decision following in the same stage is a
+ *   mid-episode step: r = -0.02 H, s' = the measured state.
+ * - Practice or review with no decision following (the attempt cap ended the
+ *   episode): r = A_next - 0.02 H, s' = null.
  */
 const rewardPending = (
   pending: readonly PendingDecision[],
@@ -372,8 +377,9 @@ const rewardPending = (
       stillPending.push(decision);
       continue;
     }
-    const nextState = willDecide.has(m.competency) ? measuredState(m) : null;
-    const reward = rewardOf({ accuracy: m.accuracy, passed: m.passed }, decision.addedDecisions, weights);
+    const endsEpisode = decision.action === 'none' || !willDecide.has(m.competency);
+    const nextState = endsEpisode ? null : measuredState(m);
+    const reward = rewardOf({ accuracy: m.accuracy, passed: m.passed }, decision.addedDecisions, weights, endsEpisode);
     next = updateQ(next, decision.state, decision.action, reward, nextState, GAMMA).table;
     operations.push({ kind: 'update', state: decision.state, action: decision.action, reward, next: nextState, gamma: GAMMA });
     rewards.push({
@@ -390,13 +396,10 @@ const rewardPending = (
  * pending decision is rewarded by the first graded answers its competency gets
  * after it, so a quiz that covers the competency settles it before the drive.
  *
- * The quiz only covers the stage's own competencies, and every one of them
- * gets a drive decision next, so s' is the quiz's state (mastery after the
- * quiz, passed at it) and never terminal.
- *
- * OPEN: s' is the state after the quiz, but the next decision is taken at the
- * drive's state, so the max over Q(s', a') looks at a state the learner moves
- * on from before deciding. To discuss with the reward function.
+ * What a quiz settles is a decision to move on (`none`) from an earlier
+ * stage: that ended its episode (2026-11-20), so the quiz's accuracy is its
+ * reward and s' is null. A practice or review is always settled by its own
+ * stage's repeat drive first.
  */
 export const quizMeasured = (
   cursor: CourseCursor,

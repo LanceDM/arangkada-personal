@@ -6,6 +6,8 @@ const RELEASED: Record<string, string> = {
   '2026-10-28a': '561fa9bb',
   '2026-10-28b': '45470d72',
   '2026-11-10a': 'eb6bd039',
+  // gamma 1 with one episode per competency per stage, no pass bonus, warm-up 2 / 0 / 0.
+  '2026-11-20a': 'e3586c18',
 };
 
 describe('the run config version', () => {

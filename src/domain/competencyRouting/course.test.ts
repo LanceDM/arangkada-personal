@@ -111,8 +111,9 @@ describe('the per-competency routing FSM', () => {
     });
     const rewarded = second.rewards.find(r => r.competency === 'document_awareness')!;
     expect(rewarded.action).toBe('practice');
-    // A_next 2/3, passed, practice added 3 decisions.
-    expect(rewarded.reward).toBeCloseTo(2 / 3 + 0.5 - 0.06, 10);
+    // Mid-episode (a decision follows in the stage): only its cost, 3 added
+    // decisions x 0.02, and the measured state as s' (2026-11-20).
+    expect(rewarded.reward).toBeCloseTo(-0.06, 10);
     expect(rewarded.next).toEqual({ mastery: 3, result: 'passed' });
     // The none taken for driver_legality waits for its next measurement.
     expect(second.cursor.pending.some(p => p.competency === 'driver_legality')).toBe(true);
@@ -172,8 +173,10 @@ describe('the per-competency routing FSM', () => {
     };
     const out = quizMeasured(cursor, [measured('document_awareness', 2, 0.85)], emptyQTable(), 5);
     expect(out.rewards).toHaveLength(1);
-    expect(out.rewards[0]).toMatchObject({ competency: 'document_awareness', measuredBy: 'quiz', next: { mastery: 3, result: 'passed' } });
-    expect(out.rewards[0].reward).toBeCloseTo(2 / 3 + 0.5, 10);
+    // Moving on ended that stage's episode: the later quiz's accuracy is its
+    // reward, with no next state and no pass bonus (2026-11-20).
+    expect(out.rewards[0]).toMatchObject({ competency: 'document_awareness', measuredBy: 'quiz', next: null });
+    expect(out.rewards[0].reward).toBeCloseTo(2 / 3, 10);
     // Driver legality is not in Level 2's quiz: it keeps waiting.
     expect(out.cursor.pending.map(p => p.competency)).toEqual(['driver_legality']);
     expect(applyQOperations(emptyQTable(), out.operations)).toEqual(out.table);
@@ -189,7 +192,7 @@ describe('the per-competency routing FSM', () => {
     };
     const out = finalMeasured(cursor, [{ competency: 'parking', accuracy: 1, passed: true, masteryP: 0.9, driveEvidence: 9 }], emptyQTable(), 3);
     expect(out.rewards).toHaveLength(1);
-    expect(out.rewards[0]).toMatchObject({ measuredBy: 'final', next: null, reward: 1.5 });
+    expect(out.rewards[0]).toMatchObject({ measuredBy: 'final', next: null, reward: 1 });
     expect(out.cursor.pending).toEqual([]);
   });
 
