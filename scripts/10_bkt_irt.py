@@ -167,7 +167,7 @@ for code in CODES:
         b = rasch_b(tr_seqs, test_only)
         p = fit(with_irt, b, trd)
         if with_irt:
-            weights[name].append(float(p["w"]))
+            weights[name].append(float(p["w"].detach()))
         with torch.no_grad():
             preds[name].append(forward(p, b, ted).numpy()[m])
     print(f"  fold {code} done", flush=True)
