@@ -1,0 +1,28 @@
+{
+ "exportedAt": "2026-11-24T05:18:37.084448",
+ "counts": {
+  "q_tables/*/updates": 1519,
+  "q_tables": 3,
+  "quiz_items": 306,
+  "study_counters": 3,
+  "study_invites": 15,
+  "test_designs": 1,
+  "users/*/attempts/*/telemetry": 460,
+  "users/*/attempts": 411,
+  "users/*/bkt": 31,
+  "users/*/bktUpdates": 6280,
+  "users/*/course": 124,
+  "users/*/courseLog": 426,
+  "users/*/courseQuizSittings": 251,
+  "users/*/progress": 43,
+  "users/*/study": 153,
+  "users/*/testDrafts": 54,
+  "users/*/testSittings": 52,
+  "users/*/testStatus": 54,
+  "users/*/dailyAttempts": 33,
+  "users/*/dailyStreak": 10,
+  "users/*/examAttempts": 10,
+  "users/*/routing": 2,
+  "users": 51
+ }
+}
