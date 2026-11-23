@@ -1,0 +1,9 @@
+Attempts analysed: 284 (258 drives, 26 final-exam drives) from 21 participants
+Logged FSM transitions: 67689; distinct edges used: 61 of 109 defined
+Transitions not in the FSM's table: 0
+Graded through the FSM's verdict edges (answer_correct / answer_incorrect): 2072 (correct 1749, incorrect 323); the scoring log below also counts rule checks graded outside those edges (e.g. holding speed over a limit)
+Graded decisions: 2499; correct 1962 (78.5%); violations 537
+Runs ended by a collision: 17; timed out: 1
+Repeat drives: 111
+Competencies missed on a level's first drive and tested again in a repeat: 96 (from 20 participants)
+  accuracy on those competencies: first drive 0.380 -> last repeat 0.709; fully correct on the last repeat: 50.0%; Wilcoxon signed-rank p = 2.2e-12

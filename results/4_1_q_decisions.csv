@@ -1,0 +1,9 @@
+state,exploit,explore,forced,decisions,legal_actions,final_tag
+M1-passed,0,0,23,23,practice,no_choice
+M1-failed,18,6,0,24,practice/review,exploiting
+M2-passed,25,6,0,31,none/practice,exploiting
+M2-failed,4,5,0,9,practice/review,exploiting
+M3-passed,33,11,0,44,none/practice,exploiting
+M3-failed,5,4,0,9,practice/review,exploiting
+M4-passed,382,44,0,426,none/practice,exploiting
+M4-failed,49,10,0,59,practice/review,exploiting

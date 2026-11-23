@@ -1,0 +1,16 @@
+state,action,Q,updates,visits,leader
+M1-passed,practice,0.4754,23,23,True
+M1-failed,practice,0.5352,20,20,True
+M1-failed,review,0.2341,4,4,False
+M2-passed,none,0.8148,27,27,True
+M2-passed,practice,0.5493,4,4,False
+M2-failed,practice,0.6141,6,6,True
+M2-failed,review,0.4195,3,3,False
+M3-passed,none,0.7374,33,33,True
+M3-passed,practice,0.4999,11,11,False
+M3-failed,practice,0.7067,5,5,True
+M3-failed,review,0.6205,4,4,False
+M4-passed,none,0.7977,384,384,True
+M4-passed,practice,0.7005,42,42,False
+M4-failed,practice,0.7275,10,10,False
+M4-failed,review,0.7508,49,49,True

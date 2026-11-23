@@ -1,0 +1,6 @@
+Q-table log entries: 1250 (625 decisions, 625 rewards) from 21 participants
+Decisions: forced (one legal action) 23, exploit (took the leader) 516, explore 86
+Rewards measured by: drive 289, final exam 231, quiz 105
+States visited: 8 of 8; most visited: M4-passed (426 decisions)
+Final leader per state: M1-passed=practice, M1-failed=practice, M2-passed=none, M2-failed=practice, M3-passed=none, M3-failed=practice, M4-passed=none, M4-failed=review
+Learned leader agrees with the fallback rule in 7 of 8 states

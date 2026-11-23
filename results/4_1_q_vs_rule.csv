@@ -1,0 +1,9 @@
+state,legal,learned_leader,rule,agrees
+M1-passed,practice,practice,practice,True
+M1-failed,practice/review,practice,practice or review,True
+M2-passed,none/practice,none,practice,False
+M2-failed,practice/review,practice,practice or review,True
+M3-passed,none/practice,none,none,True
+M3-failed,practice/review,practice,practice or review,True
+M4-passed,none/practice,none,none,True
+M4-failed,practice/review,review,practice or review,True
