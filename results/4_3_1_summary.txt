@@ -1,0 +1,10 @@
+Study participants enrolled: 22
+Withdrawn: 1 (P-0011)
+Pre-test fully answered: 19; post-test fully answered: 21
+Pre-test closed by the deadline: P-0003 (0/60 answered), P-0014 (23/60 answered)
+Complete (pre + post fully answered, not withdrawn): 19
+Drive attempts: 258; final-exam drives: 26
+Course quiz sittings: 200
+BKT updates: 4650 (drive 2242, quiz 1245, pre-test 1163)
+Q-learning updates: 1250
+Timed-out attempts: 1; runs ended by a collision: 17
