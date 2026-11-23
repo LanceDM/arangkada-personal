@@ -1,27 +1,21 @@
-"""4.2: the pre-test, the adaptive post-test and the learning outcome.
+"""4.2 (classical test statistics): item difficulty, discrimination, KR-20, routing.
+
+The IRT (Rasch) evaluation is in 04_irt.py. No pre-test vs post-test comparison
+is made.
 
 Pre-test: 60 fixed items (the whole test bank). Post-test: a two-stage
 adaptive test of 30 items, 15 routing items for everyone, then a 15-item easy,
 medium or hard block chosen by the routing score. Every post-test item is also
 in the pre-test.
 
-Sample: the 21 active participants for item statistics where they answered;
-the 19 who fully answered both tests for reliability and the learning outcome
-(P-0003 and P-0014 had their pre-test closed by the time limit).
+Sample: the 19 participants who fully answered the pre-test (P-0003 and P-0014
+had theirs closed by the time limit); the 21 for the post-test routing.
 
 Outputs (results/):
   4_2_summary.txt
   4_2_item_analysis.csv       per item: difficulty (p) and discrimination, pre and post
   4_2_routing.csv             post-test routing per participant
-  4_2_pre_post.csv            per participant: pre and post on the same items
-  4_2_pre_post_by_competency.csv
-  fig_4_2_pre_post.png
 """
-from collections import defaultdict
-
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -112,54 +106,6 @@ rt.to_csv(RESULTS / "4_2_routing.csv", index=False)
 blk = rt.groupby("block").agg(participants=("code", "size"), mean_routing=("routing_score", "mean"),
                               mean_block_score=("block_score", "mean"))
 
-# --- learning outcome: same items, pre vs post ----------------------------------
-pp = []
-for c in complete:
-    post_items = set(post[post.code == c].item)
-    a = pre[(pre.code == c) & pre.item.isin(post_items)].correct
-    b = post[post.code == c].correct
-    pp.append({"code": c, "items": len(post_items), "block": rt.set_index("code").block.get(c),
-               "pre_same_items": a.mean(), "post": b.mean(), "pre_all_60": pre[pre.code == c].correct.mean()})
-pp = pd.DataFrame(pp)
-pp["gain"] = pp.post - pp.pre_same_items
-pp.round(4).to_csv(RESULTS / "4_2_pre_post.csv", index=False)
-diff = pp.gain
-shapiro = stats.shapiro(diff)
-t = stats.ttest_rel(pp.post, pp.pre_same_items)
-w = stats.wilcoxon(pp.post, pp.pre_same_items)
-dz = diff.mean() / diff.std(ddof=1)
-
-# by competency (pooled over the 19, same items)
-bc = defaultdict(lambda: [0, 0, 0, 0])
-for c in complete:
-    post_c = post[post.code == c]
-    for _, r in post_c.iterrows():
-        pr = pre[(pre.code == c) & (pre.item == r["item"])].correct
-        if len(pr):
-            v = bc[r.competency]
-            v[0] += pr.iloc[0]; v[1] += r.correct; v[2] += 1
-bcd = pd.DataFrame([{"competency": k, "responses": v[2], "pre": v[0] / v[2], "post": v[1] / v[2],
-                     "gain": (v[1] - v[0]) / v[2]} for k, v in bc.items()]).sort_values("gain")
-bcd.round(4).to_csv(RESULTS / "4_2_pre_post_by_competency.csv", index=False)
-
-# --- figure --------------------------------------------------------------------
-fig, ax = plt.subplots(figsize=(7, 4.6), dpi=200)
-for _, r in pp.iterrows():
-    col = "#2E7D32" if r.gain > 0 else "#C8102E" if r.gain < 0 else "#888888"
-    ax.plot([0, 1], [r.pre_same_items * 100, r.post * 100], color=col, alpha=.7, lw=1.4, marker="o", ms=4)
-ax.plot([0, 1], [pp.pre_same_items.mean() * 100, pp.post.mean() * 100], color="#223864", lw=4, marker="o", ms=8,
-        label=f"Mean ({pp.pre_same_items.mean():.0%} → {pp.post.mean():.0%})")
-ax.set_xticks([0, 1], ["Pre-test", "Post-test"])
-ax.set_xlim(-.3, 1.3)
-ax.set_ylim(0, 105)
-ax.set_ylabel("Percent correct on the same items")
-ax.grid(axis="y", color="#dddddd")
-ax.legend(frameon=False, loc="lower right")
-for s in ("top", "right"):
-    ax.spines[s].set_visible(False)
-fig.tight_layout()
-fig.savefig(RESULTS / "fig_4_2_pre_post.png")
-
 lines = [
     f"Participants: {len(codes)} active; {len(full('pre'))} fully answered the pre-test, "
     f"{len(full('post'))} the post-test; {len(complete)} both",
@@ -173,16 +119,6 @@ lines = [
     "Post-test routing (cuts " + "/".join(map(str, design.get("cuts") if isinstance(design.get("cuts"), list) else rt.cuts.iloc[0].split("/"))) + ")",
 ] + [f"  {b}: {int(r.participants)} participants, mean routing score {r.mean_routing:.1f}/15, "
      f"mean block score {r.mean_block_score:.1f}/15" for b, r in blk.iterrows()] + [
-    "",
-    f"Learning outcome (n = {len(pp)}, each participant's post-test items scored in both tests)",
-    f"  pre {pp.pre_same_items.mean():.3f} (SD {pp.pre_same_items.std():.3f}) -> post {pp.post.mean():.3f} (SD {pp.post.std():.3f}); "
-    f"mean gain {diff.mean():+.3f}",
-    f"  improved {int((diff > 0).sum())}, same {int((diff == 0).sum())}, declined {int((diff < 0).sum())}",
-    f"  Shapiro-Wilk on the differences: W = {shapiro.statistic:.3f}, p = {shapiro.pvalue:.3f}",
-    f"  paired t({len(pp) - 1}) = {t.statistic:.3f}, p = {t.pvalue:.4f}; Cohen's d_z = {dz:.2f}",
-    f"  Wilcoxon signed-rank: W = {w.statistic:.1f}, p = {w.pvalue:.4f}",
 ]
 (RESULTS / "4_2_summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 print("\n".join(lines))
-print("\n", bcd.round(3).to_string(index=False))
-print("\n", pp.round(3).to_string(index=False))
