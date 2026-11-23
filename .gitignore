@@ -1,0 +1,6 @@
+# Raw participant data and keys never go in git (this repo is public)
+data/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
