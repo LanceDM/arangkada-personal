@@ -1,0 +1,13 @@
+BKT next answer | all | threshold 0.5 | n 4650
+  TP 3336, FP 890, FN 254, TN 170; accuracy 0.754, precision 0.789, recall 0.929, specificity 0.160, F1 0.854, balanced accuracy 0.545, MCC 0.131, kappa 0.114
+BKT next answer | drive | threshold 0.5 | n 2242
+  TP 1798, FP 316, FN 90, TN 38; accuracy 0.819, precision 0.851, recall 0.952, specificity 0.107, F1 0.899, balanced accuracy 0.530, MCC 0.094, kappa 0.081
+BKT next answer | pre_test | threshold 0.5 | n 1163
+  TP 816, FP 293, FN 0, TN 54; accuracy 0.748, precision 0.736, recall 1.000, specificity 0.156, F1 0.848, balanced accuracy 0.578, MCC 0.338, kappa 0.205
+BKT next answer | quiz | threshold 0.5 | n 1245
+  TP 722, FP 281, FN 164, TN 78; accuracy 0.643, precision 0.720, recall 0.815, specificity 0.217, F1 0.764, balanced accuracy 0.516, MCC 0.037, kappa 0.036
+BKT next answer | all (Youden-optimal threshold) | threshold 0.899 | n 4650
+  TP 1009, FP 139, FN 2581, TN 921; accuracy 0.415, precision 0.879, recall 0.281, specificity 0.869, F1 0.426, balanced accuracy 0.575, MCC 0.146, kappa 0.083
+Final mastery (Mastered) vs post-test answer | all | threshold level 4 | n 630
+  TP 383, FP 150, FN 75, TN 22; accuracy 0.643, precision 0.719, recall 0.836, specificity 0.128, F1 0.773, balanced accuracy 0.482, MCC -0.044, kappa -0.041
+ROC AUC (BKT next answer): 0.574

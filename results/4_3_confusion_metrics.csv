@@ -1,0 +1,7 @@
+model,threshold,group,n,TP,FP,FN,TN,accuracy,precision,recall,specificity,npv,f1,balanced_accuracy,mcc,kappa
+BKT next answer,0.5,all,4650,3336,890,254,170,0.754,0.7894,0.9292,0.1604,0.4009,0.8536,0.5448,0.1306,0.1137
+BKT next answer,0.5,drive,2242,1798,316,90,38,0.8189,0.8505,0.9523,0.1073,0.2969,0.8986,0.5298,0.0938,0.0806
+BKT next answer,0.5,pre_test,1163,816,293,0,54,0.7481,0.7358,1.0,0.1556,1.0,0.8478,0.5778,0.3384,0.2055
+BKT next answer,0.5,quiz,1245,722,281,164,78,0.6426,0.7198,0.8149,0.2173,0.3223,0.7644,0.5161,0.0368,0.0356
+BKT next answer,0.899,all (Youden-optimal threshold),4650,1009,139,2581,921,0.4151,0.8789,0.2811,0.8689,0.263,0.4259,0.575,0.1459,0.0828
+Final mastery (Mastered) vs post-test answer,level 4,all,630,383,150,75,22,0.6429,0.7186,0.8362,0.1279,0.2268,0.773,0.4821,-0.0443,-0.0415
