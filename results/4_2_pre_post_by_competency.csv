@@ -1,0 +1,12 @@
+competency,responses,pre,post,gain
+document_awareness,43,0.6512,0.6279,-0.0233
+lane_discipline,57,0.7368,0.7193,-0.0175
+traffic_signals,52,0.6154,0.6538,0.0385
+parking,43,0.5814,0.6279,0.0465
+right_of_way,52,0.6538,0.7308,0.0769
+driver_legality,52,0.6154,0.7308,0.1154
+general_rules,62,0.7419,0.871,0.129
+pedestrians,38,0.6842,0.8158,0.1316
+road_signs,38,0.5,0.6579,0.1579
+hazard_awareness,76,0.6316,0.7895,0.1579
+speed_control,57,0.4737,0.6491,0.1754

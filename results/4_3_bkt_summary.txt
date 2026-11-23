@@ -1,0 +1,10 @@
+BKT updates analysed: 4650 from 21 participants; parameters: {'pTransit': 0.03, 'pGuess': 0.35, 'pSlip': 0.1}, {'pTransit': 0.03, 'pGuess': 0.25, 'pSlip': 0.2}, {'pTransit': 0, 'pGuess': 0.25, 'pSlip': 0.1}
+Observed correct rate: 0.772
+BKT predictions: accuracy 0.754, AUC 0.577, Brier 0.188, log loss 0.569
+Baseline (always predict the overall rate): accuracy 0.772, AUC 0.5, Brier 0.176
+On answers with earlier evidence in the competency (n = 4419): BKT AUC 0.600, Brier 0.188; running-mean baseline AUC 0.577, Brier 0.196
+Calibration: expected calibration error (10 bins) = 0.100
+
+Final mastery (21 participants x 11 competencies = 231): Beginning 9 (4%); Developing 11 (5%); Nearly mastered 13 (6%); Mastered 198 (86%)
+Capped at Nearly mastered for too little drive evidence: 0
+Mean final mastery vs post-test score: Spearman rho = 0.390, p = 0.081 (n = 21)

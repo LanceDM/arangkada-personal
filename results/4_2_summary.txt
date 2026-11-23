@@ -1,0 +1,18 @@
+Participants: 21 active; 19 fully answered the pre-test, 21 the post-test; 19 both
+
+Item analysis (pre-test, 60 items, fully answered pre-tests)
+  mean difficulty p = 0.708; moderate (.30-.80): 35; easy (p > .80): 23; difficult (p < .30): 2
+  discrimination (corrected point-biserial): very good (>= .40): 16; poor (< .20): 15; fair (.20-.29): 12; good (.30-.39): 11; no variance: 6
+  KR-20 pre-test (60 items, n = 19): 0.877
+  KR-20 post-test routing stage (15 items, n = 21): 0.029
+
+Post-test routing (cuts 6/12)
+  hard: 15 participants, mean routing score 13.0/15, mean block score 8.5/15
+  medium: 6 participants, mean routing score 10.8/15, mean block score 11.7/15
+
+Learning outcome (n = 19, each participant's post-test items scored in both tests)
+  pre 0.630 (SD 0.162) -> post 0.723 (SD 0.064); mean gain +0.093
+  improved 15, same 0, declined 4
+  Shapiro-Wilk on the differences: W = 0.959, p = 0.561
+  paired t(18) = 2.496, p = 0.0225; Cohen's d_z = 0.57
+  Wilcoxon signed-rank: W = 35.0, p = 0.0154

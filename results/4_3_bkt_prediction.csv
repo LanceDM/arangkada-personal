@@ -1,0 +1,19 @@
+group,n,observed_correct,accuracy,auc,brier,log_loss
+all,4650,0.772,0.754,0.5767,0.1878,0.5687
+baseline: overall correct rate,4650,0.772,0.772,0.5,0.176,0.5368
+all (answers with an earlier answer in the competency),4419,0.7619,0.7429,0.6,0.1879,0.5689
+baseline: participant's running mean in the competency,4419,0.7619,0.7495,0.5775,0.1959,1.1386
+source: drive,2242,0.8421,0.8189,0.6071,0.1417,0.4553
+source: pre_test,1163,0.7016,0.7481,0.4281,0.2307,0.6926
+source: quiz,1245,0.7116,0.6426,0.5021,0.2307,0.6573
+competency: document_awareness,489,0.7096,0.683,0.5329,0.2254,0.6582
+competency: driver_legality,300,0.6667,0.6467,0.4948,0.2532,0.7331
+competency: general_rules,303,0.7624,0.7558,0.4154,0.2097,0.6389
+competency: hazard_awareness,305,0.7311,0.7049,0.5632,0.2159,0.6357
+competency: lane_discipline,771,0.738,0.7276,0.5489,0.2104,0.6273
+competency: parking,316,0.7025,0.693,0.5144,0.2331,0.68
+competency: pedestrians,496,0.9032,0.9012,0.5601,0.0984,0.3472
+competency: right_of_way,379,0.7784,0.7467,0.5169,0.193,0.5852
+competency: road_signs,451,0.8115,0.7827,0.6051,0.1656,0.513
+competency: speed_control,305,0.7803,0.741,0.6137,0.181,0.5491
+competency: traffic_signals,535,0.843,0.8318,0.7166,0.1306,0.4185
