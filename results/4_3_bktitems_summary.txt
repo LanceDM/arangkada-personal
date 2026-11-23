@@ -1,0 +1,11 @@
+Answers: 4650, 21 participants, 398 questions / drive checks; leave-one-participant-out; L2 on question offsets = 1.0
+
+BKT hand-set (as logged)     AUC 0.577  Brier 0.188  log loss 0.569  accuracy 0.754  balanced acc 0.545  MCC 0.131  specificity 0.160
+BKT (pre-test as a block)    AUC 0.627  Brier 0.169  log loss 0.512  accuracy 0.772  balanced acc 0.500  MCC 0.000  specificity 0.000
+BKT + item easiness          AUC 0.774  Brier 0.145  log loss 0.449  accuracy 0.786  balanced acc 0.603  MCC 0.277  specificity 0.266
+KT-IDEM                      AUC 0.769  Brier 0.146  log loss 0.453  accuracy 0.786  balanced acc 0.600  MCC 0.274  specificity 0.258
+Item difficulty only (08_pfa.py) AUC 0.768  Brier 0.146  log loss 0.454  accuracy 0.785  balanced acc 0.590  MCC 0.261  specificity 0.231
+PFA + items (08_pfa.py)      AUC 0.769  Brier 0.146  log loss 0.453  accuracy 0.786  balanced acc 0.602  MCC 0.277  specificity 0.262
+
+BKT + item easiness: higher AUC than plain BKT for 21 of 21 held-out participants (Wilcoxon p = 0.0000)
+KT-IDEM: higher AUC than plain BKT for 21 of 21 held-out participants (Wilcoxon p = 0.0000)
