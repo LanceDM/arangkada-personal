@@ -1,0 +1,16 @@
+state,action,decisions,updates,mean_target,ci95_low,ci95_high,final_Q,last5_mean_abs_dq
+M1-passed,practice,23,23,0.475,0.326,0.625,0.475,0.013
+M1-failed,practice,20,20,0.535,0.37,0.7,0.535,0.023
+M1-failed,review,4,4,0.234,-0.346,0.814,0.234,0.151
+M2-passed,none,27,27,0.815,0.681,0.948,0.815,0.012
+M2-passed,practice,4,4,0.549,-0.098,1.196,0.549,0.167
+M2-failed,practice,6,6,0.614,0.396,0.832,0.614,0.04
+M2-failed,review,3,3,0.42,-0.279,1.118,0.42,0.178
+M3-passed,none,33,33,0.737,0.609,0.865,0.737,0.008
+M3-passed,practice,11,11,0.5,0.307,0.692,0.5,0.021
+M3-failed,practice,5,5,0.707,0.574,0.84,0.707,0.198
+M3-failed,review,4,4,0.621,0.274,0.967,0.621,0.211
+M4-passed,none,384,384,0.798,0.762,0.833,0.798,0.001
+M4-passed,practice,42,42,0.7,0.636,0.765,0.7,0.005
+M4-failed,practice,10,10,0.727,0.605,0.85,0.727,0.002
+M4-failed,review,49,49,0.751,0.731,0.77,0.751,0.0

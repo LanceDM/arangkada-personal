@@ -1,0 +1,16 @@
+transition,count
+MODULE -> QUIZ (lessons read),126
+QUIZ -> DRIVE (every competency passed),118
+DRIVE -> REPEAT (some competencies not done),78
+"QUIZ -> QUIZ (some failed, retake)",74
+REPEAT -> MODULE (every competency done),64
+DRIVE -> MODULE (every competency done),41
+REPEAT -> REPEAT (some competencies not done),33
+MODULE -> DRIVE (lessons read),21
+DRIVE -> MODULE (tutorial ended),21
+FINAL -> CERTIFIED (passed),21
+REPEAT -> FINAL (every competency done),14
+QUIZ -> QUIZ_REVIEW (third attempt failed),8
+QUIZ_REVIEW -> DRIVE (module reviewed),8
+DRIVE -> FINAL (every competency done),7
+FINAL -> FINAL (failed),5

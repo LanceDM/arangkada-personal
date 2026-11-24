@@ -1,0 +1,32 @@
+Participants: 21; logged activities replayed: 484
+Routing transitions rebuilt: 639; illegal: 0 (0.00% error rate)
+Participants whose replay ends where their stored course ends: 21 of 21
+End states: CERTIFIED 21
+
+Transitions taken:
+  MODULE -> QUIZ (lessons read): 126
+  QUIZ -> DRIVE (every competency passed): 118
+  DRIVE -> REPEAT (some competencies not done): 78
+  QUIZ -> QUIZ (some failed, retake): 74
+  REPEAT -> MODULE (every competency done): 64
+  DRIVE -> MODULE (every competency done): 41
+  REPEAT -> REPEAT (some competencies not done): 33
+  MODULE -> DRIVE (lessons read): 21
+  DRIVE -> MODULE (tutorial ended): 21
+  FINAL -> CERTIFIED (passed): 21
+  REPEAT -> FINAL (every competency done): 14
+  QUIZ -> QUIZ_REVIEW (third attempt failed): 8
+  QUIZ_REVIEW -> DRIVE (module reviewed): 8
+  DRIVE -> FINAL (every competency done): 7
+  FINAL -> FINAL (failed): 5
+
+Quiz retakes that also re-asked competencies already passed (content, not a transition): 9
+  P-0006: QUIZ(6) a2 also asked ['lane_discipline']
+  P-0007: QUIZ(6) a2 also asked ['parking']
+  P-0012: QUIZ(2) a2 also asked ['general_rules', 'hazard_awareness']
+  P-0012: QUIZ(5) a2 also asked ['pedestrians', 'right_of_way']
+  P-0013: QUIZ(1) a3 also asked ['document_awareness']
+  P-0013: QUIZ(3) a2 also asked ['lane_discipline', 'pedestrians', 'traffic_signals']
+  P-0013: QUIZ(5) a2 also asked ['pedestrians', 'right_of_way']
+  P-0014: QUIZ(6) a2 also asked ['parking']
+  P-0020: QUIZ(6) a3 also asked ['lane_discipline']

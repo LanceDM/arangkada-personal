@@ -1,0 +1,6 @@
+expected,decisions,correct,participants,violations,accuracy
+brake,981,783,21,198,0.7982
+stop,720,607,21,113,0.8431
+accelerate,651,515,21,136,0.7911
+turn_left,76,29,21,47,0.3816
+turn_right,71,28,21,43,0.3944
