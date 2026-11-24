@@ -1,0 +1,9 @@
+model,auc,brier,balanced_accuracy,specificity,mcc,TP,FP,FN,TN,rmse
+Always predict the overall correct rate (baseline),0.5,0.176,0.5,0.0,0.0,3590,1060,0,0,0.4195
+"BKT, hand-set parameters (as used in the study)",0.5767,0.1878,0.5448,0.1604,0.1306,3336,890,254,170,0.4334
+"BKT, parameters fitted to the data",0.6266,0.1689,0.5,0.0,0.0,3590,1060,0,0,0.411
+Performance Factors Analysis (PFA),0.6475,0.1679,0.5012,0.0038,0.0227,3585,1056,5,4,0.4098
+Question difficulty only (no learner history),0.7677,0.1463,0.5899,0.2311,0.2608,3406,815,184,245,0.3825
+"BKT + IRT difficulty, 60 test items only",0.6973,0.1602,0.5566,0.1472,0.2003,3468,904,122,156,0.4002
+BKT + learned easiness per question,0.7742,0.1446,0.6025,0.266,0.2774,3371,778,219,282,0.3803
+"BKT + IRT difficulty, all questions",0.765,0.1494,0.6471,0.384,0.3395,3268,653,322,407,0.3865
