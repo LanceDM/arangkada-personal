@@ -15,6 +15,7 @@ Outputs (results/):
 from collections import Counter, defaultdict
 
 import matplotlib
+import matplotlib.ticker
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -112,6 +113,30 @@ fig.supxlabel("Update number within the state")
 fig.supylabel("Q-value")
 fig.tight_layout(rect=(0, 0.03, 1, 1))
 fig.savefig(RESULTS / "fig_4_1_q_convergence.png")
+
+# the same, one figure per state (for the paper: one readable chart each)
+for s in states:
+    fig, ax = plt.subplots(figsize=(6.5, 3.4), dpi=200)
+    for a in ACTIONS:
+        if a not in series[s]:
+            continue
+        xs, ys = zip(*series[s][a])
+        ax.plot(xs, ys, label=a, color=colors[a], lw=2,
+                marker="o" if n_state[s] <= 60 else None, ms=3.5)
+    lo = min(v for pts in series[s].values() for _, v in pts)
+    ax.set_ylim(min(0, lo - 0.05), 1.05)     # a step reward alone is negative (-0.02 per added scenario)
+    ax.set_xlabel("Update number within the state", fontsize=10)
+    ax.set_ylabel("Q-value", fontsize=10)
+    ax.grid(color="#dddddd", lw=0.6)
+    ax.tick_params(labelsize=9)
+    if n_state[s] < 15:
+        ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(integer=True))
+    for sp in ("top", "right"):
+        ax.spines[sp].set_visible(False)
+    ax.legend(title="Action", frameon=False, fontsize=9, title_fontsize=9, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(RESULTS / f"fig_4_1_q_convergence_{s}.png")
+    plt.close(fig)
 
 sel = Counter(u["decision"]["selection"] for u in visits)
 meas = Counter(u["learning"]["measuredBy"] for u in learns)
