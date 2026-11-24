@@ -1,7 +1,8 @@
 """4.2: IRT (Rasch) evaluation of the assessment and its adaptive post-test.
 
 The system scores tests with the Rasch (1PL) model: one difficulty b per item,
-ability theta by EAP with a N(0, 1) prior. The post-test adapts by stage: 15
+ability theta by weighted likelihood estimation (WLE; Warm, 1989), as in the
+deployed scoring. The post-test adapts by stage: 15
 routing items for everyone, then an easy, medium or hard block of 15 chosen by
 the routing score (cuts 6 / 12). The blocks were built from item difficulties
 estimated on the pre-tests.
@@ -9,9 +10,9 @@ estimated on the pre-tests.
 This script:
   4.2.1 calibrates the 60 items on the pre-test with conditional maximum
         likelihood (CML), with standard errors and infit / outfit mean squares;
-  4.2.2 reports reliability (KR-20, EAP person reliability) and the test and
+  4.2.2 reports reliability (KR-20, WLE person reliability) and the test and
         block information functions;
-  4.2.3 estimates each participant's ability (EAP theta, SE) on the pre-test and
+  4.2.3 estimates each participant's ability (WLE theta, SE) on the pre-test and
         on the post-test, and the Ability Estimation Error (sqrt of mean SE^2);
   4.2.4 checks the difficulty adjustment: block difficulties in order, each
         routed participant's block against the block that is most informative at
@@ -33,12 +34,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize
+from scipy.optimize import brentq, minimize
 
 from common import RESULTS, load, study_participants
 
-GRID = np.arange(-6, 6.0001, 0.05)
-PRIOR = np.exp(-0.5 * GRID ** 2)
 
 design = next(d for d in load("test_designs") if d["_id"] == "post")
 BLOCKS = ["routing", "easy", "medium", "hard"]
@@ -104,16 +103,20 @@ def p_correct(theta, b):
     return 1 / (1 + np.exp(-(theta - b)))
 
 
-def eap(resp):
-    """resp: list of (b, correct). EAP theta and posterior SD on the grid."""
-    like = np.ones_like(GRID)
-    for b, y in resp:
-        pr = p_correct(GRID, b)
-        like *= pr if y else 1 - pr
-    w = like * PRIOR
-    w /= w.sum()
-    m = (w * GRID).sum()
-    return m, np.sqrt((w * (GRID - m) ** 2).sum())
+def wle(resp):
+    """resp: list of (b, correct). Warm's (1989) weighted likelihood estimate and its SE,
+    1 / sqrt(I(theta)). Finite for all-correct and all-wrong patterns."""
+    bs = np.array([b for b, _ in resp]); ys = np.array([float(y) for _, y in resp])
+
+    def score(th):
+        pr = p_correct(th, bs)
+        i = (pr * (1 - pr)).sum()
+        j = (pr * (1 - pr) * (1 - 2 * pr)).sum()
+        return (ys - pr).sum() + j / (2 * i)
+
+    th = brentq(score, -10, 10)
+    pr = p_correct(th, bs)
+    return th, 1 / np.sqrt((pr * (1 - pr)).sum())
 
 
 def info(theta, bs):
@@ -124,12 +127,12 @@ def info(theta, bs):
 # person estimates on the pre-test (calibrated items only)
 persons = []
 for code, row in X.iterrows():
-    th, se = eap([(B[i], row[i]) for i in est_items])
+    th, se = wle([(B[i], row[i]) for i in est_items])
     persons.append({"code": code, "pre_score": int(row.sum()), "pre_items": len(items),
                     "theta_pre": th, "se_pre": se})
 persons = pd.DataFrame(persons).set_index("code")
 
-# infit / outfit at the EAP thetas
+# infit / outfit at the WLE thetas
 fit = []
 for i in est_items:
     th = persons.loc[X.index, "theta_pre"].values
@@ -164,7 +167,8 @@ def kr20(m):
 
 
 kr20_pre = kr20(X.values)
-eap_rel_pre = persons.theta_pre.var(ddof=1) / (persons.theta_pre.var(ddof=1) + (persons.se_pre ** 2).mean())
+# WLE person reliability: the share of the variance of the estimates that is not error
+wle_rel_pre = 1 - (persons.se_pre ** 2).mean() / persons.theta_pre.var(ddof=1)
 
 # block b's: items without an estimate (everyone right / wrong) get the extreme-score
 # value the app uses, b = ln((1 - p) / p) with p clamped half a response from 0 / 1
@@ -185,15 +189,15 @@ for code, d in post.items():
     resp = d["resp"]
     rt = [(BB[x["itemId"]], bool(x["correct"])) for x in resp if x.get("block") == "routing"]
     allr = [(BB[x["itemId"]], bool(x["correct"])) for x in resp]
-    th_r, se_r = eap(rt)
-    th_p, se_p = eap(allr)
+    th_r, se_r = wle(rt)
+    th_p, se_p = wle(allr)
     routed = d["routing"]["block"]
     inf = {bl: info(th_r, block_b[bl]) for bl in ("easy", "medium", "hard")}
     best = max(inf, key=inf.get)
     stage2 = [bb for bb, _ in allr[len(rt):]]
     gaps = {bl: abs(th_p - np.mean(block_b[bl])) for bl in ("easy", "medium", "hard")}
     # SE the participant would have had with each block instead (routing + block)
-    se_alt = {bl: 1 / np.sqrt(info(th_p, [b for b, _ in rt] + block_b[bl]) + 1) for bl in ("easy", "medium", "hard")}
+    se_alt = {bl: 1 / np.sqrt(info(th_p, [b for b, _ in rt] + block_b[bl])) for bl in ("easy", "medium", "hard")}
     prow.append({"code": code, "routing_score": d["routing"]["score"], "routed_block": routed,
                  "theta_routing": th_r, "se_routing": se_r,
                  "most_informative_block": best, "consistent": routed == best,
@@ -210,7 +214,7 @@ persons.round(4).to_csv(RESULTS / "4_2_irt_persons.csv")
 
 rmse_pre = np.sqrt((persons.se_pre.dropna() ** 2).mean())
 rmse_post = np.sqrt((R.se_post ** 2).mean())
-eap_rel_post = R.theta_post.var(ddof=1) / (R.theta_post.var(ddof=1) + (R.se_post ** 2).mean())
+wle_rel_post = 1 - (R.se_post ** 2).mean() / R.theta_post.var(ddof=1)
 
 # --- figures ----------------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(7.5, 5.5), dpi=200)
@@ -262,17 +266,17 @@ lines = [
     f"misfit: {', '.join(it.index[it.fit == 'misfit']) or '-'}",
     "",
     "4.2.2 Reliability and information",
-    f"  KR-20 pre-test: {kr20_pre:.3f}; EAP person reliability pre-test: {eap_rel_pre:.3f}",
+    f"  KR-20 pre-test: {kr20_pre:.3f}; WLE person reliability pre-test: {wle_rel_pre:.3f}",
     "  block mean b: " + ", ".join(f"{bl} {np.mean(block_b[bl]):.2f}" for bl in BLOCKS)
     + f"; easy < medium < hard: {order_ok}",
     "  ability where each block gives most information: "
     + ", ".join(f"{bl} {th[np.argmax(info(th, block_b[bl]))]:.2f}" for bl in BLOCKS),
     "",
-    "4.2.3 Ability estimates (EAP, N(0,1) prior)",
+    "4.2.3 Ability estimates (WLE)",
     f"  pre-test theta: mean {persons.theta_pre.mean():.2f}, SD {persons.theta_pre.std():.2f}; "
     f"Ability Estimation Error sqrt(mean SE^2) = {rmse_pre:.3f} (60 items)",
     f"  post-test theta: mean {R.theta_post.mean():.2f}, SD {R.theta_post.std():.2f}; "
-    f"Ability Estimation Error = {rmse_post:.3f} (30 items); EAP reliability {eap_rel_post:.3f}",
+    f"Ability Estimation Error = {rmse_post:.3f} (30 items); WLE reliability {wle_rel_post:.3f}",
     "",
     "4.2.4 Adaptive difficulty (two-stage routing, cuts " + "/".join(map(str, design["cuts"])) + ")",
     "  routed: " + ", ".join(f"{b} {n}" for b, n in R.routed_block.value_counts().items()),
