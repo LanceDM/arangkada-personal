@@ -166,5 +166,37 @@ lines += ["", f"Quiz retakes that also re-asked competencies already passed (con
 lines += [f"  {x}" for x in reasked]
 if problems:
     lines += ["", "Illegal steps:"] + [f"  {x}" for x in problems]
+# --- routing metrics tied to Q-learning --------------------------------------------
+# A competency episode is one competency in one level. It is closed either by
+# Q-learning choosing `none` or by the 3-attempt cap, which the course log records
+# as action `none` with source `cap`. A cap closure is "not ready" when `none`
+# would not have been legal there (a fail, or a pass below mastery level 2).
+episodes, drives_per_level = {}, Counter()
+for p in study_participants():
+    if p["withdrawn"]:
+        continue
+    for c in sorted(p["sub"].get("courseLog", []), key=lambda c: c.get("timestamp") or 0):
+        if not re.match(r"drive_(DRIVE|REPEAT)", c.get("attemptId") or ""):
+            continue
+        decs = c.get("decisions") or []
+        if not decs or decs[0].get("levelId") == 0:
+            continue
+        drives_per_level[(p["code"], decs[0]["levelId"])] += 1
+        for d in decs:
+            episodes[(p["code"], d["levelId"], d["competency"])] = d
+E_ = pd.DataFrame([{"source": d.get("source"), "ready": "none" in (d.get("legal") or [])} for d in episodes.values()])
+cap = E_[E_.source == "cap"]
+D = pd.Series(drives_per_level)
+lines += [
+    "",
+    "Routing metrics tied to Q-learning",
+    f"  competency episodes (competency x level): {len(E_)}",
+    f"  closed by Q-learning (none): {int((E_.source != 'cap').sum())}; closed by the 3-attempt cap: {len(cap)} "
+    f"({len(cap) / len(E_):.1%})",
+    f"    cap closures where none was legal (passed at mastery level 2+): {int(cap.ready.sum())}; "
+    f"not ready (failed, or passed below level 2): {int((~cap.ready).sum())} ({(~cap.ready).sum() / len(E_):.1%} of episodes)",
+    f"  levels played: {len(D)}; repeat drives: {int((D - 1).sum())}; mean repeat drives per level: {(D - 1).mean():.2f}",
+    "  drives per level: " + ", ".join(f"{k} drive(s) {v} ({v / len(D):.1%})" for k, v in sorted(D.value_counts().items())),
+]
 (RESULTS / "4_1_routing_summary.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
 print("\n".join(lines))

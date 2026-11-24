@@ -30,3 +30,10 @@ Quiz retakes that also re-asked competencies already passed (content, not a tran
   P-0013: QUIZ(5) a2 also asked ['pedestrians', 'right_of_way']
   P-0014: QUIZ(6) a2 also asked ['parking']
   P-0020: QUIZ(6) a3 also asked ['lane_discipline']
+
+Routing metrics tied to Q-learning
+  competency episodes (competency x level): 483
+  closed by Q-learning (none): 444; closed by the 3-attempt cap: 39 (8.1%)
+    cap closures where none was legal (passed at mastery level 2+): 32; not ready (failed, or passed below level 2): 7 (1.4% of episodes)
+  levels played: 126; repeat drives: 111; mean repeat drives per level: 0.88
+  drives per level: 1 drive(s) 48 (38.1%), 2 drive(s) 45 (35.7%), 3 drive(s) 33 (26.2%)
