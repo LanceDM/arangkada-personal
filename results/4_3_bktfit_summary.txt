@@ -1,0 +1,15 @@
+Hand-set replay matches the logged predictions (max difference 9.4e-14)
+Answers: 4650 in 231 sequences (participant x competency), 21 participants; leave-one-participant-out
+
+baseline: overall correct rate   AUC 0.500  Brier 0.176  log loss 0.537  accuracy 0.772  balanced acc 0.500  MCC 0.000
+hand-set                         AUC 0.577  Brier 0.188  log loss 0.569  accuracy 0.754  balanced acc 0.545  MCC 0.131
+fitted-global                    AUC 0.580  Brier 0.174  log loss 0.531  accuracy 0.770  balanced acc 0.505  MCC 0.041
+fitted-pinit                     AUC 0.585  Brier 0.174  log loss 0.532  accuracy 0.771  balanced acc 0.507  MCC 0.056
+fitted-competency                AUC 0.592  Brier 0.174  log loss 0.531  accuracy 0.771  balanced acc 0.510  MCC 0.068
+
+Best fitted model by log loss: fitted-competency; lower log loss than hand-set for 19 of 21 held-out participants (Wilcoxon p = 0.0000)
+
+Parameters fitted on all participants:
+  fitted-global: pGuess (pre_test) 0.300, pSlip (pre_test) 0.200, pGuess (quiz) 0.300, pSlip (quiz) 0.200, pGuess (drive) 0.300, pSlip (drive) 0.148, pInit (all) 0.872, pTransit (quiz, drive) 0.211
+  fitted-pinit: pGuess (pre_test) 0.300, pSlip (pre_test) 0.200, pGuess (quiz) 0.300, pSlip (quiz) 0.200, pGuess (drive) 0.300, pSlip (drive) 0.150, pInit (document_awareness) 0.810, pInit (driver_legality) 0.770, pInit (general_rules) 0.960, pInit (hazard_awareness) 0.725, pInit (lane_discipline) 0.990, pInit (parking) 0.827, pInit (pedestrians) 0.990, pInit (right_of_way) 0.902, pInit (road_signs) 0.895, pInit (speed_control) 0.729, pInit (traffic_signals) 0.820, pTransit (quiz, drive) 0.240
+  fitted-competency: pGuess (pre_test) 0.300, pSlip (pre_test) 0.200, pGuess (quiz) 0.300, pSlip (quiz) 0.200, pGuess (drive) 0.300, pSlip (drive) 0.145, pInit (document_awareness) 0.809, pInit (driver_legality) 0.772, pInit (general_rules) 0.951, pInit (hazard_awareness) 0.711, pInit (lane_discipline) 0.990, pInit (parking) 0.838, pInit (pedestrians) 0.990, pInit (right_of_way) 0.871, pInit (road_signs) 0.900, pInit (speed_control) 0.664, pInit (traffic_signals) 0.786, pTransit (document_awareness) 0.223, pTransit (driver_legality) 0.024, pTransit (general_rules) 0.000, pTransit (hazard_awareness) 0.324, pTransit (lane_discipline) 0.139, pTransit (parking) 0.187, pTransit (pedestrians) 0.500, pTransit (right_of_way) 0.500, pTransit (road_signs) 0.171, pTransit (speed_control) 0.500, pTransit (traffic_signals) 0.474
