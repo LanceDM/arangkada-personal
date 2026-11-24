@@ -1,8 +1,8 @@
 Answers: 4650, 21 participants; leave-one-participant-out; b recomputed per fold from the training participants
 
-BKT (pre-test as a block)      AUC 0.627  Brier 0.169  log loss 0.512  accuracy 0.772  balanced acc 0.500  MCC 0.000  specificity 0.000
-BKT + IRT b (all questions)    AUC 0.765  Brier 0.149  log loss 0.467  accuracy 0.790  balanced acc 0.647  MCC 0.340  specificity 0.384
-BKT + IRT b (test items only)  AUC 0.697  Brier 0.160  log loss 0.493  accuracy 0.779  balanced acc 0.557  MCC 0.200  specificity 0.147
+BKT (pre-test as a block)      AUC 0.627  Brier 0.169  log loss 0.512  accuracy 0.772  balanced acc 0.500  MCC 0.000  specificity 0.000  ECE 0.019
+BKT + IRT b (all questions)    AUC 0.765  Brier 0.149  log loss 0.467  accuracy 0.790  balanced acc 0.647  MCC 0.340  specificity 0.384  ECE 0.046
+BKT + IRT b (test items only)  AUC 0.697  Brier 0.160  log loss 0.493  accuracy 0.779  balanced acc 0.557  MCC 0.200  specificity 0.147  ECE 0.027
 BKT + item easiness (09)       AUC 0.774  Brier 0.145  log loss 0.449  accuracy 0.786  balanced acc 0.603  MCC 0.277  specificity 0.266
 
 BKT + IRT b (all questions): fitted weight on b, mean 1.133 (range 1.105 to 1.174); higher AUC than plain BKT for 21 of 21 participants (Wilcoxon p = 0.0000)

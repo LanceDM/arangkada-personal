@@ -192,7 +192,13 @@ def evaluate(y, s, thr=0.5):
             "log_loss": -np.mean(y * np.log(s) + (1 - y) * np.log(1 - s)),
             "accuracy": (yh == y).mean(), "recall": rec, "specificity": spec,
             "balanced_accuracy": (rec + spec) / 2, "mcc": (tp * tn - fp * fn) / denom if denom else 0.0,
-            "TP": tp, "FP": fp, "FN": fn, "TN": tn}
+            "ece": ece(y, s), "TP": tp, "FP": fp, "FN": fn, "TN": tn}
+
+
+def ece(y, s, bins=10):
+    """Expected calibration error, 10 equal-width bins (as in 05_bkt.py)."""
+    k = np.minimum((s * bins).astype(int), bins - 1)
+    return sum(abs(s[k == j].mean() - y[k == j].mean()) * (k == j).sum() for j in range(bins) if (k == j).any()) / len(y)
 
 
 rows = []
@@ -205,13 +211,15 @@ met.round(4).to_csv(RESULTS / "4_3_bktirt_metrics.csv", index=False)
 folds = pd.DataFrame([{"code": c, **{f"auc_{m}": auc(y[codes == c], s[codes == c]) for m, s in P.items()}}
                       for c in CODES])
 folds.round(4).to_csv(RESULTS / "4_3_bktirt_folds.csv", index=False)
+pd.DataFrame({"code": codes, "source": [SOURCES[k] for k in src], "y": y.astype(int),
+              **{m: np.round(v, 5) for m, v in P.items()}}).to_csv(RESULTS / "4_3_bktirt_predictions.csv", index=False)
 
 lines = [f"Answers: {len(y)}, {len(CODES)} participants; leave-one-participant-out; "
          "b recomputed per fold from the training participants", ""]
 for m in P:
     r = met[(met.model == m) & (met.source == "all")].iloc[0]
     lines.append(f"{m:30s} AUC {r.auc:.3f}  Brier {r.brier:.3f}  log loss {r.log_loss:.3f}  accuracy {r.accuracy:.3f}  "
-                 f"balanced acc {r.balanced_accuracy:.3f}  MCC {r.mcc:.3f}  specificity {r.specificity:.3f}")
+                 f"balanced acc {r.balanced_accuracy:.3f}  MCC {r.mcc:.3f}  specificity {r.specificity:.3f}  ECE {r.ece:.3f}")
 prev = RESULTS / "4_3_bktitems_metrics.csv"
 if prev.exists():
     f = pd.read_csv(prev)
