@@ -218,7 +218,7 @@ wle_rel_post = 1 - (R.se_post ** 2).mean() / R.theta_post.var(ddof=1)
 
 # --- figures ----------------------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(7.5, 5.5), dpi=200)
-bins = np.arange(-4, 4.01, 0.5)
+bins = np.arange(-4, max(4.5, np.ceil(persons.theta_pre.max() * 2) / 2) + 0.01, 0.5)
 colors = {"routing": "#888888", "easy": "#2E7D32", "medium": "#E0A800", "hard": "#C8102E"}
 ax.hist(persons.theta_pre.dropna(), bins=bins, orientation="horizontal", color="#223864", alpha=.85,
         label="Participants (pre-test θ)")
